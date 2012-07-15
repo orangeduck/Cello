@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
   foreach(numbers, num) {
     
     if (type_of(num) is Int) {
-      printf("Int Number: %i\n", (int)as_long(num));
+      printf("Int Number: %li\n", as_long(num));
     } elif (type_of(num) is Real) {
       printf("Real Number: %f\n", as_double(num));
     }

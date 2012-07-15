@@ -6,28 +6,34 @@
 /** Num - number */
 
 class {
-  var (*add)(var, var);
-  var (*sub)(var, var);
-  var (*mul)(var, var);
-  var (*div)(var, var);
-  var (*negate)(var);
-  var (*absolute)(var);
+  void (*add)(var, var);
+  void (*sub)(var, var);
+  void (*mul)(var, var);
+  void (*div)(var, var);
+  void (*negate)(var);
+  void (*absolute)(var);
 } Num;
 
-var add(var, var);
-var sub(var, var);
-var mul(var, var);
-var divide(var, var);
+void add(var, var);
+void sub(var, var);
+void mul(var, var);
+void divide(var, var);
 
-var negate(var);
-var absolute(var);
+void negate(var);
+void absolute(var);
 
 /* Integer Type */
+
+extern Type Int;
+
+/* Members */
 
 object {
   Type type;
   long value;
 } IntObject;
+
+/* Methods */
 
 void Int_New(var, va_list*);
 void Int_Delete(var);
@@ -37,39 +43,38 @@ bool Int_Eq(var, var);
 bool Int_Gt(var, var);
 bool Int_Lt(var, var);
 
-var Int_Add(var, var);
-var Int_Sub(var, var);
-var Int_Mul(var, var);
-var Int_Div(var, var);
-var Int_Neg(var);
-var Int_Abs(var);
+void Int_Add(var, var);
+void Int_Sub(var, var);
+void Int_Mul(var, var);
+void Int_Div(var, var);
+void Int_Neg(var);
+void Int_Abs(var);
 
 long Int_AsLong(var);
 double Int_AsDouble(var);
 
-implements(Int, New) as { sizeof(IntObject), Int_New, Int_Delete };
-implements(Int, Copy) as { Int_Copy };
-implements(Int, Eq) as { Int_Eq };
-implements(Int, Ord) as { Int_Gt, Int_Lt };
-implements(Int, AsLong) as { Int_AsLong  };
-implements(Int, AsDouble) as { Int_AsDouble  };
-implements(Int, Num) as { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
+/* Instances */
 
-methods(Int) as {
-  method_begin(Int),
-  method(Int, New), method(Int, Copy),
-  method(Int, Eq), method(Int, Ord),
-  method(Int, AsLong),method(Int, AsDouble),
-  method(Int, Num),
-  method_end(Int),
-};
+instance(Int, New) = { sizeof(IntObject), Int_New, Int_Delete };
+instance(Int, Copy) = { Int_Copy };
+instance(Int, Eq) = { Int_Eq };
+instance(Int, Ord) = { Int_Gt, Int_Lt };
+instance(Int, AsLong) = { Int_AsLong  };
+instance(Int, AsDouble) = { Int_AsDouble  };
+instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
 
 /* Real Type */
+
+extern Type Real;
+
+/* Members */
 
 object {
   Type type;
   double value;
 } RealObject;
+
+/* Methods */
 
 void Real_New(var, va_list*);
 void Real_Delete(var);
@@ -79,31 +84,25 @@ bool Real_Eq(var, var);
 bool Real_Gt(var, var);
 bool Real_Lt(var, var);
 
-var Real_Add(var, var);
-var Real_Sub(var, var);
-var Real_Mul(var, var);
-var Real_Div(var, var);
-var Real_Neg(var);
-var Real_Abs(var);
+void Real_Add(var, var);
+void Real_Sub(var, var);
+void Real_Mul(var, var);
+void Real_Div(var, var);
+void Real_Neg(var);
+void Real_Abs(var);
 
 double Real_AsDouble(var);
 long Real_AsLong(var);
 
-implements(Real, New) as { sizeof(RealObject), Real_New, Real_Delete };
-implements(Real, Copy) as { Real_Copy };
-implements(Real, Eq) as { Real_Eq };
-implements(Real, Ord) as { Real_Gt, Real_Lt };
-implements(Real, AsDouble) as { Real_AsDouble };
-implements(Real, AsLong) as { Real_AsLong };
-implements(Real, Num) as { Real_Add, Real_Sub, Real_Mul, Real_Div, Real_Neg, Real_Abs };
+/* Instances */
 
-methods(Real) as {
-  method_begin(Real),
-  method(Real, New), method(Real, Copy),
-  method(Real, Eq), method(Real, Ord),
-  method(Real, AsDouble), method(Real, AsLong), 
-  method(Real, Num), 
-  method_end(Real),
-};
+instance(Real, New) = { sizeof(RealObject), Real_New, Real_Delete };
+instance(Real, Copy) = { Real_Copy };
+instance(Real, Eq) = { Real_Eq };
+instance(Real, Ord) = { Real_Gt, Real_Lt };
+instance(Real, AsDouble) = { Real_AsDouble };
+instance(Real, AsLong) = { Real_AsLong };
+instance(Real, Num) = { Real_Add, Real_Sub, Real_Mul, Real_Div, Real_Neg, Real_Abs };
+
 
 #endif

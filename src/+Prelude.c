@@ -9,6 +9,20 @@ const char* type_name(Type t) {
   return type_class_name(t, "__TypeName");
 }
 
+static void type_print(Type t) {
+  
+  printf("(Type: '%p')\n", t);
+  while(t->class_name) {
+    if (strcmp(t->class_name, "__TypeName") == 0) {
+      printf("(%s, %p '%s')\n", t->class_name, t->class_object, (const char*)t->class_object);
+    } else {
+      printf("(%s, %p)\n", t->class_name, t->class_object);
+    }
+    t++;
+  }
+  
+}
+
 bool type_implements_name(Type t, const char* class_name) {
   
   while(t->class_name) {
@@ -21,12 +35,25 @@ bool type_implements_name(Type t, const char* class_name) {
 
 var type_class_name(Type t, const char* class_name) {
   
+  const char* type_name = NULL;
+  
   while(t->class_name) {
-    if (strcmp(t->class_name, class_name) == 0) return (var)t->class_object;
+    if (strcmp(t->class_name, "__TypeName") == 0) {
+      type_name = t->class_object;
+    }
+    if (strcmp(t->class_name, class_name) == 0) {
+      return (var)t->class_object;
+    }
     t++;
   }
   
-  fprintf(stderr, "|\n| ClassError: Type '%s' does not implement class '%s'\n|\n", type_name(t), class_name);
+  if (type_name == NULL) {
+    fprintf(stderr, "|\n| ObjectError: Cannot find type name for object.\n| Does is start with a 'Type' struct entry?\n|\n");
+    abort();
+  }
+  
+  fprintf(stderr, "|\n| ClassError: Type '%s' does not implement class '%s'\n|\n",  
+    type_name, class_name);
   abort();
 }
 
@@ -34,29 +61,13 @@ Type type_of(var self) {
   return ((ObjectObject*)self)->type;
 }
 
-static void type_print(Type t) {
+var type_cast(var self, Type t, const char* func) {
   
-  printf("(Type: %p)\n", t);
-  while(t->class_name) {
-    if (strcmp(t->class_name, "__TypeName") == 0) {
-      printf("(%s, %s)\n", t->class_name, (const char*)t->class_object);
-    } else {
-      printf("(%s, %p)\n", t->class_name, t->class_object);
-    }
-    t++;
-  }
-  
-}
-
-var type_cast(var self, const char* typename, const char* func) {
-  
-  const char* objtypename = type_name(type_of(self));
-  
-  if (strcmp(typename, objtypename) == 0) {
+  if (type_of(self) is t) {
     return self;
   } else {
     fprintf(stderr, "|\n| TypeError: Argument to function '%s'\n|\t Got type '%s'\n|\t Expected type '%s'\n|\n",
-        func, objtypename, typename); abort();
+        func, type_name(type_of(self)), type_name(t)); abort();
   }
   
 }

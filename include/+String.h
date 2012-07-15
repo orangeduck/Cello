@@ -3,10 +3,16 @@
 
 #include "+Prelude.h"
 
+extern Type String;
+
+/* Members */
+
 object {
   Type type;
   char* value;
 } StringObject;
+
+/* Methods */
 
 void String_New(var, va_list*);
 void String_Delete(var);
@@ -19,19 +25,13 @@ bool String_Contains(var, var);
 
 const char* String_AsStr(var);
 
-implements(String, New) as { sizeof(StringObject), String_New, String_Delete };
-implements(String, Copy) as { String_Copy };
-implements(String, Eq) as { String_Eq };
-implements(String, Len) as { String_Len  };
-implements(String, AsStr) as { String_AsStr  };
+/* Instances */
 
-methods(String) as {
-  method_begin(String),
-  method(String, New), method(String, Copy),
-  method(String, Eq), method(String, Len),
-  method(String, AsStr), 
-  method_end(String),
-};
+instance(String, New) = { sizeof(StringObject), String_New, String_Delete };
+instance(String, Copy) = { String_Copy };
+instance(String, Eq) = { String_Eq };
+instance(String, Len) = { String_Len  };
+instance(String, AsStr) = { String_AsStr  };
 
 
 #endif

@@ -3,6 +3,8 @@
 
 #include "+Prelude.h"
 
+extern Type List;
+
 /* Members */
 
 object {
@@ -40,27 +42,17 @@ var List_Iter_Start(var);
 var List_Iter_End(var);
 var List_Iter_Next(var, var);
 
-/* Interfaces */
+/* Instances */
 
-implements(List, New) as { sizeof(ListObject), List_New, List_Delete };
-implements(List, Copy) as { List_Copy };
-implements(List, Eq) as { List_Eq };
-implements(List, Len) as { List_Len };
-implements(List, Empty) as { List_IsEmpty, List_Clear };
-implements(List, Push) as { List_Push_Back, List_Push_At, List_Push_Back, List_Push_Front, List_Pop_Back, List_Pop_At, List_Pop_Back, List_Pop_Front };
-implements(List, At) as { List_At, List_Set };
-implements(List, Iter) as { List_Iter_Start, List_Iter_End, List_Iter_Next };
+instance(List, New) = { sizeof(ListObject), List_New, List_Delete };
+instance(List, Copy) = { List_Copy };
+instance(List, Eq) = { List_Eq };
+instance(List, Len) = { List_Len };
+instance(List, Empty) = { List_IsEmpty, List_Clear };
+instance(List, Push) = { List_Push_Back, List_Push_At, List_Push_Back, List_Push_Front, List_Pop_Back, List_Pop_At, List_Pop_Back, List_Pop_Front };
+instance(List, At) = { List_At, List_Set };
+instance(List, Iter) = { List_Iter_Start, List_Iter_End, List_Iter_Next };
 
-/* Type */
-
-methods(List) as {
-  method_begin(List),
-  method(List, New), method(List, Copy),
-  method(List, Eq), method(List, Len),
-  method(List, Empty), method(List, Push),
-  method(List, At), method(List, Iter),
-  method_end(List),
-};
 
 
 #endif

@@ -3,6 +3,21 @@
 
 #include "+List.h"
 
+methods(List) = {
+  methods_begin(List),
+  method(List, New),
+  method(List, Copy),
+  method(List, Eq),
+  method(List, Len),
+  method(List, Empty),
+  method(List, Push),
+  method(List, At),
+  method(List, Iter),
+  methods_end(List)
+};
+
+Type List = methods_table(List);
+
 void List_New(var self, va_list* args) {
   ListObject* lo = cast(self, List);
   

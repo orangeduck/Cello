@@ -3,6 +3,18 @@
 
 #include "+String.h"
 
+methods(String) = {
+  methods_begin(List),
+  method(String, New),
+  method(String, Copy),
+  method(String, Eq),
+  method(String, Len),
+  method(String, AsStr), 
+  methods_end(List)
+};
+
+Type String = methods_table(String);
+
 void String_New(var self, va_list* args) {
   
   StringObject* s = cast(self, String);

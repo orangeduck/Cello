@@ -4,41 +4,55 @@
 
 #include "+Number.h"
 
-var add(var lhs, var rhs) {
+void add(var lhs, var rhs) {
   Num* inum = type_class(type_of(lhs), Num);
   assert(inum->add);
-  return inum->add(lhs, rhs);
+  inum->add(lhs, rhs);
 }
 
-var sub(var lhs, var rhs) {
+void sub(var lhs, var rhs) {
   Num* inum = type_class(type_of(lhs), Num);
   assert(inum->sub);
-  return inum->sub(lhs, rhs);
+  inum->sub(lhs, rhs);
 }
 
-var mul(var lhs, var rhs) {
+void mul(var lhs, var rhs) {
   Num* inum = type_class(type_of(lhs), Num);
   assert(inum->mul);
-  return inum->mul(lhs, rhs);
+  inum->mul(lhs, rhs);
 }
 
-var divide(var lhs, var rhs) {
+void divide(var lhs, var rhs) {
   Num* inum = type_class(type_of(lhs), Num);
   assert(inum->div);
-  return inum->div(lhs, rhs);
+  inum->div(lhs, rhs);
 }
 
-var negate(var self) {
+void negate(var self) {
   Num* inum = type_class(type_of(self), Num);
   assert(inum->negate);
-  return inum->negate(self);
+  inum->negate(self);
 }
 
-var absolute(var self) {
+void absolute(var self) {
   Num* inum = type_class(type_of(self), Num);
   assert(inum->absolute);
-  return inum->absolute(self);
+  inum->absolute(self);
 }
+
+methods(Int) = {
+  methods_begin(Int),
+  method(Int, New), 
+  method(Int, Copy),
+  method(Int, Eq), 
+  method(Int, Ord),
+  method(Int, AsLong),
+  method(Int, AsDouble),
+  method(Int, Num),
+  methods_end(Int)
+};
+
+Type Int = methods_table(Int);
 
 void Int_New(var self, va_list* args) {
   IntObject* io = cast(self, Int);
@@ -67,40 +81,34 @@ bool Int_Lt(var self, var other) {
   return io->value < as_long(other);
 }
 
-var Int_Add(var self, var other) {
+void Int_Add(var self, var other) {
   IntObject* io = cast(self, Int);
   io->value += as_long(other);
-  return io;
 }
 
-var Int_Sub(var self, var other) {
+void Int_Sub(var self, var other) {
   IntObject* io = cast(self, Int);
   io->value -= as_long(other);
-  return io;
 }
 
-var Int_Mul(var self, var other) {
+void Int_Mul(var self, var other) {
   IntObject* io = cast(self, Int);
   io->value *= as_long(other);
-  return io;
 }
 
-var Int_Div(var self, var other) {
+void Int_Div(var self, var other) {
   IntObject* io = cast(self, Int);
   io->value /= as_long(other);
-  return io;
 }
 
-var Int_Neg(var self) {
+void Int_Neg(var self) {
   IntObject* io = cast(self, Int);
   io->value = - io->value;
-  return self;
 }
 
-var Int_Abs(var self) {
+void Int_Abs(var self) {
   IntObject* io = cast(self, Int);
   io->value = abs(io->value);
-  return self;
 }
 
 long Int_AsLong(var self) {
@@ -112,6 +120,17 @@ double Int_AsDouble(var self) {
   IntObject* io = cast(self, Int);
   return io->value;
 }
+
+methods(Real) = {
+  methods_begin(Real),
+  method(Real, New), method(Real, Copy),
+  method(Real, Eq), method(Real, Ord),
+  method(Real, AsDouble), method(Real, AsLong), 
+  method(Real, Num), 
+  methods_end(Real)
+};
+
+Type Real = methods_table(Real);
 
 void Real_New(var self, va_list* args) {
   RealObject* ro = cast(self, Real);
@@ -140,40 +159,34 @@ bool Real_Lt(var self, var other) {
   return ro->value < as_double(other);
 }
 
-var Real_Add(var self, var other) {
+void Real_Add(var self, var other) {
   RealObject* ro = cast(self, Real);
   ro->value += as_double(other);
-  return ro;
 }
 
-var Real_Sub(var self, var other) {
+void Real_Sub(var self, var other) {
   RealObject* ro = cast(self, Real);
   ro->value -= as_double(other);
-  return ro;
 }
 
-var Real_Mul(var self, var other) {
+void Real_Mul(var self, var other) {
   RealObject* ro = cast(self, Real);
   ro->value *= as_double(other);
-  return ro;
 }
 
-var Real_Div(var self, var other) {
+void Real_Div(var self, var other) {
   RealObject* ro = cast(self, Real);
   ro->value /= as_double(other);
-  return ro;
 }
 
-var Real_Neg(var self) {
+void Real_Neg(var self) {
   RealObject* ro = cast(self, Real);
   ro->value = - ro->value;
-  return self;
 }
 
-var Real_Abs(var self) {
+void Real_Abs(var self) {
   RealObject* ro = cast(self, Real);
   ro->value = fabs(ro->value);
-  return self;
 }
 
 double Real_AsDouble(var self) {

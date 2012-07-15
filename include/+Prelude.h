@@ -10,13 +10,12 @@
 **
 **    New reserved keywords:
 **
-**    var, as, is, not, elif, foreach, class, object, implements, 
+**    var, is, not, elif, foreach, class, object, instance, 
 **    methods, method, method_begin, method_end
 */
 
 typedef void* var;
 
-#define as =
 #define is ==
 #define not !
 #define elif else if
@@ -24,12 +23,14 @@ typedef void* var;
 #define class typedef struct 
 #define object typedef struct 
 
-#define implements(T,C) static const C T##C
+#define instance(T,C) static const C T##C
 
-#define methods(T) static const ClassObject T[] 
-#define method_begin(T) {"__TypeName", #T} 
+#define methods(T) static const TypeMethod T##Methods[] 
+#define methods_begin(T) {"__TypeName", #T}
 #define method(T,C) {#C, &T##C}
-#define method_end(T) {NULL, NULL}
+#define methods_end(T) {NULL, NULL}
+
+#define methods_table(T) T##Methods
 
 /*
 ** Types
@@ -40,9 +41,9 @@ typedef void* var;
 typedef struct {
   const char* class_name;
   const void* class_object;
-} ClassObject;
+} TypeMethod;
 
-typedef const ClassObject* Type;
+typedef const TypeMethod* Type;
 
 #define type_implements(T, C) type_implements_name(T, #C)
 #define type_class(T, C) type_class_name(T, #C)
@@ -63,8 +64,8 @@ object {
 
 Type type_of(var);
 
-#define cast(X, T) type_cast(X, #T, __func__)
-var type_cast(var, const char*, const char*);
+#define cast(X, T) type_cast(X, T, __func__)
+var type_cast(var, Type t, const char*);
 
 /*
 ** Classes
