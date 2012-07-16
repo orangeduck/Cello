@@ -1,20 +1,18 @@
-CC=gcc
-
-INCS= -I ./include
-
-C_FILES= $(wildcard src/*.c) $(wildcard src/*/*.c)
-
+CC = gcc
+INCS = -I ./include
+C_FILES = $(wildcard src/*.c) $(wildcard src/*/*.c)
 PLATFORM = $(shell uname)
+NAME = C+
 
 ifeq ($(findstring Linux,$(PLATFORM)),Linux)
-	OUT=libC+.so
+	OUT=lib$(NAME).so
 	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -O3 -g -fPIC
 	LFLAGS= -shared
 	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
 endif
 
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
-	OUT=C+.dll
+	OUT=$(NAME).dll
 	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
 	LFLAGS= -g -L ./lib -shared
 	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
