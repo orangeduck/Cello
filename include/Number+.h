@@ -2,6 +2,7 @@
 #define NumberPlus_h
 
 #include "Prelude+.h"
+#include "Type+.h"
 
 /** Num */
 
@@ -27,17 +28,19 @@ void absolute(var);
 module Int;
 
 data {
-  Type type;
+  var type;
   long value;
 } IntData;
 
-void Int_New(var, va_list*);
-void Int_Delete(var);
+var Int_New(var, va_list*);
+var Int_Delete(var);
 var Int_Copy(var);
 
 bool Int_Eq(var, var);
 bool Int_Gt(var, var);
 bool Int_Lt(var, var);
+
+long Int_Hash(var);
 
 void Int_Add(var, var);
 void Int_Sub(var, var);
@@ -53,8 +56,9 @@ instance(Int, New) = { sizeof(IntData), Int_New, Int_Delete };
 instance(Int, Copy) = { Int_Copy };
 instance(Int, Eq) = { Int_Eq };
 instance(Int, Ord) = { Int_Gt, Int_Lt };
-instance(Int, AsLong) = { Int_AsLong  };
-instance(Int, AsDouble) = { Int_AsDouble  };
+instance(Int, Hash) = { Int_Hash };
+instance(Int, AsLong) = { Int_AsLong };
+instance(Int, AsDouble) = { Int_AsDouble };
 instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
 
 /* Real */
@@ -62,17 +66,19 @@ instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
 module Real;
 
 data {
-  Type type;
+  var type;
   double value;
 } RealData;
 
-void Real_New(var, va_list*);
-void Real_Delete(var);
+var Real_New(var, va_list*);
+var Real_Delete(var);
 var Real_Copy(var);
 
 bool Real_Eq(var, var);
 bool Real_Gt(var, var);
 bool Real_Lt(var, var);
+
+long Real_Hash(var);
 
 void Real_Add(var, var);
 void Real_Sub(var, var);
@@ -88,6 +94,7 @@ instance(Real, New) = { sizeof(RealData), Real_New, Real_Delete };
 instance(Real, Copy) = { Real_Copy };
 instance(Real, Eq) = { Real_Eq };
 instance(Real, Ord) = { Real_Gt, Real_Lt };
+instance(Real, Hash) = { Real_Hash };
 instance(Real, AsDouble) = { Real_AsDouble };
 instance(Real, AsLong) = { Real_AsLong };
 instance(Real, Num) = { Real_Add, Real_Sub, Real_Mul, Real_Div, Real_Neg, Real_Abs };

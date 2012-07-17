@@ -4,114 +4,72 @@
 #include <assert.h>
 
 #include "Prelude+.h"
+#include "Type+.h"
 
-const char* type_name(Type t) {
-  return type_class_name(t, "__TypeName");
-}
+/*
+** Because "Type" is extern it isn't a constant expression.
+** This means the type_of a TypeData object cannot be set at compile time.
+** And the type_of a TypeData object is just "Type" again.
+**
+** So by convention at compile time the type_of a TypeData object is set to NULL.
+** So if we access a struct and it tells us NULL is the type, just assume "Type".
+*/
 
-static void type_print(Type t) {
+var type_of(var self) {
+  var listed = ((ObjectData*)self)->type;
   
-  printf("(Type: '%p')\n", t);
-  while(t->class_name) {
-    if (strcmp(t->class_name, "__TypeName") == 0) {
-      printf("(%s, %p '%s')\n", t->class_name, t->class_object, (const char*)t->class_object);
-    } else {
-      printf("(%s, %p)\n", t->class_name, t->class_object);
-    }
-    t++;
-  }
-  
-}
-
-bool type_implements_name(Type t, const char* class_name) {
-  
-  while(t->class_name) {
-    if (strcmp(t->class_name, class_name) == 0) return true;
-    t++;
-  }
-  
-  return false;
-}
-
-var type_class_name(Type t, const char* class_name) {
-  
-  const char* type_name = NULL;
-  
-  while(t->class_name) {
-    if (strcmp(t->class_name, "__TypeName") == 0) {
-      type_name = t->class_object;
-    }
-    if (strcmp(t->class_name, class_name) == 0) {
-      return (var)t->class_object;
-    }
-    t++;
-  }
-  
-  if (type_name == NULL) {
-    fprintf(stderr, "|\n| ObjectError: Cannot find type name for object.\n| Does is start with a 'Type' struct entry?\n|\n");
-    abort();
-  }
-  
-  fprintf(stderr, "|\n| ClassError: Type '%s' does not implement class '%s'\n|\n",  
-    type_name, class_name);
-  abort();
-}
-
-Type type_of(var self) {
-  return ((ObjectData*)self)->type;
-}
-
-var type_cast(var self, Type t, const char* func) {
-  
-  if (type_of(self) is t) {
-    return self;
+  if (listed is NULL) {
+    return Type;
   } else {
-    fprintf(stderr, "|\n| TypeError: Argument to function '%s'\n|\t Got type '%s'\n|\t Expected type '%s'\n|\n",
-        func, type_name(type_of(self)), type_name(t)); abort();
+    return listed;
   }
-  
 }
 
-var new(Type type, ...) { 
+var new(var type, ...) { 
   
-  New* inew = type_class(type, New);
+  type = cast(type, Type);
   
-  var obj = calloc(inew->size, 1);
-  ((ObjectData*)obj)->type = type;
+  New* inew = Type_Class(type, New);
+  assert(inew->size);
+  
+  var self = calloc(1, inew->size);
+  assert(self);
+  
+  ((ObjectData*)self)->type = type;
   
   if (inew->ctor) {
     va_list args;
     va_start(args, type);
-    inew->ctor(obj, &args);
+    self = inew->ctor(self, &args);
     va_end(args);
   }
   
-  return obj;
+  return self;
 }
 
 void delete(var self) {
-  New* inew = type_class(type_of(self), New);
+  New* inew = Type_Class(type_of(self), New);
   
   if (inew->dtor) {
-    inew->dtor(self);
+    self = inew->dtor(self);
   }
   
   free(self);
 }
 
 var copy(var self) {
-  Copy* icopy = type_class(type_of(self), Copy);
+  Copy* icopy = Type_Class(type_of(self), Copy);
   assert(icopy->copy);
   return icopy->copy(self);
 }
 
 bool eq(var lhs, var rhs) {
   
-  if (not type_implements(type_of(lhs), Eq)) {
+  if (not Type_Implements(type_of(lhs), Eq)) {
     return lhs == rhs;
   }
   
-  Eq* ieq = type_class(type_of(lhs), Eq);
+  Eq* ieq = Type_Class(type_of(lhs), Eq);
   assert(ieq->eq);
   return ieq->eq(lhs, rhs);
   
@@ -122,13 +80,13 @@ bool neq(var lhs, var rhs) {
 }
 
 bool gt(var lhs, var rhs) {
-  Ord* iord = type_class(type_of(lhs), Ord);
+  Ord* iord = Type_Class(type_of(lhs), Ord);
   assert(iord->gt);
   return iord->gt(lhs, rhs);
 }
 
 bool lt(var lhs, var rhs) {
-  Ord* iord = type_class(type_of(lhs), Ord);
+  Ord* iord = Type_Class(type_of(lhs), Ord);
   assert(iord->lt);
   return iord->lt(lhs, rhs);
 }
@@ -141,159 +99,157 @@ bool le(var lhs, var rhs) {
   return not gt(lhs, rhs);
 }
 
-size_t len(var self) {
-  Len* ilen = type_class(type_of(self), Len);
-  assert(ilen->len);
-  return ilen->len(self);
+int len(var self) {
+  Collection* icollection = Type_Class(type_of(self), Collection);
+  assert(icollection->len);
+  return icollection->len(self);
+}
+
+bool is_empty(var self) {
+  Collection* icollection = Type_Class(type_of(self), Collection);
+  assert(icollection->is_empty);
+  return icollection->is_empty(self);
+}
+
+void clear(var self) {
+  Collection* icollection = Type_Class(type_of(self), Collection);
+  assert(icollection->clear);
+  icollection->clear(self);
 }
 
 bool contains(var self, var obj) {
-  Contains* icontains = type_class(type_of(self), Contains);
-  assert(icontains->contains);
-  return icontains->contains(self, obj);
+  Collection* icollection = Type_Class(type_of(self), Collection);
+  assert(icollection->contains);
+  return icollection->contains(self, obj);
 }
 
-void erase(var self, var obj) {
-  Contains* icontains = type_class(type_of(self), Contains);
-  assert(icontains->erase);
-  icontains->erase(self, obj);
+void discard(var self, var obj) {
+  Collection* icollection = Type_Class(type_of(self), Collection);
+  assert(icollection->discard);
+  icollection->discard(self, obj);
 }
 
 var iter_start(var self) {
-  Iter* iiter = type_class(type_of(self), Iter);
+  Iter* iiter = Type_Class(type_of(self), Iter);
   assert(iiter->iter_start);
   return iiter->iter_start(self);
 }
 
 var iter_end(var self) {
-  Iter* iiter = type_class(type_of(self), Iter);
+  Iter* iiter = Type_Class(type_of(self), Iter);
   assert(iiter->iter_end);
   return iiter->iter_end(self);
 }
 
 var iter_next(var self, var curr) {
-  Iter* iiter = type_class(type_of(self), Iter);
+  Iter* iiter = Type_Class(type_of(self), Iter);
   assert(iiter->iter_next);
   return iiter->iter_next(self, curr);
 }
 
 var at(var self, int index) {
-  At* iat = type_class(type_of(self), At);
+  At* iat = Type_Class(type_of(self), At);
   assert(iat->at);
   return iat->at(self, index);
 }
 
 void set(var self, int index, var value) {
-  At* iat = type_class(type_of(self), At);
+  At* iat = Type_Class(type_of(self), At);
   assert(iat->set);
   iat->set(self, index, value);
 }
 
-bool is_empty(var self) {
-  Empty* iempty = type_class(type_of(self), Empty);
-  assert(iempty->is_empty);
-  return iempty->is_empty(self);
-}
-
-void clear(var self) {
-  Empty* iempty = type_class(type_of(self), Empty);
-  assert(iempty->clear);
-  iempty->clear(self);
-}
-
 void push(var self, var val) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->push);
   ipush->push(self, val);
 }
 
 void push_at(var self, var val, int index) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->push_at);
   ipush->push_at(self, val, index);
 }
 
 void push_back(var self, var val) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->push_back);
   ipush->push_back(self, val);
 }
 
 void push_front(var self, var val) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->push_front);
   ipush->push_front(self, val);
 }
 
 var pop(var self) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->pop);
   return ipush->pop(self);
 }
 
 var pop_at(var self, int index) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->pop_at);
   return ipush->pop_at(self, index);
 }
 
 var pop_back(var self) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->pop_back);
   return ipush->pop_back(self);
 }
 
 var pop_front(var self) {
-  Push* ipush = type_class(type_of(self), Push);
+  Push* ipush = Type_Class(type_of(self), Push);
   assert(ipush->pop_front);
   return ipush->pop_front(self);
 }
 
 long hash(var self) {
 
-  if (not type_implements(type_of(self), Hash)) {
+  if (not Type_Implements(type_of(self), Hash)) {
     return (long)self;
   }
   
-  Hash* ihash = type_class(type_of(self), Hash);
+  Hash* ihash = Type_Class(type_of(self), Hash);
   assert(ihash->hash);
   return ihash->hash(self);
 }
 
 var get(var self, var key) {
-  Dict* idict = type_class(type_of(self), Dict);
+  Dict* idict = Type_Class(type_of(self), Dict);
   assert(idict->get);
   return idict->get(self, key);
 }
 
 void put(var self, var key, var val) {
-  Dict* idict = type_class(type_of(self), Dict);
+  Dict* idict = Type_Class(type_of(self), Dict);
   assert(idict->put);
   return idict->put(self, key, val);
 }
 
-static char basic_string[256];
+char as_char(var self) {
+  AsChar* iaschar = Type_Class(type_of(self), AsChar);
+  assert(iaschar->as_char);
+  return iaschar->as_char(self);
+}
 
 const char* as_str(var self) {
-
-  if (not type_implements(type_of(self), AsStr)) {
-    sprintf(basic_string, "%s:%p", type_name(type_of(self)), self);
-    return basic_string;
-  }
-
-  AsStr* iasstr = type_class(type_of(self), AsStr);
+  AsStr* iasstr = Type_Class(type_of(self), AsStr);
   assert(iasstr->as_str);
   return iasstr->as_str(self);
 }
 
 long as_long(var self) {
-  AsLong* iaslong = type_class(type_of(self), AsLong);
+  AsLong* iaslong = Type_Class(type_of(self), AsLong);
   assert(iaslong->as_long);
   return iaslong->as_long(self);
 }
 
 double as_double(var self) {
-  AsDouble* iasdouble = type_class(type_of(self), AsDouble);
+  AsDouble* iasdouble = Type_Class(type_of(self), AsDouble);
   assert(iasdouble->as_double);
   return iasdouble->as_double(self);
 }

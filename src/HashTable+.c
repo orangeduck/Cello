@@ -5,13 +5,11 @@
 
 #include "HashTable+.h"
 
-Type HashTable = methods {
+var HashTable = methods {
   methods_begin(HashTable),
   method(HashTable, New),
   method(HashTable, Copy),
-  method(HashTable, Len),
-  method(HashTable, Empty),
-  method(HashTable, Contains),
+  method(HashTable, Collection),
   method(HashTable, Dict),
   method(HashTable, Iter),
   methods_end(HashTable)
@@ -19,35 +17,30 @@ Type HashTable = methods {
 
 static void HashBucket_DeleteAll(struct HashBucket* hb) {
   
-  if (hb->next) {
-    HashBucket_DeleteAll(hb->next);
-  }
- 
-  delete(hb->key);
-  delete(hb->value);
-  free(hb);
+  if (hb == NULL) return;
   
+  HashBucket_DeleteAll(hb->next);
+  free(hb);
 }
 
-void HashTable_New(var self, va_list* args) {
+var HashTable_New(var self, va_list* args) {
   HashTableData* ht = cast(self, HashTable);
   ht->keys = new(List, 0);
   ht->table_size = 87;
   ht->buckets = calloc(sizeof(struct HashBucket*), ht->table_size);
+  return self;
 }
 
-void HashTable_Delete(var self) {
+var HashTable_Delete(var self) {
   HashTableData* ht = cast(self, HashTable);
   
   for(int i = 0; i < ht->table_size; i++) {
-    if (ht->buckets[i]) {
-      HashBucket_DeleteAll(ht->buckets[i]);
-    }
+    HashBucket_DeleteAll(ht->buckets[i]);
   }
   
   delete(ht->keys);
   free(ht->buckets);
-  
+  return self;
 }
 
 var HashTable_Copy(var self) {
@@ -62,7 +55,7 @@ var HashTable_Copy(var self) {
   return cop;
 }
 
-size_t HashTable_Len(var self) {
+int HashTable_Len(var self) {
   HashTableData* ht = cast(self, HashTable);
   return len(ht->keys);
 }
@@ -76,9 +69,7 @@ void HashTable_Clear(var self) {
   HashTableData* ht = cast(self, HashTable);
   
   for(int i = 0; i < ht->table_size; i++) {
-    if (ht->buckets[i]) {
-      HashBucket_DeleteAll(ht->buckets[i]);
-    }
+    HashBucket_DeleteAll(ht->buckets[i]);
   }
   
   memset(ht->buckets, 0, sizeof(struct HashBucket*) * ht->table_size);
@@ -90,13 +81,7 @@ bool HashTable_Contains(var self, var key) {
   return contains(ht->keys, key);
 }
 
-static void HashBucket_Delete(struct HashBucket* hb) {
-  delete(hb->key);
-  delete(hb->value);
-  free(hb);
-}
-
-void HashTable_Erase(var self, var key) {
+void HashTable_Discard(var self, var key) {
   HashTableData* ht = cast(self, HashTable);
   
   long loc = hash(key) % ht->table_size;
@@ -106,15 +91,15 @@ void HashTable_Erase(var self, var key) {
   
   if ( eq(b->key, key) ) {
     ht->buckets[loc] = b->next;
-    erase(ht->keys, key);
-    HashBucket_Delete(b);
+    discard(ht->keys, key);
+    free(b);
   }
   
   while (1) {
     if ( eq(b->next->key, key) ) {
       b->next = b->next->next;
-      erase(ht->keys, key);
-      HashBucket_Delete(b->next);
+      discard(ht->keys, key);
+      free(b);
     }
     
     if ( b->next == NULL ) return;
@@ -178,10 +163,7 @@ void HashTable_Put(var self, var key, var val) {
   
   while (1) {
     if ( eq(b->key, key) ) {
-      erase(ht->keys, b->key);
-      delete(b->key);
-      delete(b->value);
-      
+      discard(ht->keys, b->key);
       push(ht->keys, key);
       b->key = key;
       b->value = val;

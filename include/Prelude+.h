@@ -9,11 +9,11 @@
 /*
 ** Syntax
 **
-**    New reserved keywords:
+**  New reserved keywords:
 **
-**    var, is, not, elif, module, class, data, instance, 
-**    methods, method, methods_begin, methods_end,
-**    lit, $, foreach, 
+**  var is not elif
+**  module class data instance
+**  lit $ foreach cast
 */
 
 typedef void* var;
@@ -22,85 +22,72 @@ typedef void* var;
 #define not !
 #define elif else if
 
-#define module extern Type
+#define module extern var
 
 #define class typedef struct 
 #define data typedef struct 
 
 #define instance(T,C) static const C T##C
 
-#define methods (Type)(TypeMethod[])
-#define methods_begin(T) {"__TypeName", #T}
-#define method(T,C) {#C, &T##C}
+/*
+** Methods
+**
+**  These macros make the declaration 
+**  of Types statically much easier
+*/
+
+#define methods (TypeData*)(const TypeData[])
+#define methods_begin(T) {NULL, "__Type"}, {#T, "__Name"}
+#define method(T,C) {&T##C, #C}
 #define methods_end(T) {NULL, NULL}
 
 #define methods_table(T) T##Methods
 
 /*
-** Types
-**    
-**    A list of named class instances ending in NULL entries.
-*/
-
-typedef struct {
-  const char* class_name;
-  const void* class_object;
-} TypeMethod;
-
-typedef const TypeMethod* Type;
-
-#define type_implements(T, C) type_implements_name(T, #C)
-#define type_class(T, C) type_class_name(T, #C)
-
-bool type_implements_name(Type, const char* class_name);
-var type_class_name(Type, const char* class_name);
-
-const char* type_name(Type);
-
-/*
 ** Data
 **
-**    All data objects must start with "Type" member.
+**  All data objects must start with "type" member.
+**  If this is not respected functions taking "var" _will_ crash.
 */
 
 data {
-  Type type;
+  var type;
 } ObjectData;
 
-Type type_of(var);
+var type_of(var);
 
-#define cast(X, T) type_cast(X, T, __func__)
-var type_cast(var, Type t, const char*);
+#define cast(X, T) Type_Cast(X, T, __func__)
 
 /*
 ** Classes
 **
-**    Sets of functions which work upon objects.
+**  Sets of functions which work upon objects.
 */
 
 /** New - heap allocation with constructor/destructor */
 
 class {
   size_t size;
-  void (*ctor)(var, va_list*);
-  void (*dtor)(var);
+  var (*ctor)(var, va_list*);
+  var (*dtor)(var);
 } New;
 
-var new(Type, ...);
+var new(var, ...);
 void delete(var);
 
 /** Lit - Literatal value. 
 *
 * Can use "lit" macro or the "$" sign.
 *
-* This is a way to declare rich data on the stack.
-* Huge benefit in avoiding new/delete management & overhead.
+* var hello = $(String, "Hello");
 *
-* Warning: does not call constructors/destructors.
-*   Simply copies arguments as if they were data members.
-*   Assumes that the data object for a type is named as such:
-*   
-*   Int <=> IntData
+* This is a way to declare rich data on the stack.
+* Good for avoiding new/delete management & overhead.
+*
+*   !! Does not call constructors/destructors.
+*   !! Simply copies arguments as if they were data members.
+*   !! Assumes that the data object for a type is named as such:
+*   !!   Int => IntData
 *
 */
 
@@ -115,7 +102,6 @@ class {
 } Copy;
 
 var copy(var);
-
 
 /** Eq - equality */
 
@@ -138,24 +124,29 @@ bool lt(var, var);
 bool ge(var, var);
 bool le(var, var);
 
-
-/** Len - countable length */
-
-class {
-  size_t (*len)(var);
-} Len ;
-
-size_t len(var);
-
-/** Contains - contains object */
+/** Hash - hashable */
 
 class {
+  long (*hash)(var);
+} Hash;
+
+long hash(var);
+
+/** Collection - contains objects */
+
+class {
+  int (*len)(var);
+  bool (*is_empty)(var);
+  void (*clear)(var);
   bool (*contains)(var, var);
-  void (*erase)(var, var);
-} Contains;
+  void (*discard)(var, var);
+} Collection;
 
+int len(var);
+bool is_empty(var);
+void clear(var);
 bool contains(var, var);
-void erase(var, var);
+void discard(var, var);
 
 /** Iter - iterable */
 
@@ -170,33 +161,6 @@ var iter_end(var);
 var iter_next(var,var);
 
 #define foreach(xs, x) for(var x = iter_start(xs); x != iter_end(xs); x = iter_next(xs, x))
-
-var sum(var);
-var product(var);
-var sorted(var);
-
-var map(var, void f(var));
-var filter(var, bool f(var));
-
-/** At - positional access */
-
-class {
-  var (*at)(var, int);
-  void (*set)(var, int, var);
-} At;
-
-var at(var, int);
-void set(var, int, var);
-
-/** Empty - can be empty and cleared */
-
-class {
-  bool (*is_empty)(var);
-  void (*clear)(var);
-} Empty;
-
-bool is_empty(var);
-void clear(var);
 
 /** Push - insertion and removal abilities */
 
@@ -222,16 +186,17 @@ var pop_at(var, int);
 var pop_back(var);
 var pop_front(var);
 
-
-/** Hash - convert to a hash */
+/** At - positional access */
 
 class {
-  long (*hash)(var);
-} Hash;
+  var (*at)(var, int);
+  void (*set)(var, int, var);
+} At;
 
-long hash(var);
+var at(var, int);
+void set(var, int, var);
 
-/** Dict - access as a dictionary */
+/** Dict - dictionary access */
 
 class {
   var (*get)(var, var);
@@ -245,7 +210,7 @@ void put(var, var, var);
 
 class {
   char (*as_char)(var);
-} AsChr;
+} AsChar;
 
 char as_char(var);
 
@@ -273,21 +238,6 @@ class {
 
 double as_double(var);
 
-/** Show - uses the above to print formatted strings */
 
-void show(var);
-void showf(const char*, ...);
-
-void fshow(FILE*, var);
-void fshowf(FILE*, const char*, ...);
-
-void sshow(char*, var);
-void sshowf(char*, const char*, ...);
-
-void vfshow(FILE*, var);
-void vfshowf(FILE*, const char*, va_list);
-
-void vsshow(char*, var);
-void vsshowf(char*, const char*, va_list);
 
 #endif

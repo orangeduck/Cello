@@ -3,21 +3,19 @@
 
 #include "List+.h"
 
-Type List = methods {
+var List = methods {
   methods_begin(List),
   method(List, New),
   method(List, Copy),
   method(List, Eq),
-  method(List, Len),
-  method(List, Empty),
+  method(List, Collection),
   method(List, Push),
   method(List, At),
-  method(List, Contains),
   method(List, Iter),
   methods_end(List)
 };
 
-void List_New(var self, va_list* args) {
+var List_New(var self, va_list* args) {
   ListData* lo = cast(self, List);
   
   lo->num_items = 0;
@@ -30,11 +28,13 @@ void List_New(var self, va_list* args) {
     push(self, va_arg(*args, var));
   }
   
+  return self;
 }
 
-void List_Delete(var self) {
+var List_Delete(var self) {
   ListData* lo = cast(self, List);
   free(lo->items);
+  return self;
 }
 
 var List_Copy(var self) {
@@ -64,7 +64,7 @@ bool List_Eq(var self, var other) {
   return true;
 }
 
-size_t List_Len(var self) {
+int List_Len(var self) {
   ListData* lo = cast(self, List);
   return lo->num_items;
 } 
@@ -91,11 +91,11 @@ bool List_Contains(var self, var obj) {
   return false;
 }
 
-void List_Erase(var self, var obj) {
+void List_Discard(var self, var obj) {
   ListData* lo = cast(self, List);
   for (int i = 0; i < len(self); i++) {
     if ( eq(at(self, i), obj) ) {
-      delete(pop_at(self, i));
+      pop_at(self, i);
     }
   }
 }

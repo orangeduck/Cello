@@ -47,9 +47,9 @@ int main(int argc, char** argv) {
   
   var prices = new(HashTable);
   
-  put(prices, new(String, "Apple"),  new(Int, 12)); 
-  put(prices, new(String, "Banana"), new(Int,  6)); 
-  put(prices, new(String, "Pear"),   new(Int, 55)); 
+  put(prices, $(String, "Apple"),  $(Int, 12)); 
+  put(prices, $(String, "Banana"), $(Int,  6)); 
+  put(prices, $(String, "Pear"),   $(Int, 55)); 
   
   var pear_price = get(prices, $(String, "Pear"));
   
@@ -60,7 +60,6 @@ int main(int argc, char** argv) {
     printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
   }
   
-  // Stored keys and values are deleted with table.
   delete(prices);
   
   return 0;
