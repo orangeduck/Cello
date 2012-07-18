@@ -13,6 +13,7 @@ data {
 var Type_New(var, va_list*);
 var Type_Delete(var);
 
+#define cast(X, T) Type_Cast(X, T, __func__)
 var Type_Cast(var, var, const char*);
 
 #define Type_Implements(T, C) Type_Implements_Name(T, #C)

@@ -17,16 +17,13 @@
 */
 
 typedef void* var;
-
 #define is ==
 #define not !
 #define elif else if
 
 #define module extern var
-
 #define class typedef struct 
 #define data typedef struct 
-
 #define instance(T,C) static const C T##C
 
 /*
@@ -40,8 +37,6 @@ typedef void* var;
 #define methods_begin(T) {NULL, "__Type"}, {#T, "__Name"}
 #define method(T,C) {&T##C, #C}
 #define methods_end(T) {NULL, NULL}
-
-#define methods_table(T) T##Methods
 
 /*
 ** Data

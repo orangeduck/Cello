@@ -3,6 +3,7 @@
 
 #include "Prelude+.h"
 #include "String+.h"
+#include "Char+.h"
 #include "Number+.h"
 #include "List+.h"
 #include "HashTable+.h"
@@ -15,27 +16,28 @@ int main(int argc, char** argv) {
   // String allocated on stack using literal
   var hello2 = $(String, "Hello");
   
-  // Show length and also extract c string
+  // polymorphic len & as_str functions
   printf("String len %i Is: '%s'\n", len(hello1), as_str(hello1));
   
-  // Equality function does actual string comparison
+  // Equality function overloaded for actual string comparison
   if ( eq(hello1, hello2) ) {
     printf("Strings are equal!\n");
   }
   
   delete(hello1);
   
-  // Lists easy to create using literals.
+  // Lists easy to create.
   var numbers = new(List, 3, $(Int, 1), $(Real, 10.12), $(Int, 6));
   
   // Lists implement "Iter" so "foreach" can work on them.
   foreach(numbers, num) {
     
     // Types are data too.
+    // "is" is just "==" i.e non overloaded equality.
+    // Similar semantics to python "is"
+    
     if (type_of(num) is Int) {
       printf("Int Number: %li\n", as_long(num));
-    
-    // "is" is just "==" i.e non overloaded equality.
     } elif (type_of(num) is Real) {
       printf("Real Number: %f\n", as_double(num));
     }
@@ -57,10 +59,23 @@ int main(int argc, char** argv) {
   
   foreach(prices, key) {
     var price = get(prices, key);
-    printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
+    
+    if ( not contains(key, $(String, 'na')) ) {
+      printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
+    }
   }
   
   delete(prices);
+  
+  // Stack allocation really it is quite flexible
+  // Obviously this object cannot shrink and grow
+  // But it can still be interated over etc
+  var counting = $(List, 3, 3, (var[]){ $(Int, 1), $(Real, 2.0), $(Char, 'a') });
+  
+  foreach(counting, item) {
+    // Types are rich objects too e.g overloaded as_str
+    printf("Type: %s\n", as_str(type_of(item)));
+  }
   
   return 0;
 }

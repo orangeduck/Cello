@@ -23,12 +23,12 @@ long Char_Hash(var);
 
 char Char_AsChar(var);
 
-instance(String, New) = { sizeof(CharData), Char_New, Char_Delete };
-instance(String, Copy) = { Char_Copy };
-instance(String, Eq) = { Char_Eq };
-instance(String, Ord) = { Char_Gt, Char_Lt };
-instance(String, Hash) = { Char_Hash  };
-instance(String, AsChar) = { Char_AsChar  };
+instance(Char, New) = { sizeof(CharData), Char_New, Char_Delete };
+instance(Char, Copy) = { Char_Copy };
+instance(Char, Eq) = { Char_Eq };
+instance(Char, Ord) = { Char_Gt, Char_Lt };
+instance(Char, Hash) = { Char_Hash  };
+instance(Char, AsChar) = { Char_AsChar  };
 
 
 #endif
