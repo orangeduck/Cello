@@ -4,13 +4,11 @@ C+
 About
 -----
 
-__What is C+?__
-
-C+ is a C library which brings higher level programming tools to C. It takes inspiration from C++, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic typing, and some syntactic sugar. This isn't a new language, just a library for C99. There are a selection of new keywords and many generically named functions in the namespace are taken but other than that it should be fully compatible with normal code.
+C+ is a C library which brings higher level programming tools to C. It takes inspiration from C++, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic typing, and some syntactic sugar. This isn't a new language, just a library for C99. There are a selection of new keywords, and many generically named functions in the namespace are taken, but other than that it should be fully compatible with normal code.
 
 Primarily I made this for fun and learning. I wouldn't seriously recommend it's use in production code, although I'd love to say it would make a cute little scripting language for C/C++ based applications.
 
-I am a huge fan of C, Python and Haskell. What I don't enjoy in Haskell is writing small detailed algorithms in a functional style. This I feel is best in C/Python. What I do love about Haskell (and C) is the way programs are structured at a higher level. C will never be object oriented but I hope that with C+ I've turned it into something of a dynamic and powerful functional language which it might have once been. This also expains why some of the terminology is closer to Haskell than C++.
+I am a huge fan of C, Python and Haskell. What I don't enjoy in Haskell is writing small detailed algorithms in a functional style. Which turns out to be something I enjoy in C/Python. What I do love about Haskell (and C) is the way programs are structured at a higher level. With this project I never really aimed for Object Orientation in C, but I hope that with C+ I've turned it into something of a dynamic and powerful functional language which it might have once been. This approach also expains why some of the terminology is closer to Haskell than C++.
 
 Examples
 --------
@@ -166,28 +164,35 @@ var Int_Copy(var self) {
 ...
 ```
 
-More information and native class definitions (such as New, Eq, Ord) can be found in "Prelude+.h"
+More information and native class definitions (such as for ```New```, ```Eq```, ```Ord```) can be found in ```Prelude+.h```
 
 Explaination
 ------------
 
-The first thing that probably comes into your head viewing the above code is "var". This is a typedef to a void* and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the "cast" function.
+The first thing that probably comes into your head viewing the above code is ```var```. This is a typedef of ```void*``` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the "cast" function.
 
-This allows for a form of poor-man's duck-typing. If an object looks like it has a length, and it implements "Len", then you are more than free to use "len" upon it. One can test if an object implements a certain class with "Type_Implmenets(type_of(obj), Class)". Calling a function on an object which does not implement the appropriate classes will throw an error.
+This allows for a form of poor-man's duck-typing. If an object looks like it has a length, and it implements ```Len```, then you are more than free to use ```len``` upon it. One can test if an object implements a certain class with the function ```Type_Implements(type_of(obj), Class)```. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
 
-Another thing that may have jumped to your mind in the examples is "new", "delete" and the "$" symbol. These are ways to allocate memory for objects. "new" and "delete" are used for heap objects and call constructors/destructors. "$" is used to allocate objects on the stack. It _doesn't_ call a constructor or destructor, but will initialize the coorisponding types data structure with the arguments provided.
+Another thing that may have jumped to your mind in the examples is ```new```, ```delete``` and the ```$``` symbol. These are ways to allocate memory for objects. ```new``` and ```delete``` are used for heap objects and call constructors/destructors. ```$``` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the coorisponding types data structure with the arguments provided.
 
-A final thing that might have popped into your head is that Types of objects are rich objects themselves. The type "Type" implement various classes and can be used with functions such as "as_str". It even implements "New" meaning new Types can be constructed at runtime.
+A final thing that might have popped into your head is that types of objects are objects themselves. The type ```Type``` implement various classes and so can be used with functions such as ```as_str```. It even implements ```New``` meaning new Types can be constructed at runtime if wanted.
 
-"foreach" is a new addition which allows for iteration over objects which implement the "Iter" interface. Also shown are various generic containers which implement this. The Hashtable can use as a key any object that implements "Hash" and can store any object as a value.
+```foreach``` is a new addition which allows for iteration over objects which implement the ```Iter``` class. Also shown are various generic containers which implement this. The Hashtable can use as a key any object that implements ```Hash``` and can store any object as a value.
 
 Other than these things there is not much suprising in the code which cannot be explained via syntactic sugar.
 
-* "is" -> "=="
-* "not" -> "!"
-* "elif" -> "else if"
-* "module" -> "extern var"
-* "class" -> "typedef struct"
-* "data" -> "typedef struct"
+* ```is``` -> ```==```
+* ```not``` -> ```!```
+* ```elif``` -> ```else if```
+* ```module``` -> ```extern var```
+* ```class``` -> ```typedef struct```
+* ```data``` -> ```typedef struct```
 
-"instance" and the "methods" macros being helpers for defining Type objects statically.
+```instance``` and the ```methods``` macros being helpers for defining Type objects statically.
+
+Questions & Contributions
+-------------------------
+
+Questions, Contributions and Feedback are more than welcome. Feel free to get in contact:
+
+contact@theorangeduck.com
