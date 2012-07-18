@@ -55,8 +55,8 @@ var Int = methods {
 };
 
 var Int_New(var self, va_list* args) {
-  IntData* io = cast(self, Int);
-  io->value = va_arg(*args, int);
+  IntData* intdata = cast(self, Int);
+  intdata->value = va_arg(*args, int);
   return self;
 }
 
@@ -65,8 +65,8 @@ var Int_Delete(var self) {
 }
 
 var Int_Copy(var self) {
-  IntData* io = cast(self, Int);
-  return new(Int, io->value);
+  IntData* intdata = cast(self, Int);
+  return new(Int, intdata->value);
 }
 
 bool Int_Eq(var self, var other) {
