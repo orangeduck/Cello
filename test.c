@@ -6,6 +6,7 @@
 #include "Char+.h"
 #include "Number+.h"
 #include "List+.h"
+#include "NoneType+.h"
 #include "HashTable+.h"
 
 int main(int argc, char** argv) {
@@ -60,7 +61,7 @@ int main(int argc, char** argv) {
   foreach(prices, key) {
     var price = get(prices, key);
     
-    if ( not contains(key, $(String, 'na')) ) {
+    if ( not contains(key, $(String, "na")) ) {
       printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
     }
   }
@@ -76,6 +77,17 @@ int main(int argc, char** argv) {
     // Types are rich objects too e.g overloaded as_str
     printf("Type: %s\n", as_str(type_of(item)));
   }
+  
+  printf("Type of '%s' is '%s'\n", as_str(None), as_str(type_of(None)));
+  
+  var testlist = new(List, 0);
+  for(int i = 0; i < 10000; i++) {
+    push(testlist, $(Int, 1));
+  }
+  for(int i = 0; i < 10000; i++) {
+    var item = pop(testlist);
+  }
+  
   
   return 0;
 }

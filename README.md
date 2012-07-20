@@ -51,7 +51,7 @@ foreach(prices, key) {
 delete(prices);
 ```
 
-Defining a new class.
+__Defining a new class.__
 
 In the header...
 
@@ -88,7 +88,7 @@ void add(var lhs, var rhs) {
 ...
 ```
 
-Defining a new type.
+__Defining a new type.__
 
 In the header...
 
@@ -169,15 +169,15 @@ More information and native class definitions (such as for ```New```, ```Eq```, 
 Explaination
 ------------
 
-The first thing that probably comes into your head viewing the above code is ```var```. This is a typedef of ```void*``` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the "cast" function.
+The first thing that probably comes into your head viewing the above code is ```var```. This is a typedef of ```void*``` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the ```cast``` function.
 
-This allows for a form of poor-man's duck-typing. If an object looks like it has a length, and it implements ```Len```, then you are more than free to use ```len``` upon it. One can test if an object implements a certain class with the function ```Type_Implements(type_of(obj), Class)```. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
+This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, and it implements ```Len```, then you are more than free to use ```len``` upon it. One can test if an object implements a certain class with the function ```Type_Implements(type_of(obj), Class)```. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
 
 Another thing that may have jumped to your mind in the examples is ```new```, ```delete``` and the ```$``` symbol. These are ways to allocate memory for objects. ```new``` and ```delete``` are used for heap objects and call constructors/destructors. ```$``` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the coorisponding types data structure with the arguments provided.
 
 A final thing that might have popped into your head is that types of objects are objects themselves. The type ```Type``` implement various classes and so can be used with functions such as ```as_str```. It even implements ```New``` meaning new Types can be constructed at runtime if wanted.
 
-```foreach``` is a new addition which allows for iteration over objects which implement the ```Iter``` class. Also shown are various generic containers which implement this. The Hashtable can use as a key any object that implements ```Hash``` and can store any object as a value.
+```foreach``` is a new addition which allows for iteration over objects which implement the ```Iter``` class. Also shown are various generic containers which implement this. For example the Hashtable can use as a key any object that implements ```Hash``` and can store any object as a value.
 
 Other than these things there is not much suprising in the code which cannot be explained via syntactic sugar.
 
@@ -188,7 +188,7 @@ Other than these things there is not much suprising in the code which cannot be 
 * ```class``` -> ```typedef struct```
 * ```data``` -> ```typedef struct```
 
-```instance``` and the ```methods``` macros being helpers for defining Type objects statically.
+finally the ```instance``` and ```methods``` macros are helpers for defining Type objects statically. Because Type objects are somewhat complicated the syntax is very awkward otherwise.
 
 Questions & Contributions
 -------------------------

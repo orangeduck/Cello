@@ -1,6 +1,8 @@
 #include <math.h>
 #include <assert.h>
 
+#include "NoneType+.h"
+
 #include "List+.h"
 
 var List = methods {
@@ -103,12 +105,7 @@ void List_Discard(var self, var obj) {
 static void List_Reserve_More(ListData* lo) {
   
   if (lo->num_items > lo->num_slots) {
-    if (lo->num_slots < 10) {
-      lo->num_slots += 5;
-    } else {
-      lo->num_slots = pow(lo->num_slots, 1.5);
-    }
-    
+    lo->num_slots = ceil((lo->num_slots + 1) * 1.5);
     lo->items = realloc(lo->items, sizeof(var) * lo->num_slots);
   }
 
@@ -138,22 +135,20 @@ void List_Push_At(var self, var val, int index) {
   lo->items[index] = val;
 }
 
-/* TODO: Free space when appropriate */
-
 static void List_Reserve_Less(ListData* lo) {
   
-  //if ( pow(lo->num_items, 1.5) > lo->num_slots) {
-  //  lo->num_slots = pow(lo->num_slots, 1.0/1.5);
-  //  lo->items = realloc(lo->items, sizeof(var) * lo->num_slots);
-  //}
-  
-  assert(lo->num_slots >= lo->num_items);
+  if ( lo->num_slots > pow(lo->num_items+1, 1.5)) {
+    lo->num_slots = floor((lo->num_slots-1) * (1.0/1.5));
+    lo->items = realloc(lo->items, sizeof(var) * lo->num_slots);
+  }
   
 }
 
 var List_Pop_Back(var self) {
   ListData* lo = cast(self, List);
-  
+
+  if (is_empty(self)) return None;
+
   var retval = lo->items[lo->num_items-1];
   
   lo->num_items--;
@@ -168,6 +163,12 @@ var List_Pop_Front(var self) {
 
 var List_Pop_At(var self, int index) {
   ListData* lo = cast(self, List);
+  
+  if (is_empty(self) || 
+      index < 0 || 
+      index > lo->num_items-1) {
+    return None;
+  }
   
   var retval = lo->items[index];
   
@@ -184,11 +185,23 @@ var List_Pop_At(var self, int index) {
 
 var List_At(var self, int index) {
   ListData* lo = cast(self, List);
+  
+  if (is_empty(self) || 
+      index < 0 || 
+      index > lo->num_items-1) {
+    return None;
+  }
+  
   return lo->items[index];
 }
 
 void List_Set(var self, int index, var val) {
   ListData* lo = cast(self, List);
+  
+  if (index < 0 || index > lo->num_items-1) {
+    return;
+  }
+  
   lo->items[index] = val;
 }
 

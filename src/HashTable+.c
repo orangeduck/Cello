@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "List+.h"
+#include "NoneType+.h"
 
 #include "HashTable+.h"
 
@@ -110,22 +111,13 @@ void HashTable_Discard(var self, var key) {
   return;
 }
 
-static var HashTable_Error(var self, var key) {
-
-  fprintf(stderr, "|\n| HashTableError: Key '%s' is not in '%s'\n|\n",  
-    as_str(key), as_str(self));
-  abort();
-  return NULL;
-  
-}
-
 var HashTable_Get(var self, var key) {
 
   HashTableData* ht = cast(self, HashTable);
   long loc = hash(key) % ht->table_size;
   struct HashBucket* b = ht->buckets[loc];
   
-  if ( b == NULL ) return HashTable_Error(self, key);
+  if ( b == NULL ) return None;
   
   while (1) {
     if ( eq(b->key, key) ) {
@@ -133,13 +125,13 @@ var HashTable_Get(var self, var key) {
     }
     
     if ( b->next == NULL ) {
-      return HashTable_Error(self, key);
+      return None;
     }
     
     b = b->next;
   }
   
-  return HashTable_Error(self, key);
+  return None;
 }
 
 static struct HashBucket* HashBucket_New(var key, var val, struct HashBucket* next) {
