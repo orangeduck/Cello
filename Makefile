@@ -11,6 +11,13 @@ ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
 endif
 
+ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
+	OUT=lib$(NAME).so
+	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -O3 -g -fPIC
+	LFLAGS= -shared
+	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
+endif
+
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	OUT=$(NAME).dll
 	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
@@ -22,7 +29,8 @@ $(OUT): $(OBJ_FILES)
 	$(CC) $(OBJ_FILES) $(LFLAGS) -o $@
 	
 test: $(OBJ_FILES) test.c
-	$(CC) test.c $(CFLAGS) $(OBJ_FILES) -o test
+	$(CC) test.c -lcunit $(CFLAGS) $(OBJ_FILES) -o test
+	./test
   
 obj/%.o: src/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
