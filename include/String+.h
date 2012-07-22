@@ -1,3 +1,9 @@
+/*
+** == String ==
+**
+**  Basic string wrapper
+*/
+
 #ifndef StringPlus_h
 #define StringPlus_h
 
@@ -11,23 +17,23 @@ data {
   char* value;
 } StringData;
 
-/** String_New(var, char*); */
-var String_New(var, va_list*);
-var String_Delete(var);
-void String_Assign(var, var);
-var String_Copy(var);
+/** String_New(var self, char* value); */
+var String_New(var self, va_list* args);
+var String_Delete(var self);
+void String_Assign(var self, var obj);
+var String_Copy(var self);
 
-bool String_Eq(var, var);
+bool String_Eq(var self, var obj);
 
-int String_Len(var);
-bool String_IsEmpty(var);
-void String_Clear(var);
-bool String_Contains(var, var);
-void String_Discard(var, var);
+int String_Len(var self);
+bool String_IsEmpty(var self);
+void String_Clear(var self);
+bool String_Contains(var self, var sub);
+void String_Discard(var self, var sub);
 
-long String_Hash(var);
+long String_Hash(var self);
 
-const char* String_AsStr(var);
+const char* String_AsStr(var self);
 
 instance(String, New) = { sizeof(StringData), String_New, String_Delete };
 instance(String, Assign) = { String_Assign };

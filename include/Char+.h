@@ -1,3 +1,9 @@
+/*
+** == Char ==
+**
+**  Basic char wrapper
+*/
+
 #ifndef CharPlus_h
 #define CharPlus_h
 
@@ -11,19 +17,19 @@ data {
   char value;
 } CharData;
 
-/** Char_New(var, char); */
-var Char_New(var, va_list*);
-var Char_Delete(var);
-void Char_Assign(var, var);
-var Char_Copy(var);
+/** Char_New(var self, char value); */
+var Char_New(var self, va_list* args);
+var Char_Delete(var self);
+void Char_Assign(var self, var obj);
+var Char_Copy(var self);
 
-bool Char_Eq(var, var);
-bool Char_Gt(var, var);
-bool Char_Lt(var, var);
+bool Char_Eq(var self, var obj);
+bool Char_Gt(var self, var obj);
+bool Char_Lt(var self, var obj);
 
-long Char_Hash(var);
+long Char_Hash(var self);
 
-char Char_AsChar(var);
+char Char_AsChar(var self);
 
 instance(Char, New) = { sizeof(CharData), Char_New, Char_Delete };
 instance(Char, Assign) = { Char_Assign };

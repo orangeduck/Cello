@@ -15,15 +15,19 @@ class {
   void (*absolute)(var);
 } Num;
 
-void add(var, var);
-void sub(var, var);
-void mul(var, var);
-void divide(var, var);
+void add(var self, var obj);
+void sub(var self, var obj);
+void mul(var self, var obj);
+void divide(var self, var obj);
 
-void negate(var);
-void absolute(var);
+void negate(var self);
+void absolute(var self);
 
-/* Integer */
+/*
+** == Int ==
+**
+**  Basic integer wrapper
+*/
 
 module Int;
 
@@ -32,27 +36,27 @@ data {
   long value;
 } IntData;
 
-/** Int_New(var, long); */
-var Int_New(var, va_list*);
-var Int_Delete(var);
-void Int_Assign(var, var);
-var Int_Copy(var);
+/** Int_New(var self, long value); */
+var Int_New(var self, va_list* args);
+var Int_Delete(var self);
+void Int_Assign(var self, var obj);
+var Int_Copy(var self);
 
-bool Int_Eq(var, var);
-bool Int_Gt(var, var);
-bool Int_Lt(var, var);
+bool Int_Eq(var self, var obj);
+bool Int_Gt(var self, var obj);
+bool Int_Lt(var self, var obj);
 
-long Int_Hash(var);
+long Int_Hash(var self);
 
-void Int_Add(var, var);
-void Int_Sub(var, var);
-void Int_Mul(var, var);
-void Int_Div(var, var);
-void Int_Neg(var);
-void Int_Abs(var);
+void Int_Add(var self, var obj);
+void Int_Sub(var self, var obj);
+void Int_Mul(var self, var obj);
+void Int_Div(var self, var obj);
+void Int_Neg(var self);
+void Int_Abs(var self);
 
-long Int_AsLong(var);
-double Int_AsDouble(var);
+long Int_AsLong(var self);
+double Int_AsDouble(var self);
 
 instance(Int, New) = { sizeof(IntData), Int_New, Int_Delete };
 instance(Int, Assign) = { Int_Assign };
@@ -64,7 +68,11 @@ instance(Int, AsLong) = { Int_AsLong };
 instance(Int, AsDouble) = { Int_AsDouble };
 instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
 
-/* Real */
+/*
+** == Real ==
+**
+**  Basic float/double wrapper
+*/
 
 module Real;
 
@@ -73,27 +81,27 @@ data {
   double value;
 } RealData;
 
-/** Real_New(var, double); */
-var Real_New(var, va_list*);
-var Real_Delete(var);
-void Real_Assign(var, var);
-var Real_Copy(var);
+/** Real_New(var self, double value); */
+var Real_New(var self, va_list* args);
+var Real_Delete(var self);
+void Real_Assign(var self, var obj);
+var Real_Copy(var self);
 
-bool Real_Eq(var, var);
-bool Real_Gt(var, var);
-bool Real_Lt(var, var);
+bool Real_Eq(var self, var obj);
+bool Real_Gt(var self, var obj);
+bool Real_Lt(var self, var obj);
 
-long Real_Hash(var);
+long Real_Hash(var self);
 
-void Real_Add(var, var);
-void Real_Sub(var, var);
-void Real_Mul(var, var);
-void Real_Div(var, var);
-void Real_Neg(var);
-void Real_Abs(var);
+void Real_Add(var self, var obj);
+void Real_Sub(var self, var obj);
+void Real_Mul(var self, var obj);
+void Real_Div(var self, var obj);
+void Real_Neg(var self);
+void Real_Abs(var self);
 
-double Real_AsDouble(var);
-long Real_AsLong(var);
+double Real_AsDouble(var self);
+long Real_AsLong(var self);
 
 instance(Real, New) = { sizeof(RealData), Real_New, Real_Delete };
 instance(Real, Assign) = { Real_Assign };

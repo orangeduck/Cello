@@ -22,12 +22,9 @@ var Type_Cast(var obj, var t, const char* func) {
 
 var Type_New(var self, va_list* args) {
   
-  free(self);
-  
   const char* name = va_arg(*args, const char*);
   int count = va_arg(*args, int);
-  
-  void** ifaces = va_arg(*args, void**);
+  var* ifaces = va_arg(*args, var*);
   const char** inames = va_arg(*args, const char**);
   
   TypeData* newtype = malloc(sizeof(TypeData) * (count + 2));

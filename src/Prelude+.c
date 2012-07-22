@@ -26,16 +26,19 @@ var type_of(var self) {
 }
 
 var new(var type, ...) { 
-  
   type = cast(type, Type);
   
   New* inew = Type_Class(type, New);
-  assert(inew->size);
   
-  var self = calloc(1, inew->size);
-  assert(self);
+  var self;
   
-  ((ObjectData*)self)->type = type;
+  if (inew->size <= sizeof(ObjectData)) {
+    self = NULL;
+  } else {
+    self = calloc(1, inew->size);
+    assert(self);
+    ((ObjectData*)self)->type = type;
+  }
   
   if (inew->construct) {
     va_list args;

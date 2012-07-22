@@ -1,9 +1,9 @@
 /*
-** List
+** == List ==
 **
-**  A dynamically sized list of objects
-**  Simply contains pointers to objects
-**  Is not responsible object deallocation
+**  + A dynamically sized list of data objects
+**  + Simply contains pointers to data objects
+**  + Is not responsible object deallocation
 */
 
 #ifndef ListPlus_h
@@ -22,34 +22,34 @@ data {
   int cursor;
 } ListData;
 
-/** List_New(var, int, ...) */
-var List_New(var, va_list*);
-var List_Delete(var);
-void List_Assign(var, var);
-var List_Copy(var);
+/** List_New(var self, int count, ... items) */
+var List_New(var self, va_list* args);
+var List_Delete(var self);
+void List_Assign(var self, var obj);
+var List_Copy(var self);
 
-bool List_Eq(var, var);
+bool List_Eq(var self, var obj);
 
-int List_Len(var);
-bool List_IsEmpty(var);
-void List_Clear(var);
-bool List_Contains(var, var);
-void List_Discard(var, var);
+int List_Len(var self);
+bool List_IsEmpty(var self);
+void List_Clear(var self);
+bool List_Contains(var self, var obj);
+void List_Discard(var self, var obj);
 
-void List_Push_Back(var, var);
-void List_Push_Front(var, var);
-void List_Push_At(var, var, int);
+void List_Push_Back(var self, var obj);
+void List_Push_Front(var self, var obj);
+void List_Push_At(var self, var obj, int i);
 
-var List_Pop_Back(var);
-var List_Pop_Front(var);
-var List_Pop_At(var, int);
+var List_Pop_Back(var self);
+var List_Pop_Front(var self);
+var List_Pop_At(var self, int i);
 
-var List_At(var, int);
-void List_Set(var, int, var);
+var List_At(var self, int i);
+void List_Set(var self, int i, var obj);
 
-var List_Iter_Start(var);
-var List_Iter_End(var);
-var List_Iter_Next(var, var);
+var List_Iter_Start(var self);
+var List_Iter_End(var self);
+var List_Iter_Next(var self, var curr);
 
 instance(List, New) = { sizeof(ListData), List_New, List_Delete };
 instance(List, Assign) = { List_Assign };

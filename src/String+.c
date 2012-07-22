@@ -77,7 +77,7 @@ bool String_Contains(var self, var obj) {
   return false;
 }
 
-/* TODO: Actually implement */
+
 
 void String_Discard(var self, var obj) {
   StringData* s = cast(self, String);
@@ -85,11 +85,15 @@ void String_Discard(var self, var obj) {
   if (Type_Implements(type_of(obj), AsStr)) {
     const char* ostr = as_str(obj);
     const char* pos = strstr(s->value, ostr);
+    /* TODO: Implement */
   }
   
   if (Type_Implements(type_of(obj), AsChar)) {
     char ochar = as_char(obj);
     const char* pos = strchr(s->value, ochar);
+    while(cpos != NULL) {
+      pos = pos+1;
+    }
   }
   
 }

@@ -23,28 +23,28 @@ data {
   var items;
 } ArrayData;
 
-/** Array_New(var, var, int, ...) */
-var Array_New(var, va_list*);
-var Array_Delete(var);
-void Array_Assign(var, var);
-var Array_Copy(var);
+/** Array_New(var self, var type, int count, ... items) */
+var Array_New(var self, va_list* args);
+var Array_Delete(var self);
+void Array_Assign(var self, var obj);
+var Array_Copy(var self);
 
-bool Array_Eq(var, var);
+bool Array_Eq(var self, var obj);
 
-int Array_Len(var);
-bool Array_IsEmpty(var);
-void Array_Clear(var);
-bool Array_Contains(var, var);
-void Array_Discard(var, var);
+int Array_Len(var self);
+bool Array_IsEmpty(var self);
+void Array_Clear(var self);
+bool Array_Contains(var self, var obj);
+void Array_Discard(var self, var obj);
 
-void Array_Append(var, var);
+void Array_Append(var self, var obj);
 
-var Array_At(var, int);
-void Array_Set(var, int, var);
+var Array_At(var self, int i);
+void Array_Set(var self, int i, var obj);
 
-var Array_Iter_Start(var);
-var Array_Iter_End(var);
-var Array_Iter_Next(var, var);
+var Array_Iter_Start(var self);
+var Array_Iter_End(var self);
+var Array_Iter_Next(var self, var curr);
 
 instance(Array, New) = { sizeof(ArrayData), Array_New, Array_Delete };
 instance(Array, Assign) = { Array_Assign };
