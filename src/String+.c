@@ -91,7 +91,7 @@ void String_Discard(var self, var obj) {
   if (Type_Implements(type_of(obj), AsChar)) {
     char ochar = as_char(obj);
     const char* pos = strchr(s->value, ochar);
-    while(cpos != NULL) {
+    while(pos != NULL) {
       pos = pos+1;
     }
   }
