@@ -10,6 +10,7 @@ data {
   const char* class_name;
 } TypeData;
 
+/** Type_New(var, const char*, var*, const char**); */
 var Type_New(var, va_list*);
 var Type_Delete(var);
 

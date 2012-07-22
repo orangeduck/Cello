@@ -7,11 +7,11 @@
 #include "Type+.h"
 
 /*
-** Because "Type" is extern it isn't a constant expression.
-** This means the type_of a TypeData object cannot be set at compile time.
-** And the type_of a TypeData object is just "Type" again.
+** The type_of a Type object is just "Type" again.
+** But because "Type" is extern it isn't a constant expression.
+** This means the type_of a Type object cannot be set at compile time.
 **
-** So by convention at compile time the type_of a TypeData object is set to NULL.
+** So by convention at compile time the type_of a Type object is set to NULL.
 ** So if we access a struct and it tells us NULL is the type, just assume "Type".
 */
 
@@ -37,10 +37,10 @@ var new(var type, ...) {
   
   ((ObjectData*)self)->type = type;
   
-  if (inew->ctor) {
+  if (inew->construct) {
     va_list args;
     va_start(args, type);
-    self = inew->ctor(self, &args);
+    self = inew->construct(self, &args);
     va_end(args);
   }
   
@@ -50,11 +50,33 @@ var new(var type, ...) {
 void delete(var self) {
   New* inew = Type_Class(type_of(self), New);
   
-  if (inew->dtor) {
-    self = inew->dtor(self);
+  if (inew->destruct) {
+    self = inew->destruct(self);
   }
   
   free(self);
+}
+
+var construct(var self, ...) {
+  New* inew = Type_Class(type_of(self), New);
+  assert(inew->construct);
+  va_list args;
+  va_start(args, self);
+  self = inew->construct(self, &args);
+  va_end(args);
+  return self;
+}
+
+var destruct(var self) {
+  New* inew = Type_Class(type_of(self), New);
+  assert(inew->destruct); 
+  return inew->destruct(self);
+}
+
+void assign(var self, var obj) {
+  Assign* iassign = Type_Class(type_of(self), Assign);
+  assert(iassign->assign);
+  iassign->assign(self, obj);
 }
 
 var copy(var self) {

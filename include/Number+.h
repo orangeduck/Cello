@@ -4,7 +4,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-/** Num */
+/** Num - performs numeric operations */
 
 class {
   void (*add)(var, var);
@@ -32,8 +32,10 @@ data {
   long value;
 } IntData;
 
+/** Int_New(var, long); */
 var Int_New(var, va_list*);
 var Int_Delete(var);
+void Int_Assign(var, var);
 var Int_Copy(var);
 
 bool Int_Eq(var, var);
@@ -53,6 +55,7 @@ long Int_AsLong(var);
 double Int_AsDouble(var);
 
 instance(Int, New) = { sizeof(IntData), Int_New, Int_Delete };
+instance(Int, Assign) = { Int_Assign };
 instance(Int, Copy) = { Int_Copy };
 instance(Int, Eq) = { Int_Eq };
 instance(Int, Ord) = { Int_Gt, Int_Lt };
@@ -70,8 +73,10 @@ data {
   double value;
 } RealData;
 
+/** Real_New(var, double); */
 var Real_New(var, va_list*);
 var Real_Delete(var);
+void Real_Assign(var, var);
 var Real_Copy(var);
 
 bool Real_Eq(var, var);
@@ -91,6 +96,7 @@ double Real_AsDouble(var);
 long Real_AsLong(var);
 
 instance(Real, New) = { sizeof(RealData), Real_New, Real_Delete };
+instance(Real, Assign) = { Real_Assign };
 instance(Real, Copy) = { Real_Copy };
 instance(Real, Eq) = { Real_Eq };
 instance(Real, Ord) = { Real_Gt, Real_Lt };

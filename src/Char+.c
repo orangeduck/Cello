@@ -3,6 +3,7 @@
 var Char = methods {
   methods_begin(Char),
   method(Char, New),
+  method(Char, Assign),
   method(Char, Copy),
   method(Char, Eq),
   method(Char, Ord),
@@ -19,6 +20,11 @@ var Char_New(var self, va_list* args) {
 
 var Char_Delete(var self) {
   return self;
+}
+
+void Char_Assign(var self, var obj) {
+  CharData* cd = cast(self, Char);
+  cd->value = as_char(obj);
 }
 
 var Char_Copy(var self) {

@@ -8,6 +8,7 @@
 var List = methods {
   methods_begin(List),
   method(List, New),
+  method(List, Assign),
   method(List, Copy),
   method(List, Eq),
   method(List, Collection),
@@ -30,6 +31,8 @@ var List_New(var self, va_list* args) {
     push(self, va_arg(*args, var));
   }
   
+  lo->cursor = 0;
+  
   return self;
 }
 
@@ -37,6 +40,19 @@ var List_Delete(var self) {
   ListData* lo = cast(self, List);
   free(lo->items);
   return self;
+}
+
+void List_Assign(var self, var obj) {
+  ListData* lo = cast(self, List);
+  
+  lo->num_items = 0;
+  lo->num_slots = 0;
+  lo->items = realloc(lo->items, 0);
+  lo->cursor = 0;
+  
+  foreach(obj, item) {
+    push(self, item);
+  }
 }
 
 var List_Copy(var self) {
@@ -207,6 +223,7 @@ void List_Set(var self, int index, var val) {
 
 var List_Iter_Start(var self) {
   ListData* lo = cast(self, List);
+  lo->cursor = 0;
   return lo->items[0];
 }
 
@@ -216,20 +233,25 @@ var List_Iter_End(var self) {
   return LIST_ITER_END;
 }
 
-/* 
-** TODO: Implement proper iteration
-**    Use pair of cursors
-**    Bool flag to toggle
-**    Store last position, check if correct.
-*/
-
 var List_Iter_Next(var self, var curr) {
+  ListData* lo = cast(self, List);
+  
+  if (lo->items[lo->cursor] is curr) {
+    lo->cursor++;
+    if (lo->cursor == lo->num_items) {
+      return LIST_ITER_END;
+    } else {
+      return lo->items[lo->cursor];
+    }
+  }
   
   for(int i = 0; i < len(self)-1; i++) {
-    
     var val = at(self, i);
-    if (val is curr) { return at(self, i+1); }
     
+    if (val is curr) {
+      lo->cursor = i+1;
+      return at(self, i+1);
+    }
   }
   
   return LIST_ITER_END;

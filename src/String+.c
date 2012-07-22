@@ -6,6 +6,7 @@
 var String = methods {
   methods_begin(List),
   method(String, New),
+  method(String, Assign),
   method(String, Copy),
   method(String, Eq),
   method(String, Collection),
@@ -26,6 +27,13 @@ var String_Delete(var self) {
   StringData* s = cast(self, String);
   free(s->value);
   return self;
+}
+
+void String_Assign(var self, var obj) {
+  StringData* s = cast(self, String);
+  const char* value = as_str(obj);
+  s->value = realloc(s->value, strlen(value) + 1);
+  strcpy(s->value, value);
 }
 
 var String_Copy(var self) {

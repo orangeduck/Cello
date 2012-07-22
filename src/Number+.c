@@ -44,6 +44,7 @@ void absolute(var self) {
 var Int = methods {
   methods_begin(Int),
   method(Int, New), 
+  method(Int, Assign),
   method(Int, Copy),
   method(Int, Eq), 
   method(Int, Ord),
@@ -62,6 +63,11 @@ var Int_New(var self, va_list* args) {
 
 var Int_Delete(var self) {
   return self;
+}
+
+void Int_Assign(var self, var obj) {
+  IntData* intdata = cast(self, Int);
+  intdata->value = as_long(obj);
 }
 
 var Int_Copy(var self) {
@@ -132,6 +138,7 @@ double Int_AsDouble(var self) {
 var Real = methods {
   methods_begin(Real),
   method(Real, New),
+  method(Real, Assign),
   method(Real, Copy),
   method(Real, Eq),
   method(Real, Ord),
@@ -150,6 +157,11 @@ var Real_New(var self, va_list* args) {
 
 var Real_Delete(var self) {
   return self;
+}
+
+void Real_Assign(var self, var obj) {
+  RealData* ro = cast(self, Real);
+  ro->value = as_double(obj);
 }
 
 var Real_Copy(var self) {

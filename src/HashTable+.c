@@ -9,6 +9,7 @@
 var HashTable = methods {
   methods_begin(HashTable),
   method(HashTable, New),
+  method(HashTable, Assign),
   method(HashTable, Copy),
   method(HashTable, Collection),
   method(HashTable, Dict),
@@ -42,6 +43,21 @@ var HashTable_Delete(var self) {
   delete(ht->keys);
   free(ht->buckets);
   return self;
+}
+
+void HashTable_Assign(var self, var obj) {
+  HashTableData* ht = cast(self, HashTable);
+  
+  for(int i = 0; i < ht->table_size; i++) {
+    HashBucket_DeleteAll(ht->buckets[i]);
+  }
+  
+  clear(ht->keys);
+  
+  foreach(obj, key) {
+    var val = get(obj, key);
+    put(self, key, val);
+  }
 }
 
 var HashTable_Copy(var self) {

@@ -190,6 +190,13 @@ Other than these things there is not much suprising in the code which cannot be 
 
 finally the ```instance``` and ```methods``` macros are helpers for defining Type objects statically. Because Type objects are somewhat complicated the syntax is very awkward otherwise.
 
+Compiling
+---------
+
+To build the just run "make"
+
+To build the tests run "make test" (requires CUnit)
+
 Questions & Contributions
 -------------------------
 

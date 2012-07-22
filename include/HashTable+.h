@@ -21,6 +21,7 @@ data {
 
 var HashTable_New(var, va_list*);
 var HashTable_Delete(var);
+void HashTable_Assign(var, var);
 var HashTable_Copy(var);
 
 int HashTable_Len(var);
@@ -37,6 +38,7 @@ var HashTable_Iter_End(var);
 var HashTable_Iter_Next(var, var);
 
 instance(HashTable, New) = { sizeof(HashTableData), HashTable_New, HashTable_Delete };
+instance(HashTable, Assign) = { HashTable_Assign };
 instance(HashTable, Copy) = { HashTable_Copy };
 instance(HashTable, Collection) = { HashTable_Len, HashTable_IsEmpty, HashTable_Clear, 
                                     HashTable_Contains, HashTable_Discard };

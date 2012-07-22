@@ -1,3 +1,11 @@
+/*
+** List
+**
+**  A dynamically sized list of objects
+**  Simply contains pointers to objects
+**  Is not responsible object deallocation
+*/
+
 #ifndef ListPlus_h
 #define ListPlus_h
 
@@ -11,11 +19,13 @@ data {
   int num_items;
   int num_slots;
   var* items;
+  int cursor;
 } ListData;
 
-/* new(List, int count, var items ...) */
+/** List_New(var, int, ...) */
 var List_New(var, va_list*);
 var List_Delete(var);
+void List_Assign(var, var);
 var List_Copy(var);
 
 bool List_Eq(var, var);
@@ -42,6 +52,7 @@ var List_Iter_End(var);
 var List_Iter_Next(var, var);
 
 instance(List, New) = { sizeof(ListData), List_New, List_Delete };
+instance(List, Assign) = { List_Assign };
 instance(List, Copy) = { List_Copy };
 instance(List, Eq) = { List_Eq };
 instance(List, Collection) = { List_Len, List_IsEmpty, List_Clear, List_Contains, List_Discard };

@@ -63,12 +63,15 @@ var type_of(var);
 
 class {
   size_t size;
-  var (*ctor)(var, va_list*);
-  var (*dtor)(var);
+  var (*construct)(var, va_list*);
+  var (*destruct)(var);
 } New;
 
 var new(var, ...);
 void delete(var);
+
+var construct(var, ...);
+var destruct(var);
 
 /** Lit - Literatal value. 
 *
@@ -89,6 +92,13 @@ void delete(var);
 #define $ lit
 #define lit(T, ...) (T##Data[]){{T, __VA_ARGS__}}
 
+/** Assign - assignment (copy constructor) */
+
+class {
+  void (*assign)(var, var);
+} Assign;
+
+void assign(var, var);
 
 /** Copy - copyable */
 
