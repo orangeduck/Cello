@@ -45,11 +45,7 @@ var Array_Delete(var self) {
 }
 
 void Array_Assign(var self, var obj) {
-  ArrayData* ad = cast(self, Array);
-  
-  ad->num_items = 0;
-  ad->num_slots = 0;
-  ad->items = realloc(ad->items, 0);
+  clear(self);
   
   foreach(obj, item) {
     push(self, item);

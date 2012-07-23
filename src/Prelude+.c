@@ -326,4 +326,22 @@ void vfshowf(FILE* f, const char* fmt, va_list args) {
   
 }
 
+bool with_enter(var self) {
+  With* iwith = Type_Class(type_of(self), With);
+  assert(iwith->enter);
+  iwith->enter(self);
+  return false;
+}
+
+
+bool with_exit(var obj, bool enable) {
+  if (enable) {
+    With* iwith = Type_Class(type_of(self), With);
+    assert(iwith->exit);
+    iwith->exit(self);
+    return false;
+  }
+  
+  return true;
+}
 

@@ -196,7 +196,7 @@ void test_array_push_pop(void) {
     pop_front(testarray);
     pop_front(shadow_testarray);
   }
-
+  
 }
 
 int main(int argc, char** argv) {

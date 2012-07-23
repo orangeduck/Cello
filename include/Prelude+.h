@@ -14,7 +14,7 @@
 **
 **  var is not elif
 **  module class data instance
-**  lit $ foreach cast
+**  lit $ foreach cast with
 */
 
 typedef void* var;
@@ -257,6 +257,18 @@ class {
 
 double as_double(var obj);
 
+
+/** With - perform command on exit/enter of block */
+
+class {
+  void (*enter)(var);
+  void (*exit)(var);
+} With;
+
+bool with_enter(var obj);
+bool with_exit(var obj, bool enable);
+
+#define with(x) for(bool __wvar = with_enter(x); with_exit(x, __wvar); __wvar = true)
 
 
 #endif
