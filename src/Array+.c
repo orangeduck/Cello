@@ -135,11 +135,22 @@ static void Array_Reserve_More(ArrayData* ad) {
 
 }
 
+static void Array_Set_Type_At(ArrayData* ad, int i) {
+  
+  New* inew = Type_Class(ad->item_type, New);
+  
+  ObjectData* template = ad->items + (inew->size * i);
+  template->type = ad->item_type;
+  
+}
+
 void Array_Push_Back(var self, var obj) {
   ArrayData* ad = cast(self, Array);
   ad->num_items++;
   Array_Reserve_More(ad);
-  set(ad, ad->num_items-1, obj);
+  
+  Array_Set_Type_At(self, ad->num_items-1);
+  set(self, ad->num_items-1, obj);
 }
 
 void Array_Push_Front(var self, var obj) {
@@ -156,6 +167,7 @@ void Array_Push_At(var self, var obj, int index) {
           ad->items + inew->size * index, 
           inew->size * (ad->num_items - index));
   
+  Array_Set_Type_At(self, index);
   set(self, index, obj);
 }
 
@@ -217,6 +229,7 @@ void Array_Set(var self, int i, var obj) {
   
   ArrayData* ad = cast(self, Array);
   New* inew = Type_Class(ad->item_type, New);
+  
   assign(ad->items + inew->size * i, obj);
 }
 

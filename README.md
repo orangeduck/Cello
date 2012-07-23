@@ -200,6 +200,10 @@ To build the tests run "make test" (requires CUnit)
 Questions & Contributions
 -------------------------
 
-Questions, Contributions and Feedback are more than welcome. Feel free to get in contact:
+Questions, Contributions and Feedback are more than welcome.
+
+You can e-mail me at:
 
 contact@theorangeduck.com
+
+Or get in contact via the IRC channel at #c+ on Freenode

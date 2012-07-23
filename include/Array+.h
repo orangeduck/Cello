@@ -1,10 +1,12 @@
 /*
 ** Array
 **
-**  Single typed dynamically sized list of objects
-**  Does not contains references But allocates actual objects
-**  Constructor and Set use Assign on arguments
-**  Is responsible for deallocation of contents
+**  + Singly typed, dynamically sized, list of objects
+**  + Unlike List does not contains references
+**  + Allocates space for actual data
+**  + Constructor and "set" use "assign" on data
+**  + Pop will always return None as data is destructed when removed
+**  + Unlike List, is responsible for deallocation of contents
 */
 
 #ifndef ArrayPlus_h

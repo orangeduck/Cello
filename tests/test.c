@@ -9,6 +9,7 @@
 #include "Char+.h"
 #include "Number+.h"
 #include "List+.h"
+#include "Array+.h"
 #include "NoneType+.h"
 #include "HashTable+.h"
 
@@ -179,6 +180,25 @@ void test_list_push_pop(void) {
 
 }
 
+void test_array_push_pop(void) {
+  var testarray = new(Array, Int, 0);
+  var shadow_testarray = new(Array, Int, 0);
+
+  for(int i = 0; i < 5; i++) {
+    push(testarray, $(Int, i));
+    push(shadow_testarray, $(Int, i));
+  }
+  
+  for(int i = 0; i < 5; i++) {
+    var item = at(testarray, 0);
+    var shadow_item = at(shadow_testarray, 0);
+    CU_ASSERT(as_long(item) == as_long(shadow_item));
+    pop_front(testarray);
+    pop_front(shadow_testarray);
+  }
+
+}
+
 int main(int argc, char** argv) {
 
   CU_pSuite cplus_suite = NULL;
@@ -203,6 +223,8 @@ int main(int argc, char** argv) {
                           test_list_push_pop)) ||
       (NULL == CU_add_test(cplus_suite, "test list rich_objects",
                           test_list_static_allocation)) ||
+      (NULL == CU_add_test(cplus_suite, "test array push pop",
+                          test_array_push_pop)) ||
       (NULL == CU_add_test(cplus_suite, "test hashtable constructor",
                           test_hashtable_constructor)) ||
       (NULL == CU_add_test(cplus_suite, "test hashtable foreach",

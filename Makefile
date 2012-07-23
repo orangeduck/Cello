@@ -7,21 +7,21 @@ NAME = C+
 
 ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	OUT=lib$(NAME).so
-	CFLAGS= $(INCS) $(LIBS) -std=gnu99 -Wall -Werror -Wno-unused -O3 -g -fPIC
+	CFLAGS= $(INCS) $(LIBS) -std=gnu99 -Wall -Werror -Wno-unused -g -fPIC
 	LFLAGS= -shared
 	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
 endif
 
 ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	OUT=lib$(NAME).so
-	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -O3 -g -fPIC
+	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -g -fPIC
 	LFLAGS= -shared
 	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
 endif
 
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	OUT=$(NAME).dll
-	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
+	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -g
 	LFLAGS= -g -L ./lib -shared
 	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
 endif
