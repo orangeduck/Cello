@@ -1,5 +1,6 @@
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 
 #include "NoneType+.h"
 
@@ -114,6 +115,7 @@ void List_Discard(var self, var obj) {
   for (int i = 0; i < len(self); i++) {
     if ( eq(at(self, i), obj) ) {
       pop_at(self, i);
+      return;
     }
   }
 }
@@ -141,12 +143,15 @@ void List_Push_Front(var self, var val) {
 
 void List_Push_At(var self, var val, int index) {
   ListData* lo = cast(self, List);
+  
+  if (index < 0 || index > lo->num_items-1) return;
+  
   lo->num_items++;
   List_Reserve_More(lo);
   
-  for(int i = lo->num_items-1; i > index; i--) {
-    lo->items[i] = lo->items[i-1];
-  }
+  memmove(&lo->items[index+1], 
+          &lo->items[index], 
+          sizeof(var) * (lo->num_items - index));
   
   lo->items[index] = val;
 }
@@ -180,17 +185,15 @@ var List_Pop_Front(var self) {
 var List_Pop_At(var self, int index) {
   ListData* lo = cast(self, List);
   
-  if (is_empty(self) || 
-      index < 0 || 
-      index > lo->num_items-1) {
+  if (index < 0 || index > lo->num_items-1) {
     return None;
   }
   
   var retval = lo->items[index];
   
-  for(int i = index; i < lo->num_items; i++) {
-    lo->items[i] = lo->items[i+1];
-  }
+  memmove(&lo->items[index], 
+          &lo->items[index+1], 
+          sizeof(var) * (lo->num_items - index));
   
   lo->num_items--;
   List_Reserve_Less(lo);
@@ -202,9 +205,7 @@ var List_Pop_At(var self, int index) {
 var List_At(var self, int index) {
   ListData* lo = cast(self, List);
   
-  if (is_empty(self) || 
-      index < 0 || 
-      index > lo->num_items-1) {
+  if (index < 0 || index > lo->num_items-1) {
     return None;
   }
   

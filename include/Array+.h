@@ -37,7 +37,13 @@ void Array_Clear(var self);
 bool Array_Contains(var self, var obj);
 void Array_Discard(var self, var obj);
 
-void Array_Append(var self, var obj);
+void Array_Push_Back(var self, var obj);
+void Array_Push_Front(var self, var obj);
+void Array_Push_At(var self, var obj, int i);
+
+var Array_Pop_Back(var self);
+var Array_Pop_Front(var self);
+var Array_Pop_At(var self, int i);
 
 var Array_At(var self, int i);
 void Array_Set(var self, int i, var obj);
@@ -51,6 +57,7 @@ instance(Array, Assign) = { Array_Assign };
 instance(Array, Copy) = { Array_Copy };
 instance(Array, Eq) = { Array_Eq };
 instance(Array, Collection) = { Array_Len, Array_IsEmpty, Array_Clear, Array_Contains, Array_Discard };
+instance(Array, Push) = { Array_Push_Back, Array_Push_At, Array_Push_Back, Array_Push_Front, Array_Pop_Back, Array_Pop_At, Array_Pop_Back, Array_Pop_Front };
 instance(Array, At) = { Array_At, Array_Set };
 instance(Array, Iter) = { Array_Iter_Start, Array_Iter_End, Array_Iter_Next };
 

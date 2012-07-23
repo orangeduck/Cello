@@ -1,3 +1,8 @@
+#include <math.h>
+#include <assert.h>
+#include <string.h>
+
+#include "NoneType+.h"
 
 #include "Array+.h"
 
@@ -8,6 +13,7 @@ var Array = methods {
   method(Array, Copy),
   method(Array, Eq),
   method(Array, Collection),
+  method(Array, Push),
   method(Array, At),
   method(Array, Iter),
   methods_end(Array)
@@ -23,7 +29,7 @@ var Array_New(var self, va_list* args) {
   
   int count = va_arg(*args, int);
   for(int i = 0; i < count; i++) {
-    Array_Append(self, va_arg(*args, var));
+    push(self, va_arg(*args, var));
   }
   
   return self;
@@ -75,7 +81,6 @@ bool Array_Eq(var self, var obj) {
   }
   
   return true;
-  
 }
 
 int Array_Len(var self) {
@@ -111,20 +116,105 @@ bool Array_Contains(var self, var obj) {
 }
 
 void Array_Discard(var self, var obj) {
+  for(int i = 0; i < len(self); i++) {
+    var item = at(self, i);
+    if ( eq(item, obj) ) {
+      pop_at(self, i);
+      return;
+    }
+  }
+}
+
+static void Array_Reserve_More(ArrayData* ad) {
+  
+  if (ad->num_items > ad->num_slots) {
+    ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
+    New* inew = Type_Class(ad->item_type, New);
+    ad->items = realloc(ad->items, inew->size * ad->num_slots);
+  }
 
 }
 
-void Array_Append(var self, var obj) {
+void Array_Push_Back(var self, var obj) {
+  ArrayData* ad = cast(self, Array);
+  ad->num_items++;
+  Array_Reserve_More(ad);
+  set(ad, ad->num_items-1, obj);
+}
+
+void Array_Push_Front(var self, var obj) {
+  Array_Push_At(self, obj, 0);
+}
+
+void Array_Push_At(var self, var obj, int index) {
+  ArrayData* ad = cast(self, Array);
+  ad->num_items++;
+  Array_Reserve_More(ad);
+  
+  New* inew = Type_Class(ad->item_type, New);
+  memmove(ad->items + inew->size * (index+1), 
+          ad->items + inew->size * index, 
+          inew->size * (ad->num_items - index));
+  
+  set(self, index, obj);
+}
+
+static void Array_Reserve_Less(ArrayData* ad) {
+  
+  if ( ad->num_slots > pow(ad->num_items+1, 1.5)) {
+    ad->num_slots = floor((ad->num_slots-1) * (1.0/1.5));
+    New* inew = Type_Class(ad->item_type, New);
+    ad->items = realloc(ad->items, inew->size * ad->num_slots);
+  }
   
 }
 
+var Array_Pop_Back(var self) {
+  ArrayData* ad = cast(self, Array);
+
+  if (is_empty(self)) return None;
+  
+  destruct(at(self, len(self)-1));
+  
+  ad->num_items--;
+  Array_Reserve_Less(ad);
+  
+  return None;
+}
+
+var Array_Pop_Front(var self) {
+  return Array_Pop_At(self, 0);
+}
+
+var Array_Pop_At(var self, int index) {
+  ArrayData* ad = cast(self, Array);
+  
+  if (is_empty(self)) return None;
+  
+  destruct(at(self, index));
+  
+  New* inew = Type_Class(ad->item_type, New);
+  memmove(ad->items + inew->size * index, 
+          ad->items + inew->size * (index+1), 
+          inew->size * (ad->num_items - index));
+  
+  ad->num_items--;
+  Array_Reserve_Less(ad);
+  
+  return None;
+}
+
 var Array_At(var self, int i) {
+  if (i < 0 || i >= len(self)) return None;
+  
   ArrayData* ad = cast(self, Array);
   New* inew = Type_Class(ad->item_type, New);
   return ad->items + inew->size * i;
 }
 
 void Array_Set(var self, int i, var obj) {
+  if (i < 0 || i >= len(self)) return;
+  
   ArrayData* ad = cast(self, Array);
   New* inew = Type_Class(ad->item_type, New);
   assign(ad->items + inew->size * i, obj);
