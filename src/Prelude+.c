@@ -25,13 +25,12 @@ var type_of(var self) {
   }
 }
 
-var new(var type, ...) { 
+var allocate(var type) {
   type = cast(type, Type);
   
   New* inew = Type_Class(type, New);
-  
+ 
   var self;
-  
   if (inew->size <= sizeof(ObjectData)) {
     self = NULL;
   } else {
@@ -40,6 +39,14 @@ var new(var type, ...) {
     ((ObjectData*)self)->type = type;
   }
   
+  return self;
+}
+
+var new(var type, ...) { 
+  
+  var self = allocate(type);
+  
+  New* inew = Type_Class(type, New);
   if (inew->construct) {
     va_list args;
     va_start(args, type);
@@ -279,69 +286,62 @@ double as_double(var self) {
   return iasdouble->as_double(self);
 }
 
-void show(var self) {
-  puts(as_str(self));
+void open(var self, const char* name, const char* access) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->open);
+  istream->open(self, name, access);
 }
 
-void showf(const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  vfprintf(stdout, fmt, args);
-  va_end (args);
+void close(var self) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->close);
+  istream->close(self);
 }
 
-void fshow(FILE* f, var self) {
-  fputs(as_str(self), f);
+void seek(var self, int pos, int origin) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->seek);
+  istream->seek(self, pos, origin);
 }
 
-void fshowf(FILE* f, const char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  vfprintf(f, fmt, args);
-  va_end (args);
+int tell(var self) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->tell);
+  return istream->tell(self);
 }
 
-static const char* fmt_flags = "-+ #0";
-static const char* fmt_width = "0123456789*";
-static const char* fmt_precision = ".0123456789*";
-static const char* fmt_length = "hlL";
-static const char* fmt_specifier = "cdieEfgGosuxXpn%";
-
-/* TODO: This can be done but it is a pain
-  
-  * Split around format specifiers.
-  * Detect what type of specifier it is.
-  * Apply appropriate conversion to va_arg
-  * get printf to do the hard conversion work.
-  * print out part by part
-  
-  * Alternately use sprintf and print in one go
-    (Could cause memory issues)
-  
-*/
-
-void vfshowf(FILE* f, const char* fmt, va_list args) {
-  
-  return;
-  
+void flush(var self) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->flush);
+  istream->flush(self);
 }
 
-bool with_enter(var self) {
-  With* iwith = Type_Class(type_of(self), With);
-  assert(iwith->enter);
-  iwith->enter(self);
-  return false;
+bool eof(var self) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->eof);
+  return istream->eof(self);
 }
 
-
-bool with_exit(var obj, bool enable) {
-  if (enable) {
-    With* iwith = Type_Class(type_of(self), With);
-    assert(iwith->exit);
-    iwith->exit(self);
-    return false;
-  }
-  
-  return true;
+int read(var self, void* output, int size) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->read);
+  return istream->read(self, output, size);
 }
 
+int write(var self, void* input, int size) {
+  Stream* istream = Type_Class(type_of(self), Stream);
+  assert(istream->write);
+  return istream->write(self, input, size);
+}
+
+void parse_read(var self, var stream) {
+  Parse* iparse = Type_Class(type_of(self), Parse);
+  assert(iparse->parse_read);
+  iparse->parse_read(self, stream);
+}
+
+void parse_write(var self, var stream) {
+  Parse* iparse = Type_Class(type_of(self), Parse);
+  assert(iparse->parse_write);
+  iparse->parse_write(self, stream);
+}

@@ -33,6 +33,9 @@ void String_Discard(var self, var sub);
 
 long String_Hash(var self);
 
+void String_Parse_Read(var self, var stream);
+void String_Parse_Write(var self, var stream);
+
 const char* String_AsStr(var self);
 
 instance(String, New) = { sizeof(StringData), String_New, String_Delete };
@@ -41,6 +44,7 @@ instance(String, Copy) = { String_Copy };
 instance(String, Eq) = { String_Eq };
 instance(String, Collection) = { String_Len, String_IsEmpty, String_Clear, String_Contains, String_Discard };
 instance(String, Hash) = { String_Hash  };
+instance(String, Parse) = { String_Parse_Read, String_Parse_Write };
 instance(String, AsStr) = { String_AsStr  };
 
 

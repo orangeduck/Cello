@@ -29,6 +29,9 @@ endif
 $(OUT): $(OBJ_FILES)
 	$(CC) $(OBJ_FILES) $(LFLAGS) -o $@
 	
+examples: $(OBJ_FILES) examples/files.c
+	$(CC) examples/files.c $(CFLAGS) $(OBJ_FILES) -o examples/files $(LIBS)
+  
 test: $(OBJ_FILES) tests/test.c
 	$(CC) tests/test.c -lcunit $(CFLAGS) $(OBJ_FILES) -o test $(LIBS)
 	./test

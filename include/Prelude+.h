@@ -93,7 +93,7 @@ var type_of(var obj);
 */
 
 
-/** New - heap allocation with constructor/destructor */
+/** New - heap allocation & constructor/destructor */
 
 class {
   size_t size;
@@ -104,6 +104,7 @@ class {
 var new(var type, ...);
 void delete(var obj);
 
+var allocate(var type);
 var construct(var obj, ...);
 var destruct(var obj);
 
@@ -268,7 +269,41 @@ class {
 bool with_enter(var obj);
 bool with_exit(var obj, bool enable);
 
+// Good idea but still needs some work.
 #define with(x) for(bool __wvar = with_enter(x); with_exit(x, __wvar); __wvar = true)
+
+
+/** Stream - File like object */
+
+class {
+  void (*open)(var,const char*,const char*);
+  void (*close)(var);
+  void (*seek)(var,int,int);
+  int (*tell)(var);
+  void (*flush)(var);
+  bool (*eof)(var);
+  int (*read)(var,void*,int);
+  int (*write)(var,void*,int);
+} Stream;
+
+void open(var self, const char* name, const char* access);
+void close(var self);
+void seek(var self, int pos, int origin);
+int tell(var self);
+void flush(var self);
+bool eof(var self);
+int read(var self, void* output, int size);
+int write(var self, void* input, int size);
+
+/** Parse - Readable/Writeable to Stream */
+
+class {
+  void (*parse_read)(var,var);
+  void (*parse_write)(var,var);
+} Parse;
+
+void parse_read(var self, var stream);
+void parse_write(var self, var stream);
 
 
 #endif

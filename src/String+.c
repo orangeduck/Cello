@@ -11,6 +11,7 @@ var String = methods {
   method(String, Eq),
   method(String, Collection),
   method(String, Hash),
+  method(String, Parse),
   method(String, AsStr), 
   methods_end(List)
 };
@@ -96,6 +97,40 @@ void String_Discard(var self, var obj) {
     }
   }
   
+}
+
+void String_Parse_Read(var self, var stream) {
+  StringData* s = cast(self, String);
+  free(s->value);
+  
+  int size = 128;
+  int count = 0;
+  char* value = malloc(size);
+  char curr;
+  
+  while (true) {
+    
+    read(stream, &curr, 1);
+    if (curr == '\0') break;
+    
+    if (count == size) {
+      size = size * 1.5;
+      value = realloc(value, size);
+    }
+    
+    value[count] = curr;
+    count++;
+  }
+  
+  value = realloc(value, count+1);
+  value[count] = '\0';
+  
+  s->value = value;
+}
+
+void String_Parse_Write(var self, var stream) {
+  StringData* s = cast(self, String);
+  write(stream, s->value, strlen(s->value) + 1);
 }
 
 long String_Hash(var self) {

@@ -49,6 +49,7 @@ var Int = methods {
   method(Int, Eq), 
   method(Int, Ord),
   method(Int, Hash),
+  method(Int, Parse),
   method(Int, AsLong),
   method(Int, AsDouble),
   method(Int, Num),
@@ -125,6 +126,16 @@ void Int_Abs(var self) {
   io->value = abs(io->value);
 }
 
+void Int_Parse_Read(var self, var stream) {
+  IntData* io = cast(self, Int);
+  read(stream, &io->value, sizeof(long));
+}
+
+void Int_Parse_Write(var self, var stream) {
+  IntData* io = cast(self, Int);
+  write(stream, &io->value, sizeof(long));
+}
+
 long Int_AsLong(var self) {
   IntData* io = cast(self, Int);
   return io->value;
@@ -143,6 +154,7 @@ var Real = methods {
   method(Real, Eq),
   method(Real, Ord),
   method(Real, Hash),
+  method(Real, Parse),
   method(Real, AsDouble),
   method(Real, AsLong), 
   method(Real, Num), 
@@ -224,6 +236,16 @@ void Real_Neg(var self) {
 void Real_Abs(var self) {
   RealData* ro = cast(self, Real);
   ro->value = fabs(ro->value);
+}
+
+void Real_Parse_Read(var self, var stream) {
+  RealData* ro = cast(self, Real);
+  read(stream, &ro->value, sizeof(double));
+}
+
+void Real_Parse_Write(var self, var stream) {
+  RealData* ro = cast(self, Real);
+  write(stream, &ro->value, sizeof(double));
 }
 
 double Real_AsDouble(var self) {

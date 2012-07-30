@@ -55,6 +55,9 @@ void Int_Div(var self, var obj);
 void Int_Neg(var self);
 void Int_Abs(var self);
 
+void Int_Parse_Read(var self, var stream);
+void Int_Parse_Write(var self, var stream);
+
 long Int_AsLong(var self);
 double Int_AsDouble(var self);
 
@@ -64,6 +67,7 @@ instance(Int, Copy) = { Int_Copy };
 instance(Int, Eq) = { Int_Eq };
 instance(Int, Ord) = { Int_Gt, Int_Lt };
 instance(Int, Hash) = { Int_Hash };
+instance(Int, Parse) = { Int_Parse_Read, Int_Parse_Write };
 instance(Int, AsLong) = { Int_AsLong };
 instance(Int, AsDouble) = { Int_AsDouble };
 instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
@@ -100,6 +104,9 @@ void Real_Div(var self, var obj);
 void Real_Neg(var self);
 void Real_Abs(var self);
 
+void Real_Parse_Read(var self, var stream);
+void Real_Parse_Write(var self, var stream);
+
 double Real_AsDouble(var self);
 long Real_AsLong(var self);
 
@@ -109,6 +116,7 @@ instance(Real, Copy) = { Real_Copy };
 instance(Real, Eq) = { Real_Eq };
 instance(Real, Ord) = { Real_Gt, Real_Lt };
 instance(Real, Hash) = { Real_Hash };
+instance(Real, Parse) = { Real_Parse_Read, Real_Parse_Write };
 instance(Real, AsDouble) = { Real_AsDouble };
 instance(Real, AsLong) = { Real_AsLong };
 instance(Real, Num) = { Real_Add, Real_Sub, Real_Mul, Real_Div, Real_Neg, Real_Abs };
