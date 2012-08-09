@@ -266,17 +266,18 @@ class {
   void (*exit)(var);
 } With;
 
-bool with_enter(var obj);
-bool with_exit(var obj, bool enable);
+void enter_with(var self);
+void exit_with(var self);
 
-// Good idea but still needs some work.
-#define with(x) for(bool __wvar = with_enter(x); with_exit(x, __wvar); __wvar = true)
+bool enter_for(var self, var* fst);
 
+#define with(x) with_as(x, __with##__COUNTER__)
+#define with_as(x, y) for(var y = NULL; enter_for(x, &y); exit_with(y))
 
 /** Stream - File like object */
 
 class {
-  void (*open)(var,const char*,const char*);
+  var (*open)(var,const char*,const char*);
   void (*close)(var);
   void (*seek)(var,int,int);
   int (*tell)(var);
@@ -286,7 +287,7 @@ class {
   int (*write)(var,void*,int);
 } Stream;
 
-void open(var self, const char* name, const char* access);
+var open(var self, const char* name, const char* access);
 void close(var self);
 void seek(var self, int pos, int origin);
 int tell(var self);

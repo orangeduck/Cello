@@ -286,10 +286,10 @@ double as_double(var self) {
   return iasdouble->as_double(self);
 }
 
-void open(var self, const char* name, const char* access) {
+var open(var self, const char* name, const char* access) {
   Stream* istream = Type_Class(type_of(self), Stream);
   assert(istream->open);
-  istream->open(self, name, access);
+  return istream->open(self, name, access);
 }
 
 void close(var self) {
@@ -344,4 +344,30 @@ void parse_write(var self, var stream) {
   Parse* iparse = Type_Class(type_of(self), Parse);
   assert(iparse->parse_write);
   iparse->parse_write(self, stream);
+}
+
+void enter_with(var self) {
+  With* iwith = Type_Class(type_of(self), With);
+  if(iwith->enter) {
+    iwith->enter(self);
+  }
+}
+
+void exit_with(var self) {
+  With* iwith = Type_Class(type_of(self), With);
+  if(iwith->exit) {
+    iwith->exit(self);
+  }
+}
+
+bool enter_for(var self, var* fst) {
+  
+  if (*fst == NULL) {
+    enter_with(self);
+    *fst = self;
+    return true;
+  } else {
+    return false;
+  }
+  
 }

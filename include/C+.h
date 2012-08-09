@@ -13,5 +13,7 @@
 #include "List+.h"
 #include "HashTable+.h"
 
+#include "File+.h"
+
 #endif
 

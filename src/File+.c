@@ -39,9 +39,10 @@ var File_Copy(var self) {
   return fnew;
 }
 
-void File_Open(var self, const char* filename, const char* access) {
+var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
   fd->f = fopen(filename, access);
+  return self;
 }
 
 void File_Close(var self) {

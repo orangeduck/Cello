@@ -6,18 +6,18 @@
 
 int main(int arc, char** argv) {
   
-  var f = $(File, NULL);
+  var tmp = $(File, NULL);
   
-  open(f, "test.bin", "w");
+  with_as( open(tmp, "test.bin", "w"), f) {
     
     put(f, String, $(String, "Hello"));
     put(f, Int, $(Int, 1));
     put(f, Int, $(Int, 22));
   
-  close(f);
+  };
   
-  open(f, "test.bin", "r");
-       
+  with_as( open(tmp, "test.bin", "r"), f) {
+    
     var string = get(f, String);
     var first = get(f, Int);
     var second = get(f, Int);
@@ -29,6 +29,6 @@ int main(int arc, char** argv) {
     delete(first);
     delete(second);
     
-  close(f);
+  }
   
 }
