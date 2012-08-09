@@ -1,14 +1,17 @@
 #ifndef FunctionPlus_h
 #define FunctionPlus_h
 
+#include "Prelude+.h"
+#include "Type+.h"
+
 /** Call - can be called like a function */
 
 class {
-  var (*call)(var,var);
+  var (*call_with)(var,var);
 } Call;
 
-#define call(x, ...) call_with_ptr(x, (var[]){ ##__VA_ARGS__, NULL })
-var call_with_ptr(var self, var* args)
+#define call(x, ...) call_with_ptr(x, (var[]){ __VA_ARGS__, NULL })
+var call_with_ptr(var self, var* args);
 var call_with(var self, var args);
 
 
@@ -35,12 +38,10 @@ data {
   var (*func)(var);
 } FunctionData;
 
-
 #define lambda(name, args) \
-  auto var __LambdaPlus##name(var); \
-  var name = $(Function, __LambdaPlus##name); \
-  var __LambdaPlus##name(var args)
-
+  auto var __LambdaPlus_##name(var); \
+  var name = $(Function, __LambdaPlus_##name); \
+  var __LambdaPlus_##name(var args)
 
 /** Function_New(var self, var(*func)(var) ); */
 var Function_New(var self, va_list* args);

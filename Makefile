@@ -1,7 +1,8 @@
 CC = gcc
 LIBS = -lm
 INCS = -I ./include
-C_FILES = $(wildcard src/*.c) $(wildcard src/*/*.c)
+C_FILES = $(wildcard src/*.c)
+EXAMPLE_FILES = $(wildcard examples/*.c)
 PLATFORM = $(shell uname)
 NAME = C+
 
@@ -29,8 +30,11 @@ endif
 $(OUT): $(OBJ_FILES)
 	$(CC) $(OBJ_FILES) $(LFLAGS) -o $@
 	
-examples: $(OBJ_FILES) examples/files.c
+examples: $(OBJ_FILES) $(EXAMPLE_FILES)
 	$(CC) examples/files.c $(CFLAGS) $(OBJ_FILES) -o examples/files $(LIBS)
+	$(CC) examples/types.c $(CFLAGS) $(OBJ_FILES) -o examples/types $(LIBS)
+	$(CC) examples/lists.c $(CFLAGS) $(OBJ_FILES) -o examples/lists $(LIBS)
+	$(CC) examples/functions.c $(CFLAGS) $(OBJ_FILES) -o examples/functions $(LIBS)
   
 test: $(OBJ_FILES) tests/test.c
 	$(CC) tests/test.c -lcunit $(CFLAGS) $(OBJ_FILES) -o test $(LIBS)

@@ -359,15 +359,3 @@ void exit_with(var self) {
     iwith->exit(self);
   }
 }
-
-bool enter_for(var self, var* fst) {
-  
-  if (*fst == NULL) {
-    enter_with(self);
-    *fst = self;
-    return true;
-  } else {
-    return false;
-  }
-  
-}

@@ -8,12 +8,12 @@
 ** but with creative thinking could become a powerful tool.
 */
 
-static Type Hello;
+static var Hello;
 
 data {
   var type;
   int hello_val;
-} HelloData
+} HelloData;
 
 static var Hello_New(var self, va_list* args) {
   HelloData* hd = cast(self, Hello);
@@ -37,11 +37,16 @@ int main(int argc, char** argv) {
   instance(Hello, Eq) = { Hello_Eq };
  
   Hello = new(Type, "Hello", 2, 
-    (var[]){ method(Hello, New), method(Hello, Eq) }, 
-    ((const char*)[]){ "New", "Eq" } );
+    (var[]){ &HelloNew, &HelloEq }, 
+    (const char*[]){ "New", "Eq" } );
+  
+  printf("%s!\n", as_str(Hello));
 
-  printf("%s!", as_str(Hello));
- 
+  var hello_obj1 = new(Hello, 1);
+  var hello_obj2 = new(Hello, 2);
+
+  printf("Equal? %d\n", (int)eq(hello_obj1, hello_obj2) );
+  
   return 0;
 }
 

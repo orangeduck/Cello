@@ -1,6 +1,7 @@
 #include "Prelude+.h"
 #include "List+.h"
 #include "Nonetype+.h"
+#include "Number+.h"
 
 int main(int arc, char** argv) {
   
@@ -8,7 +9,7 @@ int main(int arc, char** argv) {
 
   foreach(values, val) {
     
-    Type t = type_of(val);
+    var t = type_of(val);
 
     if (t is Int) {
       printf("%s (%ld)\n", as_str(t), as_long(val));

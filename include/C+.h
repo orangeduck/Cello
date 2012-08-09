@@ -4,6 +4,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
+#include "Function+.h"
 #include "NoneType.h"
 #include "Number+.h"
 #include "Char+.h"

@@ -18,7 +18,7 @@
 module Type;
 
 data {
-  const void* class_object;
+  void* class_object;
   const char* class_name;
 } TypeData;
 

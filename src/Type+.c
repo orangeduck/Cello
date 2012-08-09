@@ -32,7 +32,7 @@ var Type_New(var self, va_list* args) {
   newtype[0].class_object = Type;
   newtype[0].class_name = "__Type";
   
-  newtype[1].class_object = name;
+  newtype[1].class_object = (void*)name;
   newtype[1].class_name = "__Name";
   
   for(int i = 0; i < count; i++) {

@@ -25,7 +25,7 @@ typedef void* var;
 #define module extern var
 #define class typedef struct 
 #define data typedef struct 
-#define instance(T,C) static const C T##C
+#define instance(T,C) static C T##C
 
 
 /*
@@ -269,10 +269,10 @@ class {
 void enter_with(var self);
 void exit_with(var self);
 
-bool enter_for(var self, var* fst);
-
-#define with(x) with_as(x, __with##__COUNTER__)
-#define with_as(x, y) for(var y = NULL; enter_for(x, &y); exit_with(y))
+//  TODO: This needs work!
+//
+//  #define with(x) with_as(x, __with##__COUNTER__)
+//  #define with_as(x, y) for(var y = NULL; enter_for(x, &y); exit_with(y))
 
 /** Stream - File like object */
 
