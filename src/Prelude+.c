@@ -161,6 +161,12 @@ void discard(var self, var obj) {
   icollection->discard(self, obj);
 }
 
+void reverse(var self) {
+  Reverse* ireverse = Type_Class(type_of(self), Reverse);
+  assert(ireverse->reverse);
+  ireverse->reverse(self);
+}
+
 var iter_start(var self) {
   Iter* iiter = Type_Class(type_of(self), Iter);
   assert(iiter->iter_start);

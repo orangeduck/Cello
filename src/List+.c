@@ -39,7 +39,11 @@ var List_New(var self, va_list* args) {
 
 var List_Delete(var self) {
   ListData* lo = cast(self, List);
+  printf("Before Free\n");
+  printf("Num Items: %i\n", lo->num_items);
+  printf("Num Slots: %i\n", lo->num_slots);
   free(lo->items);
+  printf("After Free\n");
   return self;
 }
 
@@ -125,11 +129,13 @@ static void List_Reserve_More(ListData* lo) {
   if (lo->num_items > lo->num_slots) {
     lo->num_slots = ceil((lo->num_slots + 1) * 1.5);
     lo->items = realloc(lo->items, sizeof(var) * lo->num_slots);
+    printf("Resizing to: %i (%i) [%i]\n", sizeof(var) * lo->num_slots, lo->num_slots, lo->num_items);
   }
 
 }
 
 void List_Push_Back(var self, var val) {
+
   ListData* lo = cast(self, List);
   lo->num_items++;
   List_Reserve_More(lo);
@@ -138,6 +144,9 @@ void List_Push_Back(var self, var val) {
 }
 
 void List_Push_Front(var self, var val) {
+
+  printf("Pushing item at front!\n");
+
   List_Push_At(self, val, 0);
 }
 
@@ -167,7 +176,7 @@ static void List_Reserve_Less(ListData* lo) {
 
 var List_Pop_Back(var self) {
   ListData* lo = cast(self, List);
-
+  
   if (is_empty(self)) return None;
 
   var retval = lo->items[lo->num_items-1];

@@ -3,31 +3,50 @@
 **
 **  Higher Order Functional Tools
 **
-**  Functions that allocate memory begin 
-**  with "new". Others can be assumed
-**  destructive.
-**
 **  All "lambda" expressions must be
 **  at the /statement/ level. This means
 **  they cannot be used inside expressions.
+**
+**  Functions that allocate memory begin 
+**  with "new". Others can be assumed
+**  destructive.
 */
 
 #include "Function+.h"
+#include "Curry+.h"
 
+/* More ways to construct Functions */
 #define lambda_id(name, f) lambda(name, args) { return call_with(f, args); }
 
 #define lambda_compose(name, f, g) \
-  lambda(fnew, args) { \
+  lambda(name, args) { \
     return call(f, call_with(g, args)); \
   }
 
-#define lambda_partial(name, f, rhs) \
+#define lambda_flip(name, f) \
   lambda(name, args) { \
-    var argfull = copy(args); push(argfull, rhs); \
-    var ret = call_with(f, argfull); \
-    return delete(argfull), ret; \
+    var argflip = copy(args); reverse(args); \
+    var ret = call_with(f, args); \
+    return delete(argflip), ret; \
   }
-
+  
+#define lambda_partial(name, f, lhs) \
+  lambda(name, args) { \
+    var argfull = copy(args); \
+    printf("TEST-1\n"); \
+    push_front(argfull, lhs); \
+    printf("TEST0\n"); \
+    var ret = call_with(f, argfull); \
+    printf("TEST1\n"); \
+    delete(argfull); \
+    printf("TEST2\n"); \
+    return ret; \
+  }
+  
+/* Convert existing function to Function */ 
+#define lambda_void(name, func_ptr) lambda(name, args) { func_ptr(args); return None; }
+#define lambda_uncurry(name, func_ptr, argc) lambda_uncurry##argc(name, func_ptr)
+#define lambda_void_uncurry(name, func_ptr, argc) lambda_void_uncurry##argc(name, func_ptr)
 
 /* Applies to collection, ignores return */
 void map(var self, var func);

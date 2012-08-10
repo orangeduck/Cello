@@ -169,6 +169,14 @@ void clear(var col);
 bool contains(var col, var obj);
 void discard(var col, var obj);
 
+/** Reverse - can be revered */
+
+class {
+  void (*reverse)(var);
+} Reverse;
+
+void reverse(var self);
+
 /** Iter - iterable */
 
 class {
