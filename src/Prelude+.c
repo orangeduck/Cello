@@ -161,6 +161,60 @@ void discard(var self, var obj) {
   icollection->discard(self, obj);
 }
 
+static void swap_items(var self, int i0, int i1) {
+  var lft = at(self, i0);
+  var rht = at(self, i1);
+  set(self, i0, rht);
+  set(self, i1, lft);
+}
+
+static int sort_partition(var self, int left, int right, int pivot) {
+  var pival = at(self, pivot);
+  swap_items(self, pivot, right);
+  int storei = left;
+  for(int i = left; i < right; i++) {
+    if_lt( at(self, i) , pival ) {
+      swap_items(self, i, storei);
+      storei++;
+    }
+  }
+  swap_items(self, storei, right);
+  return storei;
+}
+
+static void sort_part(var self, int left, int right) {
+  if (len(self) >= 2) {
+    int pivot = len(self)/2;
+    int newpivot = sort_partition(self, left, right, pivot);
+    sort_part(self, left, newpivot-1);
+    sort_part(self, newpivot+1, right);
+  }
+}
+
+void sort(var self) {
+  sort_part(self, 0, len(self)-1);
+}
+
+var maximum(var self) {
+  var best = at(self, 0);
+  foreach(self, item) {
+    if_lt(item, best) {
+      best = item;
+    }
+  }
+  return best;
+}
+
+var minimum(var self) {
+  var best = at(self, 0);
+  foreach(self, item) {
+    if_gt(item, best) {
+      best = item;
+    }
+  }
+  return best;
+}
+
 void reverse(var self) {
   Reverse* ireverse = Type_Class(type_of(self), Reverse);
   assert(ireverse->reverse);

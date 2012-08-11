@@ -27,7 +27,6 @@ typedef void* var;
 #define data typedef struct 
 #define instance(T,C) static C T##C
 
-
 /*
 ** == Methods ==
 **
@@ -133,6 +132,9 @@ class {
 bool eq(var self, var obj);
 bool neq(var self, var obj);
 
+#define if_eq(X,Y) if(eq(X,Y))
+#define if_neq(X,Y) if(neq(X,Y))
+
 /** Ord - ordering */
 
 class {
@@ -144,6 +146,11 @@ bool gt(var self, var obj);
 bool lt(var self, var obj);
 bool ge(var self, var obj);
 bool le(var self, var obj);
+
+#define if_lt(X,Y) if(lt(X,Y))
+#define if_gt(X,Y) if(gt(X,Y))
+#define if_le(X,Y) if(le(X,Y))
+#define if_ge(X,Y) if(ge(X,Y))
 
 /** Hash - hashable */
 
@@ -168,6 +175,10 @@ bool is_empty(var col);
 void clear(var col);
 bool contains(var col, var obj);
 void discard(var col, var obj);
+
+void sort(var col);
+var maximum(var self);
+var minimum(var self);
 
 /** Reverse - can be revered */
 

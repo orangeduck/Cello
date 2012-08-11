@@ -35,6 +35,7 @@ examples: $(OBJ_FILES) $(EXAMPLE_FILES)
 	$(CC) examples/types.c $(CFLAGS) $(OBJ_FILES) -o examples/types $(LIBS)
 	$(CC) examples/lists.c $(CFLAGS) $(OBJ_FILES) -o examples/lists $(LIBS)
 	$(CC) examples/functions.c $(CFLAGS) $(OBJ_FILES) -o examples/functions $(LIBS)
+	$(CC) examples/example.c $(CFLAGS) $(OBJ_FILES) -o examples/example $(LIBS)
   
 test: $(OBJ_FILES) tests/test.c
 	$(CC) tests/test.c -lcunit $(CFLAGS) $(OBJ_FILES) -o test $(LIBS)

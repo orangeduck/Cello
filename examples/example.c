@@ -1,5 +1,5 @@
 /*
-** Example of C+ Program
+** Example C+ Program
 */
 
 #include "C+.h"
@@ -16,11 +16,9 @@ int main(int argc, char** argv) {
 	
   /* Collections can be looped over */
   foreach(items, item) {
-    
     /* Types are also objects */
     var type = type_of(item);
     printf("Type: '%s'\n", as_str(type));
-    
   }
   
   /* Heap objects destroyed with "delete" */
@@ -44,27 +42,24 @@ int main(int argc, char** argv) {
   /* File-like objects can "open" and "close" */
   var file = open($(File, NULL), "prices.bin", "wb");
   
-  /* "with" means "close" called at end of block */
-  with(file) {
+  /* First class function object */
+  lambda(write_pair, args) {
     
-    /* First class function object */
-    lambda(write_pair, args) {
-      
-      /* Run time type-checking with "cast" */
-      var key = cast(pop(args), String);
-      var val = cast(get(prices, key), Int);
-      
-      /* File implements "put/get" like Hashtable */
-      put(file, String, key);
-      put(file, Int, val);
-      
-      return None;
-    }
+    /* Run time type-checking with "cast" */
+    var key = cast(at(args, 0), String);
+    var val = cast(get(prices, key), Int);
     
-    /* Higher order functions */
-    map(write_pair, prices);
+    /* File implements "put/get" like Hashtable */
+    put(file, String, key);
+    put(file, Int, val);
     
+    return None;
   };
+  
+  /* Higher order functions */
+  map(prices, write_pair);
+  
+  close(file);
   
   delete(prices);
   

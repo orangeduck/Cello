@@ -161,7 +161,7 @@ void Array_Push_At(var self, var obj, int index) {
   New* inew = Type_Class(ad->item_type, New);
   memmove(ad->items + inew->size * (index+1), 
           ad->items + inew->size * index, 
-          inew->size * (ad->num_items - index));
+          inew->size * ((ad->num_items-1) - index));
   
   Array_Set_Type_At(self, index);
   set(self, index, obj);
@@ -204,7 +204,7 @@ var Array_Pop_At(var self, int index) {
   New* inew = Type_Class(ad->item_type, New);
   memmove(ad->items + inew->size * index, 
           ad->items + inew->size * (index+1), 
-          inew->size * (ad->num_items - index));
+          inew->size * ((ad->num_items-1) - index));
   
   ad->num_items--;
   Array_Reserve_Less(ad);
