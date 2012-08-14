@@ -1,5 +1,5 @@
-#ifndef CurryPlus_h
-#define CurryPlus_h
+#ifndef LambdaCurryPlus_h
+#define LambdaCurryPlus_h
 
 /* Uncurring lambda macros */
 

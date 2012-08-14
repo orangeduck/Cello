@@ -29,6 +29,10 @@ var call_with(var self, var args);
 **    };
 **
 **    call(hello_person, $(String, "Dan"));
+**
+**
+**	See 'Lambda+.h' for more functional tools.
+**
 */
 
 module Function;
