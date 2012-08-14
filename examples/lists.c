@@ -1,7 +1,4 @@
-#include "Prelude+.h"
-#include "List+.h"
-#include "Nonetype+.h"
-#include "Number+.h"
+#include "C+.h"
 
 int main(int arc, char** argv) {
   
