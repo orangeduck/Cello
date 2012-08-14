@@ -160,7 +160,7 @@ void List_Push_At(var self, var val, int index) {
   
   memmove(&lo->items[index+1], 
           &lo->items[index], 
-          sizeof(var) * (lo->num_items - index));
+          sizeof(var) * ((lo->num_items-1) - index));
   
   lo->items[index] = val;
 }
