@@ -7,7 +7,6 @@
 #include "Function+.h"
 #include "Lambda+.h"
 #include "LambdaCurry+.h"
-#include "LambdaThread+.h"
 
 #include "NoneType+.h"
 #include "Number+.h"
