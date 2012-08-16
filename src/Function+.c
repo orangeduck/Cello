@@ -11,7 +11,7 @@ var call_with_ptr(var self, var* args) {
 }
 
 var call_with(var self, var args) {
-  Call* icall = Type_Class(type_of(self), Call);
+  Call* icall = type_class(type_of(self), Call);
   assert(icall->call_with);
   return icall->call_with(self, args);
 }

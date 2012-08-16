@@ -61,7 +61,7 @@ var type_of(var obj);
 **  Ensure object X is of certain type T.
 */
 
-#define cast(X, T) Type_Cast(X, T, __func__)
+#define cast(X, T) Type_Cast(X, T, __func__, __FILE__, __LINE__)
 
 
 /* 

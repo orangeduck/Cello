@@ -126,7 +126,7 @@ static void Array_Reserve_More(ArrayData* ad) {
   
   if (ad->num_items > ad->num_slots) {
     ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
-    New* inew = Type_Class(ad->item_type, New);
+    New* inew = type_class(ad->item_type, New);
     ad->items = realloc(ad->items, inew->size * ad->num_slots);
   }
 
@@ -134,7 +134,7 @@ static void Array_Reserve_More(ArrayData* ad) {
 
 static void Array_Set_Type_At(ArrayData* ad, int i) {
   
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   
   ObjectData* template = ad->items + (inew->size * i);
   template->type = ad->item_type;
@@ -159,7 +159,7 @@ void Array_Push_At(var self, var obj, int index) {
   ad->num_items++;
   Array_Reserve_More(ad);
   
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   memmove(ad->items + inew->size * (index+1), 
           ad->items + inew->size * index, 
           inew->size * ((ad->num_items-1) - index));
@@ -172,7 +172,7 @@ static void Array_Reserve_Less(ArrayData* ad) {
   
   if ( ad->num_slots > pow(ad->num_items+1, 1.5)) {
     ad->num_slots = floor((ad->num_slots-1) * (1.0/1.5));
-    New* inew = Type_Class(ad->item_type, New);
+    New* inew = type_class(ad->item_type, New);
     ad->items = realloc(ad->items, inew->size * ad->num_slots);
   }
   
@@ -202,7 +202,7 @@ var Array_Pop_At(var self, int index) {
   
   destruct(at(self, index));
   
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   memmove(ad->items + inew->size * index, 
           ad->items + inew->size * (index+1), 
           inew->size * ((ad->num_items-1) - index));
@@ -217,7 +217,7 @@ var Array_At(var self, int i) {
   if (i < 0 || i >= len(self)) return None;
   
   ArrayData* ad = cast(self, Array);
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   return ad->items + inew->size * i;
 }
 
@@ -225,7 +225,7 @@ void Array_Set(var self, int i, var obj) {
   if (i < 0 || i >= len(self)) return;
   
   ArrayData* ad = cast(self, Array);
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   
   assign(ad->items + inew->size * i, obj);
 }
@@ -243,7 +243,7 @@ var Array_Iter_End(var self) {
 
 var Array_Iter_Next(var self, var curr) {
   ArrayData* ad = cast(self, Array);
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   
   if (curr >= ad->items + inew->size * ad->num_items) {
     return ARRAY_ITER_END;

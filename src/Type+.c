@@ -1,5 +1,7 @@
 #include <string.h>
 
+#include "Bool+.h"
+
 #include "Type+.h"
 
 var Type = methods {
@@ -9,13 +11,17 @@ var Type = methods {
   methods_end(Type),
 };
 
-var Type_Cast(var obj, var t, const char* func) {
+var Type_Cast(var obj, var t, const char* func, const char* file, int line) {
   
   if (type_of(obj) is t) {
     return obj;
   } else {
-    fprintf(stderr, "|\n| TypeError: Argument to function '%s' \n|\t Got type '%s'\n|\t Expected type '%s'\n|\n",
-        func, as_str(type_of(obj)), as_str(t)); abort();
+    fprintf(stderr, "|\n"
+                    "| TypeError: Argument to function '%s' at '%s:%i' \n"
+                    "|\t Got type '%s'\n"
+                    "|\t Expected type '%s'\n"
+                    "|\n",
+        func, file, line, as_str(type_of(obj)), as_str(t)); abort();
   }
   
 }
@@ -48,7 +54,7 @@ var Type_Delete(var self) {
 }
 
 const char* Type_AsStr(var self) {
-  return Type_Class_Name(self, "__Name");
+  return type_class(self, __Name);
 }
 
 static void Type_Print(var self) {
@@ -64,16 +70,16 @@ static void Type_Print(var self) {
   }
 }
 
-bool Type_Implements_Name(var self, const char* class_name) {
+var Type_Implements_Name(var self, const char* class_name) {
   TypeData* t = self;
   while(t->class_name) {
-    if (strcmp(t->class_name, class_name) == 0) return true;
+    if (strcmp(t->class_name, class_name) == 0) return True;
     t++;
   }
-  return false;
+  return False;
 }
 
-var Type_Class_Name(var self, const char* class_name) {
+var Type_Class_Name(var self, const char* class_name, const char* func, const char* file, int line) {
   TypeData* t = self;
   
   const char* type_name = NULL;
@@ -88,11 +94,20 @@ var Type_Class_Name(var self, const char* class_name) {
   }
   
   if (type_name == NULL) {
-    fprintf(stderr, "|\n| ObjectError: Cannot find type name for object.\n| Does is start with a 'Type' struct entry?\n|\n");
+    fprintf(stderr, "|\n"
+                    "| ClassError: function '%s' at '%s:%i'\n"
+                    "|\t Cannot find class '__Name' for object '%p'\n"
+                    "|\t Was it correctly constructed?\n"
+                    "|\t Does is start with a 'type' entry?\n"
+                    "|\n",
+            func, file, line, self);
     abort();
   }
   
-  fprintf(stderr, "|\n| ClassError: Type '%s' does not implement class '%s'\n|\n",  
-    type_name, class_name);
+  fprintf(stderr, "|\n"
+                  "| ClassError: function '%s' at '%s:%i'\n"
+                  "|\t Type '%s' does not implement class '%s'\n"
+                  "|\n",  
+    func, file, line, type_name, class_name);
   abort();
 }

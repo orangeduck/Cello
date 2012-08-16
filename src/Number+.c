@@ -6,37 +6,37 @@
 #include "Number+.h"
 
 void add(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->add);
   inum->add(lhs, rhs);
 }
 
 void sub(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->sub);
   inum->sub(lhs, rhs);
 }
 
 void mul(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->mul);
   inum->mul(lhs, rhs);
 }
 
 void divide(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->div);
   inum->div(lhs, rhs);
 }
 
 void negate(var self) {
-  Num* inum = Type_Class(type_of(self), Num);
+  Num* inum = type_class(type_of(self), Num);
   assert(inum->negate);
   inum->negate(self);
 }
 
 void absolute(var self) {
-  Num* inum = Type_Class(type_of(self), Num);
+  Num* inum = type_class(type_of(self), Num);
   assert(inum->absolute);
   inum->absolute(self);
 }

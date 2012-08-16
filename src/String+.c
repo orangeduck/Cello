@@ -67,7 +67,7 @@ void String_Clear(var self) {
 var String_Contains(var self, var obj) {
   StringData* s = cast(self, String);
   
-  if (Type_Implements(type_of(obj), AsStr)) {
+  if (type_implements(type_of(obj), AsStr)) {
     const char* ostr = as_str(obj);
     if ( strstr(s->value, ostr) ) {
       return True;
@@ -76,7 +76,7 @@ var String_Contains(var self, var obj) {
     }
   }
   
-  if (Type_Implements(type_of(obj), AsChar)) {
+  if (type_implements(type_of(obj), AsChar)) {
     char ochar = as_char(obj);
     if (strchr(s->value, ochar)) {
       return True;
@@ -93,13 +93,13 @@ var String_Contains(var self, var obj) {
 void String_Discard(var self, var obj) {
   StringData* s = cast(self, String);
   
-  if (Type_Implements(type_of(obj), AsStr)) {
+  if (type_implements(type_of(obj), AsStr)) {
     const char* ostr = as_str(obj);
     const char* pos = strstr(s->value, ostr);
     /* TODO: Implement */
   }
   
-  if (Type_Implements(type_of(obj), AsChar)) {
+  if (type_implements(type_of(obj), AsChar)) {
     char ochar = as_char(obj);
     const char* pos = strchr(s->value, ochar);
     while(pos != NULL) {

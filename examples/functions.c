@@ -10,14 +10,12 @@ int main(int argc, char** argv) {
   */
   
   lambda(hello_name, args) {
-  
     /* Input is a list of arguments */
     var name = cast(at(args, 0), String);
     printf("Hello %s!\n", as_str(name));
     
     /* Always must return */
     return None;
-    
   }
   
   /* Functions called with "call" */
@@ -52,7 +50,6 @@ int main(int argc, char** argv) {
   ** If they have all argument types as "var".
   ** Then they can be uncurried.
   */
-  
   var Welcome_Pair(var fst, var snd) {
     printf("Hello %s and %s!\n", as_str(fst), as_str(snd));
     return None;
