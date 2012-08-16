@@ -2,7 +2,8 @@
 #include <assert.h>
 #include <string.h>
 
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
 
 #include "List+.h"
 
@@ -67,20 +68,19 @@ var List_Copy(var self) {
   return newlist;
   
 }
-
-bool List_Eq(var self, var other) {
+var List_Eq(var self, var other) {
   
   if (len(self) != len(other)) {
-    return false;
+    return False;
   }
   
   for(int i = 0; i < len(self); i++) {
-    if (neq( at(self,i) , at(other,i) )) {
-      return false;
+    if_neq( at(self,i) , at(other,i) ) {
+      return False;
     }
   }
   
-  return true;
+  return True;
 }
 
 int List_Len(var self) {
@@ -88,9 +88,9 @@ int List_Len(var self) {
   return lo->num_items;
 } 
 
-bool List_IsEmpty(var self) {
+var List_IsEmpty(var self) {
   ListData* lo = cast(self, List);
-  return (lo->num_items is 0);
+  return (var)(lo->num_items is 0);
 }
 
 void List_Clear(var self) {
@@ -101,13 +101,13 @@ void List_Clear(var self) {
   
 }
 
-bool List_Contains(var self, var obj) {
+var List_Contains(var self, var obj) {
   ListData* lo = cast(self, List);
   foreach(self, item) {
-    if ( eq(item, obj) ) return true;
+    if_eq(item, obj) return True;
   }
   
-  return false;
+  return False;
 }
 
 void List_Discard(var self, var obj) {

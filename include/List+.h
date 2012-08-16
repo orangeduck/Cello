@@ -28,12 +28,12 @@ var List_Delete(var self);
 void List_Assign(var self, var obj);
 var List_Copy(var self);
 
-bool List_Eq(var self, var obj);
+var List_Eq(var self, var obj);
 
 int List_Len(var self);
-bool List_IsEmpty(var self);
+var List_IsEmpty(var self);
 void List_Clear(var self);
-bool List_Contains(var self, var obj);
+var List_Contains(var self, var obj);
 void List_Discard(var self, var obj);
 
 void List_Push_Back(var self, var obj);

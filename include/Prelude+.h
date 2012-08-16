@@ -126,11 +126,11 @@ var copy(var obj);
 /** Eq - equality */
 
 class {
-  bool (*eq)(var,var);
+  var (*eq)(var,var);
 } Eq;
 
-bool eq(var self, var obj);
-bool neq(var self, var obj);
+var eq(var self, var obj);
+var neq(var self, var obj);
 
 #define if_eq(X,Y) if(eq(X,Y))
 #define if_neq(X,Y) if(neq(X,Y))
@@ -138,14 +138,14 @@ bool neq(var self, var obj);
 /** Ord - ordering */
 
 class {
-  bool (*gt)(var,var);
-  bool (*lt)(var,var);
+  var (*gt)(var,var);
+  var (*lt)(var,var);
 } Ord;
 
-bool gt(var self, var obj);
-bool lt(var self, var obj);
-bool ge(var self, var obj);
-bool le(var self, var obj);
+var gt(var self, var obj);
+var lt(var self, var obj);
+var ge(var self, var obj);
+var le(var self, var obj);
 
 #define if_lt(X,Y) if(lt(X,Y))
 #define if_gt(X,Y) if(gt(X,Y))
@@ -164,16 +164,16 @@ long hash(var obj);
 
 class {
   int (*len)(var);
-  bool (*is_empty)(var);
+  var (*is_empty)(var);
   void (*clear)(var);
-  bool (*contains)(var, var);
+  var (*contains)(var, var);
   void (*discard)(var, var);
 } Collection;
 
 int len(var col);
-bool is_empty(var col);
+var is_empty(var col);
 void clear(var col);
-bool contains(var col, var obj);
+var contains(var col, var obj);
 void discard(var col, var obj);
 
 void sort(var col);

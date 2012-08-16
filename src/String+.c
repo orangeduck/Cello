@@ -1,6 +1,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "Bool+.h"
+
 #include "String+.h"
 
 var String = methods {
@@ -42,10 +44,10 @@ var String_Copy(var self) {
   return new(String, s->value);
 }
 
-bool String_Eq(var self, var other) {
+var String_Eq(var self, var other) {
   StringData* fst = cast(self, String);
   StringData* snd = cast(other, String);
-  return (strcmp(fst->value, snd->value) == 0);
+  return (var)(strcmp(fst->value, snd->value) == 0);
 }
 
 int String_Len(var self) {
@@ -53,8 +55,8 @@ int String_Len(var self) {
   return strlen(s->value);
 }
 
-bool String_IsEmpty(var self) {
-  return (len(self) == 0);
+var String_IsEmpty(var self) {
+  return (var)(len(self) == 0);
 }
 void String_Clear(var self) {
   StringData* s = cast(self, String);
@@ -62,20 +64,28 @@ void String_Clear(var self) {
   s->value[0] = '\0';
 }
 
-bool String_Contains(var self, var obj) {
+var String_Contains(var self, var obj) {
   StringData* s = cast(self, String);
   
   if (Type_Implements(type_of(obj), AsStr)) {
     const char* ostr = as_str(obj);
-    return (bool)strstr(s->value, ostr);
+    if ( strstr(s->value, ostr) ) {
+      return True;
+    } else {
+      return False;
+    }
   }
   
   if (Type_Implements(type_of(obj), AsChar)) {
     char ochar = as_char(obj);
-    return (bool)strchr(s->value, ochar);
+    if (strchr(s->value, ochar)) {
+      return True;
+    } else {
+     return False;
+    }
   }
   
-  return false;
+  return False;
 }
 
 

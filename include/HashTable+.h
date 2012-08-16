@@ -36,9 +36,9 @@ void HashTable_Assign(var self, var obj);
 var HashTable_Copy(var self);
 
 int HashTable_Len(var self);
-bool HashTable_IsEmpty(var self);
+var HashTable_IsEmpty(var self);
 void HashTable_Clear(var self);
-bool HashTable_Contains(var self, var key);
+var HashTable_Contains(var self, var key);
 void HashTable_Discard(var self, var key);
 
 var HashTable_Get(var self, var key);

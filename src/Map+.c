@@ -1,6 +1,8 @@
-#include "Map+.h"
 #include "List+.h"
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
+
+#include "Map+.h"
 
 var Map = methods {
   methods_begin(Map),
@@ -48,8 +50,8 @@ int Map_Len(var self) {
   return len(md->keys);
 }
 
-bool Map_IsEmpty(var self) {
-  return (len(self) == 0);
+var Map_IsEmpty(var self) {
+  return (var)(len(self) == 0);
 }
 
 void Map_Clear(var self) {
@@ -58,7 +60,7 @@ void Map_Clear(var self) {
   }
 }
 
-bool Map_Contains(var self, var key) {
+var Map_Contains(var self, var key) {
   MapData* md = cast(self, Map);
   return contains(md->keys, key);
 }

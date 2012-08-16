@@ -23,12 +23,12 @@ var String_Delete(var self);
 void String_Assign(var self, var obj);
 var String_Copy(var self);
 
-bool String_Eq(var self, var obj);
+var String_Eq(var self, var obj);
 
 int String_Len(var self);
-bool String_IsEmpty(var self);
+var String_IsEmpty(var self);
 void String_Clear(var self);
-bool String_Contains(var self, var sub);
+var String_Contains(var self, var sub);
 void String_Discard(var self, var sub);
 
 long String_Hash(var self);

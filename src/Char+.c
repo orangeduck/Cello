@@ -32,19 +32,19 @@ var Char_Copy(var self) {
   return new(Char, cd->value);
 }
 
-bool Char_Eq(var self, var other) {
+var Char_Eq(var self, var other) {
   CharData* cd = cast(self, Char);
-  return (cd->value == as_char(other));
+  return (var)(cd->value == as_char(other));
 }
 
-bool Char_Gt(var self, var other) {
+var Char_Gt(var self, var other) {
   CharData* cd = cast(self, Char);
-  return (cd->value > as_char(other));
+  return (var)(cd->value > as_char(other));
 }
 
-bool Char_Lt(var self, var other) {
+var Char_Lt(var self, var other) {
   CharData* cd = cast(self, Char);
-  return (cd->value < as_char(other));
+  return (var)(cd->value < as_char(other));
 }
 
 long Char_Hash(var self) {

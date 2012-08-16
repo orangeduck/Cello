@@ -2,7 +2,8 @@
 #include <string.h>
 
 #include "List+.h"
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
 
 #include "HashTable+.h"
 
@@ -77,8 +78,8 @@ int HashTable_Len(var self) {
   return len(ht->keys);
 }
 
-bool HashTable_IsEmpty(var self) {
-  return (len(self) == 0);
+var HashTable_IsEmpty(var self) {
+  return (var)(len(self) == 0);
 }
 
 void HashTable_Clear(var self) {
@@ -93,7 +94,7 @@ void HashTable_Clear(var self) {
   clear(ht->keys);
 }
 
-bool HashTable_Contains(var self, var key) {
+var HashTable_Contains(var self, var key) {
   HashTableData* ht = cast(self, HashTable);
   return contains(ht->keys, key);
 }

@@ -36,9 +36,9 @@ void Map_Assign(var self, var obj);
 var Map_Copy(var self);
 
 int Map_Len(var self);
-bool Map_IsEmpty(var self);
+var Map_IsEmpty(var self);
 void Map_Clear(var self);
-bool Map_Contains(var self, var key);
+var Map_Contains(var self, var key);
 void Map_Discard(var self, var key);
 
 var Map_Get(var self, var key);

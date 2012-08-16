@@ -1,6 +1,7 @@
 
 #include "Prelude+.h"
 #include "Type+.h"
+#include "Bool+.h"
 
 /*
 ** This example shows dynamic creation of a Type on the heap.
@@ -25,10 +26,14 @@ static var Hello_Delete(var self) {
   return self;
 }
 
-static bool Hello_Eq(var self, var obj) {
+static var Hello_Eq(var self, var obj) {
   HelloData* lhs = cast(self, Hello);
   HelloData* rhs = cast(obj, Hello);
-  return (lhs->hello_val == rhs->hello_val);
+  if (lhs->hello_val == rhs->hello_val) {
+    return True;
+  } else {
+    return False;
+  }
 }
 
 int main(int argc, char** argv) {

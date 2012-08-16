@@ -8,7 +8,8 @@
 #include "Lambda+.h"
 #include "LambdaCurry+.h"
 
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
 #include "Number+.h"
 #include "Char+.h"
 #include "String+.h"
@@ -17,6 +18,7 @@
 #include "Array+.h"
 #include "List+.h"
 #include "HashTable+.h"
+#include "Map+.h"
 
 #endif
 

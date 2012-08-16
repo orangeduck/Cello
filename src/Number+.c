@@ -76,19 +76,18 @@ var Int_Copy(var self) {
   return new(Int, intdata->value);
 }
 
-bool Int_Eq(var self, var other) {
+var Int_Eq(var self, var other) {
   IntData* io = cast(self, Int);
-  return io->value == as_long(other);
+  return (var)(io->value == as_long(other));
 }
 
-bool Int_Gt(var self, var other) {
+var Int_Gt(var self, var other) {
   IntData* io = cast(self, Int);
-  return io->value > as_long(other);
+  return (var)(io->value > as_long(other));
 }
-
-bool Int_Lt(var self, var other) {
+var Int_Lt(var self, var other) {
   IntData* io = cast(self, Int);
-  return io->value < as_long(other);
+  return (var)(io->value < as_long(other));
 }
 
 long Int_Hash(var self) {
@@ -181,19 +180,19 @@ var Real_Copy(var self) {
   return new(Real, ro->value);
 }
 
-bool Real_Eq(var self, var other) {
+var Real_Eq(var self, var other) {
   RealData* ro = cast(self, Real);
-  return ro->value == as_double(other);
+  return (var)(ro->value == as_double(other));
 }
 
-bool Real_Gt(var self, var other) {
+var Real_Gt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return ro->value > as_double(other);
+  return (var)(ro->value > as_double(other));
 }
 
-bool Real_Lt(var self, var other) {
+var Real_Lt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return ro->value < as_double(other);
+  return (var)(ro->value < as_double(other));
 }
 
 union interp_cast {

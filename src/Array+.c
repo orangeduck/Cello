@@ -2,7 +2,8 @@
 #include <assert.h>
 #include <string.h>
 
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
 
 #include "Array+.h"
 
@@ -64,19 +65,19 @@ var Array_Copy(var self) {
   return newarray;
 }
 
-bool Array_Eq(var self, var obj) {
+var Array_Eq(var self, var obj) {
   
   if (len(self) != len(obj)) {
-    return false;
+    return False;
   }
   
   for(int i = 0; i < len(self); i++) {
-    if (neq( at(self,i) , at(obj,i) )) {
-      return false;
+    if_neq( at(self,i) , at(obj,i) ) {
+      return False;
     }
   }
   
-  return true;
+  return True;
 }
 
 int Array_Len(var self) {
@@ -84,8 +85,8 @@ int Array_Len(var self) {
   return ad->num_items;
 }
 
-bool Array_IsEmpty(var self) {
-  return (len(self) == 0);
+var Array_IsEmpty(var self) {
+  return (var)(len(self) == 0);
 }
 
 void Array_Clear(var self) {
@@ -101,14 +102,14 @@ void Array_Clear(var self) {
   
 }
 
-bool Array_Contains(var self, var obj) {
+var Array_Contains(var self, var obj) {
   foreach(self, item) {
-    if ( eq(item, obj) ) {
-      return true;
+    if_eq(item, obj) {
+      return True;
     }
   }
   
-  return false;
+  return False;
 }
 
 void Array_Discard(var self, var obj) {

@@ -1,12 +1,12 @@
 /*
-** Array
+** == Array ==
 **
-**  + Singly typed, dynamically sized, list of objects
-**  + Unlike List does not contains references
-**  + Allocates space for actual data
-**  + Constructor and "set" use "assign" on data
-**  + Pop will always return None as data is destructed when removed
-**  + Unlike List, is responsible for deallocation of contents
+**  Singly typed, dynamically sized, list of objects
+**  Unlike List does not contains references
+**  Allocates space for actual data
+**  Constructor and "set" use "assign" to copy data to array
+**  Pop will always return None as data is destructed when removed
+**  Unlike List, will  deallocate contents
 */
 
 #ifndef ArrayPlus_h
@@ -31,12 +31,12 @@ var Array_Delete(var self);
 void Array_Assign(var self, var obj);
 var Array_Copy(var self);
 
-bool Array_Eq(var self, var obj);
+var Array_Eq(var self, var obj);
 
 int Array_Len(var self);
-bool Array_IsEmpty(var self);
+var Array_IsEmpty(var self);
 void Array_Clear(var self);
-bool Array_Contains(var self, var obj);
+var Array_Contains(var self, var obj);
 void Array_Discard(var self, var obj);
 
 void Array_Push_Back(var self, var obj);

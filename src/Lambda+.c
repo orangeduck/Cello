@@ -1,7 +1,8 @@
 
 #include "Lambda+.h"
 #include "List+.h"
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
 #include "Number+.h"
 
 void map(var self, var func) {
@@ -22,7 +23,7 @@ var new_map(var self, var func) {
 var new_filter(var self, var eq_func) {
   var ret = new(List, 0);
   foreach(self, item) {
-    if (call(eq_func, item) != None) {
+    if (call(eq_func, item)) {
       push(ret, item);
     }
   }

@@ -4,15 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Prelude+.h"
-#include "String+.h"
-#include "Char+.h"
-#include "Number+.h"
-#include "List+.h"
-#include "Array+.h"
-#include "NoneType+.h"
-#include "HashTable+.h"
-
+#include "C+.h"
 #include "CUnit/Basic.h"
 
 int init_cplus_test_suite(void) {
@@ -44,11 +36,14 @@ void test_list_static_allocation(void) {
   CU_ASSERT(1 == chars);
 }
 
-void test_none(void) {
-  var _none = None;
+void test_bool(void) {
+  var _true = True;
+  var _false = False;
 
-  CU_ASSERT_STRING_EQUAL("None", as_str(_none));
-  CU_ASSERT_STRING_EQUAL("NoneType", as_str(type_of(_none)));
+  CU_ASSERT_STRING_EQUAL("True", as_str(_true));
+  CU_ASSERT_STRING_EQUAL("Bool", as_str(type_of(_true)));
+  CU_ASSERT_STRING_EQUAL("False", as_str(_false));
+  CU_ASSERT_STRING_EQUAL("Bool", as_str(type_of(_false)));
 }
 
 void test_string_constructor(void) {
@@ -62,7 +57,7 @@ void test_string_constructor(void) {
   CU_ASSERT_STRING_EQUAL("Hello", as_str(hello1));
 
   // Equality function overloaded for actual string comparison
-  CU_ASSERT(eq(hello1, hello2))
+  CU_ASSERT(eq(hello1, hello2) is True)
 
   delete(hello1);
 }
@@ -229,8 +224,8 @@ int main(int argc, char** argv) {
                           test_hashtable_constructor)) ||
       (NULL == CU_add_test(cplus_suite, "test hashtable foreach",
                           test_hashtable_foreach)) ||
-      (NULL == CU_add_test(cplus_suite, "test none",
-                          test_none))
+      (NULL == CU_add_test(cplus_suite, "test bool",
+                          test_bool))
      ) {
     CU_cleanup_registry();
     return CU_get_error();

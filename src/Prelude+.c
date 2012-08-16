@@ -5,26 +5,34 @@
 
 #include "Prelude+.h"
 #include "Type+.h"
+#include "Bool+.h"
 
 /*
 ** The type_of a Type object is just "Type" again.
 ** But because "Type" is extern it isn't a constant expression.
-** This means the type_of a Type object cannot be set at compile time.
+** This means it cannot be set at compile time.
 **
 ** So by convention at compile time the type_of a Type object is set to NULL.
 ** So if we access a struct and it tells us NULL is the type, just assume "Type".
 */
 
 var type_of(var self) {
-  var listed = ((ObjectData*)self)->type;
   
-  if (listed is NULL) {
+  /* Test against Builtins */
+  if (self is True) return Bool;
+  if (self is False) return Bool;
+
+  /* Use first entry in struct */
+  var entry = ((ObjectData*)self)->type;
+  if (entry is NULL) {
     return Type;
   } else {
-    return listed;
+    return entry;
   }
+
 }
 
+/* Allocate space for type, set type entry */
 var allocate(var type) {
   type = cast(type, Type);
   
@@ -95,10 +103,10 @@ var copy(var self) {
   return icopy->copy(self);
 }
 
-bool eq(var lhs, var rhs) {
+var eq(var lhs, var rhs) {
   
   if (not Type_Implements(type_of(lhs), Eq)) {
-    return lhs == rhs;
+    return (var)(lhs == rhs);
   }
   
   Eq* ieq = Type_Class(type_of(lhs), Eq);
@@ -107,28 +115,28 @@ bool eq(var lhs, var rhs) {
   
 }
 
-bool neq(var lhs, var rhs) {
-  return not eq(lhs, rhs);
+var neq(var lhs, var rhs) {
+  return (var)(not eq(lhs, rhs));
 }
 
-bool gt(var lhs, var rhs) {
+var gt(var lhs, var rhs) {
   Ord* iord = Type_Class(type_of(lhs), Ord);
   assert(iord->gt);
   return iord->gt(lhs, rhs);
 }
 
-bool lt(var lhs, var rhs) {
+var lt(var lhs, var rhs) {
   Ord* iord = Type_Class(type_of(lhs), Ord);
   assert(iord->lt);
   return iord->lt(lhs, rhs);
 }
 
-bool ge(var lhs, var rhs) {
-  return not lt(lhs, rhs);
+var ge(var lhs, var rhs) {
+  return (var)(not lt(lhs, rhs));
 }
 
-bool le(var lhs, var rhs) {
-  return not gt(lhs, rhs);
+var le(var lhs, var rhs) {
+  return (var)(not gt(lhs, rhs));
 }
 
 int len(var self) {
@@ -137,7 +145,7 @@ int len(var self) {
   return icollection->len(self);
 }
 
-bool is_empty(var self) {
+var is_empty(var self) {
   Collection* icollection = Type_Class(type_of(self), Collection);
   assert(icollection->is_empty);
   return icollection->is_empty(self);
@@ -149,7 +157,7 @@ void clear(var self) {
   icollection->clear(self);
 }
 
-bool contains(var self, var obj) {
+var contains(var self, var obj) {
   Collection* icollection = Type_Class(type_of(self), Collection);
   assert(icollection->contains);
   return icollection->contains(self, obj);
