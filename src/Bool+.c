@@ -1,8 +1,7 @@
+#include "Bool+.h"
 
 #include "Prelude+.h"
 #include "Type+.h"
-
-#include "Bool+.h"
 
 var Bool = methods {
   methods_begin(Bool),

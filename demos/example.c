@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   delete(items);
   
   /* Hashtables require "Eq" and "Hash" on key type */
-  var prices = new(HashTable);
+  var prices = new(Table, String, Int);
   put(prices, $(String, "Apple"),  $(Int, 12)); 
   put(prices, $(String, "Banana"), $(Int,  6)); 
   put(prices, $(String, "Pear"),   $(Int, 55)); 

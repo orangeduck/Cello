@@ -26,7 +26,6 @@ var String_Copy(var self);
 var String_Eq(var self, var obj);
 
 int String_Len(var self);
-var String_IsEmpty(var self);
 void String_Clear(var self);
 var String_Contains(var self, var sub);
 void String_Discard(var self, var sub);
@@ -42,7 +41,7 @@ instance(String, New) = { sizeof(StringData), String_New, String_Delete };
 instance(String, Assign) = { String_Assign };
 instance(String, Copy) = { String_Copy };
 instance(String, Eq) = { String_Eq };
-instance(String, Collection) = { String_Len, String_IsEmpty, String_Clear, String_Contains, String_Discard };
+instance(String, Collection) = { String_Len, String_Clear, String_Contains, String_Discard };
 instance(String, Hash) = { String_Hash  };
 instance(String, Parse) = { String_Parse_Read, String_Parse_Write };
 instance(String, AsStr) = { String_AsStr  };

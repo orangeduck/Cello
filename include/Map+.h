@@ -36,7 +36,6 @@ void Map_Assign(var self, var obj);
 var Map_Copy(var self);
 
 int Map_Len(var self);
-var Map_IsEmpty(var self);
 void Map_Clear(var self);
 var Map_Contains(var self, var key);
 void Map_Discard(var self, var key);
@@ -51,7 +50,7 @@ var Map_Iter_Next(var self, var curr);
 instance(Map, New) = { sizeof(MapData), Map_New, Map_Delete };
 instance(Map, Assign) = { Map_Assign };
 instance(Map, Copy) = { Map_Copy };
-instance(Map, Collection) = { Map_Len, Map_IsEmpty, Map_Clear, Map_Contains, Map_Discard };
+instance(Map, Collection) = { Map_Len, Map_Clear, Map_Contains, Map_Discard };
 instance(Map, Dict) = { Map_Get, Map_Put };
 instance(Map, Iter) = { Map_Iter_Start, Map_Iter_End, Map_Iter_Next };
 

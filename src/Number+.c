@@ -1,9 +1,10 @@
+#include "Number+.h"
+
+#include "Type+.h"
+
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
-
-#include "Type+.h"
-#include "Number+.h"
 
 void add(var lhs, var rhs) {
   Num* inum = type_class(type_of(lhs), Num);

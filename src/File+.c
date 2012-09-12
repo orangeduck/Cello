@@ -1,7 +1,6 @@
+#include "File+.h"
 
 #include <assert.h>
-
-#include "File+.h"
 
 var File = methods {
   methods_begin(File),

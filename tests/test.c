@@ -106,8 +106,8 @@ void test_list_foreach(void) {
   delete(numbers);
 }
 
-void test_hashtable_constructor(void) {
-  var prices = new(HashTable);
+void test_dictionary_constructor(void) {
+  var prices = new(Dictionary);
 
   put(prices, $(String, "Apple"),  $(Int, 12));
   put(prices, $(String, "Banana"), $(Real,  1.34));
@@ -120,14 +120,14 @@ void test_hashtable_constructor(void) {
   delete(prices);
 }
 
-void test_hashtable_foreach(void) {
+void test_dictionary_foreach(void) {
   int integers = 0;
   int reals = 0;
   int total = 0;
   int error = 0;
   int not_contains = 0;
 
-  var prices = new(HashTable);
+  var prices = new(Dictionary);
 
   put(prices, $(String, "Apple"),  $(Int, 12));
   put(prices, $(String, "Banana"), $(Real,  1.34));
@@ -220,10 +220,10 @@ int main(int argc, char** argv) {
                           test_list_static_allocation)) ||
       (NULL == CU_add_test(cplus_suite, "test array push pop",
                           test_array_push_pop)) ||
-      (NULL == CU_add_test(cplus_suite, "test hashtable constructor",
-                          test_hashtable_constructor)) ||
-      (NULL == CU_add_test(cplus_suite, "test hashtable foreach",
-                          test_hashtable_foreach)) ||
+      (NULL == CU_add_test(cplus_suite, "test dictionary constructor",
+                          test_dictionary_constructor)) ||
+      (NULL == CU_add_test(cplus_suite, "test dictionary foreach",
+                          test_dictionary_foreach)) ||
       (NULL == CU_add_test(cplus_suite, "test bool",
                           test_bool))
      ) {

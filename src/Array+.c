@@ -85,10 +85,6 @@ int Array_Len(var self) {
   return ad->num_items;
 }
 
-var Array_IsEmpty(var self) {
-  return (var)(len(self) == 0);
-}
-
 void Array_Clear(var self) {
   ArrayData* ad = cast(self, Array);
   

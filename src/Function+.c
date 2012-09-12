@@ -1,7 +1,8 @@
-#include <assert.h>
-
 #include "Function+.h"
+
 #include "List+.h"
+
+#include <assert.h>
 
 var call_with_ptr(var self, var* args) {
   int num = 0;

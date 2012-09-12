@@ -31,8 +31,8 @@ int main(int argc, char** argv) {
   /* Heap objects destroyed with "delete" */
   delete(items);
   
-  /* Hashtables require "Eq" and "Hash" on key type */
-  var prices = new(HashTable);
+  /* Tables require "Eq" and "Hash" on key type */
+  var prices = new(Table, String, Int);
   put(prices, $(String, "Apple"),  $(Int, 12)); 
   put(prices, $(String, "Banana"), $(Int,  6)); 
   put(prices, $(String, "Pear"),   $(Int, 55)); 
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   var pear_price = get(prices, $(String, "Pear"));
   printf("Price of a 'Pear' is '%li'\n", as_long(pear_price));
 
-  /* Hashtable also supports iteration */
+  /* Tables also supports iteration */
   foreach(prices, key) {
     var price = get(prices, key);
     printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
 About
 -----
 
-C+ is a C library which brings higher level programming tools to C. It takes inspiration from C++, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic typing, and some syntactic sugar. This isn't a new language, just a library for GNU99. There are a selection of new keywords, and many generically named functions in the namespace are taken, but other than that it should be fully compatible with normal C code.
+C+ is a C GNU99 library which brings higher level programming tools to C. It takes inspiration from C++, Obj-C, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic typing, and some syntactic sugar. There are a selection of new keywords, and many generically named functions in the namespace are taken, but other than that it should be fully compatible with normal C code.
 
 Although I've made the syntax pleasant, this isn't a library for beginners. It is for C power users, as manual memory management doesn't play nicely with many higher-order concepts.
 

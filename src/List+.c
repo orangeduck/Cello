@@ -86,11 +86,6 @@ var List_Eq(var self, var other) {
 int List_Len(var self) {
   ListData* lo = cast(self, List);
   return lo->num_items;
-} 
-
-var List_IsEmpty(var self) {
-  ListData* lo = cast(self, List);
-  return (var)(lo->num_items is 0);
 }
 
 void List_Clear(var self) {

@@ -1,8 +1,8 @@
+#include "Map+.h"
+
 #include "List+.h"
 #include "Bool+.h"
 #include "None+.h"
-
-#include "Map+.h"
 
 var Map = methods {
   methods_begin(Map),
@@ -48,10 +48,6 @@ var Map_Copy(var self) {
 int Map_Len(var self) {
   MapData* md = cast(self, Map);
   return len(md->keys);
-}
-
-var Map_IsEmpty(var self) {
-  return (var)(len(self) == 0);
 }
 
 void Map_Clear(var self) {

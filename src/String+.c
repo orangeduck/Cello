@@ -55,9 +55,6 @@ int String_Len(var self) {
   return strlen(s->value);
 }
 
-var String_IsEmpty(var self) {
-  return (var)(len(self) == 0);
-}
 void String_Clear(var self) {
   StringData* s = cast(self, String);
   s->value = realloc(s->value, 1);

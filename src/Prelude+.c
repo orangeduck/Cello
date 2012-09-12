@@ -146,9 +146,7 @@ int len(var self) {
 }
 
 var is_empty(var self) {
-  Collection* icollection = type_class(type_of(self), Collection);
-  assert(icollection->is_empty);
-  return icollection->is_empty(self);
+  return (var)(len(self) == 0);
 }
 
 void clear(var self) {

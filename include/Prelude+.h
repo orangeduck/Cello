@@ -164,18 +164,17 @@ long hash(var obj);
 
 class {
   int (*len)(var);
-  var (*is_empty)(var);
   void (*clear)(var);
   var (*contains)(var, var);
   void (*discard)(var, var);
 } Collection;
 
 int len(var col);
-var is_empty(var col);
 void clear(var col);
 var contains(var col, var obj);
 void discard(var col, var obj);
 
+var is_empty(var col);
 void sort(var col);
 var maximum(var self);
 var minimum(var self);

@@ -1,8 +1,8 @@
-#include <string.h>
-
 #include "Bool+.h"
 
 #include "Type+.h"
+
+#include <string.h>
 
 var Type = methods {
   methods_begin(Type),
