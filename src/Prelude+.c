@@ -50,6 +50,10 @@ var allocate(var type) {
   return self;
 }
 
+void deallocate(var obj) {
+  free(obj);
+}
+
 var new(var type, ...) { 
   
   var self = allocate(type);
@@ -72,7 +76,7 @@ void delete(var self) {
     self = inew->destruct(self);
   }
   
-  free(self);
+  deallocate(self);
 }
 
 var construct(var self, ...) {

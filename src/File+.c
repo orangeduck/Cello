@@ -22,6 +22,8 @@ var File_New(var self, va_list* args) {
 }
 
 var File_Delete(var self) {
+  FileData* fd = cast(self, File);
+  if (fd->f != NULL) { close(self); }
   return self;
 }
 

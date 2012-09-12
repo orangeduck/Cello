@@ -104,6 +104,8 @@ var new(var type, ...);
 void delete(var obj);
 
 var allocate(var type);
+void deallocate(var obj);
+
 var construct(var obj, ...);
 var destruct(var obj);
 
