@@ -2,10 +2,11 @@
 #define test_h
 
 #include "C+.h"
-#include "CUnit/Basic.h"
 
-void init_core_suite(void);
+#include <CUnit/Basic.h>
 
-void build_core_suite(CU_pSuite suite); 
+int init_core_suite(void);
+
+int build_core_suite(CU_pSuite suite); 
 
 #endif

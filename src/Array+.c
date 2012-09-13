@@ -111,7 +111,7 @@ var Array_Contains(var self, var obj) {
 void Array_Discard(var self, var obj) {
   for(int i = 0; i < len(self); i++) {
     var item = at(self, i);
-    if ( eq(item, obj) ) {
+    if_eq(item, obj) {
       pop_at(self, i);
       return;
     }
@@ -121,9 +121,12 @@ void Array_Discard(var self, var obj) {
 static void Array_Reserve_More(ArrayData* ad) {
   
   if (ad->num_items > ad->num_slots) {
+    int old_size = ad->num_slots;
     ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
     New* inew = type_class(ad->item_type, New);
     ad->items = realloc(ad->items, inew->size * ad->num_slots);
+    
+    memset(ad->items + old_size * inew->size, 0, (ad->num_slots - old_size) * inew->size);
   }
 
 }
@@ -143,6 +146,7 @@ void Array_Push_Back(var self, var obj) {
   Array_Reserve_More(ad);
   
   Array_Set_Type_At(self, ad->num_items-1);
+  
   set(self, ad->num_items-1, obj);
 }
 
@@ -226,12 +230,15 @@ void Array_Set(var self, int i, var obj) {
   assign(ad->items + inew->size * i, obj);
 }
 
+static const var ARRAY_ITER_END = (var)-1;
+
 var Array_Iter_Start(var self) {
+
+  if (len(self) == 0) { return ARRAY_ITER_END; }
+
   ArrayData* ad = cast(self, Array);
   return ad->items;
 }
-
-static const var ARRAY_ITER_END = (var)-1;
 
 var Array_Iter_End(var self) {
   return ARRAY_ITER_END;
@@ -241,7 +248,7 @@ var Array_Iter_Next(var self, var curr) {
   ArrayData* ad = cast(self, Array);
   New* inew = type_class(ad->item_type, New);
   
-  if (curr >= ad->items + inew->size * ad->num_items) {
+  if (curr >= ad->items + inew->size * (ad->num_items-1)) {
     return ARRAY_ITER_END;
   } else {
     return curr + inew->size;

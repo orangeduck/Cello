@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
 
   CU_pSuite core_suite = CU_add_suite("C+ Core Suite", init_core_suite, NULL);
   
-  build_core_suite(core_suite);
+  int err = build_core_suite(core_suite);
   
   CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();

@@ -19,7 +19,7 @@ DEMO_TARGETS= $(DEMO_C_FILES:%.c=%$(EXE_SUFFIX))
 
 TEST_C_FILES= $(wildcard tests/*.c)
 TEST_OBJ_FILES= $(addprefix obj/,$(notdir $(TEST_C_FILES:%.c=%.o)))
-TEST_TARGETS= $(TEST_C_FILES:%.c=%$(EXE_SUFFIX))
+TEST_TARGET= tests/test$(EXE_SUFFIX)
 
 SHARED_LIB= $(SHARED_LIB_PREFIX)C+$(SHARED_LIB_SUFFIX)
 STATIC_LIB= $(STATIC_LIB_PREFIX)C+$(STATIC_LIB_SUFFIX)
@@ -64,10 +64,11 @@ demos: $(DEMO_TARGETS)
 $(DEMO_TARGETS): demos/%$(EXE_SUFFIX): obj/%.o $(STATIC_LIB)
 	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LAC_LIBS)
  
-tests: $(TEST_TARGETS)
-
-$(TEST_TARGETS): tests/%$(EXE_SUFFIX): obj/%.o $(STATIC_LIB)
+tests: $(TEST_TARGET)
+	
+$(TEST_TARGET): $(LIB_OBJ_FILES) $(TEST_OBJ_FILES)
 	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LAC_LIBS) -lCunit
+	./$@
  
 # Clean
 

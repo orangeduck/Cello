@@ -101,27 +101,28 @@ var Table_Contains(var self, var key) {
 }
 
 void Table_Discard(var self, var key) {
+    
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
-  
+    
   long i = hash(key) % tab->size;
   
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
-  
+    
   int pos = -1;
   
   for(int i = 0; i < len(keys); i++) {
     var k = at(keys, i);
-    if_eq(k, key) { pos = i; }
+    if_eq(k, key) { pos = i; break; }
   }
   
   if (pos != -1) {
     discard(tab->keys, key);
-    pop_at(keys, i);
-    pop_at(vals, i);
+    pop_at(keys, pos);
+    pop_at(vals, pos);
   }
-  
+    
 }
 
 var Table_Get(var self, var key) {
@@ -144,7 +145,6 @@ var Table_Get(var self, var key) {
 }
 
 void Table_Put(var self, var key, var val) {
-
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
   val = cast(val, tab->val_type);
@@ -160,7 +160,7 @@ void Table_Put(var self, var key, var val) {
     var k = at(keys, i);
     if_eq(k, key) { pos = i; }
   }
-
+  
   if (pos != -1) {
     pop_at(keys, i);
     pop_at(vals, i);

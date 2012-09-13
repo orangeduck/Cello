@@ -6,7 +6,7 @@
 #include "String+.h"
 
 var String = methods {
-  methods_begin(List),
+  methods_begin(String),
   method(String, New),
   method(String, Assign),
   method(String, Copy),
@@ -15,7 +15,7 @@ var String = methods {
   method(String, Hash),
   method(String, Parse),
   method(String, AsStr), 
-  methods_end(List)
+  methods_end(String)
 };
 
 var String_New(var self, va_list* args) {
@@ -46,8 +46,11 @@ var String_Copy(var self) {
 
 var String_Eq(var self, var other) {
   StringData* fst = cast(self, String);
-  StringData* snd = cast(other, String);
-  return (var)(strcmp(fst->value, snd->value) == 0);
+  if (type_implements(type_of(other), AsStr)) {
+    return (var)(strcmp(fst->value, as_str(other)) == 0);
+  } else {
+    return False;
+  }
 }
 
 int String_Len(var self) {

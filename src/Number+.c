@@ -1,6 +1,7 @@
 #include "Number+.h"
 
 #include "Type+.h"
+#include "Bool+.h"
 
 #include <assert.h>
 #include <math.h>
@@ -79,7 +80,11 @@ var Int_Copy(var self) {
 
 var Int_Eq(var self, var other) {
   IntData* io = cast(self, Int);
-  return (var)(io->value == as_long(other));
+  if (type_implements(type_of(other), AsLong)) {
+    return (var)(io->value == as_long(other));
+  } else {
+    return False;
+  }
 }
 
 var Int_Gt(var self, var other) {
@@ -183,7 +188,11 @@ var Real_Copy(var self) {
 
 var Real_Eq(var self, var other) {
   RealData* ro = cast(self, Real);
-  return (var)(ro->value == as_double(other));
+  if (type_implements(type_of(other), AsDouble)) {
+    return (var)(ro->value == as_double(other));
+  } else {
+    return False;
+  }
 }
 
 var Real_Gt(var self, var other) {

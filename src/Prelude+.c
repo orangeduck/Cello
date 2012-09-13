@@ -6,6 +6,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 #include "Bool+.h"
+#include "None+.h"
 
 /*
 ** The type_of a Type object is just "Type" again.
@@ -206,22 +207,30 @@ void sort(var self) {
 }
 
 var maximum(var self) {
-  var best = at(self, 0);
-  foreach(self, item) {
-    if_lt(item, best) {
-      best = item;
-    }
-  }
-  return best;
-}
+  
+  if (len(self) == 0) return None;
 
-var minimum(var self) {
   var best = at(self, 0);
   foreach(self, item) {
     if_gt(item, best) {
       best = item;
     }
   }
+  
+  return best;
+}
+
+var minimum(var self) {
+  
+  if (len(self) == 0) return None;
+  
+  var best = at(self, 0);
+  foreach(self, item) {
+    if_lt(item, best) {
+      best = item;
+    }
+  }
+  
   return best;
 }
 

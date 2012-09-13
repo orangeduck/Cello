@@ -218,13 +218,16 @@ void List_Set(var self, int index, var val) {
   lo->items[index] = val;
 }
 
+static const var LIST_ITER_END = (var)-1;
+
 var List_Iter_Start(var self) {
+  
+  if (len(self) == 0) { return LIST_ITER_END; } 
+
   ListData* lo = cast(self, List);
   lo->cursor = 0;
   return lo->items[0];
 }
-
-static const var LIST_ITER_END = (var)-1;
 
 var List_Iter_End(var self) {
   return LIST_ITER_END;

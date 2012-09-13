@@ -36,10 +36,10 @@ static var Hello_Eq(var self, var obj) {
   }
 }
 
+instance(Hello, New) = { sizeof(HelloData), Hello_New, Hello_Delete };
+instance(Hello, Eq) = { Hello_Eq };
+
 int main(int argc, char** argv) {
-  
-  instance(Hello, New) = { sizeof(HelloData), Hello_New, Hello_Delete };
-  instance(Hello, Eq) = { Hello_Eq };
  
   Hello = new(Type, "Hello", 2, 
     (var[]){ &HelloNew, &HelloEq }, 
@@ -51,6 +51,11 @@ int main(int argc, char** argv) {
   var hello_obj2 = new(Hello, 2);
 
   printf("Equal? %d\n", (int)eq(hello_obj1, hello_obj2) );
+  
+  delete(hello_obj1);
+  delete(hello_obj2);
+  
+  delete(Hello);
   
   return 0;
 }
