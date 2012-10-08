@@ -6,8 +6,7 @@
 
 var call_with_ptr(var self, var* args) {
   int num = 0;
-  while(args[num] != NULL) { num++; }
-  
+  while(args[num] != (var)-1) { num++; }
   return call_with(self, $(List, num, num, args, 0));
 }
 

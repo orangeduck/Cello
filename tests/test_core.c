@@ -342,7 +342,7 @@ static void test_stream(void) {
   CU_ASSERT(f);
 }
 
-static var TestType = NULL;
+static var TestType;
 
 data {
   var type;
@@ -418,28 +418,28 @@ int init_core_suite(void) {
 
 int build_core_suite(CU_pSuite suite) {
 
-  if (suite == NULL) {
+  if (suite is None) {
     CU_cleanup_registry();
     return CU_get_error();
   }
 
-  if ((CU_add_test(suite, "Types", test_type)            == NULL) ||
-      (CU_add_test(suite, "Casting", test_cast)          == NULL) ||
-      (CU_add_test(suite, "New/Delete", test_new)        == NULL) ||
-      (CU_add_test(suite, "Assign", test_assign)         == NULL) ||
-      (CU_add_test(suite, "Copy", test_copy)             == NULL) ||
-      (CU_add_test(suite, "Equality", test_eq)           == NULL) ||
-      (CU_add_test(suite, "Ordering", test_ord)          == NULL) ||
-      (CU_add_test(suite, "Hashing", test_hash)          == NULL) ||
-      (CU_add_test(suite, "Collection", test_collection) == NULL) ||
-      (CU_add_test(suite, "Iteration", test_iter)        == NULL) ||
-      (CU_add_test(suite, "Push/Pop", test_push)         == NULL) ||
-      (CU_add_test(suite, "At/Set", test_at)             == NULL) ||
-      (CU_add_test(suite, "Get/Put", test_dict)          == NULL) ||
-      (CU_add_test(suite, "As CTypes", test_as_ctype)    == NULL) ||
-      (CU_add_test(suite, "Stream/Parse", test_stream)   == NULL) ||
-      (CU_add_test(suite, "New Type", test_type_new)     == NULL) ||
-      (CU_add_test(suite, "Type Implements", test_type_implements)   == NULL))
+  if ((CU_add_test(suite, "Types", test_type)            is None) or
+      (CU_add_test(suite, "Casting", test_cast)          is None) or
+      (CU_add_test(suite, "New/Delete", test_new)        is None) or
+      (CU_add_test(suite, "Assign", test_assign)         is None) or
+      (CU_add_test(suite, "Copy", test_copy)             is None) or
+      (CU_add_test(suite, "Equality", test_eq)           is None) or
+      (CU_add_test(suite, "Ordering", test_ord)          is None) or
+      (CU_add_test(suite, "Hashing", test_hash)          is None) or
+      (CU_add_test(suite, "Collection", test_collection) is None) or
+      (CU_add_test(suite, "Iteration", test_iter)        is None) or
+      (CU_add_test(suite, "Push/Pop", test_push)         is None) or
+      (CU_add_test(suite, "At/Set", test_at)             is None) or
+      (CU_add_test(suite, "Get/Put", test_dict)          is None) or
+      (CU_add_test(suite, "As CTypes", test_as_ctype)    is None) or
+      (CU_add_test(suite, "Stream/Parse", test_stream)   is None) or
+      (CU_add_test(suite, "New Type", test_type_new)     is None) or
+      (CU_add_test(suite, "Type Implements", test_type_implements) is None))
   {
     CU_cleanup_registry();
     return CU_get_error();

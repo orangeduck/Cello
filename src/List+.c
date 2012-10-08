@@ -17,6 +17,7 @@ var List = methods {
   method(List, Push),
   method(List, At),
   method(List, Iter),
+  method(List, Reverse),
   methods_end(List)
 };
 
@@ -140,7 +141,7 @@ void List_Push_Front(var self, var val) {
 void List_Push_At(var self, var val, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) return;
+  if (index < 0 or index > lo->num_items-1) return;
   
   lo->num_items++;
   List_Reserve_More(lo);
@@ -181,7 +182,7 @@ var List_Pop_Front(var self) {
 var List_Pop_At(var self, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) {
+  if (index < 0 or index > lo->num_items-1) {
     return None;
   }
   
@@ -201,7 +202,7 @@ var List_Pop_At(var self, int index) {
 var List_At(var self, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) {
+  if (index < 0 or index > lo->num_items-1) {
     return None;
   }
   
@@ -211,7 +212,7 @@ var List_At(var self, int index) {
 void List_Set(var self, int index, var val) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) {
+  if (index < 0 or index > lo->num_items-1) {
     return;
   }
   
@@ -256,4 +257,13 @@ var List_Iter_Next(var self, var curr) {
   
   return LIST_ITER_END;
   
+}
+
+void List_Reverse(var self) {
+  for(int i = 0; i < len(self) / 2; i++) {
+    var fst = at(self, i);
+    var snd = at(self, len(self) - 1 - i);
+    set(self, i, snd);
+    set(self, len(self) - 1 - i, fst);
+  }
 }

@@ -1,0 +1,36 @@
+<NotepadPlus>
+    <UserLang name="C+" ext="cp">
+        <Settings>
+            <Global caseIgnored="no" escapeChar="\" />
+            <TreatAsSymbol comment="yes" commentLine="yes" />
+            <Prefix words1="no" words2="no" words3="no" words4="no" />
+        </Settings>
+        <KeywordLists>
+            <Keywords name="Delimiters">&quot;&apos;0&quot;&apos;0</Keywords>
+            <Keywords name="Folder+">{</Keywords>
+            <Keywords name="Folder-">}; }</Keywords>
+            <Keywords name="Operators">- ! &quot; $ % &amp; ( ) , . ; ? [ \ ] ^ | ~ + &lt; = &gt;</Keywords>
+            <Keywords name="Comment">1/* 2*/ 0//</Keywords>
+            <Keywords name="Words1">var is not and or elif else foreach if typedef for while do return sizeof as void unsigned const char short int long bool float double size_t va_list* void* char* char** var* FILE* va_list bool struct union static extern volatile module class data instance methods methods_begin method methods_end #include #define #ifndef #undef #endif lambda lambda_id lambda_const lambda_compose lambda_flip lambda_partial lambda_partial_l lambda_partial_r lambda_void lambda_uncurry lambda_void_uncurry lambda_pipe lambda_method_pipe </Keywords>
+            <Keywords name="Words2">Int Real Bool Type True False String List Array Some None Table File Map Function Dictionary Char NULL</Keywords>
+            <Keywords name="Words3">lit cast with new delete allocate deallocate construct destruct assign copy eq neq gt lt ge le if_eq if_neq if_gt if_le if_ge len clear contains discard is_empty sort maximum minimum reverse iter_start iter_end iter_next hash push push_at push_back push_front pop pop_at pop_back pop_front at set get put as_char as_str as_long as_double enter_with exit_with open close seek tell flush eof read write parse_read parse_write type_class type_implements type_of add sub mul divide negate absolute map new_map new_filter new_foldl new_foldr new_sum new_product call_with call call_with_ptr</Keywords>
+            <Keywords name="Words4">New Assign Copy Eq Ord Hash Parse AsLong AsDouble AsStr AsChar Num Collection Reverse Iter Push At Dict With Stream Call</Keywords>
+        </KeywordLists>
+        <Styles>
+            <WordsStyle name="DEFAULT" styleID="11" fgColor="292929" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="FOLDEROPEN" styleID="12" fgColor="0000A0" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="FOLDERCLOSE" styleID="13" fgColor="0000A0" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="KEYWORD1" styleID="5" fgColor="004080" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="KEYWORD2" styleID="6" fgColor="800040" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="KEYWORD3" styleID="7" fgColor="804000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="KEYWORD4" styleID="8" fgColor="000040" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="COMMENT" styleID="1" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="2" />
+            <WordsStyle name="COMMENT LINE" styleID="2" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="2" />
+            <WordsStyle name="NUMBER" styleID="4" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="OPERATOR" styleID="10" fgColor="000080" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="DELIMINER1" styleID="14" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="DELIMINER2" styleID="15" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="DELIMINER3" styleID="16" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" />
+        </Styles>
+    </UserLang>
+</NotepadPlus>

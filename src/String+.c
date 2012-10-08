@@ -162,3 +162,14 @@ const char* String_AsStr(var self) {
   return s->value;
 }
 
+void String_Concat(var self, var obj) {
+  StringData* s = cast(self, String);
+  const char* os = as_str(obj);
+  
+  size_t newlen = strlen(s->value) + strlen(os);
+  
+  s->value = realloc(s->value, newlen+1);
+  
+  strcat(s->value, os);
+}
+

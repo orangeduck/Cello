@@ -6,7 +6,11 @@
 #include <CUnit/Basic.h>
 
 int init_core_suite(void);
+int init_data_suite(void);
+int init_function_suite(void);
 
 int build_core_suite(CU_pSuite suite); 
+int build_data_suite(CU_pSuite suite); 
+int build_function_suite(CU_pSuite suite); 
 
 #endif

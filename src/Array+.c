@@ -214,7 +214,7 @@ var Array_Pop_At(var self, int index) {
 }
 
 var Array_At(var self, int i) {
-  if (i < 0 || i >= len(self)) return None;
+  if (i < 0 or i >= len(self)) return None;
   
   ArrayData* ad = cast(self, Array);
   New* inew = type_class(ad->item_type, New);
@@ -222,7 +222,7 @@ var Array_At(var self, int i) {
 }
 
 void Array_Set(var self, int i, var obj) {
-  if (i < 0 || i >= len(self)) return;
+  if (i < 0 or i >= len(self)) return;
   
   ArrayData* ad = cast(self, Array);
   New* inew = type_class(ad->item_type, New);

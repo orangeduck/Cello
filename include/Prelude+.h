@@ -12,14 +12,16 @@
 **
 **  New reserved keywords:
 **
-**  var is not elif
+**  var is not and or elif foreach
 **  module class data instance
-**  lit $ foreach cast with
+**  $ lit cast with
 */
 
 typedef void* var;
 #define is ==
 #define not !
+#define and &&
+#define or ||
 #define elif else if
 
 #define module extern var

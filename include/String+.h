@@ -37,6 +37,8 @@ void String_Parse_Write(var self, var stream);
 
 const char* String_AsStr(var self);
 
+void String_Concat(var self, var obj);
+
 instance(String, New) = { sizeof(StringData), String_New, String_Delete };
 instance(String, Assign) = { String_Assign };
 instance(String, Copy) = { String_Copy };

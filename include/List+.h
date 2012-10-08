@@ -52,6 +52,8 @@ var List_Iter_Start(var self);
 var List_Iter_End(var self);
 var List_Iter_Next(var self, var curr);
 
+void List_Reverse(var self);
+
 instance(List, New) = { sizeof(ListData), List_New, List_Delete };
 instance(List, Assign) = { List_Assign };
 instance(List, Copy) = { List_Copy };
@@ -60,7 +62,7 @@ instance(List, Collection) = { List_Len, List_Clear, List_Contains, List_Discard
 instance(List, Push) = { List_Push_Back, List_Push_At, List_Push_Back, List_Push_Front, List_Pop_Back, List_Pop_At, List_Pop_Back, List_Pop_Front };
 instance(List, At) = { List_At, List_Set };
 instance(List, Iter) = { List_Iter_Start, List_Iter_End, List_Iter_Next };
-
+instance(List, Reverse) = { List_Reverse };
 
 
 #endif

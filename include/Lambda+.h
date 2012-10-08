@@ -62,19 +62,18 @@
 #define lambda_void_uncurry(name, func_ptr, argc) lambda_void_uncurry##argc(name, func_ptr)
 
 /* Compose several Function objects */
-
 #define lambda_pipe(name, ...) \
   lambda(name, args) { \
     var funcs = new(List,  __VA_ARGC__(__VA_ARGS__), __VA_ARGS__); \
     foreach(funcs, f) { args = call_with(f, args); } \
-    return args; \
+    return delete(funcs), args; \
   }
 
 #define lambda_method_pipe(name, ...) \
   lambda(name, args) { \
     var funcs = new(List,  __VA_ARGC__(__VA_ARGS__), __VA_ARGS__); \
     foreach(funcs, f) { call_with(f, args); } \
-    return None; \
+    return delete(funcs), None; \
   }
 
 /* Applies to collection, ignores return */

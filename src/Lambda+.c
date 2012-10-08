@@ -47,7 +47,7 @@ var new_foldr(var self, var func, var base) {
 }
 
 var new_sum(var self) {
-  var total = new(Real, 0);
+  var total = new(Real, 0.0);
   foreach(self, item) {
     add(total, item);
   }
@@ -55,7 +55,7 @@ var new_sum(var self) {
 }
 
 var new_product(var self) {
-  var total = new(Real, 1);
+  var total = new(Real, 1.0);
   foreach(self, item) {
     mul(total, item);
   }

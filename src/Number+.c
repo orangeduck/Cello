@@ -123,7 +123,7 @@ void Int_Div(var self, var other) {
 
 void Int_Neg(var self) {
   IntData* io = cast(self, Int);
-  io->value = - io->value;
+  io->value = -io->value;
 }
 
 void Int_Abs(var self) {
