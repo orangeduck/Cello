@@ -748,9 +748,8 @@ static void test_tree_dict(void) {
   var i0 = get(t0, $(String, "Hello"));
   var i1 = get(t0, $(String, "There"));
   
-  // TODO: Renable once tree is working.
-  //CU_ASSERT( eq(i0, $(Int, 2)) );
-  //CU_ASSERT( eq(i0, $(Int, 5)) );
+  CU_ASSERT( eq(i0, $(Int, 2)) );
+  CU_ASSERT( eq(i1, $(Int, 5)) );
   
   delete(t0);
 
@@ -793,6 +792,12 @@ var li3 = $(String, "Hello"); \
 var li4 = $(Real, 0.0); \
 var li5 = $(String, "There"); \
 var li6 = $(String, "There"); \
+var mk0 = $(String, "Hello"); \
+var mk1 = $(String, "There"); \
+var mk2 = $(String, "Blah"); \
+var mk3 = $(String, "Looking"); \
+var mk4 = $(String, "Balloons"); \
+var mk5 = $(String, "Gravy"); \
 var dk0 = $(String, "Hello"); \
 var dk1 = $(String, "There"); \
 var dk2 = $(Int, 25); \
@@ -1179,47 +1184,47 @@ static void test_map_create(void) {
   
   TEST_VALUES();
   
-  var d0 = new(Map);
-  put(d0, dk0, dv0);
-  put(d0, dk1, dv5);
-  put(d0, dk2, dv9);
+  var m0 = new(Map);
+  put(m0, mk0, dv0);
+  put(m0, mk1, dv5);
+  put(m0, mk2, dv9);
   
-  var d1 = new(Map);
-  put(d1, dk3, dv2);
-  put(d1, dk4, dv3);
-  put(d1, dk5, dv4);
+  var m1 = new(Map);
+  put(m1, mk3, dv2);
+  put(m1, mk4, dv3);
+  put(m1, mk5, dv4);
   
-  var d2 = copy(d0);
+  var m2 = copy(m0);
   
-  CU_ASSERT(d0);
-  CU_ASSERT(d1);
-  CU_ASSERT(d2);
+  CU_ASSERT(m0);
+  CU_ASSERT(m1);
+  CU_ASSERT(m2);
   
-  CU_ASSERT(d0 != d1);
-  CU_ASSERT(d0 != d2);
-  CU_ASSERT(d1 != d2);
+  CU_ASSERT(m0 != m1);
+  CU_ASSERT(m0 != m2);
+  CU_ASSERT(m1 != m2);
   
-  CU_ASSERT(contains(d0, dk0));
-  CU_ASSERT(contains(d0, dk1));
-  CU_ASSERT(contains(d0, dk2));
+  CU_ASSERT(contains(m0, mk0));
+  CU_ASSERT(contains(m0, mk1));
+  CU_ASSERT(contains(m0, mk2));
   
-  CU_ASSERT(contains(d1, dk3));
-  CU_ASSERT(contains(d1, dk4));
-  CU_ASSERT(contains(d1, dk5));
+  CU_ASSERT(contains(m1, mk3));
+  CU_ASSERT(contains(m1, mk4));
+  CU_ASSERT(contains(m1, mk5));
   
-  CU_ASSERT(contains(d2, dk0));
-  CU_ASSERT(contains(d2, dk1));
-  CU_ASSERT(contains(d2, dk2));
+  CU_ASSERT(contains(m2, mk0));
+  CU_ASSERT(contains(m2, mk1));
+  CU_ASSERT(contains(m2, mk2));
   
-  assign(d2, d1);
+  assign(m2, m1);
   
-  CU_ASSERT(contains(d2, dk3));
-  CU_ASSERT(contains(d2, dk4));
-  CU_ASSERT(contains(d2, dk5));
+  CU_ASSERT(contains(m2, mk3));
+  CU_ASSERT(contains(m2, mk4));
+  CU_ASSERT(contains(m2, mk5));
   
-  delete(d0);
-  delete(d1);
-  delete(d2);
+  delete(m0);
+  delete(m1);
+  delete(m2);
   
 }
 
@@ -1227,31 +1232,31 @@ static void test_map_collection(void) {
   
   TEST_VALUES();
   
-  var d0 = new(Map);
-  put(d0, dk0, dv0);
-  put(d0, dk1, dv5);
-  put(d0, dk2, dv9);
+  var m0 = new(Map);
+  put(m0, mk0, dv0);
+  put(m0, mk1, dv5);
+  put(m0, mk2, dv9);
   
-  CU_ASSERT(len(d0) is 3);
-  CU_ASSERT(contains(d0, dk0));
-  CU_ASSERT(contains(d0, dk1));
-  CU_ASSERT(contains(d0, dk2));
+  CU_ASSERT(len(m0) is 3);
+  CU_ASSERT(contains(m0, mk0));
+  CU_ASSERT(contains(m0, mk1));
+  CU_ASSERT(contains(m0, mk2));
   
-  discard(d0, dk0);
+  discard(m0, mk0);
   
-  CU_ASSERT(len(d0) is 2);
-  CU_ASSERT(not contains(d0, dk0));
-  CU_ASSERT(contains(d0, dk2));
-  CU_ASSERT(contains(d0, dk2));
+  CU_ASSERT(len(m0) is 2);
+  CU_ASSERT(not contains(m0, mk0));
+  CU_ASSERT(contains(m0, mk2));
+  CU_ASSERT(contains(m0, mk2));
 
-  clear(d0);
+  clear(m0);
   
-  CU_ASSERT(len(d0) is 0);
-  CU_ASSERT(not contains(d0, dk0));
-  CU_ASSERT(not contains(d0, dk2));
-  CU_ASSERT(not contains(d0, dk2));
+  CU_ASSERT(len(m0) is 0);
+  CU_ASSERT(not contains(m0, mk0));
+  CU_ASSERT(not contains(m0, mk2));
+  CU_ASSERT(not contains(m0, mk2));
   
-  delete(d0);
+  delete(m0);
   
 }
 
@@ -1259,21 +1264,21 @@ static void test_map_iter(void) {
   
   TEST_VALUES();
   
-  var d0 = new(Map);
-  put(d0, dk0, dv0);
-  put(d0, dk1, dv5);
-  put(d0, dk2, dv9);
+  var m0 = new(Map);
+  put(m0, mk0, dv0);
+  put(m0, mk1, dv5);
+  put(m0, mk2, dv9);
   
   int counter = 0;
   
-  foreach(d0, key) {
+  foreach(m0, key) {
   
-    var val = get(d0, key);
+    var val = get(m0, key);
     
     switch(counter) {
-      case 0: CU_ASSERT(key is dk0); break;
-      case 1: CU_ASSERT(key is dk1); break;
-      case 2: CU_ASSERT(key is dk2); break;
+      case 0: CU_ASSERT(key is mk0); break;
+      case 1: CU_ASSERT(key is mk1); break;
+      case 2: CU_ASSERT(key is mk2); break;
     }
     
     switch(counter) {
@@ -1293,16 +1298,16 @@ static void test_map_dict(void) {
   
   TEST_VALUES();
   
-  var d0 = new(Map);
-  put(d0, dk0, dv0);
-  put(d0, dk1, dv5);
-  put(d0, dk2, dv9);
+  var m0 = new(Map);
+  put(m0, mk0, dv0);
+  put(m0, mk1, dv5);
+  put(m0, mk2, dv9);
   
-  CU_ASSERT(get(d0, dk0) is dv0);
-  CU_ASSERT(get(d0, dk1) is dv5);
-  CU_ASSERT(get(d0, dk2) is dv9);
+  CU_ASSERT(get(m0, mk0) is dv0);
+  CU_ASSERT(get(m0, mk1) is dv5);
+  CU_ASSERT(get(m0, mk2) is dv9);
   
-  delete(d0);
+  delete(m0);
   
 }
 

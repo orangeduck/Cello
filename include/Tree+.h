@@ -55,7 +55,7 @@ instance(Tree, Assign) = { Tree_Assign };
 instance(Tree, Copy) = { Tree_Copy };
 instance(Tree, Collection) = { Tree_Len, Tree_Clear, Tree_Contains, Tree_Discard };
 instance(Tree, Dict) = { Tree_Get, Tree_Put };
-instance(Tree, Iter) = { Tree_Iter_Start, Tree_Iter_Start, Tree_Iter_Next };
+instance(Tree, Iter) = { Tree_Iter_Start, Tree_Iter_End, Tree_Iter_Next };
 
 
 
