@@ -67,7 +67,7 @@ void Map_Discard(var self, var key){
 
 var Map_Get(var self, var key) {
   // TODO: Implement
-  return None;
+  return Undefined;
 }
 
 void Map_Put(var self, var key, var val) {

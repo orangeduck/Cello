@@ -1,0 +1,62 @@
+/*
+** == Tree ==
+**
+**  Container that stores keys and values
+**
+**  + Allocates space for key and value objects
+**  + Key objects require "Ord" and "Eq" 
+**  + Uses "Assign" to set data contents
+*/
+
+#ifndef TreePlus_h
+#define TreePlus_h
+
+#include "Prelude+.h"
+#include "Type+.h"
+
+module Tree;
+
+struct TreeNode {
+  var leaf_key;
+  var leaf_val;
+  struct TreeNode* left;
+  struct TreeNode* right;
+};
+
+data {
+  var type;
+  var key_type;
+  var val_type;
+  var keys;
+  struct TreeNode* root;
+} TreeData;
+
+/** Tree_New(var self, var key_type, var val_type); */
+var Tree_New(var self, va_list* args);
+var Tree_Delete(var self);
+
+void Tree_Assign(var self, var obj);
+var Tree_Copy(var self);
+
+int Tree_Len(var self);
+void Tree_Clear(var self);
+var Tree_Contains(var self, var key);
+void Tree_Discard(var self, var key);
+
+var Tree_Get(var self, var key);
+void Tree_Put(var self, var key, var val);
+
+var Tree_Iter_Start(var self);
+var Tree_Iter_End(var self);
+var Tree_Iter_Next(var self, var curr);
+
+instance(Tree, New) = { sizeof(TreeData), Tree_New, Tree_Delete };
+instance(Tree, Assign) = { Tree_Assign };
+instance(Tree, Copy) = { Tree_Copy };
+instance(Tree, Collection) = { Tree_Len, Tree_Clear, Tree_Contains, Tree_Discard };
+instance(Tree, Dict) = { Tree_Get, Tree_Put };
+instance(Tree, Iter) = { Tree_Iter_Start, Tree_Iter_Start, Tree_Iter_Next };
+
+
+
+#endif

@@ -17,6 +17,7 @@ var Array = methods {
   method(Array, Push),
   method(Array, At),
   method(Array, Iter),
+  method(Array, Reverse),
   methods_end(Array)
 };
 
@@ -181,14 +182,14 @@ static void Array_Reserve_Less(ArrayData* ad) {
 var Array_Pop_Back(var self) {
   ArrayData* ad = cast(self, Array);
 
-  if (is_empty(self)) return None;
+  if (is_empty(self)) return Undefined;
   
   destruct(at(self, len(self)-1));
   
   ad->num_items--;
   Array_Reserve_Less(ad);
   
-  return None;
+  return Undefined;
 }
 
 var Array_Pop_Front(var self) {
@@ -198,7 +199,7 @@ var Array_Pop_Front(var self) {
 var Array_Pop_At(var self, int index) {
   ArrayData* ad = cast(self, Array);
   
-  if (is_empty(self)) return None;
+  if (is_empty(self)) return Undefined;
   
   destruct(at(self, index));
   
@@ -210,11 +211,11 @@ var Array_Pop_At(var self, int index) {
   ad->num_items--;
   Array_Reserve_Less(ad);
   
-  return None;
+  return Undefined;
 }
 
 var Array_At(var self, int i) {
-  if (i < 0 or i >= len(self)) return None;
+  if (i < 0 or i >= len(self)) return Undefined;
   
   ArrayData* ad = cast(self, Array);
   New* inew = type_class(ad->item_type, New);
@@ -253,4 +254,18 @@ var Array_Iter_Next(var self, var curr) {
   } else {
     return curr + inew->size;
   }
+}
+
+void Array_Reverse(var self) {
+  ArrayData* ad = cast(self, Array);
+  
+  var temp = allocate(ad->item_type);
+  
+  for(int i = 0; i < len(self) / 2; i++) {
+    assign(temp, at(self, i));
+    set(self, i, at(self, len(self)-1-i));
+    set(self, len(self)-1-i, temp);
+  }
+  
+  deallocate(temp);
 }

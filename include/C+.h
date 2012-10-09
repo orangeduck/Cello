@@ -10,7 +10,7 @@
 #include "Lambda+.h"
 #include "LambdaCurry+.h"
 
-/* Types */
+/* Data */
 #include "Bool+.h"
 #include "None+.h"
 #include "Number+.h"
@@ -21,6 +21,7 @@
 /* Containers */
 #include "Array+.h"
 #include "Table+.h"
+#include "Tree+.h"
 
 /* Collections */
 #include "List+.h"

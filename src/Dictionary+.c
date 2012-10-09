@@ -23,8 +23,8 @@ var Dictionary_New(var self, va_list* args) {
   dict->size = 1024;
   dict->keys = new(List, 0);
   
-  dict->key_buckets = malloc(dict->size * sizeof(ListData));
-  dict->val_buckets = malloc(dict->size * sizeof(ListData));
+  dict->key_buckets = calloc(dict->size, sizeof(var));
+  dict->val_buckets = calloc(dict->size, sizeof(var));
   
   for (int i = 0; i < dict->size; i++) {
     dict->key_buckets[i] = new(List, 0);
@@ -96,7 +96,7 @@ var Dictionary_Contains(var self, var key) {
 void Dictionary_Discard(var self, var key) {
   DictionaryData* dict = cast(self, Dictionary);
   
-  long i = hash(key) % dict->size;
+  long i = abs(hash(key)) % dict->size;
   
   var keys = dict->key_buckets[i];
   var vals = dict->val_buckets[i];
@@ -120,7 +120,7 @@ var Dictionary_Get(var self, var key) {
 
   DictionaryData* dict = cast(self, Dictionary);
   
-  long i = hash(key) % dict->size;
+  long i = abs(hash(key)) % dict->size;
   
   var keys = dict->key_buckets[i];
   var vals = dict->val_buckets[i];
@@ -131,14 +131,14 @@ var Dictionary_Get(var self, var key) {
     if_eq(k, key) { return v; }
   }
   
-  return None;
+  return Undefined;
 }
 
 void Dictionary_Put(var self, var key, var val) {
 
   DictionaryData* dict = cast(self, Dictionary);
   
-  long i = hash(key) % dict->size;
+  long i = abs(hash(key)) % dict->size;
   
   var keys = dict->key_buckets[i];
   var vals = dict->val_buckets[i];

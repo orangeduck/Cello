@@ -52,6 +52,8 @@ var Array_Iter_Start(var self);
 var Array_Iter_End(var self);
 var Array_Iter_Next(var self, var curr);
 
+void Array_Reverse(var self);
+
 instance(Array, New) = { sizeof(ArrayData), Array_New, Array_Delete };
 instance(Array, Assign) = { Array_Assign };
 instance(Array, Copy) = { Array_Copy };
@@ -60,5 +62,6 @@ instance(Array, Collection) = { Array_Len, Array_Clear, Array_Contains, Array_Di
 instance(Array, Push) = { Array_Push_Back, Array_Push_At, Array_Push_Back, Array_Push_Front, Array_Pop_Back, Array_Pop_At, Array_Pop_Back, Array_Pop_Front };
 instance(Array, At) = { Array_At, Array_Set };
 instance(Array, Iter) = { Array_Iter_Start, Array_Iter_End, Array_Iter_Next };
+instance(Array, Reverse) = { Array_Reverse };
 
 #endif

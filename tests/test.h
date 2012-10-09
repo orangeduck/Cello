@@ -5,6 +5,9 @@
 
 #include <CUnit/Basic.h>
 
+#undef CU_ASSERT
+#define CU_ASSERT(X) CU_TEST((bool)(X));
+
 int init_core_suite(void);
 int init_data_suite(void);
 int init_function_suite(void);

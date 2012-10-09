@@ -14,12 +14,17 @@
 ** This means it cannot be set at compile time.
 **
 ** So by convention at compile time the type_of a Type object is set to NULL.
-** So if we access a struct and it tells us NULL is the type, just assume "Type".
+** So if we access a struct and it tells us NULL is the type, assume "Type".
 */
 
 var type_of(var self) {
   
   /* Test against Builtins */
+  if (self is Undefined) {
+    fprintf(stderr, "|\n"
+                    "| ValueError: Recieved 'Undefined' as data value \n"
+                    "|\n"); abort();
+  }
   if (self is True) return Bool;
   if (self is False) return Bool;
 

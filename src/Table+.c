@@ -141,7 +141,7 @@ var Table_Get(var self, var key) {
     if_eq(k, key) { return v; }
   }
   
-  return None;
+  return Undefined;
 }
 
 void Table_Put(var self, var key, var val) {

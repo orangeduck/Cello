@@ -11,8 +11,10 @@ var String = methods {
   method(String, Assign),
   method(String, Copy),
   method(String, Eq),
+  method(String, Ord),
   method(String, Collection),
   method(String, Hash),
+  method(String, Reverse),
   method(String, Parse),
   method(String, AsStr), 
   methods_end(String)
@@ -52,6 +54,47 @@ var String_Eq(var self, var other) {
     return False;
   }
 }
+
+var String_Gt(var self, var obj) {
+  StringData* s = cast(self, String);
+  if (not type_implements(type_of(obj), AsStr)) return false;
+  
+  const char* fst = s->value;
+  const char* snd = as_str(obj);
+  
+  int fstlen = strlen(fst);
+  int sndlen = strlen(snd);
+  int minlen = fstlen > sndlen ? sndlen : fstlen; 
+  
+  for(int i = 0; i < minlen; i++) {
+    if (fst[i] > snd[i]) return True;
+  }
+  
+  if (fstlen > sndlen) return True;
+  
+  return False;
+}
+
+var String_Lt(var self, var obj) {
+  StringData* s = cast(self, String);
+  if (not type_implements(type_of(obj), AsStr)) return false;
+  
+  const char* fst = s->value;
+  const char* snd = as_str(obj);
+  
+  int fstlen = strlen(fst);
+  int sndlen = strlen(snd);
+  int minlen = fstlen > sndlen ? sndlen : fstlen; 
+  
+  for(int i = 0; i < minlen; i++) {
+    if (fst[i] < snd[i]) return True;
+  }
+  
+  if (fstlen < sndlen) return True;
+  
+  return False;
+}
+
 
 int String_Len(var self) {
   StringData* s = cast(self, String);
@@ -96,7 +139,9 @@ void String_Discard(var self, var obj) {
   if (type_implements(type_of(obj), AsStr)) {
     const char* ostr = as_str(obj);
     const char* pos = strstr(s->value, ostr);
-    /* TODO: Implement */
+    
+    int bytecount = strlen(s->value) - strlen(pos) - strlen(ostr) + 1;
+    memmove((char*)pos, pos + strlen(ostr), bytecount);
   }
   
   if (type_implements(type_of(obj), AsChar)) {
@@ -171,5 +216,14 @@ void String_Concat(var self, var obj) {
   s->value = realloc(s->value, newlen+1);
   
   strcat(s->value, os);
+}
+
+void String_Reverse(var self) {
+  StringData* s = cast(self, String);
+  for(int i = 0; i < strlen(s->value) / 2; i++) {
+    char temp = s->value[i];
+    s->value[i] = s->value[strlen(s->value)-1-i];
+    s->value[strlen(s->value)-1-i] = temp;
+  }
 }
 

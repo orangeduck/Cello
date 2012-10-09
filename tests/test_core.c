@@ -1,10 +1,4 @@
-/* ex: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab: */
-
 #include "test.h"
-
-/* Yeah I know... */
-#undef CU_ASSERT
-#define CU_ASSERT(X) CU_TEST((bool)(X));
 
 static void test_type(void) {
   CU_ASSERT(type_of($(Int, 1)) is Int);
@@ -166,7 +160,7 @@ static void test_collection(void) {
   CU_ASSERT(contains(y, $(Real, 2.2)));
   CU_ASSERT(contains(y, $(Real, 1.1)));
   
-  /* TODO: Get Sorting to work */
+  // TODO: Get Sorting to work
   /*
   sort(y);
   
@@ -242,8 +236,8 @@ static void test_at(void) {
   CU_ASSERT(at(x, 1) is snd);
   CU_ASSERT(at(x, 2) is trd);
   
-  CU_ASSERT(at(x, -1) is None);
-  CU_ASSERT(at(x, 3) is None);
+  CU_ASSERT(at(x, -1) is Undefined);
+  CU_ASSERT(at(x, 3) is Undefined);
   
   set(x, 1, trd);
   

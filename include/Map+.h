@@ -3,7 +3,7 @@
 **
 **  Collection that maps keys to values
 **
-**  + keys require Eq and Ord
+**  + keys require "Eq" and "Ord"
 **  + Just holds references
 **  + Not responsible for object deallocation
 */
@@ -17,7 +17,8 @@
 module Map;
 
 struct MapNode {
-  var leaf;
+  var leaf_key;
+  var leaf_val;
   struct MapNode* left;
   struct MapNode* right;
 };

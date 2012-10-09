@@ -165,7 +165,7 @@ static void List_Reserve_Less(ListData* lo) {
 var List_Pop_Back(var self) {
   ListData* lo = cast(self, List);
   
-  if (is_empty(self)) return None;
+  if (is_empty(self)) return Undefined;
 
   var retval = lo->items[lo->num_items-1];
   
@@ -183,7 +183,7 @@ var List_Pop_At(var self, int index) {
   ListData* lo = cast(self, List);
   
   if (index < 0 or index > lo->num_items-1) {
-    return None;
+    return Undefined;
   }
   
   var retval = lo->items[index];
@@ -203,7 +203,7 @@ var List_At(var self, int index) {
   ListData* lo = cast(self, List);
   
   if (index < 0 or index > lo->num_items-1) {
-    return None;
+    return Undefined;
   }
   
   return lo->items[index];

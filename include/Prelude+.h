@@ -55,6 +55,13 @@ data {
 
 var type_of(var obj);
 
+/*
+** == Undefined ==
+**
+**  Undefined or errorous data value.
+*/
+
+static const var Undefined = (var)-1;
 
 /*
 ** == Cast ==

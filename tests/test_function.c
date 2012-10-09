@@ -1,31 +1,18 @@
-/* ex: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab: */
-
 #include "test.h"
-
-/* Yeah I know... */
-#undef CU_ASSERT
-#define CU_ASSERT(X) CU_TEST((bool)(X));
 
 static var empty_function(var args) {
   return None;
 }
 
 static void test_stack_function(void) {
-  
   var f = $(Function, empty_function);
-  
   CU_ASSERT(f);
-  
 }
 
 static void test_heap_function(void) {
-  
   var f = new(Function, empty_function);
-  
   CU_ASSERT(f);
-  
   delete(f);
-  
 }
 
 static var empty_function2(var args) {
@@ -439,14 +426,15 @@ int build_function_suite(CU_pSuite suite) {
     return CU_get_error();
   }
 
-  if (
-      (CU_add_test(suite, "Stack Function", test_stack_function)    is None) or 
+  if ((CU_add_test(suite, "Stack Function", test_stack_function)    is None) or 
       (CU_add_test(suite, "Heap Function", test_heap_function)      is None) or
       (CU_add_test(suite, "Function Assign", test_function_assign)  is None) or 
       (CU_add_test(suite, "Function Copy", test_function_copy)      is None) or 
+      
       (CU_add_test(suite, "Call", test_call)                        is None) or 
       (CU_add_test(suite, "Call With", test_call_with)              is None) or 
       (CU_add_test(suite, "Call With Ptr", test_call_with_ptr)      is None) or 
+      
       (CU_add_test(suite, "Lambda", test_lambda)                    is None) or
       (CU_add_test(suite, "Lambda Id", test_lambda_id)              is None) or 
       (CU_add_test(suite, "Lambda Const", test_lambda_const)        is None) or 
@@ -458,6 +446,7 @@ int build_function_suite(CU_pSuite suite) {
       (CU_add_test(suite, "Lambda Partial Right", test_lambda_partial_r)      is None) or
       (CU_add_test(suite, "Lambda Uncurrying", test_lambda_uncurry)           is None) or 
       (CU_add_test(suite, "Lambda Void Uncurrying", test_lambda_void_uncurry) is None) or
+      
       (CU_add_test(suite, "Map", test_map)                  is None) or
       (CU_add_test(suite, "New Map", test_new_map)          is None) or
       (CU_add_test(suite, "New Filter", test_new_filter)    is None) or

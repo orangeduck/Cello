@@ -17,6 +17,9 @@
 
 module Bool;
 
+static const var True = (var)1;
+static const var False = (var)0;
+
 var Bool_Eq(var self, var obj);
 var Bool_Gt(var self, var obj);
 var Bool_Lt(var self, var obj);
@@ -34,9 +37,5 @@ instance(Bool, AsChar) = { Bool_AsChar };
 instance(Bool, AsLong) = { Bool_AsLong };
 instance(Bool, AsDouble) = { Bool_AsDouble };
 instance(Bool, AsStr) = { Bool_AsStr };
-
-/* Bool Type Singletons */
-static const var True = (var)1;
-static const var False = (var)0;
 
 #endif
