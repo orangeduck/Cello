@@ -67,7 +67,7 @@ $(DEMO_TARGETS): demos/%$(EXE_SUFFIX): obj/%.o $(STATIC_LIB)
 tests: $(TEST_TARGET)
 	
 $(TEST_TARGET): $(LIB_OBJ_FILES) $(TEST_OBJ_FILES)
-	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LAC_LIBS) -lCunit
+	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LAC_LIBS)
 	./$@
  
 # Clean

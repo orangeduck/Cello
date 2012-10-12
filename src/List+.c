@@ -18,6 +18,8 @@ var List = methods {
   method(List, At),
   method(List, Iter),
   method(List, Reverse),
+  method(List, Append),
+  method(List, Sort),
   methods_end(List)
 };
 
@@ -259,11 +261,45 @@ var List_Iter_Next(var self, var curr) {
   
 }
 
+static void List_Swap_Items(var self, int i0, int i1) {
+  var lft = at(self, i0);
+  var rht = at(self, i1);
+  set(self, i0, rht);
+  set(self, i1, lft);
+}
+
 void List_Reverse(var self) {
   for(int i = 0; i < len(self) / 2; i++) {
-    var fst = at(self, i);
-    var snd = at(self, len(self) - 1 - i);
-    set(self, i, snd);
-    set(self, len(self) - 1 - i, fst);
+    List_Swap_Items(self, i, len(self)-1-i);
   }
+}
+
+static int List_Sort_Partition(var self, int left, int right, int pivot) {
+  
+  var pival = at(self, pivot);
+  
+  List_Swap_Items(self, pivot, right);
+  int storei = left;
+  for(int i = left; i < right; i++) {
+    if_lt( at(self, i) , pival ) {
+      List_Swap_Items(self, i, storei + 1);
+      storei++;
+    }
+  }
+  List_Swap_Items(self, storei, right);
+  
+  return storei;
+}
+
+static void List_Sort_Part(var self, int left, int right) {
+  if (left < right) {
+    int pivot = left + (right-left) / 2;
+    int newpivot = List_Sort_Partition(self, left, right, pivot);
+    List_Sort_Part(self, left, newpivot-1);
+    List_Sort_Part(self, newpivot+1, right);
+  }
+}
+
+void List_Sort(var self) {
+  List_Sort_Part(self, 0, len(self)-1);
 }

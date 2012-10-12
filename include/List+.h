@@ -53,6 +53,7 @@ var List_Iter_End(var self);
 var List_Iter_Next(var self, var curr);
 
 void List_Reverse(var self);
+void List_Sort(var self);
 
 instance(List, New) = { sizeof(ListData), List_New, List_Delete };
 instance(List, Assign) = { List_Assign };
@@ -63,6 +64,8 @@ instance(List, Push) = { List_Push_Back, List_Push_At, List_Push_Back, List_Push
 instance(List, At) = { List_At, List_Set };
 instance(List, Iter) = { List_Iter_Start, List_Iter_End, List_Iter_Next };
 instance(List, Reverse) = { List_Reverse };
+instance(List, Sort) = { List_Sort };
+instance(List, Append) = { List_Push_Back };
 
 
 #endif

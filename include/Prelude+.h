@@ -186,9 +186,17 @@ var contains(var col, var obj);
 void discard(var col, var obj);
 
 var is_empty(var col);
-void sort(var col);
+
 var maximum(var self);
 var minimum(var self);
+
+/** Sort - can be sorted */
+
+class {
+  void (*sort)(var);
+} Sort;
+
+void sort(var self);
 
 /** Reverse - can be revered */
 
@@ -197,6 +205,14 @@ class {
 } Reverse;
 
 void reverse(var self);
+
+/** Append - can be appended to */
+
+class {
+  void (*append)(var, var);
+} Append;
+
+void append(var self, var obj);
 
 /** Iter - iterable */
 

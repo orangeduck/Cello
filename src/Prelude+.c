@@ -177,40 +177,6 @@ void discard(var self, var obj) {
   icollection->discard(self, obj);
 }
 
-static void swap_items(var self, int i0, int i1) {
-  var lft = at(self, i0);
-  var rht = at(self, i1);
-  set(self, i0, rht);
-  set(self, i1, lft);
-}
-
-static int sort_partition(var self, int left, int right, int pivot) {
-  var pival = at(self, pivot);
-  swap_items(self, pivot, right);
-  int storei = left;
-  for(int i = left; i < right; i++) {
-    if_lt( at(self, i) , pival ) {
-      swap_items(self, i, storei);
-      storei++;
-    }
-  }
-  swap_items(self, storei, right);
-  return storei;
-}
-
-static void sort_part(var self, int left, int right) {
-  if (len(self) >= 2) {
-    int pivot = len(self)/2;
-    int newpivot = sort_partition(self, left, right, pivot);
-    sort_part(self, left, newpivot-1);
-    sort_part(self, newpivot+1, right);
-  }
-}
-
-void sort(var self) {
-  sort_part(self, 0, len(self)-1);
-}
-
 var maximum(var self) {
   
   if (len(self) == 0) return None;
@@ -243,6 +209,18 @@ void reverse(var self) {
   Reverse* ireverse = type_class(type_of(self), Reverse);
   assert(ireverse->reverse);
   ireverse->reverse(self);
+}
+
+void sort(var self) {
+  Sort* isort = type_class(type_of(self), Sort);
+  assert(isort->sort);
+  isort->sort(self);
+}
+
+void append(var self, var obj) {
+  Append* iappend = type_class(type_of(self), Append);
+  assert(iappend->append);
+  iappend->append(self, obj);
 }
 
 var iter_start(var self) {

@@ -53,6 +53,7 @@ var Array_Iter_End(var self);
 var Array_Iter_Next(var self, var curr);
 
 void Array_Reverse(var self);
+void Array_Sort(var self);
 
 instance(Array, New) = { sizeof(ArrayData), Array_New, Array_Delete };
 instance(Array, Assign) = { Array_Assign };
@@ -63,5 +64,7 @@ instance(Array, Push) = { Array_Push_Back, Array_Push_At, Array_Push_Back, Array
 instance(Array, At) = { Array_At, Array_Set };
 instance(Array, Iter) = { Array_Iter_Start, Array_Iter_End, Array_Iter_Next };
 instance(Array, Reverse) = { Array_Reverse };
+instance(Array, Sort) = { Array_Sort };
+instance(Array, Append) = { Array_Push_Back };
 
 #endif

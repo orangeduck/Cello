@@ -18,6 +18,8 @@ var Array = methods {
   method(Array, At),
   method(Array, Iter),
   method(Array, Reverse),
+  method(Array, Append),
+  method(Array, Sort),
   methods_end(Array)
 };
 
@@ -256,16 +258,57 @@ var Array_Iter_Next(var self, var curr) {
   }
 }
 
+static void Array_Swap_Items(var self, var temp, int i0, int i1) {
+  assign(temp, at(self, i0));
+  set(self, i0, at(self, i1));
+  set(self, i1, temp);
+}
+
 void Array_Reverse(var self) {
   ArrayData* ad = cast(self, Array);
   
   var temp = allocate(ad->item_type);
   
   for(int i = 0; i < len(self) / 2; i++) {
-    assign(temp, at(self, i));
-    set(self, i, at(self, len(self)-1-i));
-    set(self, len(self)-1-i, temp);
+    Array_Swap_Items(self, temp, i, len(self)-1-i);
   }
   
-  deallocate(temp);
+  destruct(temp);
+}
+
+static int Array_Sort_Partition(var self, int left, int right, int pivot) {
+  ArrayData* ad = cast(self, Array);
+  
+  var pival = allocate(ad->item_type);
+  var temp = allocate(ad->item_type);
+  
+  assign(pival, at(self, pivot));
+  
+  Array_Swap_Items(self, temp, pivot, right);
+  int storei = left;
+  for(int i = left; i < right; i++) {
+    if_lt( at(self, i) , pival ) {
+      Array_Swap_Items(self, temp, i, storei + 1);
+      storei++;
+    }
+  }
+  Array_Swap_Items(self, temp, storei, right);
+  
+  destruct(temp);
+  destruct(pival);
+  
+  return storei;
+}
+
+static void Array_Sort_Part(var self, int left, int right) {
+  if (left < right) {
+    int pivot = left + (right-left) / 2;
+    int newpivot = Array_Sort_Partition(self, left, right, pivot);
+    Array_Sort_Part(self, left, newpivot-1);
+    Array_Sort_Part(self, newpivot+1, right);
+  }
+}
+
+void Array_Sort(var self) {
+  Array_Sort_Part(self, 0, len(self)-1);
 }

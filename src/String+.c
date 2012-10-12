@@ -17,6 +17,7 @@ var String = methods {
   method(String, Reverse),
   method(String, Parse),
   method(String, AsStr), 
+  method(String, Append), 
   methods_end(String)
 };
 
@@ -207,7 +208,7 @@ const char* String_AsStr(var self) {
   return s->value;
 }
 
-void String_Concat(var self, var obj) {
+void String_Append(var self, var obj) {
   StringData* s = cast(self, String);
   const char* os = as_str(obj);
   
