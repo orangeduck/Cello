@@ -2,7 +2,7 @@
 #include "ptest.h"
 #include "C+.h"
 
-PT_SUITE(functional_suite) {
+PT_SUITE(suite_functional) {
 
   var empty_function(var args) {
     return None;

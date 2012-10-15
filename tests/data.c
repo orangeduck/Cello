@@ -4,7 +4,7 @@
 
 #include <math.h>
 
-PT_SUITE(data_suite) {
+PT_SUITE(suite_data) {
 
   PT_TEST(test_bool_ord) {
     PT_ASSERT(eq(True, True));
