@@ -90,36 +90,31 @@ __Defining a new Class.__
 In the header...
 
 ```c
-/** Num - performs numeric operations */
+/** Vector - vector operations */
 
 class {
-  void (*add)(var, var);
-  void (*sub)(var, var);
-  void (*mul)(var, var);
-  void (*div)(var, var);
-  void (*negate)(var);
-  void (*absolute)(var);
-} Num;
+  float (*dot)(var, var);
+  float (*length)(var);
+} Vector;
 
-void add(var self, var obj);
-void sub(var self, var obj);
-void mul(var self, var obj);
-void divide(var self, var obj);
-
-void negate(var self);
-void absolute(var self);
+float dot(var self, var obj);
+float length(var self);
 ```
 
 And in the object file...
 
 ```c
-void add(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
-  assert(inum->add);
-  inum->add(lhs, rhs);
+float dot(var self, var obj) {
+  Vector* ivector = type_class(type_of(self), Vector);
+  assert(ivector->dot);
+  return ivector->dot(self, obj);
 }
 
-...
+float length(var self) {
+  Vector* ivector = type_class(type_of(self), Vector);
+  assert(ivector->length);
+  return ivector->length(self);
+}
 ```
 
 __Defining a new Type.__
@@ -127,125 +122,86 @@ __Defining a new Type.__
 In the header...
 
 ```c
-/*
-** == Int ==
-**
-**  Basic integer wrapper
-*/
-
-module Int;
+module Vec2;
 
 data {
   var type;
-  long value;
-} IntData;
+  float x, y;
+} Vec2Data;
 
-/** Int_New(var self, long value); */
-var Int_New(var self, va_list* args);
-var Int_Delete(var self);
-void Int_Assign(var self, var obj);
-var Int_Copy(var self);
+/** Vec2_New(var self, float x, float y); */
+var Vec2_New(var self, va_list* args);
+var Vec2_Delete(var self);
+void Vec2_Assign(var self, var obj);
+var Vec2_Copy(var self);
 
-bool Int_Eq(var self, var obj);
-bool Int_Gt(var self, var obj);
-bool Int_Lt(var self, var obj);
+var Vec2_Eq(var self, var obj);
 
-long Int_Hash(var self);
+float Vec2_Dot(var self, var obj);
+float Vec2_Length(var self);
 
-void Int_Add(var self, var obj);
-void Int_Sub(var self, var obj);
-void Int_Mul(var self, var obj);
-void Int_Div(var self, var obj);
-void Int_Neg(var self);
-void Int_Abs(var self);
-
-void Int_Parse_Read(var self, var stream);
-void Int_Parse_Write(var self, var stream);
-
-long Int_AsLong(var self);
-double Int_AsDouble(var self);
-
-instance(Int, New) = { sizeof(IntData), Int_New, Int_Delete };
-instance(Int, Assign) = { Int_Assign };
-instance(Int, Copy) = { Int_Copy };
-instance(Int, Eq) = { Int_Eq };
-instance(Int, Ord) = { Int_Gt, Int_Lt };
-instance(Int, Hash) = { Int_Hash };
-instance(Int, Parse) = { Int_Parse_Read, Int_Parse_Write };
-instance(Int, AsLong) = { Int_AsLong };
-instance(Int, AsDouble) = { Int_AsDouble };
-instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
+instance(Vec2, New) = { sizeof(Vec2Data), Vec2_New, Vec2_Delete };
+instance(Vec2, Assign) = { Vec2_Assign };
+instance(Vec2, Copy) = { Vec2_Copy };
+instance(Vec2, Eq) = { Vec2_Eq };
+instance(Vec2, Vector) = { Vec2_Dot, Vec2_Length };
 ```
 
 And in the object file...
 
 ```c
-var Int = methods {
-  methods_begin(Int),
-  method(Int, New), 
-  method(Int, Assign),
-  method(Int, Copy),
-  method(Int, Eq), 
-  method(Int, Ord),
-  method(Int, Hash),
-  method(Int, Parse),
-  method(Int, AsLong),
-  method(Int, AsDouble),
-  method(Int, Num),
-  methods_end(Int)
+var Vec2 = methods {
+  methods_begin(Vec2),
+  method(Vec2, New),
+  method(Vec2, Assign),
+  method(Vec2, Copy),
+  method(Vec2, Eq),
+  methods_end(Vec2)
 };
 
-var Int_New(var self, va_list* args) {
-  IntData* intdata = cast(self, Int);
-  intdata->value = va_arg(*args, int);
+var Vec2_New(var self, va_list* args) {
+  Vec2Data* v = cast(self, Vec2);
+  v->x = va_arg(*args, double);
+  v->y = va_arg(*args, double);
   return self;
 }
 
-var Int_Delete(var self) {
+var Vec2_Delete(var self) {
   return self;
 }
 
-void Int_Assign(var self, var obj) {
-  IntData* intdata = cast(self, Int);
-  intdata->value = as_long(obj);
+void Vec2_Assign(var self, var obj) {
+  Vec2Data* v1 = cast(self, Vec2);
+  Vec2Data* v2 = cast(obj, Vec2);
+  v1->x = v2->x;
+  v1->y = v2->y;
 }
 
-...
+var Vec2_Copy(var self) {
+  Vec2Data* v = cast(self, Vec2);
+  return new(Vec2, v->x, v->y);
+}
+
+var Vec2_Eq(var self, var obj) {
+  Vec2Data* v1 = cast(self, Vec2);
+  Vec2Data* v2 = cast(obj, Vec2);
+  return (var)(v1->x is v2->x and v1->y is v2->y);
+}
+
+float Vec2_Dot(var self, var obj) {
+  Vec2Data* v1 = cast(self, Vec2);
+  Vec2Data* v2 = cast(obj, Vec2);
+  return (v1->x * v2->x + v2->y * v2->y);
+}
+
+float Vec2_Length(var self) {
+  Vec2Data* v = cast(self, Vec2);
+  return sqrt(v->x * v->x + v->y * v->y);
+}
 ```
 
-More information and native class definitions (such as for ```New```, ```Eq```, ```Ord```) can be found in ```Prelude+.h```
-
-Explaination
-------------
-
-The first thing that probably comes into your head viewing the above code is ```var```. This is a typedef of ```void*``` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the ```cast``` function.
-
-This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, then you are more than free to use ```len``` upon it. One can test if a type implements a certain class with the function ```Type_Implements(type, Class)```. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
-
-Another thing that may have jumped to your mind in the examples is ```new```, ```delete``` and the ```$``` symbol. These are ways to allocate memory for objects. ```new``` and ```delete``` are used for heap objects and call constructors/destructors. ```$``` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the coorisponding types data structure with the arguments provided.
-
-Other than these things there is not much suprising in the code which cannot be explained via syntactic sugar.
-
-* ```is``` -> ```==```
-* ```not``` -> ```!```
-* ```elif``` -> ```else if```
-* ```module``` -> ```extern var```
-* ```class``` -> ```typedef struct```
-* ```data``` -> ```typedef struct```
-
-finally the ```instance``` and ```methods``` macros are helpers for defining Type objects statically. Because Type objects are somewhat complicated the syntax is very awkward otherwise.
-
-Compiling
----------
-
-To build the just run "make"
-
-To build the tests run "make test" (requires CUnit)
-
-To build the examples run "make examples"
-
-More Examples
--------------
+More More Examples
+------------------
 
 Some functional tools using "lambda" statements.
 
@@ -315,6 +271,39 @@ int main(int argc, char** argv) {
 }
 ```
 
+There are more examples in the demos folder as well as a large amount of reference material under tests and via the source code. Native class definitions (such as for ```New```, ```Eq```, ```Ord```) can be found in ```Prelude+.h```
+
+
+Explaination
+------------
+
+The first thing that probably comes into your head viewing the above code is ```var```. This is a typedef of ```void*``` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the ```cast``` function.
+
+This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, then you are more than free to use ```len``` upon it. One can test if a type implements a certain class with the function ```type_implements(type, Class)```. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
+
+Another thing that may have jumped to your mind in the examples is ```new```, ```delete``` and the ```$``` symbol. These are ways to allocate memory for objects. ```new``` and ```delete``` are used for heap objects and call constructors/destructors. ```$``` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the coorisponding types data structure with the arguments provided.
+
+Other than these things there is not much suprising in the code which cannot be explained via syntactic sugar.
+
+* ```is```, ```not```, ```and```, ```or``` -> ```==```, ```!```, ```&&```, ```||```
+* ```elif``` -> ```else if```
+* ```module``` -> ```extern var```
+* ```class``` -> ```typedef struct```
+* ```data``` -> ```typedef struct```
+
+finally the ```instance``` and ```methods``` macros are helpers for defining Type objects statically. Because Type objects are somewhat complicated the syntax is very awkward otherwise.
+
+Compiling
+---------
+
+To build the just run "make"
+
+To build the tests run "make test" (requires CUnit)
+
+To build the examples run "make examples"
+
+
+
 Returning Values
 ----------------
 
@@ -322,7 +311,7 @@ Having every data object as a reference makes returning data objects with manual
 
 * Embrace destructive operations - Although not as nice semantically as duplicative ones, consistency is the key issue. How often is it we mean not to act destructively anyway? Assume destructive functions by default, return void.
 
-* Use output parameteres - Use arguments intended for output, passed into a function. Use the "assign" function or otherwise to assign them data.
+* Use output parameteres - Use arguments intended for output, passed into a function. Use the ```assign``` function or otherwise to assign them data.
 
 
 Questions & Contributions

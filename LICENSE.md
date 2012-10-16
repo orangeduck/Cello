@@ -1,3 +1,5 @@
+Licensed Under BSD
+
 Copyright (c) 2012, Daniel Holden
 All rights reserved.
 
