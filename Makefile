@@ -8,7 +8,7 @@ AR?=ar
 LAC_CPPFLAGS= -I./include
 LAC_CFLAGS= -std=gnu99 -Wall -Werror -Wno-unused -O3 -g 
 LAC_LDFLAGS= 
-LAC_LIBS= 
+LAC_LIBS= -lm
 
 LIB_C_FILES= $(wildcard src/*.c)
 LIB_OBJ_FILES= $(addprefix obj/,$(notdir $(LIB_C_FILES:%.c=%.o)))
