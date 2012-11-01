@@ -156,6 +156,7 @@ var Vec2 = methods {
   method(Vec2, Assign),
   method(Vec2, Copy),
   method(Vec2, Eq),
+  method(Vec2, Vector),
   methods_end(Vec2)
 };
 
