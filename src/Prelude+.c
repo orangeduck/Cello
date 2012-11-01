@@ -116,7 +116,7 @@ var copy(var self) {
 var eq(var lhs, var rhs) {
   
   if (not type_implements(type_of(lhs), Eq)) {
-    return (var)(lhs == rhs);
+    return (var)(intptr_t)(lhs == rhs);
   }
   
   Eq* ieq = type_class(type_of(lhs), Eq);
@@ -126,7 +126,7 @@ var eq(var lhs, var rhs) {
 }
 
 var neq(var lhs, var rhs) {
-  return (var)(not eq(lhs, rhs));
+  return (var)(intptr_t)(not eq(lhs, rhs));
 }
 
 var gt(var lhs, var rhs) {
@@ -142,11 +142,11 @@ var lt(var lhs, var rhs) {
 }
 
 var ge(var lhs, var rhs) {
-  return (var)(not lt(lhs, rhs));
+  return (var)(intptr_t)(not lt(lhs, rhs));
 }
 
 var le(var lhs, var rhs) {
-  return (var)(not gt(lhs, rhs));
+  return (var)(intptr_t)(not gt(lhs, rhs));
 }
 
 int len(var self) {
@@ -156,7 +156,7 @@ int len(var self) {
 }
 
 var is_empty(var self) {
-  return (var)(len(self) == 0);
+  return (var)(intptr_t)(len(self) == 0);
 }
 
 void clear(var self) {
@@ -304,7 +304,7 @@ var pop_front(var self) {
 long hash(var self) {
 
   if (not type_implements(type_of(self), Hash)) {
-    return (long)self;
+    return (long)(intptr_t)self;
   }
   
   Hash* ihash = type_class(type_of(self), Hash);

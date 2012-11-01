@@ -16,19 +16,19 @@ var Bool = methods {
 };
 
 var Bool_Eq(var self, var obj) {
-  return (var)(self == obj);
+  return (var)(intptr_t)(self == obj);
 }
 
 var Bool_Gt(var self, var obj) {
-  return (var)(self > obj);
+  return (var)(intptr_t)(self > obj);
 }
 
 var Bool_Lt(var self, var obj) {
-  return (var)(self < obj);
+  return (var)(intptr_t)(self < obj);
 }
 
 long Bool_Hash(var self) {
-  return (long)self;
+  return (long)(intptr_t)self;
 }
 
 char Bool_AsChar(var self) {
@@ -47,7 +47,7 @@ const char* Bool_AsStr(var self) {
 }
 
 long Bool_AsLong(var self) {
-  return (long)self;
+  return (long)(intptr_t)self;
 }
 
 double Bool_AsDouble(var self) {

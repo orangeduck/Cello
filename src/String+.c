@@ -50,7 +50,7 @@ var String_Copy(var self) {
 var String_Eq(var self, var other) {
   StringData* fst = cast(self, String);
   if (type_implements(type_of(other), AsStr)) {
-    return (var)(strcmp(fst->value, as_str(other)) == 0);
+    return (var)(intptr_t)(strcmp(fst->value, as_str(other)) == 0);
   } else {
     return False;
   }

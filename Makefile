@@ -2,7 +2,7 @@
 
 PLATFORM?= $(shell uname)
 
-CC?=gcc
+CC=gcc
 AR?=ar
 
 LAC_CPPFLAGS= -I./include
