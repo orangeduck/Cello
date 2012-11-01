@@ -80,7 +80,7 @@ C+ is a C GNU99 library which brings higher level programming tools to C. It tak
 
 Although I've made the syntax pleasant, this isn't a library for beginners. It is for C power users, as manual memory management doesn't play nicely with many higher-order concepts.
 
-What I don't enjoy in Haskell is writing small detailed algorithms in a functional style. What I do love about Haskell (and C) is the way programs are structured at a higher level. With this project I never really aimed for Object Orientation in C, but I hope that with C+ I've turned it into something of a dynamic and powerful functional language which it might have once been. This also expains why some terminology is closer to Haskell than C++/Java.
+What I don't enjoy in Haskell is writing small detailed algorithms in a functional style. What I do love about Haskell (and C) is the way programs are structured at a higher level. With this project I never really aimed for Object Orientation in C, but I hope that with C+ I've turned it into something of a dynamic and powerful functional language which it might have once been. This also explains why some terminology is closer to Haskell than C++/Java.
 
 More Examples
 -------------
@@ -274,16 +274,16 @@ int main(int argc, char** argv) {
 There are more examples in the demos folder as well as a large amount of reference material under tests and via the source code. Native class definitions (such as for ```New```, ```Eq```, ```Ord```) can be found in ```Prelude+.h```
 
 
-Explaination
+Explanation
 ------------
 
 The first thing that probably comes into your head viewing the above code is ```var```. This is a typedef of ```void*``` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the ```cast``` function.
 
 This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, then you are more than free to use ```len``` upon it. One can test if a type implements a certain class with the function ```type_implements(type, Class)```. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
 
-Another thing that may have jumped to your mind in the examples is ```new```, ```delete``` and the ```$``` symbol. These are ways to allocate memory for objects. ```new``` and ```delete``` are used for heap objects and call constructors/destructors. ```$``` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the coorisponding types data structure with the arguments provided.
+Another thing that may have jumped to your mind in the examples is ```new```, ```delete``` and the ```$``` symbol. These are ways to allocate memory for objects. ```new``` and ```delete``` are used for heap objects and call constructors/destructors. ```$``` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the corresponding types data structure with the arguments provided.
 
-Other than these things there is not much suprising in the code which cannot be explained via syntactic sugar.
+Other than these things there is not much surprising in the code which cannot be explained via syntactic sugar.
 
 * ```is```, ```not```, ```and```, ```or``` -> ```==```, ```!```, ```&&```, ```||```
 * ```elif``` -> ```else if```
@@ -311,7 +311,7 @@ Having every data object as a reference makes returning data objects with manual
 
 * Embrace destructive operations - Although not as nice semantically as duplicative ones, consistency is the key issue. How often is it we mean not to act destructively anyway? Assume destructive functions by default, return void.
 
-* Use output parameteres - Use arguments intended for output, passed into a function. Use the ```assign``` function or otherwise to assign them data.
+* Use output parameters - Use arguments intended for output, passed into a function. Use the ```assign``` function or otherwise to assign them data.
 
 
 Questions & Contributions
