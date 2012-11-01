@@ -297,11 +297,11 @@ finally the ```instance``` and ```methods``` macros are helpers for defining Typ
 Compiling
 ---------
 
-To build the just run "make"
+To build the just run `make`
 
-To build the tests run "make test" (requires CUnit)
+To build the tests run `make test`
 
-To build the examples run "make examples"
+To build the examples run `make examples`
 
 
 
