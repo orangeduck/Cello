@@ -5,28 +5,29 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
-
+#include <stdint.h>
 
 /*
 ** == Syntax ==
 **
 **  New reserved keywords:
 **
-**  var is not elif
+**  var is not and or elif foreach
 **  module class data instance
-**  lit $ foreach cast with
+**  $ lit cast with
 */
 
 typedef void* var;
 #define is ==
 #define not !
+#define and &&
+#define or ||
 #define elif else if
 
 #define module extern var
 #define class typedef struct 
 #define data typedef struct 
-#define instance(T,C) static const C T##C
-
+#define instance(T,C) static C T##C
 
 /*
 ** == Methods ==
@@ -54,6 +55,13 @@ data {
 
 var type_of(var obj);
 
+/*
+** == Undefined ==
+**
+**  Undefined or errorous data value.
+*/
+
+static const var Undefined = (var)-1;
 
 /*
 ** == Cast ==
@@ -62,7 +70,7 @@ var type_of(var obj);
 **  Ensure object X is of certain type T.
 */
 
-#define cast(X, T) Type_Cast(X, T, __func__)
+#define cast(X, T) Type_Cast(X, T, __func__, __FILE__, __LINE__)
 
 
 /* 
@@ -105,6 +113,8 @@ var new(var type, ...);
 void delete(var obj);
 
 var allocate(var type);
+void deallocate(var obj);
+
 var construct(var obj, ...);
 var destruct(var obj);
 
@@ -127,23 +137,31 @@ var copy(var obj);
 /** Eq - equality */
 
 class {
-  bool (*eq)(var,var);
+  var (*eq)(var,var);
 } Eq;
 
-bool eq(var self, var obj);
-bool neq(var self, var obj);
+var eq(var self, var obj);
+var neq(var self, var obj);
+
+#define if_eq(X,Y) if(eq(X,Y))
+#define if_neq(X,Y) if(neq(X,Y))
 
 /** Ord - ordering */
 
 class {
-  bool (*gt)(var,var);
-  bool (*lt)(var,var);
+  var (*gt)(var,var);
+  var (*lt)(var,var);
 } Ord;
 
-bool gt(var self, var obj);
-bool lt(var self, var obj);
-bool ge(var self, var obj);
-bool le(var self, var obj);
+var gt(var self, var obj);
+var lt(var self, var obj);
+var ge(var self, var obj);
+var le(var self, var obj);
+
+#define if_lt(X,Y) if(lt(X,Y))
+#define if_gt(X,Y) if(gt(X,Y))
+#define if_le(X,Y) if(le(X,Y))
+#define if_ge(X,Y) if(ge(X,Y))
 
 /** Hash - hashable */
 
@@ -157,17 +175,44 @@ long hash(var obj);
 
 class {
   int (*len)(var);
-  bool (*is_empty)(var);
   void (*clear)(var);
-  bool (*contains)(var, var);
+  var (*contains)(var, var);
   void (*discard)(var, var);
 } Collection;
 
 int len(var col);
-bool is_empty(var col);
 void clear(var col);
-bool contains(var col, var obj);
+var contains(var col, var obj);
 void discard(var col, var obj);
+
+var is_empty(var col);
+
+var maximum(var self);
+var minimum(var self);
+
+/** Sort - can be sorted */
+
+class {
+  void (*sort)(var);
+} Sort;
+
+void sort(var self);
+
+/** Reverse - can be revered */
+
+class {
+  void (*reverse)(var);
+} Reverse;
+
+void reverse(var self);
+
+/** Append - can be appended to */
+
+class {
+  void (*append)(var, var);
+} Append;
+
+void append(var self, var obj);
 
 /** Iter - iterable */
 
@@ -266,17 +311,18 @@ class {
   void (*exit)(var);
 } With;
 
-bool with_enter(var obj);
-bool with_exit(var obj, bool enable);
+void enter_with(var self);
+void exit_with(var self);
 
-// Good idea but still needs some work.
-#define with(x) for(bool __wvar = with_enter(x); with_exit(x, __wvar); __wvar = true)
-
+//  TODO: This needs work!
+//
+//  #define with(x) with_as(x, __with##__COUNTER__)
+//  #define with_as(x, y) for(var y = NULL; enter_for(x, &y); exit_with(y))
 
 /** Stream - File like object */
 
 class {
-  void (*open)(var,const char*,const char*);
+  var (*open)(var,const char*,const char*);
   void (*close)(var);
   void (*seek)(var,int,int);
   int (*tell)(var);
@@ -286,7 +332,7 @@ class {
   int (*write)(var,void*,int);
 } Stream;
 
-void open(var self, const char* name, const char* access);
+var open(var self, const char* name, const char* access);
 void close(var self);
 void seek(var self, int pos, int origin);
 int tell(var self);

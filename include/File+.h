@@ -26,7 +26,7 @@ var File_Delete(var self);
 void File_Assign(var self, var obj);
 var File_Copy(var self);
 
-void File_Open(var self, const char* filename, const char* access);
+var File_Open(var self, const char* filename, const char* access);
 void File_Close(var self);
 
 void File_Seek(var self, int pos, int origin);

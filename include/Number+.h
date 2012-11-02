@@ -42,9 +42,9 @@ var Int_Delete(var self);
 void Int_Assign(var self, var obj);
 var Int_Copy(var self);
 
-bool Int_Eq(var self, var obj);
-bool Int_Gt(var self, var obj);
-bool Int_Lt(var self, var obj);
+var Int_Eq(var self, var obj);
+var Int_Gt(var self, var obj);
+var Int_Lt(var self, var obj);
 
 long Int_Hash(var self);
 
@@ -91,9 +91,9 @@ var Real_Delete(var self);
 void Real_Assign(var self, var obj);
 var Real_Copy(var self);
 
-bool Real_Eq(var self, var obj);
-bool Real_Gt(var self, var obj);
-bool Real_Lt(var self, var obj);
+var Real_Eq(var self, var obj);
+var Real_Gt(var self, var obj);
+var Real_Lt(var self, var obj);
 
 long Real_Hash(var self);
 

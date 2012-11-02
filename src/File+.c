@@ -1,7 +1,6 @@
+#include "File+.h"
 
 #include <assert.h>
-
-#include "File+.h"
 
 var File = methods {
   methods_begin(File),
@@ -23,6 +22,8 @@ var File_New(var self, va_list* args) {
 }
 
 var File_Delete(var self) {
+  FileData* fd = cast(self, File);
+  if (fd->f != NULL) { close(self); }
   return self;
 }
 
@@ -39,9 +40,10 @@ var File_Copy(var self) {
   return fnew;
 }
 
-void File_Open(var self, const char* filename, const char* access) {
+var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
   fd->f = fopen(filename, access);
+  return self;
 }
 
 void File_Close(var self) {

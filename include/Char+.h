@@ -23,9 +23,9 @@ var Char_Delete(var self);
 void Char_Assign(var self, var obj);
 var Char_Copy(var self);
 
-bool Char_Eq(var self, var obj);
-bool Char_Gt(var self, var obj);
-bool Char_Lt(var self, var obj);
+var Char_Eq(var self, var obj);
+var Char_Gt(var self, var obj);
+var Char_Lt(var self, var obj);
 
 long Char_Hash(var self);
 

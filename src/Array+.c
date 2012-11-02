@@ -2,7 +2,8 @@
 #include <assert.h>
 #include <string.h>
 
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
 
 #include "Array+.h"
 
@@ -16,6 +17,9 @@ var Array = methods {
   method(Array, Push),
   method(Array, At),
   method(Array, Iter),
+  method(Array, Reverse),
+  method(Array, Append),
+  method(Array, Sort),
   methods_end(Array)
 };
 
@@ -64,28 +68,24 @@ var Array_Copy(var self) {
   return newarray;
 }
 
-bool Array_Eq(var self, var obj) {
+var Array_Eq(var self, var obj) {
   
   if (len(self) != len(obj)) {
-    return false;
+    return False;
   }
   
   for(int i = 0; i < len(self); i++) {
-    if (neq( at(self,i) , at(obj,i) )) {
-      return false;
+    if_neq( at(self,i) , at(obj,i) ) {
+      return False;
     }
   }
   
-  return true;
+  return True;
 }
 
 int Array_Len(var self) {
   ArrayData* ad = cast(self, Array);
   return ad->num_items;
-}
-
-bool Array_IsEmpty(var self) {
-  return (len(self) == 0);
 }
 
 void Array_Clear(var self) {
@@ -101,20 +101,20 @@ void Array_Clear(var self) {
   
 }
 
-bool Array_Contains(var self, var obj) {
+var Array_Contains(var self, var obj) {
   foreach(self, item) {
-    if ( eq(item, obj) ) {
-      return true;
+    if_eq(item, obj) {
+      return True;
     }
   }
   
-  return false;
+  return False;
 }
 
 void Array_Discard(var self, var obj) {
   for(int i = 0; i < len(self); i++) {
     var item = at(self, i);
-    if ( eq(item, obj) ) {
+    if_eq(item, obj) {
       pop_at(self, i);
       return;
     }
@@ -124,16 +124,19 @@ void Array_Discard(var self, var obj) {
 static void Array_Reserve_More(ArrayData* ad) {
   
   if (ad->num_items > ad->num_slots) {
+    int old_size = ad->num_slots;
     ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
-    New* inew = Type_Class(ad->item_type, New);
+    New* inew = type_class(ad->item_type, New);
     ad->items = realloc(ad->items, inew->size * ad->num_slots);
+    
+    memset(ad->items + old_size * inew->size, 0, (ad->num_slots - old_size) * inew->size);
   }
 
 }
 
 static void Array_Set_Type_At(ArrayData* ad, int i) {
   
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   
   ObjectData* template = ad->items + (inew->size * i);
   template->type = ad->item_type;
@@ -146,6 +149,7 @@ void Array_Push_Back(var self, var obj) {
   Array_Reserve_More(ad);
   
   Array_Set_Type_At(self, ad->num_items-1);
+  
   set(self, ad->num_items-1, obj);
 }
 
@@ -158,10 +162,10 @@ void Array_Push_At(var self, var obj, int index) {
   ad->num_items++;
   Array_Reserve_More(ad);
   
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   memmove(ad->items + inew->size * (index+1), 
           ad->items + inew->size * index, 
-          inew->size * (ad->num_items - index));
+          inew->size * ((ad->num_items-1) - index));
   
   Array_Set_Type_At(self, index);
   set(self, index, obj);
@@ -171,7 +175,7 @@ static void Array_Reserve_Less(ArrayData* ad) {
   
   if ( ad->num_slots > pow(ad->num_items+1, 1.5)) {
     ad->num_slots = floor((ad->num_slots-1) * (1.0/1.5));
-    New* inew = Type_Class(ad->item_type, New);
+    New* inew = type_class(ad->item_type, New);
     ad->items = realloc(ad->items, inew->size * ad->num_slots);
   }
   
@@ -180,14 +184,14 @@ static void Array_Reserve_Less(ArrayData* ad) {
 var Array_Pop_Back(var self) {
   ArrayData* ad = cast(self, Array);
 
-  if (is_empty(self)) return None;
+  if (is_empty(self)) return Undefined;
   
   destruct(at(self, len(self)-1));
   
   ad->num_items--;
   Array_Reserve_Less(ad);
   
-  return None;
+  return Undefined;
 }
 
 var Array_Pop_Front(var self) {
@@ -197,44 +201,47 @@ var Array_Pop_Front(var self) {
 var Array_Pop_At(var self, int index) {
   ArrayData* ad = cast(self, Array);
   
-  if (is_empty(self)) return None;
+  if (is_empty(self)) return Undefined;
   
   destruct(at(self, index));
   
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   memmove(ad->items + inew->size * index, 
           ad->items + inew->size * (index+1), 
-          inew->size * (ad->num_items - index));
+          inew->size * ((ad->num_items-1) - index));
   
   ad->num_items--;
   Array_Reserve_Less(ad);
   
-  return None;
+  return Undefined;
 }
 
 var Array_At(var self, int i) {
-  if (i < 0 || i >= len(self)) return None;
+  if (i < 0 or i >= len(self)) return Undefined;
   
   ArrayData* ad = cast(self, Array);
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   return ad->items + inew->size * i;
 }
 
 void Array_Set(var self, int i, var obj) {
-  if (i < 0 || i >= len(self)) return;
+  if (i < 0 or i >= len(self)) return;
   
   ArrayData* ad = cast(self, Array);
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   
   assign(ad->items + inew->size * i, obj);
 }
 
+static const var ARRAY_ITER_END = (var)-1;
+
 var Array_Iter_Start(var self) {
+
+  if (len(self) == 0) { return ARRAY_ITER_END; }
+
   ArrayData* ad = cast(self, Array);
   return ad->items;
 }
-
-static const var ARRAY_ITER_END = (var)-1;
 
 var Array_Iter_End(var self) {
   return ARRAY_ITER_END;
@@ -242,11 +249,66 @@ var Array_Iter_End(var self) {
 
 var Array_Iter_Next(var self, var curr) {
   ArrayData* ad = cast(self, Array);
-  New* inew = Type_Class(ad->item_type, New);
+  New* inew = type_class(ad->item_type, New);
   
-  if (curr >= ad->items + inew->size * ad->num_items) {
+  if (curr >= ad->items + inew->size * (ad->num_items-1)) {
     return ARRAY_ITER_END;
   } else {
     return curr + inew->size;
   }
+}
+
+static void Array_Swap_Items(var self, var temp, int i0, int i1) {
+  assign(temp, at(self, i0));
+  set(self, i0, at(self, i1));
+  set(self, i1, temp);
+}
+
+void Array_Reverse(var self) {
+  ArrayData* ad = cast(self, Array);
+  
+  var temp = allocate(ad->item_type);
+  
+  for(int i = 0; i < len(self) / 2; i++) {
+    Array_Swap_Items(self, temp, i, len(self)-1-i);
+  }
+  
+  destruct(temp);
+}
+
+static int Array_Sort_Partition(var self, int left, int right, int pivot) {
+  ArrayData* ad = cast(self, Array);
+  
+  var pival = allocate(ad->item_type);
+  var temp = allocate(ad->item_type);
+  
+  assign(pival, at(self, pivot));
+  
+  Array_Swap_Items(self, temp, pivot, right);
+  int storei = left;
+  for(int i = left; i < right; i++) {
+    if_lt( at(self, i) , pival ) {
+      Array_Swap_Items(self, temp, i, storei + 1);
+      storei++;
+    }
+  }
+  Array_Swap_Items(self, temp, storei, right);
+  
+  destruct(temp);
+  destruct(pival);
+  
+  return storei;
+}
+
+static void Array_Sort_Part(var self, int left, int right) {
+  if (left < right) {
+    int pivot = left + (right-left) / 2;
+    int newpivot = Array_Sort_Partition(self, left, right, pivot);
+    Array_Sort_Part(self, left, newpivot-1);
+    Array_Sort_Part(self, newpivot+1, right);
+  }
+}
+
+void Array_Sort(var self) {
+  Array_Sort_Part(self, 0, len(self)-1);
 }

@@ -2,7 +2,8 @@
 #include <assert.h>
 #include <string.h>
 
-#include "NoneType+.h"
+#include "Bool+.h"
+#include "None+.h"
 
 #include "List+.h"
 
@@ -16,6 +17,9 @@ var List = methods {
   method(List, Push),
   method(List, At),
   method(List, Iter),
+  method(List, Reverse),
+  method(List, Append),
+  method(List, Sort),
   methods_end(List)
 };
 
@@ -67,30 +71,24 @@ var List_Copy(var self) {
   return newlist;
   
 }
-
-bool List_Eq(var self, var other) {
+var List_Eq(var self, var other) {
   
   if (len(self) != len(other)) {
-    return false;
+    return False;
   }
   
   for(int i = 0; i < len(self); i++) {
-    if (neq( at(self,i) , at(other,i) )) {
-      return false;
+    if_neq( at(self,i) , at(other,i) ) {
+      return False;
     }
   }
   
-  return true;
+  return True;
 }
 
 int List_Len(var self) {
   ListData* lo = cast(self, List);
   return lo->num_items;
-} 
-
-bool List_IsEmpty(var self) {
-  ListData* lo = cast(self, List);
-  return (lo->num_items is 0);
 }
 
 void List_Clear(var self) {
@@ -101,13 +99,13 @@ void List_Clear(var self) {
   
 }
 
-bool List_Contains(var self, var obj) {
+var List_Contains(var self, var obj) {
   ListData* lo = cast(self, List);
   foreach(self, item) {
-    if ( eq(item, obj) ) return true;
+    if_eq(item, obj) return True;
   }
   
-  return false;
+  return False;
 }
 
 void List_Discard(var self, var obj) {
@@ -130,6 +128,7 @@ static void List_Reserve_More(ListData* lo) {
 }
 
 void List_Push_Back(var self, var val) {
+
   ListData* lo = cast(self, List);
   lo->num_items++;
   List_Reserve_More(lo);
@@ -144,14 +143,14 @@ void List_Push_Front(var self, var val) {
 void List_Push_At(var self, var val, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) return;
+  if (index < 0 or index > lo->num_items-1) return;
   
   lo->num_items++;
   List_Reserve_More(lo);
   
   memmove(&lo->items[index+1], 
           &lo->items[index], 
-          sizeof(var) * (lo->num_items - index));
+          sizeof(var) * ((lo->num_items-1) - index));
   
   lo->items[index] = val;
 }
@@ -167,8 +166,8 @@ static void List_Reserve_Less(ListData* lo) {
 
 var List_Pop_Back(var self) {
   ListData* lo = cast(self, List);
-
-  if (is_empty(self)) return None;
+  
+  if (is_empty(self)) return Undefined;
 
   var retval = lo->items[lo->num_items-1];
   
@@ -185,15 +184,15 @@ var List_Pop_Front(var self) {
 var List_Pop_At(var self, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) {
-    return None;
+  if (index < 0 or index > lo->num_items-1) {
+    return Undefined;
   }
   
   var retval = lo->items[index];
   
   memmove(&lo->items[index], 
           &lo->items[index+1], 
-          sizeof(var) * (lo->num_items - index));
+          sizeof(var) * ((lo->num_items-1) - index));
   
   lo->num_items--;
   List_Reserve_Less(lo);
@@ -205,8 +204,8 @@ var List_Pop_At(var self, int index) {
 var List_At(var self, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) {
-    return None;
+  if (index < 0 or index > lo->num_items-1) {
+    return Undefined;
   }
   
   return lo->items[index];
@@ -215,20 +214,23 @@ var List_At(var self, int index) {
 void List_Set(var self, int index, var val) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 || index > lo->num_items-1) {
+  if (index < 0 or index > lo->num_items-1) {
     return;
   }
   
   lo->items[index] = val;
 }
 
+static const var LIST_ITER_END = (var)-1;
+
 var List_Iter_Start(var self) {
+  
+  if (len(self) == 0) { return LIST_ITER_END; } 
+
   ListData* lo = cast(self, List);
   lo->cursor = 0;
   return lo->items[0];
 }
-
-static const var LIST_ITER_END = (var)-1;
 
 var List_Iter_End(var self) {
   return LIST_ITER_END;
@@ -257,4 +259,47 @@ var List_Iter_Next(var self, var curr) {
   
   return LIST_ITER_END;
   
+}
+
+static void List_Swap_Items(var self, int i0, int i1) {
+  var lft = at(self, i0);
+  var rht = at(self, i1);
+  set(self, i0, rht);
+  set(self, i1, lft);
+}
+
+void List_Reverse(var self) {
+  for(int i = 0; i < len(self) / 2; i++) {
+    List_Swap_Items(self, i, len(self)-1-i);
+  }
+}
+
+static int List_Sort_Partition(var self, int left, int right, int pivot) {
+  
+  var pival = at(self, pivot);
+  
+  List_Swap_Items(self, pivot, right);
+  int storei = left;
+  for(int i = left; i < right; i++) {
+    if_lt( at(self, i) , pival ) {
+      List_Swap_Items(self, i, storei + 1);
+      storei++;
+    }
+  }
+  List_Swap_Items(self, storei, right);
+  
+  return storei;
+}
+
+static void List_Sort_Part(var self, int left, int right) {
+  if (left < right) {
+    int pivot = left + (right-left) / 2;
+    int newpivot = List_Sort_Partition(self, left, right, pivot);
+    List_Sort_Part(self, left, newpivot-1);
+    List_Sort_Part(self, newpivot+1, right);
+  }
+}
+
+void List_Sort(var self) {
+  List_Sort_Part(self, 0, len(self)-1);
 }

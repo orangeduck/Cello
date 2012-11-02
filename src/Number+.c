@@ -1,42 +1,44 @@
+#include "Number+.h"
+
+#include "Type+.h"
+#include "Bool+.h"
+
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
 
-#include "Type+.h"
-#include "Number+.h"
-
 void add(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->add);
   inum->add(lhs, rhs);
 }
 
 void sub(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->sub);
   inum->sub(lhs, rhs);
 }
 
 void mul(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->mul);
   inum->mul(lhs, rhs);
 }
 
 void divide(var lhs, var rhs) {
-  Num* inum = Type_Class(type_of(lhs), Num);
+  Num* inum = type_class(type_of(lhs), Num);
   assert(inum->div);
   inum->div(lhs, rhs);
 }
 
 void negate(var self) {
-  Num* inum = Type_Class(type_of(self), Num);
+  Num* inum = type_class(type_of(self), Num);
   assert(inum->negate);
   inum->negate(self);
 }
 
 void absolute(var self) {
-  Num* inum = Type_Class(type_of(self), Num);
+  Num* inum = type_class(type_of(self), Num);
   assert(inum->absolute);
   inum->absolute(self);
 }
@@ -76,19 +78,22 @@ var Int_Copy(var self) {
   return new(Int, intdata->value);
 }
 
-bool Int_Eq(var self, var other) {
+var Int_Eq(var self, var other) {
   IntData* io = cast(self, Int);
-  return io->value == as_long(other);
+  if (type_implements(type_of(other), AsLong)) {
+    return (var)(intptr_t)(io->value == as_long(other));
+  } else {
+    return False;
+  }
 }
 
-bool Int_Gt(var self, var other) {
+var Int_Gt(var self, var other) {
   IntData* io = cast(self, Int);
-  return io->value > as_long(other);
+  return (var)(intptr_t)(io->value > as_long(other));
 }
-
-bool Int_Lt(var self, var other) {
+var Int_Lt(var self, var other) {
   IntData* io = cast(self, Int);
-  return io->value < as_long(other);
+  return (var)(intptr_t)(io->value < as_long(other));
 }
 
 long Int_Hash(var self) {
@@ -118,7 +123,7 @@ void Int_Div(var self, var other) {
 
 void Int_Neg(var self) {
   IntData* io = cast(self, Int);
-  io->value = - io->value;
+  io->value = -io->value;
 }
 
 void Int_Abs(var self) {
@@ -181,19 +186,23 @@ var Real_Copy(var self) {
   return new(Real, ro->value);
 }
 
-bool Real_Eq(var self, var other) {
+var Real_Eq(var self, var other) {
   RealData* ro = cast(self, Real);
-  return ro->value == as_double(other);
+  if (type_implements(type_of(other), AsDouble)) {
+    return (var)(intptr_t)(ro->value == as_double(other));
+  } else {
+    return False;
+  }
 }
 
-bool Real_Gt(var self, var other) {
+var Real_Gt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return ro->value > as_double(other);
+  return (var)(intptr_t)(ro->value > as_double(other));
 }
 
-bool Real_Lt(var self, var other) {
+var Real_Lt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return ro->value < as_double(other);
+  return (var)(intptr_t)(ro->value < as_double(other));
 }
 
 union interp_cast {

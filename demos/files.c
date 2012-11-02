@@ -17,7 +17,7 @@ int main(int arc, char** argv) {
   close(f);
   
   open(f, "test.bin", "r");
-       
+    
     var string = get(f, String);
     var first = get(f, Int);
     var second = get(f, Int);

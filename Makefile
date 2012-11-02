@@ -1,47 +1,88 @@
-CC = gcc
-LIBS = -lm
-INCS = -I ./include
-C_FILES = $(wildcard src/*.c) $(wildcard src/*/*.c)
-PLATFORM = $(shell uname)
-NAME = C+
+-include config.mk
+
+PLATFORM?= $(shell uname)
+
+CC=gcc
+AR?=ar
+
+LAC_CPPFLAGS= -I./include
+LAC_CFLAGS= -std=gnu99 -Wall -Werror -Wno-unused -O3 -g 
+LAC_LDFLAGS= 
+LAC_LIBS= -lm
+
+LIB_C_FILES= $(wildcard src/*.c)
+LIB_OBJ_FILES= $(addprefix obj/,$(notdir $(LIB_C_FILES:%.c=%.o)))
+
+DEMO_C_FILES= $(wildcard demos/*.c)
+DEMO_OBJ_FILES= $(addprefix obj/,$(notdir $(DEMO_C_FILES:%.c=%.o)))
+DEMO_TARGETS= $(DEMO_C_FILES:%.c=%$(EXE_SUFFIX))
+
+TEST_C_FILES= $(wildcard tests/*.c)
+TEST_OBJ_FILES= $(addprefix obj/,$(notdir $(TEST_C_FILES:%.c=%.o)))
+TEST_TARGET= tests/test$(EXE_SUFFIX)
+
+SHARED_LIB= $(SHARED_LIB_PREFIX)C+$(SHARED_LIB_SUFFIX)
+STATIC_LIB= $(STATIC_LIB_PREFIX)C+$(STATIC_LIB_SUFFIX)
 
 ifeq ($(findstring Linux,$(PLATFORM)),Linux)
-	OUT=lib$(NAME).so
-	CFLAGS= $(INCS) $(LIBS) -std=gnu99 -Wall -Werror -Wno-unused -g -fPIC
-	LFLAGS= -shared
-	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
+	LAC_CFLAGS+= -fPIC
+	LAC_LDFLAGS+= -fPIC
+	SHARED_LIB_PREFIX:=lib
+	SHARED_LIB_SUFFIX:=.so
+	STATIC_LIB_PREFIX:=lib
+	STATIC_LIB_SUFFIX:=.a
+	EXE_SUFFIX:=
+else ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
+	LAC_CFLAGS+= -fPIC
+	LAC_LDFLAGS+= -fPIC
+	SHARED_LIB_PREFIX:=lib
+	SHARED_LIB_SUFFIX:=.so
+	STATIC_LIB_PREFIX:=lib
+	STATIC_LIB_SUFFIX:=.a
+else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
+	LAC_LDFLAGS+= 
+	LAC_LIBS+= -lmingw32
+	SHARED_LIB_PREFIX:=
+	SHARED_LIB_SUFFIX:=.dll
+	STATIC_LIB_PREFIX:=
+	STATIC_LIB_SUFFIX:=.lib
+	EXE_SUFFIX:=.exe
 endif
 
-ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
-	OUT=lib$(NAME).so
-	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -g -fPIC
-	LFLAGS= -shared
-	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
-endif
+all: $(SHARED_LIB) $(STATIC_LIB)
 
-ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
-	OUT=$(NAME).dll
-	CFLAGS= $(INCS) -std=gnu99 -Wall -Werror -Wno-unused -g
-	LFLAGS= -g -L ./lib -shared
-	OBJ_FILES= $(addprefix obj/,$(notdir $(C_FILES:.c=.o)))
-endif
-
-$(OUT): $(OBJ_FILES)
-	$(CC) $(OBJ_FILES) $(LFLAGS) -o $@
+$(SHARED_LIB): $(LIB_OBJ_FILES)
+	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -shared -o $@ $^ $(LAC_LIBS)
 	
-examples: $(OBJ_FILES) examples/files.c examples/functions.c
-	$(CC) examples/files.c $(CFLAGS) $(OBJ_FILES) -o examples/files $(LIBS)
-	$(CC) examples/functions.c $(CFLAGS) $(OBJ_FILES) -o examples/functions $(LIBS)
+$(STATIC_LIB): $(LIB_OBJ_FILES)
+	$(AR) rcs $@ $^
   
-test: $(OBJ_FILES) tests/test.c
-	$(CC) tests/test.c -lcunit $(CFLAGS) $(OBJ_FILES) -o test $(LIBS)
-	./test
-  
-obj/%.o: src/%.c | obj
-	$(CC) $< -c $(CFLAGS) -o $@
+# Demos
+
+demos: $(DEMO_TARGETS)
+
+$(DEMO_TARGETS): demos/%$(EXE_SUFFIX): obj/%.o $(STATIC_LIB)
+	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LAC_LIBS)
+ 
+tests: $(TEST_TARGET)
 	
+$(TEST_TARGET): $(LIB_OBJ_FILES) $(TEST_OBJ_FILES)
+	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -o $@ $^ $(LAC_LIBS)
+	./$@
+ 
+# Clean
+
+clean:
+	$(RM) $(LIB_OBJ_FILES) $(DEMO_OBJ_FILES) $(TEST_OBJ_FILES) $(TEST_TARGETS) $(DEMO_TARGETS) $(SHARED_LIB) $(STATIC_LIB)
+
 obj:
 	mkdir obj
-	
-clean:
-	rm $(OBJ_FILES)
+
+obj/%.o: src/%.c | obj
+	$(CC) $(LAC_CPPFLAGS) $(LAC_CFLAGS) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+obj/%.o: demos/%.c | obj
+	$(CC) $(LAC_CPPFLAGS) $(LAC_CFLAGS) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+  
+obj/%.o: tests/%.c | obj
+	$(CC) $(LAC_CPPFLAGS) $(LAC_CFLAGS) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<

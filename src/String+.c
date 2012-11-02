@@ -1,19 +1,24 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "Bool+.h"
+
 #include "String+.h"
 
 var String = methods {
-  methods_begin(List),
+  methods_begin(String),
   method(String, New),
   method(String, Assign),
   method(String, Copy),
   method(String, Eq),
+  method(String, Ord),
   method(String, Collection),
   method(String, Hash),
+  method(String, Reverse),
   method(String, Parse),
   method(String, AsStr), 
-  methods_end(List)
+  method(String, Append), 
+  methods_end(String)
 };
 
 var String_New(var self, va_list* args) {
@@ -42,40 +47,89 @@ var String_Copy(var self) {
   return new(String, s->value);
 }
 
-bool String_Eq(var self, var other) {
+var String_Eq(var self, var other) {
   StringData* fst = cast(self, String);
-  StringData* snd = cast(other, String);
-  return (strcmp(fst->value, snd->value) == 0);
+  if (type_implements(type_of(other), AsStr)) {
+    return (var)(intptr_t)(strcmp(fst->value, as_str(other)) == 0);
+  } else {
+    return False;
+  }
 }
+
+var String_Gt(var self, var obj) {
+  StringData* s = cast(self, String);
+  if (not type_implements(type_of(obj), AsStr)) return false;
+  
+  const char* fst = s->value;
+  const char* snd = as_str(obj);
+  
+  int fstlen = strlen(fst);
+  int sndlen = strlen(snd);
+  int minlen = fstlen > sndlen ? sndlen : fstlen; 
+  
+  for(int i = 0; i < minlen; i++) {
+    if (fst[i] > snd[i]) return True;
+  }
+  
+  if (fstlen > sndlen) return True;
+  
+  return False;
+}
+
+var String_Lt(var self, var obj) {
+  StringData* s = cast(self, String);
+  if (not type_implements(type_of(obj), AsStr)) return false;
+  
+  const char* fst = s->value;
+  const char* snd = as_str(obj);
+  
+  int fstlen = strlen(fst);
+  int sndlen = strlen(snd);
+  int minlen = fstlen > sndlen ? sndlen : fstlen; 
+  
+  for(int i = 0; i < minlen; i++) {
+    if (fst[i] < snd[i]) return True;
+  }
+  
+  if (fstlen < sndlen) return True;
+  
+  return False;
+}
+
 
 int String_Len(var self) {
   StringData* s = cast(self, String);
   return strlen(s->value);
 }
 
-bool String_IsEmpty(var self) {
-  return (len(self) == 0);
-}
 void String_Clear(var self) {
   StringData* s = cast(self, String);
   s->value = realloc(s->value, 1);
   s->value[0] = '\0';
 }
 
-bool String_Contains(var self, var obj) {
+var String_Contains(var self, var obj) {
   StringData* s = cast(self, String);
   
-  if (Type_Implements(type_of(obj), AsStr)) {
+  if (type_implements(type_of(obj), AsStr)) {
     const char* ostr = as_str(obj);
-    return (bool)strstr(s->value, ostr);
+    if ( strstr(s->value, ostr) ) {
+      return True;
+    } else {
+      return False;
+    }
   }
   
-  if (Type_Implements(type_of(obj), AsChar)) {
+  if (type_implements(type_of(obj), AsChar)) {
     char ochar = as_char(obj);
-    return (bool)strchr(s->value, ochar);
+    if (strchr(s->value, ochar)) {
+      return True;
+    } else {
+     return False;
+    }
   }
   
-  return false;
+  return False;
 }
 
 
@@ -83,13 +137,15 @@ bool String_Contains(var self, var obj) {
 void String_Discard(var self, var obj) {
   StringData* s = cast(self, String);
   
-  if (Type_Implements(type_of(obj), AsStr)) {
+  if (type_implements(type_of(obj), AsStr)) {
     const char* ostr = as_str(obj);
     const char* pos = strstr(s->value, ostr);
-    /* TODO: Implement */
+    
+    int bytecount = strlen(s->value) - strlen(pos) - strlen(ostr) + 1;
+    memmove((char*)pos, pos + strlen(ostr), bytecount);
   }
   
-  if (Type_Implements(type_of(obj), AsChar)) {
+  if (type_implements(type_of(obj), AsChar)) {
     char ochar = as_char(obj);
     const char* pos = strchr(s->value, ochar);
     while(pos != NULL) {
@@ -150,5 +206,25 @@ long String_Hash(var self) {
 const char* String_AsStr(var self) {
   StringData* s = cast(self, String);
   return s->value;
+}
+
+void String_Append(var self, var obj) {
+  StringData* s = cast(self, String);
+  const char* os = as_str(obj);
+  
+  size_t newlen = strlen(s->value) + strlen(os);
+  
+  s->value = realloc(s->value, newlen+1);
+  
+  strcat(s->value, os);
+}
+
+void String_Reverse(var self) {
+  StringData* s = cast(self, String);
+  for(int i = 0; i < strlen(s->value) / 2; i++) {
+    char temp = s->value[i];
+    s->value[i] = s->value[strlen(s->value)-1-i];
+    s->value[strlen(s->value)-1-i] = temp;
+  }
 }
 
