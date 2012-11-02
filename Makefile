@@ -53,6 +53,7 @@ all: $(SHARED_LIB) $(STATIC_LIB)
 
 $(SHARED_LIB): $(LIB_OBJ_FILES)
 	$(CC) $(LAC_LDFLAGS) $(LDFLAGS) -shared -o $@ $^ $(LAC_LIBS)
+
 	
 $(STATIC_LIB): $(LIB_OBJ_FILES)
 	$(AR) rcs $@ $^

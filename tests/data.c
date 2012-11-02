@@ -1323,28 +1323,13 @@ PT_SUITE(suite_data) {
     
     var f0 = new(File, "test.bin", "w"); 
     var f1 = $(File, NULL);
-    var f2 = copy(f1);
     
     PT_ASSERT(f0);
     PT_ASSERT(f1);
-    PT_ASSERT(f2);
     
     PT_ASSERT(f0 != f1);
-    PT_ASSERT(f0 != f2);
-    PT_ASSERT(f1 != f2);
-    
-    assign(f2, f0);
-    
-    PT_ASSERT(f0);
-    PT_ASSERT(f1);
-    PT_ASSERT(f2);
-    
-    PT_ASSERT(f0 != f1);
-    PT_ASSERT(f0 != f2);
-    PT_ASSERT(f1 != f2);
     
     delete(f0);
-    delete(f2);
     
   }
 

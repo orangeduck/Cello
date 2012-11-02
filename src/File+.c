@@ -5,9 +5,7 @@
 var File = methods {
   methods_begin(File),
   method(File, New),
-  method(File, Assign),
   method(File, With),
-  method(File, Copy),
   method(File, Stream),
   method(File, Dict),
   methods_end(File),
@@ -23,25 +21,13 @@ var File_New(var self, va_list* args) {
 
 var File_Delete(var self) {
   FileData* fd = cast(self, File);
-  if (fd->f != NULL) { close(self); }
+  if (fd->f != NULL and tell(self) != -1) { close(self); }
   return self;
-}
-
-void File_Assign(var self, var obj) {
-  FileData* fd0 = cast(self, File);
-  FileData* fd1 = cast(obj, File);
-  fd0->f = fd1->f;
-}
-
-var File_Copy(var self) {
-  FileData* fd = cast(self, File); 
-  FileData* fnew = new(File);
-  fnew->f = fd->f;
-  return fnew;
 }
 
 var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
+  if (fd->f != NULL and tell(self) != -1) { close(self); }
   fd->f = fopen(filename, access);
   return self;
 }
@@ -49,6 +35,7 @@ var File_Open(var self, const char* filename, const char* access) {
 void File_Close(var self) {
   FileData* fd = cast(self, File);
   fclose(fd->f);
+  fd->f = NULL;
 }
 
 void File_Seek(var self, int pos, int origin) {
