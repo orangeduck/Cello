@@ -310,7 +310,7 @@ static int Array_Sort_Partition(var self, int left, int right, int pivot) {
 
 static void Array_Sort_Part(var self, int left, int right) {
   if (left < right) {
-    int pivot = (right + left) / 2;
+    int pivot = left + (right - left) / 2;
     int newpivot = Array_Sort_Partition(self, left, right, pivot);
     Array_Sort_Part(self, left, newpivot-1);
     Array_Sort_Part(self, newpivot+1, right);
