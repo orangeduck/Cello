@@ -200,10 +200,10 @@ PT_SUITE(suite_core) {
     //  printf("Y: %f\n", as_double(item));
     //}
     
-    //PT_ASSERT(eq(at(y, 0), $(Real, 1.1)));
-    //PT_ASSERT(eq(at(y, 1), $(Real, 2.2)));
-    //PT_ASSERT(eq(at(y, 2), $(Real, 5.2)));
-    //PT_ASSERT(eq(at(y, 3), $(Real, 7.1)));
+    PT_ASSERT(eq(at(y, 0), $(Real, 1.1)));
+    PT_ASSERT(eq(at(y, 1), $(Real, 2.2)));
+    PT_ASSERT(eq(at(y, 2), $(Real, 5.2)));
+    PT_ASSERT(eq(at(y, 3), $(Real, 7.1)));
     
     var maxval = maximum(y);
     var minval = minimum(y);
@@ -221,10 +221,10 @@ PT_SUITE(suite_core) {
     //  printf("Z: %f\n", as_double(item));
     //}
     
-    //PT_ASSERT(eq(at(z, 0), $(Real, 1.1)));
-    //PT_ASSERT(eq(at(z, 1), $(Real, 2.2)));
-    //PT_ASSERT(eq(at(z, 2), $(Real, 5.2)));
-    //PT_ASSERT(eq(at(z, 3), $(Real, 7.1)));
+    PT_ASSERT(eq(at(z, 0), $(Real, 1.1)));
+    PT_ASSERT(eq(at(z, 1), $(Real, 2.2)));
+    PT_ASSERT(eq(at(z, 2), $(Real, 5.2)));
+    PT_ASSERT(eq(at(z, 3), $(Real, 7.1)));
     
     delete(z);
     

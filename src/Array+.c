@@ -278,6 +278,7 @@ void Array_Reverse(var self) {
 
 static int Array_Sort_Partition(var self, int left, int right, int pivot) {
   ArrayData* ad = cast(self, Array);
+  int fix = 0;
   
   var pival = allocate(ad->item_type);
   var temp = allocate(ad->item_type);
@@ -288,9 +289,15 @@ static int Array_Sort_Partition(var self, int left, int right, int pivot) {
   int storei = left;
   for(int i = left; i < right; i++) {
     if_lt( at(self, i) , pival ) {
-      Array_Swap_Items(self, temp, i, storei + 1);
+	  if (fix) {
+        Array_Swap_Items(self, temp, i, storei + 1);
+      }
       storei++;
-    }
+    } else {
+		if (!fix) {
+			fix = 1;
+		}
+	}
   }
   Array_Swap_Items(self, temp, storei, right);
   
