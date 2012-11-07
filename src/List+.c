@@ -277,23 +277,24 @@ void List_Reverse(var self) {
 static int List_Sort_Partition(var self, int left, int right, int pivot) {
   
   var pival = at(self, pivot);
-  int fix = 0;
   
   List_Swap_Items(self, pivot, right);
+
   int storei = left;
-  for(int i = left; i < right; i++) {
-    if_lt( at(self, i) , pival ) {
-      if(fix) {
+  bool fix = false;
+  
+  for (int i = left; i < right; i++) {
+    if_lt ( at(self, i) , pival ) {
+      if (fix) {
         List_Swap_Items(self, i, storei);
       }
       storei++;
     } else {
-      if (!fix) {
-        fix = 1;
-      }
+      fix = true;
     }
   }
-  if ( fix ) {
+  
+  if (fix) {
     List_Swap_Items(self, storei, right);
   }
   
