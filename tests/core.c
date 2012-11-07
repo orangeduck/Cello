@@ -193,12 +193,7 @@ PT_SUITE(suite_core) {
     PT_ASSERT(contains(y, $(Real, 2.2)));
     PT_ASSERT(contains(y, $(Real, 1.1)));
     
-    // TODO: Get Sorting to work
     sort(y);
-    
-    //foreach(y, item) {
-    //  printf("Y: %f\n", as_double(item));
-    //}
     
     PT_ASSERT(eq(at(y, 0), $(Real, 1.1)));
     PT_ASSERT(eq(at(y, 1), $(Real, 2.2)));
@@ -217,16 +212,25 @@ PT_SUITE(suite_core) {
     
     sort(z);
     
-    //foreach(z, item) {
-    //  printf("Z: %f\n", as_double(item));
-    //}
-    
     PT_ASSERT(eq(at(z, 0), $(Real, 1.1)));
     PT_ASSERT(eq(at(z, 1), $(Real, 2.2)));
     PT_ASSERT(eq(at(z, 2), $(Real, 5.2)));
     PT_ASSERT(eq(at(z, 3), $(Real, 7.1)));
     
     delete(z);
+    
+    var w = new(List, 6, $(Int, 135), $(Int, 11), $(Int, 254), $(Int, 123213), $(Int, 22), $(Int, 1));
+    
+    sort(w);
+    
+    PT_ASSERT(eq(at(w, 0), $(Int, 1)));
+    PT_ASSERT(eq(at(w, 1), $(Int, 11)));
+    PT_ASSERT(eq(at(w, 2), $(Int, 22)));
+    PT_ASSERT(eq(at(w, 3), $(Int, 135)));
+    PT_ASSERT(eq(at(w, 4), $(Int, 254)));
+    PT_ASSERT(eq(at(w, 5), $(Int, 123213)));
+    
+    delete(w);
     
   }
 
