@@ -283,17 +283,19 @@ static int List_Sort_Partition(var self, int left, int right, int pivot) {
   int storei = left;
   for(int i = left; i < right; i++) {
     if_lt( at(self, i) , pival ) {
-	  if (fix) {
-        List_Swap_Items(self, i, storei + 1);
+      if(fix) {
+        List_Swap_Items(self, i, storei);
       }
       storei++;
     } else {
-	  if (!fix) {
-	    fix = 1;
-	  }	
-	}
+      if (!fix) {
+        fix = 1;
+      }
+    }
   }
-  List_Swap_Items(self, storei, right);
+  if ( fix ) {
+    List_Swap_Items(self, storei, right);
+  }
   
   return storei;
 }
