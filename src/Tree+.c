@@ -116,25 +116,25 @@ void Tree_Discard(var self, var key) {
       
       if ((node->left is NULL) and 
           (node->right is NULL)) {
+        *parent = NULL;
         Tree_Node_Delete(node);
         discard(td->keys, key);
-        *parent = NULL;
         return;
       }
       
       if ((node->left is NULL) and
           not (node->right is NULL)) {
+        *parent = node->right;
         Tree_Node_Delete(node);
         discard(td->keys, key);
-        *parent = node->right;
         return;
       }
       
       if ((node->right is NULL) and
           not (node->left is NULL)) {
+        *parent = node->left;
         Tree_Node_Delete(node);
         discard(td->keys, key);
-        *parent = node->left;
         return;
       }
       
