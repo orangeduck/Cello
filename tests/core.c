@@ -232,6 +232,28 @@ PT_SUITE(suite_core) {
     
     delete(w);
     
+    var map1 = new(Map, 0);
+    var map2 = new(Map, 0);
+    
+    PT_ASSERT(eq(map1, map2));
+    put(map1, $(String, "key"), $(String, "val"));
+    PT_ASSERT(neq(map1, map2));
+    put(map2, $(String, "key"), $(String, "val"));
+    PT_ASSERT(eq(map1, map2));
+    put(map1, $(String, "newkey"), $(Int, 10));
+    put(map2, $(String, "newkey"), $(String, "newval"));
+    PT_ASSERT(neq(map1, map2));
+    put(map1, $(String, "newkey"), $(String, "newval"));
+    PT_ASSERT(eq(map1, map2));
+    put(map2, $(String, "difkey"), $(Int, 5));
+    PT_ASSERT(neq(map1, map2));
+    
+    delete(map1);
+    delete(map2);
+    
+    
+    
+    
   }
 
   PT_TEST(test_iter) {
