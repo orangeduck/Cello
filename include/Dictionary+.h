@@ -30,6 +30,8 @@ var Dictionary_Delete(var self);
 void Dictionary_Assign(var self, var obj);
 var Dictionary_Copy(var self);
 
+var Dictionary_Eq(var self, var obj);
+
 int Dictionary_Len(var self);
 void Dictionary_Clear(var self);
 var Dictionary_Contains(var self, var key);
@@ -45,6 +47,7 @@ var Dictionary_Iter_Next(var self, var curr);
 instance(Dictionary, New) = { sizeof(DictionaryData), Dictionary_New, Dictionary_Delete };
 instance(Dictionary, Assign) = { Dictionary_Assign };
 instance(Dictionary, Copy) = { Dictionary_Copy };
+instance(Dictionary, Eq) = { Dictionary_Eq };
 instance(Dictionary, Collection) = { Dictionary_Len, Dictionary_Clear, Dictionary_Contains, Dictionary_Discard };
 instance(Dictionary, Dict) = { Dictionary_Get, Dictionary_Put };
 instance(Dictionary, Iter) = { Dictionary_Iter_Start, Dictionary_Iter_End, Dictionary_Iter_Next };
