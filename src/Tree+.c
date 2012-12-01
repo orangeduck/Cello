@@ -9,6 +9,7 @@ var Tree = methods {
   method(Tree, New),
   method(Tree, Assign),
   method(Tree, Copy),
+  method(Tree, Eq),
   method(Tree, Collection),
   method(Tree, Dict),
   method(Tree, Iter),
@@ -50,6 +51,32 @@ var Tree_Copy(var self) {
     put(newtree, key, val);
   }
   return newtree;
+}
+
+var Tree_Eq(var self, var obj) {
+  TreeData* td = cast(self, Tree);
+  if (eq(type_of(obj), Tree)) {
+		var val;
+    foreach(obj, key) {
+			if ((val = get(self, key)) is Undefined) {
+				return False;
+			}
+			if_neq(get(obj, key), val) {
+				return False;
+			}
+		}
+    /* see if there exists key at the first object, which
+     * doesn't exist at the second object. 
+     */
+    foreach(self, key) {
+			if ((val = get(obj, key)) is Undefined) {
+				return False;
+			}
+		}
+		return True;
+  } else {
+    return False;
+  }
 }
 
 int Tree_Len(var self) {
