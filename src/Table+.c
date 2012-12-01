@@ -212,3 +212,4 @@ var Table_Iter_Next(var self, var curr) {
   TableData* tab = cast(self, Table);
   return iter_next(tab->keys, curr);
 }
+
