@@ -13,6 +13,7 @@ var Table = methods {
   method(Table, New),
   method(Table, Assign),
   method(Table, Copy),
+  method(Table, Eq),
   method(Table, Collection),
   method(Table, Dict),
   method(Table, Iter),
@@ -76,6 +77,32 @@ var Table_Copy(var self) {
   }
   
   return cop;
+}
+
+var Table_Eq(var self, var obj) {
+  TableData* tab = cast(self, Table);
+  if (eq(type_of(obj), Table)) {
+		var val;
+    foreach(obj, key) {
+			if ((val = get(self, key)) is Undefined) {
+				return False;
+			}
+			if_neq(get(obj, key), val) {
+				return False;
+			}
+		}
+    /* see if there exists key at the first object, which
+     * doesn't exist at the second object. 
+     */
+    foreach(self, key) {
+			if ((val = get(obj, key)) is Undefined) {
+				return False;
+			}
+		}
+		return True;
+  } else {
+    return False;
+  }
 }
 
 int Table_Len(var self) {
@@ -162,8 +189,8 @@ void Table_Put(var self, var key, var val) {
   }
   
   if (pos != -1) {
-    pop_at(keys, i);
-    pop_at(vals, i);
+    pop_at(keys, pos);
+    pop_at(vals, pos);
   }
   
   push(keys, key);
@@ -185,3 +212,4 @@ var Table_Iter_Next(var self, var curr) {
   TableData* tab = cast(self, Table);
   return iter_next(tab->keys, curr);
 }
+
