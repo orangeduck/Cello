@@ -1,5 +1,5 @@
-#ifndef FunctionMacrosPlus_h
-#define FunctionMacrosPlus_h
+#ifndef FunctionAutoPlus_h
+#define FunctionAutoPlus_h
 
 
 #define auto_lambda0(func) var __Plus_##func(var self, var args) { return func(); }; \

@@ -4,6 +4,7 @@
 /* Core */
 #include "Prelude+.h"
 #include "Type+.h"
+#include "Exception+.h"
 
 /* Functional */
 #include "Function+.h"
@@ -27,6 +28,11 @@
 #include "List+.h"
 #include "Dictionary+.h"
 #include "Map+.h"
+
+/* Memory */
+#include "Value+.h"
+#include "Reference+.h"
+#include "Pool+.h"
 
 #endif
 

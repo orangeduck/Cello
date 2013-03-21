@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <setjmp.h>
 
 /*
 ** == Syntax ==
