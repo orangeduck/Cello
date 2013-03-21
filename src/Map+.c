@@ -9,6 +9,7 @@ var Map = methods {
   method(Map, New),
   method(Map, Assign),
   method(Map, Copy),
+  method(Map, Eq),
   method(Map, Collection),
   method(Map, Dict),
   method(Map, Iter),
@@ -46,6 +47,34 @@ var Map_Copy(var self) {
     put(newmap, key, val);
   }
   return newmap;
+}
+
+var Map_Eq(var self, var obj) {
+	MapData* md = cast(self, Map);
+  if (eq(type_of(obj), Map)) {
+		var val;
+    foreach(obj, key) {
+			if ((val = get(self, key)) == Undefined) {
+				return False;
+			}
+			if_neq(get(obj, key), val) {
+				return False;
+			}
+		}
+    
+    foreach(self, key) {
+      if ((val = get(obj, key)) == Undefined) {
+				return False;
+			}
+			if_neq(get(self, key), val) {
+				return False;
+			}
+    }
+		return True;
+		
+  } else {
+    return False;
+  }
 }
 
 int Map_Len(var self) {

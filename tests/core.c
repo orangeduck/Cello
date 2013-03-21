@@ -139,7 +139,65 @@ PT_SUITE(suite_core) {
     PT_ASSERT(  eq($(Int, 1 ), $(Int, 1 )) );
     PT_ASSERT( neq($(Int, 2 ), $(Int, 20)) );
     PT_ASSERT(  eq($(String, "Hello"), $(String, "Hello")) );
-    PT_ASSERT( neq($(String, "Hello"), $(String, "There")) ); 
+    PT_ASSERT( neq($(String, "Hello"), $(String, "There")) );
+    
+    var tab1 = new(Table, String, Int);
+    var tab2 = new(Table, String, Int);
+    
+    PT_ASSERT(eq(tab1, tab2));
+    put(tab1, $(String, "apple"), $(Int, 10));
+    PT_ASSERT(neq(tab1, tab2));
+    put(tab2, $(String, "apple"), $(Int, 10));
+    PT_ASSERT(eq(tab1, tab2));
+    put(tab1, $(String, "pear"), $(Int, 20));
+    put(tab2, $(String, "pear"), $(Int, 30));
+    PT_ASSERT(neq(tab1, tab2));
+    put(tab1, $(String, "pear"), $(Int, 30));
+    PT_ASSERT(eq(tab1, tab2));
+    put(tab2, $(String, "banana"), $(Int, 10));
+    PT_ASSERT(neq(tab1, tab2));
+    
+    delete(tab1);
+    delete(tab2);
+
+    var dict1 = new(Dictionary, 0);
+    var dict2 = new(Dictionary, 0);
+    
+    PT_ASSERT(eq(dict1, dict2));
+    put(dict1, $(String, "apple"), $(Int, 10));
+    PT_ASSERT(neq(tab1, tab2));
+    put(dict2, $(String, "apple"), $(Int, 10));
+    PT_ASSERT(eq(dict1, dict2));
+    put(dict1, $(String, "pear"), $(Int, 20));
+    put(dict2, $(String, "pear"), $(Int, 30));
+    PT_ASSERT(neq(dict1, dict2));
+    put(dict1, $(String, "pear"), $(Int, 30));
+    PT_ASSERT(eq(dict1, dict2));
+    put(dict2, $(String, "banana"), $(Int, 10));
+    PT_ASSERT(neq(dict1, dict2));
+    
+    delete(dict1);
+    delete(dict2);
+    
+    var tree1 = new(Tree, String, String);
+    var tree2 = new(Tree, String, String);
+    
+    PT_ASSERT(eq(tree1, tree2));
+    put(tree1, $(String, "name"), $(String, "Alex"));
+    PT_ASSERT(neq(tree1, tree2));
+    put(tree2, $(String, "name"), $(String, "Alex"));
+    PT_ASSERT(eq(tree1, tree2));
+    put(tree1, $(String, "age"), $(String, "28"));
+    put(tree2, $(String, "age"), $(String, "30"));
+    PT_ASSERT(neq(tree1, tree2));
+    put(tree1, $(String, "age"), $(String, "30"));
+    PT_ASSERT(eq(tree1, tree2));
+    put(tree2, $(String, "nickname"), $(String, "The Wing Man"));
+    PT_ASSERT(neq(tree1, tree2));
+    
+    delete(tree1);
+    delete(tree2);
+    
   }
 
   PT_TEST(test_ord) {
@@ -231,6 +289,28 @@ PT_SUITE(suite_core) {
     PT_ASSERT(eq(at(w, 5), $(Int, 123213)));
     
     delete(w);
+    
+    var map1 = new(Map, 0);
+    var map2 = new(Map, 0);
+    
+    PT_ASSERT(eq(map1, map2));
+    put(map1, $(String, "key"), $(String, "val"));
+    PT_ASSERT(neq(map1, map2));
+    put(map2, $(String, "key"), $(String, "val"));
+    PT_ASSERT(eq(map1, map2));
+    put(map1, $(String, "newkey"), $(Int, 10));
+    put(map2, $(String, "newkey"), $(String, "newval"));
+    PT_ASSERT(neq(map1, map2));
+    put(map1, $(String, "newkey"), $(String, "newval"));
+    PT_ASSERT(eq(map1, map2));
+    put(map2, $(String, "difkey"), $(Int, 5));
+    PT_ASSERT(neq(map1, map2));
+    
+    delete(map1);
+    delete(map2);
+    
+    
+    
     
   }
 

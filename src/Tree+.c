@@ -9,6 +9,7 @@ var Tree = methods {
   method(Tree, New),
   method(Tree, Assign),
   method(Tree, Copy),
+  method(Tree, Eq),
   method(Tree, Collection),
   method(Tree, Dict),
   method(Tree, Iter),
@@ -50,6 +51,32 @@ var Tree_Copy(var self) {
     put(newtree, key, val);
   }
   return newtree;
+}
+
+var Tree_Eq(var self, var obj) {
+  TreeData* td = cast(self, Tree);
+  if (eq(type_of(obj), Tree)) {
+		var val;
+    foreach(obj, key) {
+			if ((val = get(self, key)) is Undefined) {
+				return False;
+			}
+			if_neq(get(obj, key), val) {
+				return False;
+			}
+		}
+    /* see if there exists key at the first object, which
+     * doesn't exist at the second object. 
+     */
+    foreach(self, key) {
+			if ((val = get(obj, key)) is Undefined) {
+				return False;
+			}
+		}
+		return True;
+  } else {
+    return False;
+  }
 }
 
 int Tree_Len(var self) {
@@ -116,25 +143,25 @@ void Tree_Discard(var self, var key) {
       
       if ((node->left is NULL) and 
           (node->right is NULL)) {
+        *parent = NULL;
         Tree_Node_Delete(node);
         discard(td->keys, key);
-        *parent = NULL;
         return;
       }
       
       if ((node->left is NULL) and
           not (node->right is NULL)) {
+        *parent = node->right;
         Tree_Node_Delete(node);
         discard(td->keys, key);
-        *parent = node->right;
         return;
       }
       
       if ((node->right is NULL) and
           not (node->left is NULL)) {
+        *parent = node->left;
         Tree_Node_Delete(node);
         discard(td->keys, key);
-        *parent = node->left;
         return;
       }
       

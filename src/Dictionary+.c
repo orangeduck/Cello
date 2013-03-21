@@ -12,6 +12,7 @@ var Dictionary = methods {
   method(Dictionary, New),
   method(Dictionary, Assign),
   method(Dictionary, Copy),
+  method(Dictionary, Eq),
   method(Dictionary, Collection),
   method(Dictionary, Dict),
   method(Dictionary, Iter),
@@ -72,6 +73,32 @@ var Dictionary_Copy(var self) {
   return cop;
 }
 
+var Dictionary_Eq(var self, var obj) {
+  DictionaryData* dict = cast(self, Dictionary);
+  if (eq(type_of(obj), Dictionary)) {
+		var val;
+    foreach(obj, key) {
+			if ((val = get(self, key)) is Undefined) {
+				return False;
+			}
+			if_neq(get(obj, key), val) {
+				return False;
+			}
+		}
+    /* see if there exists key at the first object, which
+     * doesn't exist at the second object. 
+     */
+    foreach(self, key) {
+			if ((val = get(obj, key)) is Undefined) {
+				return False;
+			}
+		}
+		return True;
+  } else {
+    return False;
+  }
+}
+
 int Dictionary_Len(var self) {
   DictionaryData* dict = cast(self, Dictionary);
   return len(dict->keys);
@@ -110,8 +137,8 @@ void Dictionary_Discard(var self, var key) {
   
   if (pos != -1) {
     discard(dict->keys, key);
-    pop_at(keys, i);
-    pop_at(vals, i);
+    pop_at(keys, pos);
+    pop_at(vals, pos);
   }
   
 }
@@ -151,8 +178,8 @@ void Dictionary_Put(var self, var key, var val) {
   }
 
   if (pos != -1) {
-    pop_at(keys, i);
-    pop_at(vals, i);
+    pop_at(keys, pos);
+    pop_at(vals, pos);
   }
   
   push(keys, key);
