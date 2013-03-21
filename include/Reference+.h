@@ -10,7 +10,7 @@ data {
   var ref;
 } ReferenceData;
 
-/** Dictionary_New(var self, var obj); */
+/** Reference_New(var self, var obj); */
 var Reference_New(var self, va_list* args);
 var Reference_Delete(var self);
 void Reference_Assign(var self, var obj);

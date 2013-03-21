@@ -111,7 +111,7 @@ var List_Contains(var self, var obj) {
 void List_Discard(var self, var obj) {
   ListData* lo = cast(self, List);
   for (int i = 0; i < len(self); i++) {
-    if ( eq(at(self, i), obj) ) {
+    if_eq(at(self, i), obj) {
       pop_at(self, i);
       return;
     }

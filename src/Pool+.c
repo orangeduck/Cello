@@ -39,17 +39,12 @@ var Pool_Delete(var self) {
 
 var Pool_Retain(var self, var x) {
   
-  printf("Hello\n");
-  
   if (contains(self, x)) {
-    printf("Value Already There\n");
     var c = get(self, x);
     add(c, $(Int, 1));
     return x;
   } else {
-    printf("New Value\n");
-    put(self, x, $(Int, 0));
-    printf("Put New Value\n");
+    put(self, x, $(Int, 1));
     return x;
   }
   
@@ -63,10 +58,8 @@ void Pool_Release(var self, var x) {
     sub(c, $(Int, 1));
     
     if_le(c, $(Int, 0)) {
-      delete(x);
       discard(self, x);
-    } else {
-      put(self, x, c);
+      delete(x);
     }
   
   }
@@ -79,16 +72,8 @@ int Pool_Len(var self) {
 }
 
 void Pool_Clear(var self) {
-  
   PoolData* pd = cast(self, Pool);
-  
-  foreach(pd->tab, k) {
-    var ref = get(pd->tab, k);
-    delete(at(ref,0));
-  }
-  
   clear(pd->tab);
-  
 }
 
 var Pool_Contains(var self, var x) {

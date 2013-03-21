@@ -27,10 +27,10 @@ var Table_New(var self, va_list* args) {
   tab->val_type = cast(va_arg(*args, var), Type);
   
   tab->size = 1024;
-  tab->keys = new(List, 0);
+  tab->keys = new(Array, tab->key_type, 0);
   
-  tab->key_buckets = malloc(tab->size * sizeof(ArrayData));
-  tab->val_buckets = malloc(tab->size * sizeof(ArrayData));
+  tab->key_buckets = malloc(tab->size * sizeof(var));
+  tab->val_buckets = malloc(tab->size * sizeof(var));
   
   for (int i = 0; i < tab->size; i++) {
     tab->key_buckets[i] = new(Array, tab->key_type, 0);
@@ -61,8 +61,7 @@ void Table_Assign(var self, var obj) {
   clear(self);
   
   foreach(obj, key) {
-    var val = get(obj, key);
-    put(self, key, val);
+    put(self, key, get(obj, key));
   }
 }
 
@@ -72,8 +71,7 @@ var Table_Copy(var self) {
   var cop = new(Table, tab->key_type, tab->val_type);
   
   foreach(self, key) {
-    var val = get(self, key);
-    put(cop, key, val);
+    put(cop, key, get(self, key));
   }
   
   return cop;
@@ -113,12 +111,13 @@ int Table_Len(var self) {
 void Table_Clear(var self) {
   TableData* tab = cast(self, Table);
   
+  clear(tab->keys);
+
   for(int i = 0; i < tab->size; i++) {
     clear(tab->key_buckets[i]);
     clear(tab->val_buckets[i]);
   }
   
-  clear(tab->keys);
 }
 
 var Table_Contains(var self, var key) {
@@ -128,28 +127,26 @@ var Table_Contains(var self, var key) {
 }
 
 void Table_Discard(var self, var key) {
-    
+  
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
-    
+  
   long i = hash(key) % tab->size;
   
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
-    
-  int pos = -1;
   
   for(int i = 0; i < len(keys); i++) {
-    var k = at(keys, i);
-    if_eq(k, key) { pos = i; break; }
+    if_eq(at(keys, i), key) {
+      
+      discard(tab->keys, key);
+      pop_at(keys, i);
+      pop_at(vals, i);
+      
+      return;
+    }
   }
   
-  if (pos != -1) {
-    discard(tab->keys, key);
-    pop_at(keys, pos);
-    pop_at(vals, pos);
-  }
-    
 }
 
 var Table_Get(var self, var key) {
@@ -162,10 +159,8 @@ var Table_Get(var self, var key) {
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
   
-  for(int i = 0; i < len(keys); i++) {
-    var k = at(keys, i);
-    var v = at(vals, i);
-    if_eq(k, key) { return v; }
+  for (int i = 0; i < len(keys); i++) {
+    if_eq(at(keys, i), key) { return at(vals, i); }
   }
   
   return Undefined;
@@ -181,21 +176,12 @@ void Table_Put(var self, var key, var val) {
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
   
-  int pos = -1;
-  
-  for(int i = 0; i < len(keys); i++) {
-    var k = at(keys, i);
-    if_eq(k, key) { pos = i; }
-  }
-  
-  if (pos != -1) {
-    pop_at(keys, pos);
-    pop_at(vals, pos);
-  }
+  discard(self, key);
   
   push(keys, key);
   push(vals, val);
-  push(tab->keys, key);  
+  push(tab->keys, key);
+  
 }
 
 var Table_Iter_Start(var self) {

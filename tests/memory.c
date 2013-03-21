@@ -38,21 +38,21 @@ PT_SUITE(suite_memory) {
     
     var p = new(Pool);
     
-    var x = retain(p, new(Int, 1));
-    var y = retain(p, new(Int, 2));
-    //var z = retain(p, new(Int, 3));
+    var x = retain(p, new(String, "Hello Everyone!"));
+    var y = retain(p, new(String, "Bonjour"));
+    var z = retain(p, new(Int, 3));
     
-    //PT_ASSERT(contains(p, x));
-    //PT_ASSERT(contains(p, y));
-    //PT_ASSERT(contains(p, z));
+    PT_ASSERT(contains(p, x));
+    PT_ASSERT(contains(p, y));
+    PT_ASSERT(contains(p, z));
     
-    /*
     retain(p, x);
     PT_ASSERT(eq(get(p, x), $(Int, 2)));
     PT_ASSERT(eq(get(p, y), $(Int, 1)));
     PT_ASSERT(eq(get(p, z), $(Int, 1)));
     release(p, x);
-
+    
+    /*
     PT_ASSERT(eq(get(p, x), $(Int, 1)));
     PT_ASSERT(eq(get(p, y), $(Int, 1)));
     PT_ASSERT(eq(get(p, z), $(Int, 1)));
