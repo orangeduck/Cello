@@ -131,18 +131,16 @@ void Table_Discard(var self, var key) {
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
   
-  long i = hash(key) % tab->size;
+  long i = abs(hash(key) % tab->size);
   
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
   
-  for(int i = 0; i < len(keys); i++) {
-    if_eq(at(keys, i), key) {
-      
+  for(int j = 0; j < len(keys); j++) {
+    if_eq(at(keys, j), key) {
       discard(tab->keys, key);
-      pop_at(keys, i);
-      pop_at(vals, i);
-      
+      pop_at(keys, j);
+      pop_at(vals, j);      
       return;
     }
   }
@@ -154,13 +152,13 @@ var Table_Get(var self, var key) {
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
   
-  long i = hash(key) % tab->size;
+  long i = abs(hash(key) % tab->size);
   
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
   
-  for (int i = 0; i < len(keys); i++) {
-    if_eq(at(keys, i), key) { return at(vals, i); }
+  for (int j = 0; j < len(keys); j++) {
+    if_eq(at(keys, j), key) { return at(vals, j); }
   }
   
   return Undefined;
@@ -171,11 +169,11 @@ void Table_Put(var self, var key, var val) {
   key = cast(key, tab->key_type);
   val = cast(val, tab->val_type);
   
-  long i = hash(key) % tab->size;
+  long i = abs(hash(key) % tab->size);
   
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
-  
+
   discard(self, key);
   
   push(keys, key);

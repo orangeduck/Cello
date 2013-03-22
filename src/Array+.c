@@ -113,8 +113,7 @@ var Array_Contains(var self, var obj) {
 
 void Array_Discard(var self, var obj) {
   for(int i = 0; i < len(self); i++) {
-    var item = at(self, i);
-    if_eq(item, obj) {
+    if_eq(at(self, i), obj) {
       pop_at(self, i);
       return;
     }
@@ -128,8 +127,6 @@ static void Array_Reserve_More(ArrayData* ad) {
     ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
     New* inew = type_class(ad->item_type, New);
     ad->items = realloc(ad->items, inew->size * ad->num_slots);
-    
-    memset(ad->items + old_size * inew->size, 0, (ad->num_slots - old_size) * inew->size);
   }
 
 }
@@ -138,10 +135,13 @@ static void Array_Set_Type_At(ArrayData* ad, int i) {
   
   New* inew = type_class(ad->item_type, New);
   
+  memset(ad->items + (inew->size * i), 0, inew->size);
   ObjectData* template = ad->items + (inew->size * i);
   template->type = ad->item_type;
   
 }
+
+#include "String+.h"
 
 void Array_Push_Back(var self, var obj) {
   ArrayData* ad = cast(self, Array);
@@ -149,8 +149,8 @@ void Array_Push_Back(var self, var obj) {
   Array_Reserve_More(ad);
   
   Array_Set_Type_At(self, ad->num_items-1);
-  
   set(self, ad->num_items-1, obj);
+  
 }
 
 void Array_Push_Front(var self, var obj) {

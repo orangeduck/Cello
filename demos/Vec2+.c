@@ -50,7 +50,7 @@ var Vec2_Copy(var self) {
 var Vec2_Eq(var self, var obj) {
   Vec2Data* v1 = cast(self, Vec2);
   Vec2Data* v2 = cast(obj, Vec2);
-  return (var)(v1->x is v2->x and v1->y is v2->y);
+  return (var)(intptr_t)(v1->x is v2->x and v1->y is v2->y);
 }
 
 float Vec2_Dot(var self, var obj) {
@@ -62,4 +62,8 @@ float Vec2_Dot(var self, var obj) {
 float Vec2_Length(var self) {
   Vec2Data* v = cast(self, Vec2);
   return sqrt(v->x * v->x + v->y * v->y);
+}
+
+int main(int argc, char** argv) {
+  return 0;
 }

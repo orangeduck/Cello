@@ -123,7 +123,7 @@ var Dictionary_Contains(var self, var key) {
 void Dictionary_Discard(var self, var key) {
   DictionaryData* dict = cast(self, Dictionary);
   
-  long i = abs(hash(key)) % dict->size;
+  long i = abs(hash(key) % dict->size);
   
   var keys = dict->key_buckets[i];
   var vals = dict->val_buckets[i];
@@ -147,7 +147,7 @@ var Dictionary_Get(var self, var key) {
 
   DictionaryData* dict = cast(self, Dictionary);
   
-  long i = abs(hash(key)) % dict->size;
+  long i = abs(hash(key) % dict->size);
   
   var keys = dict->key_buckets[i];
   var vals = dict->val_buckets[i];
@@ -165,7 +165,7 @@ void Dictionary_Put(var self, var key, var val) {
 
   DictionaryData* dict = cast(self, Dictionary);
   
-  long i = abs(hash(key)) % dict->size;
+  long i = abs(hash(key) % dict->size);
   
   var keys = dict->key_buckets[i];
   var vals = dict->val_buckets[i];

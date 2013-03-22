@@ -653,6 +653,11 @@ PT_SUITE(suite_data) {
     PT_ASSERT( eq(i0, $(Int, 2)) );
     PT_ASSERT( eq(i1, $(Int, 5)) );
     
+    put(t0, $(String, "Hello"), $(Int, 6));
+    
+    var i2 = get(t0, $(String, "Hello"));
+    PT_ASSERT( eq(i2, $(Int, 6)) );
+    
     delete(t0);
     
   }
@@ -758,6 +763,11 @@ PT_SUITE(suite_data) {
     
     PT_ASSERT( eq(i0, $(Int, 2)) );
     PT_ASSERT( eq(i1, $(Int, 5)) );
+
+    put(t0, $(String, "There"), $(Int, 8));
+
+    var i2 = get(t0, $(String, "There"));
+    PT_ASSERT( eq(i2, $(Int, 8)) );   
     
     delete(t0);
 

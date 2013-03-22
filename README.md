@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
 About
 -----
 
-C+ is a C GNU99 library which brings higher level programming tools to C. It takes inspiration from C++, Obj-C, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic typing, and some syntactic sugar. There are a selection of new keywords, and many generically named functions in the namespace are taken, but other than that it should be fully compatible with normal C code.
+C+ is a C GNU99 library which brings higher level programming tools to C. It takes inspiration from C++, Obj-C, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic/duck typing, and some syntactic sugar. There are a selection of new keywords, and many generically named functions in the namespace are taken, but other than that it should be fully compatible with normal C code.
 
 Although I've made the syntax pleasant, this isn't a library for beginners. It is for C power users, as manual memory management doesn't play nicely with many higher-order concepts.
 
@@ -84,6 +84,77 @@ What I don't enjoy in Haskell is writing small detailed algorithms in a function
 
 More Examples
 -------------
+
+Some functional tools using `lambda` statements.
+
+```c
+#include "C+.h"
+
+int main(int argc, char** argv) {
+  
+  /*
+  ** Basic method of lambda construction .
+  ** Must be at the statement level.
+  ** Cannot be used in/as expression.
+  */
+  lambda(hello_name, args) {
+  
+    /* Input is a list of arguments */
+    var name = cast(at(args, 0), String);
+    printf("Hello %s!\n", as_str(name));
+    
+    /* Always must return */
+    return None;
+    
+  }
+  
+  /* Functions called with "call" */
+  call(hello_name, $(String, "Bob"));
+  
+  /* Higher order functions supported */
+  var names = new(List, 3, $(String, "Dan"), $(String, "Robert"), $(String, "Chris"));
+  map(names, hello_name);
+  delete(names);
+  
+  /* Here is an example with two arguments */
+  lambda(add_print, args) {
+    int fst = as_long(cast(at(args, 0), Int));
+    int snd = as_long(cast(at(args, 1), Int));
+    printf("%i + %i = %i\n", fst, snd, fst+snd);
+    return None;
+  }
+  
+  /*
+  ** Notice arguments to "call" in curried form.
+  ** Use "call_with" for uncurried calling.
+  */
+  call(add_print, $(Int, 10), $(Int, 21));
+  
+  /* Partially applied Function, neat! */
+  lambda_partial(add_partial, add_print, $(Int, 5));
+  
+  call(add_partial, $(Int, 1));
+  
+  /*
+  ** We can use normal c-functions too.
+  ** If they have all argument types as "var".
+  ** Then they can be uncurried.
+  */
+  var Welcome_Pair(var fst, var snd) {
+    printf("Hello %s and %s!\n", as_str(fst), as_str(snd));
+    return None;
+  }
+  
+  lambda_uncurry(welcome_uncurried, Welcome_Pair, 2);
+  
+  call(welcome_uncurried, $(String, "John"), $(String, "David"));
+  
+  return 0;
+}
+```
+
+More More Examples
+------------------
 
 __Defining a new Class.__
 
@@ -201,98 +272,105 @@ float Vec2_Length(var self) {
 }
 ```
 
-More More Examples
-------------------
+More More More Examples
+-----------------------
 
-Some functional tools using "lambda" statements.
+Memory management is hard. Very hard when combined with a lack of rich stack types. Very very hard when combined with a whole load of high level concepts. C+ gives you a few options, which where possible, the standard library is agnostic too. You can use what you think is best.
+
+* __Destructive Operations__ - Most of the standard library uses destructive operations and expects the user to make a copy if they exlicity want one.
+* __Output Parameters__ - In some places it is more appropriate to use output parameters and in which case "assign" is used to move the data. 
+* __Reference Counting__ - This isn't used in the standard library but is provided via the following interface:
 
 ```c
 #include "C+.h"
 
+static var g_pool = NULL;
+
+static void table_fill(var x) {
+  put(x, $(String, "First"),  $(Real, 0.0));
+  put(x, $(String, "Second"), $(Real, 0.1));
+  put(x, $(String, "Third"),  $(Real, 5.7));
+  release(g_pool, x);
+}
+
+static void table_process(var x) {
+  put(x, $(String, "First"), $(Real, -0.65));
+  release(g_pool, x);
+}
+
 int main(int argc, char** argv) {
   
-  /*
-  ** Basic method of lambda construction .
-  ** Must be at the statement level.
-  ** Cannot be used in/as expression.
-  */
-  lambda(hello_name, args) {
+  g_pool = new(Pool);
   
-    /* Input is a list of arguments */
-    var name = cast(at(args, 0), String);
-    printf("Hello %s!\n", as_str(name));
-    
-    /* Always must return */
-    return None;
-    
+  var x = retain(g_pool, new(Table, String, Real));
+  
+  table_fill(retain(g_pool, x));
+  table_process(retain(g_pool, x));
+  
+  release(g_pool, x);
+  
+  delete(g_pool);
+  
+}
+
+```
+
+While useless in such a small example, as the pool always cleans up references on delete it can be very useful to avoid memory leaks on things such as event loops or general pooled memory. It can be used as a poor mans sweep garbage collector.
+
+
+More More More More Examples
+----------------------------
+
+C+ provides a kind of exception handling to deal with errors.
+
+```c
+static int try_divide(int x, int y) {
+  if (y == 0) {
+    throw(Exception, "Division By Zero");
+  } else {
+    return x / y;
   }
-  
-  /* Functions called with "call" */
-  call(hello_name, $(String, "Bob"));
-  
-  /* Higher order functions supported */
-  var names = new(List, 3, $(String, "Dan"), $(String, "Robert"), $(String, "Chris"));
-  map(names, hello_name);
-  delete(names);
-  
-  /* Here is an example with two arguments */
-  lambda(add_print, args) {
-    int fst = as_long(cast(at(args, 0), Int));
-    int snd = as_long(cast(at(args, 1), Int));
-    printf("%i + %i = %i\n", fst, snd, fst+snd);
-    return None;
+}
+
+int main(int argc, char** argv) {
+
+  try {
+    int result = try_divide(2, 0);
+  } catch (e, Exception) {
+    // Panic!
+    return 1;
   }
-  
-  /*
-  ** Notice arguments to "call" in curried form.
-  ** Use "call_with" for uncurried calling.
-  */
-  call(add_print, $(Int, 10), $(Int, 21));
-  
-  /* Partially applied Function, neat! */
-  lambda_partial(add_partial, add_print, $(Int, 5));
-  
-  call(add_partial, $(Int, 1));
-  
-  /*
-  ** We can use normal c-functions too.
-  ** If they have all argument types as "var".
-  ** Then they can be uncurried.
-  */
-  var Welcome_Pair(var fst, var snd) {
-    printf("Hello %s and %s!\n", as_str(fst), as_str(snd));
-    return None;
-  }
-  
-  lambda_uncurry(welcome_uncurried, Welcome_Pair, 2);
-  
-  call(welcome_uncurried, $(String, "John"), $(String, "David"));
   
   return 0;
 }
 ```
 
-There are more examples in the demos folder as well as a large amount of reference material under tests and via the source code. Native class definitions (such as for ```New```, ```Eq```, ```Ord```) can be found in ```Prelude+.h```
+Throwing an exception will jump the program control to the innermost `catch` block where it must be handled. To catch an exception one must put a reference to the thrown Object. `Exception` is a dummy object that can be used, but actually any Object can be thrown and caught in C+ so users can create their own Exception types or find other applications. The throw message will be preserved internally, but be careful of throwing stack memory which may become invalidated when switching control flow.
+
+More More More More More Examples
+---------------------------------
+
+There are some more examples in the demos folder as well as a large amount of reference material under tests and via the source code. Native class definitions (such as for `New`, `Eq`, `Ord`) can be found in `Prelude+.h`
 
 
 Explanation
 ------------
 
-The first thing that probably comes into your head viewing the above code is ```var```. This is a typedef of ```void*``` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the ```cast``` function.
+The first thing that probably comes into your head viewing the above code is `var`. This is a typedef of `void*` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the `cast` function.
 
-This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, then you are more than free to use ```len``` upon it. One can test if a type implements a certain class with the function ```type_implements(type, Class)```. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
+This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, then you are more than free to use `len` upon it. One can test if a type implements a certain class with the function `type_implements(type, Class)`. Calling a function on an object which does not implement the appropriate classes will throw a runtime error.
 
-Another thing that may have jumped to your mind in the examples is ```new```, ```delete``` and the ```$``` symbol. These are ways to allocate memory for objects. ```new``` and ```delete``` are used for heap objects and call constructors/destructors. ```$``` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the corresponding types data structure with the arguments provided.
+Another thing that may have jumped to your mind in the examples is `new`, `delete` and the `$` symbol. These are ways to allocate memory for objects. `new` and `delete` are used for heap objects and call constructors/destructors. `$` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the corresponding types data structure with the arguments provided.
 
 Other than these things there is not much surprising in the code which cannot be explained via syntactic sugar.
 
-* ```is```, ```not```, ```and```, ```or``` -> ```==```, ```!```, ```&&```, ```||```
-* ```elif``` -> ```else if```
-* ```module``` -> ```extern var```
-* ```class``` -> ```typedef struct```
-* ```data``` -> ```typedef struct```
+* `is`, `not`, `and`, `or` -> `==`, `!`, `&&`, `||`
+* `elif` -> `else if`
+* `module` -> `extern var`
+* `class` -> `typedef struct`
+* `data` -> `typedef struct`
 
-finally the ```instance``` and ```methods``` macros are helpers for defining Type objects statically. Because Type objects are somewhat complicated the syntax is very awkward otherwise.
+finally the `instance` and `methods` macros are helpers for defining Type objects statically. Because Type objects are somewhat complicated the syntax is very awkward otherwise.
 
 Compiling
 ---------
@@ -302,17 +380,6 @@ To build the just run `make`
 To build the tests run `make test`
 
 To build the examples run `make examples`
-
-
-
-Returning Values
-----------------
-
-Having every data object as a reference makes returning data objects with manual memory management annoying. To return a full data object one has to allocate it on the heap and expect the user to delete it once they are done with it. There are a couple alternatives to this when such an approach is unacceptable:
-
-* Embrace destructive operations - Although not as nice semantically as duplicative ones, consistency is the key issue. How often is it we mean not to act destructively anyway? Assume destructive functions by default, return void.
-
-* Use output parameters - Use arguments intended for output, passed into a function. Use the ```assign``` function or otherwise to assign them data.
 
 
 Questions & Contributions
