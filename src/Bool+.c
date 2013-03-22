@@ -35,8 +35,8 @@ char Bool_AsChar(var self) {
   return (char)(self is True);
 }
 
-static const char* true_str = "True";
-static const char* false_str = "False";
+local const char* true_str = "True";
+local const char* false_str = "False";
 
 const char* Bool_AsStr(var self) {
   if (self) {

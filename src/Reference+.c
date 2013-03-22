@@ -9,6 +9,7 @@ var Reference = methods {
   method(Reference, Eq), 
   method(Reference, Hash),
   method(Reference, At),
+  method(Reference, With),
   methods_end(Reference)
 };
 
@@ -53,3 +54,9 @@ void Reference_Set(var self, int i, var x) {
   ReferenceData* rd = cast(self, Reference);
   rd->ref = x;
 }
+
+void Reference_Exit(var self) {
+  ReferenceData* rd = cast(self, Reference);
+  delete(rd->ref);
+}
+

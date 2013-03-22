@@ -1,8 +1,14 @@
 /*
 ** == Exceptions ==
 **
-**  Exceptions in C+ are a little weird.
-**   
+**  Exceptions in C+ follow fairly normal
+**  semantics with two main differences.
+**
+**  The first is that they do not propagate
+**  and so must be caught by the innermost block.
+**
+**  The second is that any object can be
+**  thrown and caught.
 **
 */
 #ifndef ExceptionPlus_H
@@ -10,59 +16,32 @@
 
 #include "Prelude+.h"
 
-module Exception;
+module TypeError;
+module ValueError;
+module ClassError;
 
-data {
-  var type;
-  const char* name;
-} ExceptionData;
+/* Internal Exception Stuff */
 
-const char* Exception_AsStr(var e);
+enum {
+  __EXC_MAX_DEPTH = 2048,
+};
 
-instance(Exception, AsStr) = { Exception_AsStr };
+extern bool __exc_active;
+extern int __exc_depth;
+extern jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
-/*
-**  == Exception Records ==
-**
-**  Exception Macros and Records
-**
-*/
+void __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
+var __exc_catch(void*, ...);
 
-typedef struct __exc_record {
-  struct __exc_record* prev;
-  jmp_buf jb;
-} __exc_record;
-
-extern __exc_record  __exc_root;
-extern __exc_record* __exc_top;
-
-extern var __exc_obj;
-extern const char* __exc_msg;
-extern const char* __exc_file;
-extern const char* __exc_func;
-extern unsigned int __exc_lineno;
-
-void __exc_record_push(__exc_record* er);
-bool __exc_record_pop(__exc_record* er, var* exc, ...);
+/* Exception Macros */
 
 #define try \
-  __exc_record __exc_r; \
-  __exc_record_push(&__exc_r); \
-  int __exc_res = setjmp(__exc_r.jb); \
-  if (__exc_res == 0) 
-  
-#define catch(E, ...) \
-  var E = Undefined; \
-  if (__exc_res && __exc_record_pop(&__exc_r, &E, __VA_ARGS__, Undefined))
-  
-/* TODO: Format string */
-#define throw(E, FMT, ...) \
-  __exc_obj = E; \
-  __exc_msg = FMT; \
-  __exc_file = __FILE__; \
-  __exc_func = __func__; \
-  __exc_lineno = __LINE__; \
-  longjmp(__exc_top->jb, 1);
+  __exc_depth++; __exc_active = false; \
+  if (__exc_depth == __EXC_MAX_DEPTH) { fprintf(stderr, "Maximum Exception Depth Exceeded!\n"); abort(); } \
+  if (!setjmp(__exc_buffers[__exc_depth]))   
+
+#define catch(E, ...) else { __exc_active = true; } __exc_depth++; for (var E = __exc_catch(NULL, __VA_ARGS__, Undefined); E != Undefined; E = Undefined)
+#define throw(E, FMT, ...) __exc_throw(E, FMT, __FILE__, __func__, __LINE__, ##__VA_ARGS__);
 
 
 #endif

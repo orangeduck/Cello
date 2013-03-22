@@ -120,7 +120,7 @@ void Array_Discard(var self, var obj) {
   }
 }
 
-static void Array_Reserve_More(ArrayData* ad) {
+local void Array_Reserve_More(ArrayData* ad) {
   
   if (ad->num_items > ad->num_slots) {
     int old_size = ad->num_slots;
@@ -131,7 +131,7 @@ static void Array_Reserve_More(ArrayData* ad) {
 
 }
 
-static void Array_Set_Type_At(ArrayData* ad, int i) {
+local void Array_Set_Type_At(ArrayData* ad, int i) {
   
   New* inew = type_class(ad->item_type, New);
   
@@ -171,7 +171,7 @@ void Array_Push_At(var self, var obj, int index) {
   set(self, index, obj);
 }
 
-static void Array_Reserve_Less(ArrayData* ad) {
+local void Array_Reserve_Less(ArrayData* ad) {
   
   if ( ad->num_slots > pow(ad->num_items+1, 1.5)) {
     ad->num_slots = floor((ad->num_slots-1) * (1.0/1.5));
@@ -233,7 +233,7 @@ void Array_Set(var self, int i, var obj) {
   assign(ad->items + inew->size * i, obj);
 }
 
-static const var ARRAY_ITER_END = (var)-1;
+local const var ARRAY_ITER_END = (var)-1;
 
 var Array_Iter_Start(var self) {
 
@@ -258,7 +258,7 @@ var Array_Iter_Next(var self, var curr) {
   }
 }
 
-static void Array_Swap_Items(var self, var temp, int i0, int i1) {
+local void Array_Swap_Items(var self, var temp, int i0, int i1) {
   assign(temp, at(self, i0));
   set(self, i0, at(self, i1));
   set(self, i1, temp);
@@ -276,7 +276,7 @@ void Array_Reverse(var self) {
   destruct(temp);
 }
 
-static int Array_Sort_Partition(var self, int left, int right, int pivot) {
+local int Array_Sort_Partition(var self, int left, int right, int pivot) {
   
   ArrayData* ad = cast(self, Array); 
   
@@ -311,7 +311,7 @@ static int Array_Sort_Partition(var self, int left, int right, int pivot) {
   return storei;
 }
 
-static void Array_Sort_Part(var self, int left, int right) {
+local void Array_Sort_Part(var self, int left, int right) {
   if (left < right) {
     int pivot = left + (right - left) / 2;
     int newpivot = Array_Sort_Partition(self, left, right, pivot);

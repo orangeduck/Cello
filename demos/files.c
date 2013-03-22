@@ -6,16 +6,15 @@
 
 int main(int arc, char** argv) {
   
-  var f = $(File, NULL);
-  
-  open(f, "test.bin", "w");
+  with(open($(File, NULL), "test.bin", "w"), f) {
     
     put(f, String, $(String, "Hello"));
     put(f, Int, $(Int, 1));
     put(f, Int, $(Int, 22));
   
-  close(f);
+  }
   
+  var f = $(File, NULL);
   open(f, "test.bin", "r");
     
     var string = get(f, String);

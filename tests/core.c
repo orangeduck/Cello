@@ -2,24 +2,24 @@
 #include "ptest.h"
 #include "C+.h"
 
-static var TestType;
+local var TestType;
 
 data {
   var type;
   int test_data;
 } TestTypeData;
 
-static var TestType_New(var self, va_list* args) {
+local var TestType_New(var self, va_list* args) {
   TestTypeData* ttd = cast(self, TestType);
   ttd->test_data = va_arg(*args, int);
   return self;
 }
 
-static var TestType_Delete(var self) {
+local var TestType_Delete(var self) {
   return self;
 }
 
-static var TestType_Eq(var self, var obj) {
+local var TestType_Eq(var self, var obj) {
   TestTypeData* lhs = cast(self, TestType);
   TestTypeData* rhs = cast(obj, TestType);
   if (lhs->test_data == rhs->test_data) {

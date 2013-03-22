@@ -1343,9 +1343,9 @@ PT_SUITE(suite_data) {
     
   }
 
-  static char testoutput1[] = "This is a test\n";
-  static char testoutput2[] = "This is a sample\n";
-  static char testinput[512];
+  local char testoutput1[] = "This is a test\n";
+  local char testoutput2[] = "This is a sample\n";
+  local char testinput[512];
 
   PT_TEST(test_file_read) {
     

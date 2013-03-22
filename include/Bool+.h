@@ -17,8 +17,8 @@
 
 module Bool;
 
-static const var True = (var)1;
-static const var False = (var)0;
+local const var True = (var)1;
+local const var False = (var)0;
 
 var Bool_Eq(var self, var obj);
 var Bool_Gt(var self, var obj);

@@ -95,9 +95,9 @@ var Map_Contains(var self, var key) {
   return contains(md->keys, key);
 }
 
-static bool inorder_opt = true;
+local bool inorder_opt = true;
 
-static var Map_Next_Inorder(struct MapNode* node) {
+local var Map_Next_Inorder(struct MapNode* node) {
   
   inorder_opt = not inorder_opt;
   
@@ -197,7 +197,7 @@ var Map_Get(var self, var key) {
   return Undefined;
 }
 
-static struct MapNode* Map_Node_New(var key, var val) {
+local struct MapNode* Map_Node_New(var key, var val) {
   struct MapNode* node = malloc(sizeof(struct MapNode));
   node->leaf_key = key;
   node->leaf_val = val;

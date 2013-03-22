@@ -1,3 +1,13 @@
+/*
+** == Reference ==
+**
+**  Basic boxed Pointer object
+**  Use "at(p,0)" for dereference
+**
+**  "with" can be used to delete
+**  after some lifetime.
+**
+*/
 #ifndef ReferencePlus_h
 #define ReferencePlus_h
 
@@ -19,6 +29,7 @@ var Reference_Eq(var self, var obj);
 long Reference_Hash(var self);
 var Reference_At(var self, int i);
 void Reference_Set(var self, int i, var x);
+void Reference_Exit(var self);
 
 instance(Reference, New) = { sizeof(ReferenceData), Reference_New, Reference_Delete };
 instance(Reference, Assign) = { Reference_Assign };
@@ -26,5 +37,6 @@ instance(Reference, Copy) = { Reference_Copy };
 instance(Reference, Eq) = { Reference_Eq };
 instance(Reference, Hash) = { Reference_Hash };
 instance(Reference, At) = { Reference_At, Reference_Set };
+instance(Reference, With) = { NULL, Reference_Exit };
 
 #endif

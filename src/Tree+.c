@@ -96,9 +96,9 @@ var Tree_Contains(var self, var key) {
   return contains(td->keys, key);
 }
 
-static bool inorder_opt = true;
+local bool inorder_opt = true;
 
-static var Tree_Next_Inorder(struct TreeNode* node) {
+local var Tree_Next_Inorder(struct TreeNode* node) {
   
   inorder_opt = not inorder_opt;
   
@@ -124,7 +124,7 @@ static var Tree_Next_Inorder(struct TreeNode* node) {
   
 }
 
-static void Tree_Node_Delete(struct TreeNode* node) {
+local void Tree_Node_Delete(struct TreeNode* node) {
   destruct(node->leaf_key);
   destruct(node->leaf_val);
   free(node);
@@ -213,7 +213,7 @@ var Tree_Get(var self, var key) {
   return Undefined;
 }
 
-static struct TreeNode* Tree_Node_New(var self, var key, var val) {
+local struct TreeNode* Tree_Node_New(var self, var key, var val) {
   TreeData* td = cast(self, Tree);
   
   struct TreeNode* node = malloc(sizeof(struct TreeNode));

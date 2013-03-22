@@ -9,24 +9,24 @@
 ** but with creative thinking could become a powerful tool.
 */
 
-static var Hello;
+local var Hello;
 
 data {
   var type;
   int hello_val;
 } HelloData;
 
-static var Hello_New(var self, va_list* args) {
+local var Hello_New(var self, va_list* args) {
   HelloData* hd = cast(self, Hello);
   hd->hello_val = va_arg(*args, int);
   return self;
 }
 
-static var Hello_Delete(var self) {
+local var Hello_Delete(var self) {
   return self;
 }
 
-static var Hello_Eq(var self, var obj) {
+local var Hello_Eq(var self, var obj) {
   HelloData* lhs = cast(self, Hello);
   HelloData* rhs = cast(obj, Hello);
   if (lhs->hello_val == rhs->hello_val) {

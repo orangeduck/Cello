@@ -2,6 +2,8 @@
 ** == Pool ==
 **
 **  Pool based reference memory management
+**  Allows for reference counting via
+**  "retain" and "release"
 **
 */
 #ifndef PoolPlus_h

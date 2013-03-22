@@ -118,7 +118,7 @@ void List_Discard(var self, var obj) {
   }
 }
 
-static void List_Reserve_More(ListData* lo) {
+local void List_Reserve_More(ListData* lo) {
   
   if (lo->num_items > lo->num_slots) {
     lo->num_slots = ceil((lo->num_slots + 1) * 1.5);
@@ -155,7 +155,7 @@ void List_Push_At(var self, var val, int index) {
   lo->items[index] = val;
 }
 
-static void List_Reserve_Less(ListData* lo) {
+local void List_Reserve_Less(ListData* lo) {
   
   if ( lo->num_slots > pow(lo->num_items+1, 1.5)) {
     lo->num_slots = floor((lo->num_slots-1) * (1.0/1.5));
@@ -221,7 +221,7 @@ void List_Set(var self, int index, var val) {
   lo->items[index] = val;
 }
 
-static const var LIST_ITER_END = (var)-1;
+local const var LIST_ITER_END = (var)-1;
 
 var List_Iter_Start(var self) {
   
@@ -261,7 +261,7 @@ var List_Iter_Next(var self, var curr) {
   
 }
 
-static void List_Swap_Items(var self, int i0, int i1) {
+local void List_Swap_Items(var self, int i0, int i1) {
   var lft = at(self, i0);
   var rht = at(self, i1);
   set(self, i0, rht);
@@ -274,7 +274,7 @@ void List_Reverse(var self) {
   }
 }
 
-static int List_Sort_Partition(var self, int left, int right, int pivot) {
+local int List_Sort_Partition(var self, int left, int right, int pivot) {
   
   var pival = at(self, pivot);
   
@@ -301,7 +301,7 @@ static int List_Sort_Partition(var self, int left, int right, int pivot) {
   return storei;
 }
 
-static void List_Sort_Part(var self, int left, int right) {
+local void List_Sort_Part(var self, int left, int right) {
   if (left < right) {
     int pivot = left + (right-left) / 2;
     int newpivot = List_Sort_Partition(self, left, right, pivot);

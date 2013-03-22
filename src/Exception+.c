@@ -3,65 +3,73 @@
 #include "Type+.h"
 #include "None+.h"
 
-var Exception = methods {
-  methods_begin(Exception),
-  method(Exception, AsStr),
-  methods_end(Exception)
-};
+var Exception = Singleton(Excepton);
 
-const char* Exception_AsStr(var e) {
-  ExceptionData* ed = cast(e, Exception);
-  return ed->name;
-}
+var TypeError = Singleton(TypeError);
+var ValueError = Singleton(ValueError);
+var ClassError = Singleton(ClassError);
 
-__exc_record  __exc_root = { 0 };
-__exc_record* __exc_top = &__exc_root;
+bool __exc_active = false;
+int __exc_depth = -1;
+jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
-var __exc_obj = NULL;
-const char* __exc_msg = "";
-const char* __exc_file = "";
-const char* __exc_func = "";
-unsigned int __exc_lineno = 0;
+local var __exc_obj = NULL;
+local char __exc_msg[2048];
+local const char* __exc_file = "";
+local const char* __exc_func = "";
+local unsigned int __exc_lineno = 0;
 
-void __exc_record_push(__exc_record* er) {
-  er->prev = __exc_top;
-  __exc_top = er;
-}
-
-static bool __exc_record_error(void)  {
-  
-  /* TODO: Deal with when object doesn't implement "as_str" */
+local void __exc_error(void)  {
   
   fprintf(stderr, "\n");
   fprintf(stderr, "!!\t\n");
-  fprintf(stderr, "!!\tUncaught '%s' at (%s:%s:%i) \n", as_str(__exc_obj), __exc_file, __exc_func, __exc_lineno);
+  
+  if (type_implements(type_of(__exc_obj), AsStr)) {
+    fprintf(stderr, "!!\tUncaught '%s' at (%s:%s:%i) \n", as_str(__exc_obj), __exc_file, __exc_func, __exc_lineno);
+  } else {
+    fprintf(stderr, "!!\tUncaught Object at (%s:%s:%i) \n", __exc_file, __exc_func, __exc_lineno);
+  }
+  
   fprintf(stderr, "!!\t\n");
   fprintf(stderr, "!!\t\t '%s'\n", __exc_msg);
   fprintf(stderr, "!!\t\n");
   exit(EXIT_FAILURE);
-  return false;
   
 }
 
-bool __exc_record_pop(__exc_record* er, var* exc, ...) {
+void __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...) {
   
-  if (er->prev == NULL) { return __exc_record_error(); }
+  __exc_obj = obj;
+  __exc_file = file;
+  __exc_func = func;
+  __exc_lineno = lineno;
   
   va_list va;
-  va_start(va, exc);
+  va_start(va, lineno);
+  
+  vsnprintf(__exc_msg, 2047, fmt, va);
+  
+  if (__exc_depth >= 0) {
+    longjmp(__exc_buffers[__exc_depth], 1);
+  } else {
+    __exc_error();
+  }
+  
+}
+
+var __exc_catch(void* empty, ...) {
+  
+  if (!__exc_active) { return Undefined; }
+  
+  va_list va;
+  va_start(va, empty);
   var e = va_arg(va, var);
   
   while (e != Undefined) {
-  
-    if_eq(e, __exc_obj) {
-      __exc_top = __exc_top->prev;
-      *exc = e;
-      return true;
-    }
-    
+    if_eq(e, __exc_obj) { return e; }
     e = va_arg(va, var);
   }
   
-  return __exc_record_error();
+  return __exc_error(), Undefined;
   
 }

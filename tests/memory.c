@@ -34,6 +34,17 @@ PT_SUITE(suite_memory) {
     
   }
   
+  PT_TEST(test_reference_with) {
+    
+    with($(Reference, new(String, "Almost like an Auto Ptr")), r) {
+      
+      PT_ASSERT(eq(at(r,0), $(String, "Almost like an Auto Ptr")));
+      PT_ASSERT(neq(at(r,0), $(String, "Blah")));
+      
+    }
+    
+  }
+  
   PT_TEST(test_pool) {
     
     var p = new(Pool);

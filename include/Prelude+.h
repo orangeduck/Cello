@@ -25,10 +25,11 @@ typedef void* var;
 #define or ||
 #define elif else if
 
+#define local static
 #define module extern var
 #define class typedef struct 
 #define data typedef struct 
-#define instance(T,C) static C T##C
+#define instance(T,C) local C T##C
 
 /*
 ** == Methods ==
@@ -41,6 +42,14 @@ typedef void* var;
 #define methods_begin(T) {NULL, "__Type"}, {#T, "__Name"}
 #define method(T,C) {&T##C, #C}
 #define methods_end(T) {NULL, NULL}
+
+/*
+** == Singleton ==
+**
+**  Create a empty type object.
+*/
+
+#define Singleton(T) methods { methods_begin(T), methods_end(T) }
 
 
 /*
@@ -62,7 +71,7 @@ var type_of(var obj);
 **  Undefined or errorous data value.
 */
 
-static const var Undefined = (var)-1;
+local const var Undefined = (var)-1;
 
 /*
 ** == Cast ==
@@ -315,10 +324,7 @@ class {
 void enter_with(var self);
 void exit_with(var self);
 
-//  TODO: This needs work!
-//
-//  #define with(x) with_as(x, __with##__COUNTER__)
-//  #define with_as(x, y) for(var y = NULL; enter_for(x, &y); exit_with(y))
+#define with(x, y) for(var y = (enter_with(x), x); (y is Undefined ? exit_with(x), false : true); y = Undefined)
 
 /** Stream - File like object */
 

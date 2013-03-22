@@ -1,6 +1,7 @@
 #include "Bool+.h"
 
 #include "Type+.h"
+#include "Exception+.h"
 
 #include <string.h>
 
@@ -16,12 +17,12 @@ var Type_Cast(var obj, var t, const char* func, const char* file, int line) {
   if (type_of(obj) is t) {
     return obj;
   } else {
-    fprintf(stderr, "|\n"
-                    "| TypeError: Argument to function '%s' at '%s:%i' \n"
-                    "|\t Got type '%s'\n"
-                    "|\t Expected type '%s'\n"
-                    "|\n",
-        func, file, line, as_str(type_of(obj)), as_str(t)); abort();
+    throw(TypeError,
+      "Argument to function '%s' at '%s:%i' :: "
+      "Got Type '%s' :: "
+      "Expected Type '%s'", 
+      func, file, line, as_str(type_of(obj)), as_str(t));
+    return Undefined;
   }
   
 }
@@ -57,7 +58,7 @@ const char* Type_AsStr(var self) {
   return type_class(self, __Name);
 }
 
-static void Type_Print(var self) {
+local void Type_Print(var self) {
   TypeData* t = self;
   printf("(Type: '%p')\n", t);
   while(t->class_name) {
@@ -94,20 +95,22 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
   }
   
   if (type_name == NULL) {
-    fprintf(stderr, "|\n"
-                    "| ClassError: function '%s' at '%s:%i'\n"
-                    "|\t Cannot find class '__Name' for object '%p'\n"
-                    "|\t Was it correctly constructed?\n"
-                    "|\t Does is start with a 'type' entry?\n"
-                    "|\n",
-            func, file, line, self);
-    abort();
-  }
   
-  fprintf(stderr, "|\n"
-                  "| ClassError: function '%s' at '%s:%i'\n"
-                  "|\t Type '%s' does not implement class '%s'\n"
-                  "|\n",  
-    func, file, line, type_name, class_name);
-  abort();
+    throw(ClassError,
+      "Function '%s' at '%s:%i' :: "
+      "Cannot find class '__Name' for object '%p' :: "
+      "Was is correctly Constructed? :: "
+      "Does it start with a 'type' entry?",
+      func, file, line, self);
+    return Undefined;
+      
+  } else {
+  
+    throw(ClassError,
+      "Function '%s' at '%s:%i' :: "
+      "Type '%s' does not implement class '%s'",
+      func, file, line, type_name, class_name);
+    return Undefined;
+    
+  }
 }

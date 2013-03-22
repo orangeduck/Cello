@@ -2,15 +2,18 @@
 #include "ptest.h"
 #include "C+.h"
 
-static int exception_divide(int x, int y) {
+local var DivideByZeroError = Singleton(DivideByZeroError);
+
+local int exception_divide(int x, int y) {
   if (y == 0) {
-    throw(Exception, "Division By Zero: %i / %i", x, y);
+    throw(DivideByZeroError, "Division By Zero: %i / %i", x, y);
+    return 0;
   } else {
     return x / y;
   }
 }
 
-static void exception_result(int x, int y) {
+local void exception_result(int x, int y) {
   var result = $(Int, x + y);
   throw(result, "Unexpected Result");
 }
@@ -35,28 +38,22 @@ PT_SUITE(suite_exception) {
     volatile bool reached1 = false;
     volatile bool reached2 = false;
     
-    {
-      try {
-        int r3 = exception_divide(2, 0);
-      } catch (e, Exception) {
-        reached0 = true;
-      }
+    try {
+      int r3 = exception_divide(2, 0);
+    } catch (e, DivideByZeroError) {
+      reached0 = true;
     }
     
-    {
-      try {
-        int r3 = exception_divide(2, 1);
-      } catch (e, Exception) {
-        reached1 = true;
-      }
+    try {
+      int r3 = exception_divide(2, 1);
+    } catch (e, DivideByZeroError) {
+      reached1 = true;
     }
     
-    {
-      try {
-        int r3 = exception_divide(2, 1);
-      } catch (e, None) {
-        reached2 = true;
-      }
+    try {
+      int r3 = exception_divide(2, 1);
+    } catch (e, None) {
+      reached2 = true;
     }
     
     PT_ASSERT(reached0);
@@ -70,25 +67,13 @@ PT_SUITE(suite_exception) {
     volatile bool reached0 = false;
     volatile bool reached1 = false;
     
-    {
-      try {
-        exception_result(2, 2);
-      } catch (e, $(Int, 1), $(Int, 2), $(Int, 3), $(Int, 4)) {
-        PT_ASSERT(eq(e, $(Int, 4)));
-        PT_ASSERT(neq(e, $(Int, 1)));
-        reached0 = true;
-      }
+    try {
+      exception_result(2, 2);
+    } catch (e, $(Int, 1), $(Int, 2), $(Int, 3), $(Int, 4)) {
+      PT_ASSERT(eq(e, $(Int, 4)));
+      PT_ASSERT(neq(e, $(Int, 1)));
+      reached0 = true;
     }
-    
-    /*
-    {
-      try {
-        exception_result(2, 2);
-      } catch (e, $(Int, 1), $(Int, 2), $(Int, 3)) {
-        reached1 = false;
-      }
-    }
-    */
     
   }
 
