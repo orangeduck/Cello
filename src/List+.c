@@ -30,7 +30,7 @@ var List_New(var self, va_list* args) {
   
   lo->num_items = 0;
   lo->num_slots = 0;
-  lo->items = malloc(sizeof(var) * lo->num_slots);
+  lo->items = NULL;
   
   int obj_count = va_arg(*args, int);
   
@@ -54,8 +54,8 @@ void List_Assign(var self, var obj) {
   
   lo->num_items = 0;
   lo->num_slots = 0;
-  lo->items = realloc(lo->items, 0);
   lo->cursor = 0;
+  lo->items = realloc(lo->items, 0);
   
   foreach(item in obj) {
     push(self, item);
@@ -125,6 +125,7 @@ local void List_Reserve_More(ListData* lo) {
   if (lo->num_items > lo->num_slots) {
     lo->num_slots = ceil((lo->num_slots + 1) * 1.5);
     lo->items = realloc(lo->items, sizeof(var) * lo->num_slots);
+    if (lo->items == NULL) { throw(OutOfMemoryError, "Cannot grow List. Out of memory!"); }
   }
 
 }

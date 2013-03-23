@@ -6,9 +6,9 @@
 var TypeError = Singleton(TypeError);
 var ValueError = Singleton(ValueError);
 var ClassError = Singleton(ClassError);
-
 var IndexOutOfBoundsError = Singleton(IndexOutOfBoundsError);
 var KeyError = Singleton(KeyError);
+var OutOfMemoryError = Singleton(OutOfMemoryError);
 
 bool __exc_active = false;
 int __exc_depth = -1;
@@ -54,10 +54,11 @@ local void __exc_error(void)  {
     fprintf(stderr, "!!\t\t[%i] %s\n", i, symbols[i]);
   }
 
+  fprintf(stderr, "!!\t\n");
+
   free(symbols);
 
 #endif
-  
   
   exit(EXIT_FAILURE);
   

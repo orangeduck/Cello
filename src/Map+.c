@@ -189,6 +189,9 @@ var Map_Get(var self, var key) {
 
 local struct MapNode* Map_Node_New(var key, var val) {
   struct MapNode* node = malloc(sizeof(struct MapNode));
+  
+  if (node == NULL) { throw(OutOfMemoryError, "Cannot create new Map Node. Out of memory!"); }
+  
   node->leaf_key = key;
   node->leaf_val = val;
   node->left = NULL;

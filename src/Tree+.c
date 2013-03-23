@@ -211,6 +211,8 @@ local struct TreeNode* Tree_Node_New(var self, var key, var val) {
   
   struct TreeNode* node = malloc(sizeof(struct TreeNode));
   
+  if (node == NULL) { throw(OutOfMemoryError, "Cannot create Tree Node. Out of memory!"); }
+  
   node->leaf_key = allocate(td->key_type);
   node->leaf_val = allocate(td->val_type);
   assign(node->leaf_key, key);

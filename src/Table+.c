@@ -33,6 +33,9 @@ var Table_New(var self, va_list* args) {
   tab->key_buckets = malloc(tab->size * sizeof(var));
   tab->val_buckets = malloc(tab->size * sizeof(var));
   
+  if (tab->key_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
+  if (tab->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
+  
   for (int i = 0; i < tab->size; i++) {
     tab->key_buckets[i] = new(Array, tab->key_type, 0);
     tab->val_buckets[i] = new(Array, tab->val_type, 0);

@@ -30,7 +30,7 @@ var Array_New(var self, va_list* args) {
   ad->item_type = cast(va_arg(*args, var), Type);
   ad->num_items = 0;
   ad->num_slots = 0;
-  ad->items = malloc(0);
+  ad->items = NULL;
   
   int count = va_arg(*args, int);
   for(int i = 0; i < count; i++) {
@@ -126,6 +126,7 @@ local void Array_Reserve_More(ArrayData* ad) {
     ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
     New* inew = type_class(ad->item_type, New);
     ad->items = realloc(ad->items, inew->size * ad->num_slots);
+    if (ad->items == NULL) { throw(OutOfMemoryError, "Cannot grow Array, out of memory!"); }
   }
 
 }

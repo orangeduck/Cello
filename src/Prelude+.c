@@ -48,7 +48,7 @@ var allocate(var type) {
     self = NULL;
   } else {
     self = calloc(1, inew->size);
-    assert(self);
+    if (self == NULL) { throw(OutOfMemoryError, "Cannot create new '%s', out of memory!", as_str(type)); }
     ((ObjectData*)self)->type = type;
   }
   
