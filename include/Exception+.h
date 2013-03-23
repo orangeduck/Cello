@@ -22,6 +22,7 @@ global var ClassError;
 global var IndexOutOfBoundsError;
 global var KeyError;
 global var OutOfMemoryError;
+global var IOError;
 
 /* Internal Exception Stuff */
 

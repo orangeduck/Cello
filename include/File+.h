@@ -31,7 +31,6 @@ int File_Tell(var self);
 void File_Flush(var self);
 
 bool File_EOF(var self);
-int File_GetError(var self);
 
 int File_Read(var self, void* output, int size);
 int File_Write(var self, void* input, int size);

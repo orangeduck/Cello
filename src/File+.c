@@ -1,5 +1,7 @@
 #include "File+.h"
 
+#include "Exception+.h"
+
 #include <assert.h>
 
 var File = methods {
@@ -15,7 +17,7 @@ var File_New(var self, va_list* args) {
   FileData* fd = cast(self, File);
   const char* filename = va_arg(*args, const char*);
   const char* access = va_arg(*args, const char*);
-  fd->f = fopen(filename, access);
+  open(self, filename, access);
   return self;
 }
 
@@ -27,30 +29,58 @@ var File_Delete(var self) {
 
 var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
+  
   if (fd->f != NULL and tell(self) != -1) { close(self); }
+  
   fd->f = fopen(filename, access);
+  
+  if (fd->f == NULL) {
+    throw(IOError, "Could not open file: %s", filename);
+  }
+  
   return self;
 }
 
 void File_Close(var self) {
   FileData* fd = cast(self, File);
-  fclose(fd->f);
+  int err = fclose(fd->f);
+  
+  if (err != 0) {
+    throw(IOError, "Failed to close file: %i", err);
+  }
+  
   fd->f = NULL;
 }
 
 void File_Seek(var self, int pos, int origin) {
   FileData* fd = cast(self, File);
-  fseek(fd->f, pos, origin);
+  int err = fseek(fd->f, pos, origin);
+  
+  if (err != 0) {
+    throw(IOError, "Failed to seek in file: %i", err);
+  }
+  
 }
 
 int File_Tell(var self) {
   FileData* fd = cast(self, File);
-  return ftell(fd->f);
+  int i = ftell(fd->f); 
+  
+  if (i == -1) {
+    throw(IOError, "Failed to tell file: %li", i);
+  }
+  
+  return i;
 }
 
 void File_Flush(var self) {
   FileData* fd = cast(self, File);
-  fflush(fd->f);
+  int err = fflush(fd->f);
+  
+  if (err != 0) {
+    throw(IOError, "Failed to flush file: %i", err);
+  }
+  
 }
 
 bool File_EOF(var self) {
@@ -58,19 +88,28 @@ bool File_EOF(var self) {
   return feof(fd->f);
 }
 
-int File_GetError(var self) {
-  FileData* fd = cast(self, File);
-  return ferror(fd->f);
-}
 
 int File_Read(var self, void* output, int size) {
   FileData* fd = cast(self, File);
-  return fread(output, size, 1, fd->f);
+  int num = fread(output, size, 1, fd->f);
+  
+  if (num == -1) {
+    throw(IOError, "Failed to read from file: %i", num);
+    return num;
+  }
+  
+  return num;
 }
 
 int File_Write(var self, void* input, int size) {
   FileData* fd = cast(self, File);
-  return fwrite(input, size, 1, fd->f);
+  int num = fwrite(input, size, 1, fd->f);
+  
+  if (num != 1 && size != 0) {
+    throw(IOError, "Failed to write to file: %i", num);
+  }
+  
+  return num;
 }
 
 void File_Read_Data(var self, var output) {
