@@ -3,6 +3,7 @@
 #include "List+.h"
 #include "Bool+.h"
 #include "None+.h"
+#include "Exception+.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -75,28 +76,19 @@ var Dictionary_Copy(var self) {
 
 var Dictionary_Eq(var self, var obj) {
   DictionaryData* dict = cast(self, Dictionary);
-  if (eq(type_of(obj), Dictionary)) {
-		var val;
-    foreach(key in obj) {
-			if ((val = get(self, key)) is Undefined) {
-				return False;
-			}
-			if_neq(get(obj, key), val) {
-				return False;
-			}
-		}
-    /* see if there exists key at the first object, which
-     * doesn't exist at the second object. 
-     */
-    foreach(key in self) {
-			if ((val = get(obj, key)) is Undefined) {
-				return False;
-			}
-		}
-		return True;
-  } else {
-    return False;
-  }
+  if_neq(type_of(obj), Dictionary) { return False; }
+  
+  foreach(key in obj) {
+		if (not contains(self, key)) { return False; }
+		if_neq(get(obj, key), get(self, key)) { return False; }
+	}
+	
+  foreach(key in self) {
+		if (not contains(obj, key)) { return False; }
+		if_neq(get(obj, key), get(self, key)) { return False; }
+	}
+		
+	return True;
 }
 
 int Dictionary_Len(var self) {
@@ -158,7 +150,7 @@ var Dictionary_Get(var self, var key) {
     if_eq(k, key) { return v; }
   }
   
-  return Undefined;
+  return throw(KeyError, "Key not in Dictionary!");
 }
 
 void Dictionary_Put(var self, var key, var val) {

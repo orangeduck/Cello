@@ -141,7 +141,6 @@ PT_SUITE(suite_core) {
     PT_ASSERT(  eq($(String, "Hello"), $(String, "Hello")) );
     PT_ASSERT( neq($(String, "Hello"), $(String, "There")) );
     
-    /*
     var tab1 = new(Table, String, Int);
     var tab2 = new(Table, String, Int);
     
@@ -160,7 +159,6 @@ PT_SUITE(suite_core) {
     
     delete(tab1);
     delete(tab2);
-    */
 
     var dict1 = new(Dictionary, 0);
     var dict2 = new(Dictionary, 0);
@@ -373,9 +371,6 @@ PT_SUITE(suite_core) {
     PT_ASSERT(at(x, 0) is fst);
     PT_ASSERT(at(x, 1) is snd);
     PT_ASSERT(at(x, 2) is trd);
-    
-    PT_ASSERT(at(x, -1) is Undefined);
-    PT_ASSERT(at(x, 3) is Undefined);
     
     set(x, 1, trd);
     

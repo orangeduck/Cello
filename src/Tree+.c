@@ -3,6 +3,7 @@
 #include "Array+.h"
 #include "Bool+.h"
 #include "None+.h"
+#include "Exception+.h"
 
 var Tree = methods {
   methods_begin(Tree),
@@ -55,28 +56,20 @@ var Tree_Copy(var self) {
 
 var Tree_Eq(var self, var obj) {
   TreeData* td = cast(self, Tree);
-  if (eq(type_of(obj), Tree)) {
-		var val;
-    foreach(key in obj) {
-			if ((val = get(self, key)) is Undefined) {
-				return False;
-			}
-			if_neq(get(obj, key), val) {
-				return False;
-			}
-		}
-    /* see if there exists key at the first object, which
-     * doesn't exist at the second object. 
-     */
-    foreach(key in self) {
-			if ((val = get(obj, key)) is Undefined) {
-				return False;
-			}
-		}
-		return True;
-  } else {
-    return False;
-  }
+  if_neq(type_of(obj), Tree) { return False; }
+  
+  foreach(key in obj) {
+		if (not contains(self, key)) { return False; }
+		if_neq(get(obj, key), get(self, key)) { return False; }
+	}
+	
+  foreach(key in self) {
+		if (not contains(obj, key)) { return False; }
+		if_neq(get(obj, key), get(self, key)) { return False; }
+	}
+	
+	return True;
+	
 }
 
 int Tree_Len(var self) {
@@ -210,7 +203,7 @@ var Tree_Get(var self, var key) {
     else node = node->right;
   }
   
-  return Undefined;
+  return throw(KeyError, "Key not in Tree!");
 }
 
 local struct TreeNode* Tree_Node_New(var self, var key, var val) {

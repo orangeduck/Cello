@@ -1,11 +1,13 @@
+#include "List+.h"
+
+#include "Bool+.h"
+#include "None+.h"
+#include "Exception+.h"
+
 #include <math.h>
 #include <assert.h>
 #include <string.h>
 
-#include "Bool+.h"
-#include "None+.h"
-
-#include "List+.h"
 
 var List = methods {
   methods_begin(List),
@@ -167,7 +169,9 @@ local void List_Reserve_Less(ListData* lo) {
 var List_Pop_Back(var self) {
   ListData* lo = cast(self, List);
   
-  if (is_empty(self)) return Undefined;
+  if (is_empty(self)) {
+    return throw(IndexOutOfBoundsError, "Cannot pop back. List is empty!");
+  }
 
   var retval = lo->items[lo->num_items-1];
   
@@ -185,7 +189,7 @@ var List_Pop_At(var self, int index) {
   ListData* lo = cast(self, List);
   
   if (index < 0 or index > lo->num_items-1) {
-    return Undefined;
+    return throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", index, 0, len(self));
   }
   
   var retval = lo->items[index];
@@ -205,7 +209,7 @@ var List_At(var self, int index) {
   ListData* lo = cast(self, List);
   
   if (index < 0 or index > lo->num_items-1) {
-    return Undefined;
+    return throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", index, 0, len(self));
   }
   
   return lo->items[index];

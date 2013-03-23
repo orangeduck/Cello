@@ -2,3 +2,9 @@
 *.o
 *.bin
 *.exe
+test
+test.bin
+test.txt
+tests/test
+tests/test.bin
+tests/test.txt

@@ -516,9 +516,6 @@ PT_SUITE(suite_data) {
     PT_ASSERT( eq(at(a0, 1), $(String, "There")) );
     PT_ASSERT( eq(at(a0, 2), $(String, "People")) );
     
-    PT_ASSERT(at(a0, 3) is Undefined);
-    PT_ASSERT(at(a0, -1) is Undefined);
-    
     set(a0, 1, $(String, "Blah"));
     
     PT_ASSERT( eq(at(a0, 0), $(String, "Hello")) );
@@ -999,9 +996,6 @@ PT_SUITE(suite_data) {
     PT_ASSERT(at(l0, 1) is li1);
     PT_ASSERT(at(l0, 2) is li2);
     PT_ASSERT(at(l0, 3) is li3);
-    
-    PT_ASSERT(at(l0, 4) is Undefined);
-    PT_ASSERT(at(l0, -1) is Undefined);
     
     set(l0, 0, li4);
     

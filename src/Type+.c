@@ -17,12 +17,11 @@ var Type_Cast(var obj, var t, const char* func, const char* file, int line) {
   if (type_of(obj) is t) {
     return obj;
   } else {
-    throw(TypeError,
+    return throw(TypeError,
       "Argument to function '%s' at '%s:%i' :: "
       "Got Type '%s' :: "
       "Expected Type '%s'", 
       func, file, line, as_str(type_of(obj)), as_str(t));
-    return Undefined;
   }
   
 }

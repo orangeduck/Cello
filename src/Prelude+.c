@@ -7,6 +7,7 @@
 #include "Type+.h"
 #include "Bool+.h"
 #include "None+.h"
+#include "Exception+.h"
 
 var Undefined = Singleton(Undefined);
 
@@ -22,11 +23,7 @@ var Undefined = Singleton(Undefined);
 var type_of(var self) {
   
   /* Test against Builtins */
-  if (self is Undefined) {
-    fprintf(stderr, "|\n"
-                    "| ValueError: Recieved 'Undefined' as data value \n"
-                    "|\n"); abort();
-  }
+  if (self is Undefined) return throw(ValueError, "Recieved 'Undefined' as value to 'type_of'");
   if (self is True) return Bool;
   if (self is False) return Bool;
 

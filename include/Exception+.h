@@ -19,6 +19,8 @@
 global var TypeError;
 global var ValueError;
 global var ClassError;
+global var IndexOutOfBoundsError;
+global var KeyError;
 
 /* Internal Exception Stuff */
 
@@ -30,7 +32,7 @@ extern bool __exc_active;
 extern int __exc_depth;
 extern jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
-void __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
+var __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
 var __exc_catch(void*, ...);
 
 /* Exception Macros */
@@ -42,7 +44,7 @@ var __exc_catch(void*, ...);
 
 #define catch(...) catch_scanned(__VA_ARGS__)
 #define catch_scanned(x, ...) else { __exc_active = true; } __exc_depth++; for (var x = __exc_catch(NULL, ##__VA_ARGS__, Undefined); x != Undefined; x = Undefined)
-#define throw(e, fmt, ...) __exc_throw(e, fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__);
+#define throw(e, fmt, ...) __exc_throw(e, fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 
 
 #endif

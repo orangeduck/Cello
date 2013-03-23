@@ -3,6 +3,7 @@
 #include "List+.h"
 #include "Bool+.h"
 #include "None+.h"
+#include "Exception+.h"
 
 var Map = methods {
   methods_begin(Map),
@@ -51,30 +52,19 @@ var Map_Copy(var self) {
 
 var Map_Eq(var self, var obj) {
 	MapData* md = cast(self, Map);
-  if (eq(type_of(obj), Map)) {
-		var val;
-    foreach(key in obj) {
-			if ((val = get(self, key)) is Undefined) {
-				return False;
-			}
-			if_neq(get(obj, key), val) {
-				return False;
-			}
-		}
-    
-    foreach(key in self) {
-      if ((val = get(obj, key)) is Undefined) {
-				return False;
-			}
-			if_neq(get(self, key), val) {
-				return False;
-			}
-    }
-		return True;
-		
-  } else {
-    return False;
+  if_neq(type_of(obj), Map) { return False; }
+  
+  foreach(key in obj) {
+		if (not contains(self, key)) { return False; }
+		if_neq(get(obj, key), get(self, key)) { return False; }
+	}
+  
+  foreach(key in self) {
+    if (not contains(obj, key)) { return False; }
+		if_neq(get(self, key), get(obj, key)) { return False; }
   }
+  
+	return True;
 }
 
 int Map_Len(var self) {
@@ -84,9 +74,9 @@ int Map_Len(var self) {
 
 void Map_Clear(var self) {
   MapData* md = cast(self, Map);
+  
   while(not is_empty(self)) {
     discard(self, at(md->keys,0));
-    pop_front(md->keys);
   }
 }
 
@@ -194,7 +184,7 @@ var Map_Get(var self, var key) {
     else node = node->right;
   }
   
-  return Undefined;
+  return throw(KeyError, "Key not in Map!");
 }
 
 local struct MapNode* Map_Node_New(var key, var val) {

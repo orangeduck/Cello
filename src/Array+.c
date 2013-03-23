@@ -1,11 +1,12 @@
-#include <math.h>
-#include <assert.h>
-#include <string.h>
+#include "Array+.h"
 
 #include "Bool+.h"
 #include "None+.h"
+#include "Exception+.h"
 
-#include "Array+.h"
+#include <math.h>
+#include <assert.h>
+#include <string.h>
 
 var Array = methods {
   methods_begin(Array),
@@ -70,9 +71,7 @@ var Array_Copy(var self) {
 
 var Array_Eq(var self, var obj) {
   
-  if (len(self) != len(obj)) {
-    return False;
-  }
+  if (len(self) != len(obj)) { return False; }
   
   for(int i = 0; i < len(self); i++) {
     if_neq( at(self,i) , at(obj,i) ) {
@@ -141,8 +140,6 @@ local void Array_Set_Type_At(ArrayData* ad, int i) {
   
 }
 
-#include "String+.h"
-
 void Array_Push_Back(var self, var obj) {
   ArrayData* ad = cast(self, Array);
   ad->num_items++;
@@ -184,7 +181,9 @@ local void Array_Reserve_Less(ArrayData* ad) {
 var Array_Pop_Back(var self) {
   ArrayData* ad = cast(self, Array);
 
-  if (is_empty(self)) return Undefined;
+  if (is_empty(self)) {
+    return throw(IndexOutOfBoundsError, "Cannot pop back. Array is empty!");
+  }
   
   destruct(at(self, len(self)-1));
   
@@ -201,7 +200,9 @@ var Array_Pop_Front(var self) {
 var Array_Pop_At(var self, int index) {
   ArrayData* ad = cast(self, Array);
   
-  if (is_empty(self)) return Undefined;
+  if (is_empty(self)) {
+    return throw(IndexOutOfBoundsError, "Cannot pop at %i. Array is empty!", index);
+  }
   
   destruct(at(self, index));
   
@@ -217,7 +218,9 @@ var Array_Pop_At(var self, int index) {
 }
 
 var Array_At(var self, int i) {
-  if (i < 0 or i >= len(self)) return Undefined;
+  if (i < 0 or i >= len(self)) {
+    return throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", i, 0, len(self));
+  }
   
   ArrayData* ad = cast(self, Array);
   New* inew = type_class(ad->item_type, New);
@@ -225,7 +228,10 @@ var Array_At(var self, int i) {
 }
 
 void Array_Set(var self, int i, var obj) {
-  if (i < 0 or i >= len(self)) return;
+  if (i < 0 or i >= len(self)) {
+    throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", i, 0, len(self));
+    return;
+  }
   
   ArrayData* ad = cast(self, Array);
   New* inew = type_class(ad->item_type, New);

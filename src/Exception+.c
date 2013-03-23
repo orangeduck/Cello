@@ -3,11 +3,12 @@
 #include "Type+.h"
 #include "None+.h"
 
-var Exception = Singleton(Excepton);
-
 var TypeError = Singleton(TypeError);
 var ValueError = Singleton(ValueError);
 var ClassError = Singleton(ClassError);
+
+var IndexOutOfBoundsError = Singleton(IndexOutOfBoundsError);
+var KeyError = Singleton(KeyError);
 
 bool __exc_active = false;
 int __exc_depth = -1;
@@ -18,6 +19,14 @@ local char __exc_msg[2048];
 local const char* __exc_file = "";
 local const char* __exc_func = "";
 local unsigned int __exc_lineno = 0;
+
+#ifdef __unix__
+#include <execinfo.h>
+
+local void* __exc_backtrace[25];
+local int __exc_backtrace_count;
+
+#endif
 
 local void __exc_error(void)  {
   
@@ -33,16 +42,37 @@ local void __exc_error(void)  {
   fprintf(stderr, "!!\t\n");
   fprintf(stderr, "!!\t\t '%s'\n", __exc_msg);
   fprintf(stderr, "!!\t\n");
+  
+#ifdef __unix__
+    
+  fprintf(stderr, "!!\tStack Trace: \n");
+  fprintf(stderr, "!!\t\n");
+
+  char** symbols = backtrace_symbols(__exc_backtrace, __exc_backtrace_count);
+
+  for (int i = 0; i < __exc_backtrace_count; i++){
+    fprintf(stderr, "!!\t\t[%i] %s\n", i, symbols[i]);
+  }
+
+  free(symbols);
+
+#endif
+  
+  
   exit(EXIT_FAILURE);
   
 }
 
-void __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...) {
+var __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...) {
   
   __exc_obj = obj;
   __exc_file = file;
   __exc_func = func;
   __exc_lineno = lineno;
+  
+#ifdef __unix__
+  __exc_backtrace_count = backtrace(__exc_backtrace, 25);
+#endif
   
   va_list va;
   va_start(va, lineno);
@@ -54,6 +84,8 @@ void __exc_throw(var obj, const char* fmt, const char* file, const char* func, i
   } else {
     __exc_error();
   }
+  
+  return Undefined;
   
 }
 
