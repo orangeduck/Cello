@@ -16,9 +16,9 @@
 
 #include "Prelude+.h"
 
-module TypeError;
-module ValueError;
-module ClassError;
+global var TypeError;
+global var ValueError;
+global var ClassError;
 
 /* Internal Exception Stuff */
 
@@ -40,8 +40,9 @@ var __exc_catch(void*, ...);
   if (__exc_depth == __EXC_MAX_DEPTH) { fprintf(stderr, "Maximum Exception Depth Exceeded!\n"); abort(); } \
   if (!setjmp(__exc_buffers[__exc_depth]))   
 
-#define catch(E, ...) else { __exc_active = true; } __exc_depth++; for (var E = __exc_catch(NULL, __VA_ARGS__, Undefined); E != Undefined; E = Undefined)
-#define throw(E, FMT, ...) __exc_throw(E, FMT, __FILE__, __func__, __LINE__, ##__VA_ARGS__);
+#define catch(...) catch_scanned(__VA_ARGS__)
+#define catch_scanned(x, ...) else { __exc_active = true; } __exc_depth++; for (var x = __exc_catch(NULL, ##__VA_ARGS__, Undefined); x != Undefined; x = Undefined)
+#define throw(e, fmt, ...) __exc_throw(e, fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__);
 
 
 #endif

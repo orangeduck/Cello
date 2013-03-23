@@ -14,7 +14,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module Tree;
+global var Tree;
 
 struct TreeNode {
   var leaf_key;

@@ -36,13 +36,27 @@ PT_SUITE(suite_memory) {
   
   PT_TEST(test_reference_with) {
     
-    with($(Reference, new(String, "Almost like an Auto Ptr")), r) {
+    with(r in $(Reference, new(String, "Almost like an Auto Ptr"))) {
       
       PT_ASSERT(eq(at(r,0), $(String, "Almost like an Auto Ptr")));
       PT_ASSERT(neq(at(r,0), $(String, "Blah")));
       
     }
     
+  }
+  
+  PT_TEST(test_reference_with_many) {
+    
+    with(liferef0 in $(Reference, new(String, "Life is Long")))
+    with(liferef1 in $(Reference, new(String, "Life is Beautiful")))
+    with(liferef2 in $(Reference, new(String, "Life is Grand"))) {
+      
+      PT_ASSERT(eq(at(liferef0,0), $(String, "Life is Long")));
+      PT_ASSERT(eq(at(liferef1,0), $(String, "Life is Beautiful")));
+      PT_ASSERT(eq(at(liferef2,0), $(String, "Life is Grand")));
+    
+    }
+  
   }
   
   PT_TEST(test_pool) {

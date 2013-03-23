@@ -21,7 +21,7 @@ var retain(var p, var x);
 void release(var p, var x);
 
 
-module Pool;
+global var Pool;
 
 data {
   var type;

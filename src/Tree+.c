@@ -35,7 +35,7 @@ var Tree_Delete(var self) {
 void Tree_Assign(var self, var obj) {
   TreeData* other = cast(obj, Tree);
   clear(self);
-  foreach(other, key) {
+  foreach(key in other) {
     var val = get(other, key);
     put(self, key, val);
   }
@@ -46,7 +46,7 @@ var Tree_Copy(var self) {
   
   var newtree = new(Tree, td->key_type, td->val_type);
   
-  foreach(self, key) {
+  foreach(key in self) {
     var val = get(self, key);
     put(newtree, key, val);
   }
@@ -57,7 +57,7 @@ var Tree_Eq(var self, var obj) {
   TreeData* td = cast(self, Tree);
   if (eq(type_of(obj), Tree)) {
 		var val;
-    foreach(obj, key) {
+    foreach(key in obj) {
 			if ((val = get(self, key)) is Undefined) {
 				return False;
 			}
@@ -68,7 +68,7 @@ var Tree_Eq(var self, var obj) {
     /* see if there exists key at the first object, which
      * doesn't exist at the second object. 
      */
-    foreach(self, key) {
+    foreach(key in self) {
 			if ((val = get(obj, key)) is Undefined) {
 				return False;
 			}

@@ -14,7 +14,7 @@ float length(var self);
 
 /** Vec2 - vector 2d data type */
 
-module Vec2;
+global var Vec2;
 
 data {
   var type;

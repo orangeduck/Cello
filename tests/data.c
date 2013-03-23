@@ -542,7 +542,7 @@ PT_SUITE(suite_data) {
     
     int counter = 0;
     
-    foreach(a0, item) {
+    foreach(item in a0) {
       
       switch(counter) {
         case 0: PT_ASSERT( eq(item, $(String, "Hello")) ); break;
@@ -557,8 +557,8 @@ PT_SUITE(suite_data) {
     
     counter = 0;
     
-    foreach(a0, item0) {
-      foreach(a0, item1) {
+    foreach(item0 in a0) {
+      foreach(item1 in a0) {
         counter++;
       }
     }
@@ -670,7 +670,7 @@ PT_SUITE(suite_data) {
     
     int counter = 0;
     
-    foreach(t0, key) {
+    foreach(key in t0) {
       
       var val = get(t0, key);
       
@@ -781,7 +781,7 @@ PT_SUITE(suite_data) {
     
     int counter = 0;
     
-    foreach(t0, key) {
+    foreach(key in t0) {
       
       var val = get(t0, key);
       
@@ -1031,7 +1031,7 @@ PT_SUITE(suite_data) {
     
     int counter = 0;
     
-    foreach(l0, item) {
+    foreach(item in l0) {
       
       switch(counter) {
         case 0: PT_ASSERT(item is li0); break;
@@ -1156,7 +1156,7 @@ PT_SUITE(suite_data) {
     
     int counter = 0;
     
-    foreach(d0, key) {
+    foreach(key in d0) {
     
       var val = get(d0, key);
       
@@ -1287,7 +1287,7 @@ PT_SUITE(suite_data) {
     
     int counter = 0;
     
-    foreach(m0, key) {
+    foreach(key in m0) {
     
       var val = get(m0, key);
       

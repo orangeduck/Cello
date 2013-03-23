@@ -29,7 +29,7 @@ void absolute(var self);
 **  Basic integer wrapper
 */
 
-module Int;
+global var Int;
 
 data {
   var type;
@@ -78,7 +78,7 @@ instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
 **  Basic float/double wrapper
 */
 
-module Real;
+global var Real;
 
 data {
   var type;

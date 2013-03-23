@@ -14,7 +14,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module Table;
+global var Table;
 
 data {
   var type;

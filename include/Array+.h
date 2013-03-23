@@ -14,7 +14,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module Array;
+global var Array;
 
 data {
   var type;

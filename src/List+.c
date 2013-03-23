@@ -55,7 +55,7 @@ void List_Assign(var self, var obj) {
   lo->items = realloc(lo->items, 0);
   lo->cursor = 0;
   
-  foreach(obj, item) {
+  foreach(item in obj) {
     push(self, item);
   }
 }
@@ -64,7 +64,7 @@ var List_Copy(var self) {
   
   var newlist = new(List, 0);
   
-  foreach(self, val) {
+  foreach(val in self) {
     push(newlist, val);
   }
   
@@ -101,7 +101,7 @@ void List_Clear(var self) {
 
 var List_Contains(var self, var obj) {
   ListData* lo = cast(self, List);
-  foreach(self, item) {
+  foreach(item in self) {
     if_eq(item, obj) return True;
   }
   

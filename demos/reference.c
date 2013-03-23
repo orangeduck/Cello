@@ -17,7 +17,7 @@ local void table_process(var x) {
 
 local void object_lifetime_example(void) {
   
-  with($(Reference, new(String, "Life is long")), liferef) {
+  with(liferef in $(Reference, new(String, "Life is long"))) {
   
     printf("This string is alive: '%s'\n", as_str(at(liferef,0)));
   
@@ -29,9 +29,9 @@ local void object_lifetime_example(void) {
 
 local void many_object_lifetimes(void) {
   
-  with($(Reference, new(String, "Life is long")), liferef0)
-  with($(Reference, new(String, "Life is Beautiful")), liferef1)
-  with($(Reference, new(String, "Life is Grand")), liferef2) {
+  with(liferef0 in $(Reference, new(String, "Life is long")))
+  with(liferef1 in $(Reference, new(String, "Life is Beautiful")))
+  with(liferef2 in $(Reference, new(String, "Life is Grand"))) {
   
     printf("%s :: %s :: %s\n", as_str(at(liferef0,0)), as_str(at(liferef1,0)), as_str(at(liferef2,0)));
   

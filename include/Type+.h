@@ -14,7 +14,7 @@
 
 #include "Prelude+.h"
 
-module Type;
+global var Type;
 
 data {
   void* class_object;

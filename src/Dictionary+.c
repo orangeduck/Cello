@@ -55,7 +55,7 @@ void Dictionary_Assign(var self, var obj) {
 
   clear(self);
   
-  foreach(obj, key) {
+  foreach(key in obj) {
     var val = get(obj, key);
     put(self, key, val);
   }
@@ -65,7 +65,7 @@ var Dictionary_Copy(var self) {
   
   var cop = new(Dictionary);
   
-  foreach(self, key) {
+  foreach(key in self) {
     var val = get(self, key);
     put(cop, key, val);
   }
@@ -77,7 +77,7 @@ var Dictionary_Eq(var self, var obj) {
   DictionaryData* dict = cast(self, Dictionary);
   if (eq(type_of(obj), Dictionary)) {
 		var val;
-    foreach(obj, key) {
+    foreach(key in obj) {
 			if ((val = get(self, key)) is Undefined) {
 				return False;
 			}
@@ -88,7 +88,7 @@ var Dictionary_Eq(var self, var obj) {
     /* see if there exists key at the first object, which
      * doesn't exist at the second object. 
      */
-    foreach(self, key) {
+    foreach(key in self) {
 			if ((val = get(obj, key)) is Undefined) {
 				return False;
 			}

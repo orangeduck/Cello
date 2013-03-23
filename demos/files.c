@@ -6,11 +6,11 @@
 
 int main(int arc, char** argv) {
   
-  with(open($(File, NULL), "test.bin", "w"), f) {
+  with(file in open($(File, NULL), "test.bin", "w")) {
     
-    put(f, String, $(String, "Hello"));
-    put(f, Int, $(Int, 1));
-    put(f, Int, $(Int, 22));
+    put(file, String, $(String, "Hello"));
+    put(file, Int, $(Int, 1));
+    put(file, Int, $(Int, 22));
   
   }
   

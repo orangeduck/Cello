@@ -14,7 +14,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module Map;
+global var Map;
 
 struct MapNode {
   var leaf_key;

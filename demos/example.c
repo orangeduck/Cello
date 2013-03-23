@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
   var items = new(List, 3, int_item, float_item, string_item);
 	
   /* Collections can be looped over */
-  foreach(items, item) {
+  foreach(item in items) {
     /* Types are also objects */
     var type = type_of(item);
     printf("Type: '%s'\n", as_str(type));
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
   printf("Price of a 'Pear' is '%li'\n", as_long(pear_price));
 
   /* Hashtable also supports iteration */
-  foreach(prices, key) {
+  foreach(key in prices) {
     var price = get(prices, key);
     printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
   }

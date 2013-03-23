@@ -13,7 +13,7 @@
 
 #include "Prelude+.h"
 
-module Reference;
+global var Reference;
 
 data {
   var type;

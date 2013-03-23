@@ -40,19 +40,19 @@ PT_SUITE(suite_exception) {
     
     try {
       int r3 = exception_divide(2, 0);
-    } catch (e, DivideByZeroError) {
+    } catch (e in DivideByZeroError) {
       reached0 = true;
     }
     
     try {
       int r3 = exception_divide(2, 1);
-    } catch (e, DivideByZeroError) {
+    } catch (e in DivideByZeroError) {
       reached1 = true;
     }
     
     try {
       int r3 = exception_divide(2, 1);
-    } catch (e, None) {
+    } catch (e in None) {
       reached2 = true;
     }
     
@@ -69,7 +69,7 @@ PT_SUITE(suite_exception) {
     
     try {
       exception_result(2, 2);
-    } catch (e, $(Int, 1), $(Int, 2), $(Int, 3), $(Int, 4)) {
+    } catch (e in $(Int, 1), $(Int, 2), $(Int, 3), $(Int, 4)) {
       PT_ASSERT(eq(e, $(Int, 4)));
       PT_ASSERT(neq(e, $(Int, 1)));
       reached0 = true;

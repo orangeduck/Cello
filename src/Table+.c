@@ -60,7 +60,7 @@ void Table_Assign(var self, var obj) {
 
   clear(self);
   
-  foreach(obj, key) {
+  foreach(key in obj) {
     put(self, key, get(obj, key));
   }
 }
@@ -70,7 +70,7 @@ var Table_Copy(var self) {
   
   var cop = new(Table, tab->key_type, tab->val_type);
   
-  foreach(self, key) {
+  foreach(key in self) {
     put(cop, key, get(self, key));
   }
   
@@ -81,7 +81,7 @@ var Table_Eq(var self, var obj) {
   TableData* tab = cast(self, Table);
   if (eq(type_of(obj), Table)) {
 		var val;
-    foreach(obj, key) {
+    foreach(key in obj) {
 			if ((val = get(self, key)) is Undefined) {
 				return False;
 			}
@@ -92,7 +92,7 @@ var Table_Eq(var self, var obj) {
     /* see if there exists key at the first object, which
      * doesn't exist at the second object. 
      */
-    foreach(self, key) {
+    foreach(key in self) {
 			if ((val = get(obj, key)) is Undefined) {
 				return False;
 			}

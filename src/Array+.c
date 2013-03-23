@@ -41,7 +41,7 @@ var Array_New(var self, va_list* args) {
 
 var Array_Delete(var self) {
   
-  foreach(self, item) {
+  foreach(item in self) {
     destruct(item);
   }
   
@@ -51,7 +51,7 @@ var Array_Delete(var self) {
 void Array_Assign(var self, var obj) {
   clear(self);
   
-  foreach(obj, item) {
+  foreach(item in obj) {
     push(self, item);
   }
 }
@@ -61,7 +61,7 @@ var Array_Copy(var self) {
   
   var newarray = new(Array, ad->item_type, 0);
 
-  foreach(self, obj) {
+  foreach(obj in self) {
     push(newarray, obj);
   }
   
@@ -91,7 +91,7 @@ int Array_Len(var self) {
 void Array_Clear(var self) {
   ArrayData* ad = cast(self, Array);
   
-  foreach(self, item) {
+  foreach(item in self) {
     destruct(item);
   }
   
@@ -102,7 +102,7 @@ void Array_Clear(var self) {
 }
 
 var Array_Contains(var self, var obj) {
-  foreach(self, item) {
+  foreach(item in self) {
     if_eq(item, obj) {
       return True;
     }

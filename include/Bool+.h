@@ -15,10 +15,10 @@
 
 #include "Prelude+.h"
 
-module Bool;
+global var Bool;
 
-local const var True = (var)1;
-local const var False = (var)0;
+local var True = (var)1;
+local var False = (var)0;
 
 var Bool_Eq(var self, var obj);
 var Bool_Gt(var self, var obj);

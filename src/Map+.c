@@ -34,7 +34,7 @@ void Map_Assign(var self, var obj) {
   MapData* other = cast(obj, Map);
   clear(self);
   
-  foreach(other, key) {
+  foreach(key in other) {
     var val = get(other, key);
     put(self, key, val);
   }
@@ -42,7 +42,7 @@ void Map_Assign(var self, var obj) {
 
 var Map_Copy(var self) {
   var newmap = new(Map);
-  foreach(self, key) {
+  foreach(key in self) {
     var val = get(self, key);
     put(newmap, key, val);
   }
@@ -53,8 +53,8 @@ var Map_Eq(var self, var obj) {
 	MapData* md = cast(self, Map);
   if (eq(type_of(obj), Map)) {
 		var val;
-    foreach(obj, key) {
-			if ((val = get(self, key)) == Undefined) {
+    foreach(key in obj) {
+			if ((val = get(self, key)) is Undefined) {
 				return False;
 			}
 			if_neq(get(obj, key), val) {
@@ -62,8 +62,8 @@ var Map_Eq(var self, var obj) {
 			}
 		}
     
-    foreach(self, key) {
-      if ((val = get(obj, key)) == Undefined) {
+    foreach(key in self) {
+      if ((val = get(obj, key)) is Undefined) {
 				return False;
 			}
 			if_neq(get(self, key), val) {

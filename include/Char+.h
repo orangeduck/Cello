@@ -10,7 +10,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module Char;
+global var Char;
 
 data {
   var type;

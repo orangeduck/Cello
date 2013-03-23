@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   var items = new(List, 3, int_item, float_item, string_item);
 	
   /* Collections can be looped over */
-  foreach(items, item) {
+  foreach(item in items) {
     /* Types are also objects */
     var type = type_of(item);
     printf("Type: '%s'\n", as_str(type));
@@ -41,13 +41,13 @@ int main(int argc, char** argv) {
   printf("Price of a 'Pear' is '%li'\n", as_long(pear_price));
 
   /* Tables also supports iteration */
-  foreach(prices, key) {
+  foreach(key in prices) {
     var price = get(prices, key);
     printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
   }
   
-  /* "with" automatically closes File at end of scope. */
-  with(open($(File, NULL), "prices.bin", "wb"), file) {
+  /* "with" automatically closes file at end of scope. */
+  with(file in open($(File, NULL), "prices.bin", "wb"))) {
   
     /* First class function object */
     lambda(write_pair, args) {
@@ -192,7 +192,7 @@ __Defining a new Type.__
 In the header...
 
 ```c
-module Vec2;
+global var Vec2;
 
 data {
   var type;
@@ -277,13 +277,13 @@ More More More Examples
 Memory management is hard. Very hard when combined with a lack of rich stack types. Very very hard when combined with a whole load of high level concepts. C+ gives you a few options, which where possible, the standard library is agnostic too. You can use what you think is best.
 
 * __Destructive Operations__ - Most of the standard library uses destructive operations and expects the user to make a copy if they exlicity want one.
-* __Output Parameters__ - In some places it is more appropriate to use output parameters and in which case "assign" is used to move the data around. 
-* __Reference Objects__ - These can be used to wrap and declare lifetimes for normal objects.
+* __Output Parameters__ - In some places it is more appropriate to use output parameters and in which case `assign` is used to move the data around. 
+* __Reference Objects__ - References wrap standard objects, where `with` can be used to declare their lifetime. And `at` can be used to dereference.
 
 ```c
 local void object_lifetime_example(void) {
   
-  with($(Reference, new(String, "Life is long")), liferef) {
+  with(liferef in $(Reference, new(String, "Life is long"))) {
     printf("This string is alive: '%s'\n", as_str(at(liferef,0)));
   }
 
@@ -295,9 +295,9 @@ local void object_lifetime_example(void) {
 
 local void many_object_lifetimes(void) {
   
-  with($(Reference, new(String, "Life is long")), liferef0)
-  with($(Reference, new(String, "Life is Beautiful")), liferef1)
-  with($(Reference, new(String, "Life is Grand")), liferef2) {
+  with(liferef0 in $(Reference, new(String, "Life is long")))
+  with(liferef1 in $(Reference, new(String, "Life is Beautiful")))
+  with(liferef2 in $(Reference, new(String, "Life is Grand"))) {
     printf("%s :: %s :: %s\n", as_str(at(liferef0,0)), as_str(at(liferef1,0)), as_str(at(liferef2,0)));  
   }
 
@@ -362,7 +362,7 @@ int main(int argc, char** argv) {
 
   try {
     int result = try_divide(2, 0);
-  } catch (e, DivideByZeroError) {
+  } catch (e in DivideByZeroError) {
     // Panic!
     return 1;
   }
@@ -376,13 +376,13 @@ One can also catch multiple objects and then write conditional code based on eac
 ```c
 try {
   do_some_work();
-} catch (e, TypeError, ClassError) {
+} catch (e in TypeError, ClassError) {
   if (e is TypeError) { printf("Got TypeError!\n"); }
   if (e is ClassError) { printf("Got ClassError!\n"); }
 }
 ```
 
-Throwing an exception will jump the program control to the innermost `catch` block where it must be handled (exceptions to not propagate outward). To catch an exception one must put a reference to the thrown Object. Any Object can be thrown and caught as an Exception in C+ so users can create their own Exception types or find other applications for the semanitcs. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location.
+Throwing an exception will jump the program control to the innermost `catch` block where it must be handled (exceptions to not propagate outward). To catch an exception one must put a reference to the thrown object. Any objacet can be thrown and caught as an Exception in C+ so users can create their own Exception types or find other applications for the semanitcs. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location.
 
 More More More More More Examples
 ---------------------------------
@@ -395,18 +395,18 @@ Explanation
 
 The first thing that probably comes into your head viewing the above code is `var`. This is a typedef of `void*` and is used via convention in C+ code to allow for overloaded functions. As you can see in the example code type checking/hinting can be done at runtime via the `cast` function.
 
-This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, then you are more than free to use `len` upon it. One can test if a type implements a certain class with the function `type_implements(type, Class)`. Calling a function on an object which does not implement the appropriate classes will throw a ClassError.
+This allows for a form of poor-man's duck-typing. If an object looks (or sounds) like it has a length, then you are more than free to use `len` upon it. One can test if a type implements a certain class with the function `type_implements(type, Class)`. Calling a function on an object which does not implement the appropriate classes will throw a `ClassError`.
 
-Another thing that may have jumped to your mind in the examples is `new`, `delete` and the `$` symbol. These are ways to allocate memory for objects. `new` and `delete` are used for heap objects and call constructors/destructors. `$` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the corresponding types data structure with the arguments provided.
+Another thing that may have jumped to your mind in the examples is `new`, `delete` and the `$` symbol. These are ways to allocate memory for objects. `new` and `delete` are used for heap objects and call constructors/destructors. `$` is used to allocate objects on the stack. It __doesn't__ call a constructor or destructor, but will initialize the corresponding types data structure with the arguments provided. This makes it useful for basic or boxed types.
 
-The idea of `with` is stolen from Python and will execute `enter_with` and `exit_with` on an object on entrance and exit to the block. The behaviour of these can be defined by implementing the `With` class.
+The idea of `with` is stolen from Python and will execute `enter_with` and `exit_with` on an object on entrance and exit to the block. The behaviour of these can be defined by implementing the `With` class. Currently it does not handle exceptions inside the block.
 
 Other than these things there is not much surprising in the code which cannot be explained via syntactic sugar.
 
 * `is`, `not`, `and`, `or` -> `==`, `!`, `&&`, `||`
 * `elif` -> `else if`
 * `local` -> `static`
-* `module` -> `extern var`
+* `global` -> `extern`
 * `class` -> `typedef struct`
 * `data` -> `typedef struct`
 

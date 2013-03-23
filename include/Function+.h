@@ -34,7 +34,7 @@ var call_with(var self, var args);
 **
 */
 
-module Function;
+global var Function;
 
 data {
   var type;

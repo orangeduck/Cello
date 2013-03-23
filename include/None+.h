@@ -8,7 +8,7 @@
 #ifndef NonePlus_h
 #define NonePlus_h
 
-local const var Some = (var)1;
-local const var None = (var)0;
+local var Some = (var)1;
+local var None = (var)0;
 
 #endif

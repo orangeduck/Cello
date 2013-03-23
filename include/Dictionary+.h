@@ -14,7 +14,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module Dictionary;
+global var Dictionary;
 
 data {
   var type;

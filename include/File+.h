@@ -12,7 +12,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module File;
+global var File;
 
 data {
   var type;

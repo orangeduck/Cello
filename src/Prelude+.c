@@ -8,6 +8,8 @@
 #include "Bool+.h"
 #include "None+.h"
 
+var Undefined = Singleton(Undefined);
+
 /*
 ** The type_of a Type object is just "Type" again.
 ** But because "Type" is extern it isn't a constant expression.
@@ -182,7 +184,7 @@ var maximum(var self) {
   if (len(self) == 0) return None;
 
   var best = at(self, 0);
-  foreach(self, item) {
+  foreach(item  in self) {
     if_gt(item, best) {
       best = item;
     }
@@ -196,7 +198,7 @@ var minimum(var self) {
   if (len(self) == 0) return None;
   
   var best = at(self, 0);
-  foreach(self, item) {
+  foreach(item in self) {
     if_lt(item, best) {
       best = item;
     }
@@ -422,3 +424,12 @@ void exit_with(var self) {
   }
 }
 
+var enter_for(var self) {
+  enter_with(self);
+  return self;
+}
+
+var exit_for(var self) {
+  exit_with(self);
+  return Undefined;
+}

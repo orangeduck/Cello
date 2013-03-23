@@ -14,7 +14,7 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
-module List;
+global var List;
 
 data {
   var type;

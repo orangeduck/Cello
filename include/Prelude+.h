@@ -24,9 +24,10 @@ typedef void* var;
 #define and &&
 #define or ||
 #define elif else if
+#define in ,
 
 #define local static
-#define module extern var
+#define global extern
 #define class typedef struct 
 #define data typedef struct 
 #define instance(T,C) local C T##C
@@ -71,7 +72,7 @@ var type_of(var obj);
 **  Undefined or errorous data value.
 */
 
-local const var Undefined = (var)-1;
+global var Undefined;
 
 /*
 ** == Cast ==
@@ -236,7 +237,8 @@ var iter_start(var col);
 var iter_end(var col);
 var iter_next(var col, var curr);
 
-#define foreach(xs, x) for(var x = iter_start(xs); x != iter_end(xs); x = iter_next(xs, x))
+#define foreach(x) foreach_scanned(x)
+#define foreach_scanned(x, xs) for(var x = iter_start(xs); x != iter_end(xs); x = iter_next(xs, x))
 
 /** Push - insertion and removal abilities */
 
@@ -324,7 +326,11 @@ class {
 void enter_with(var self);
 void exit_with(var self);
 
-#define with(x, y) for(var y = (enter_with(x), x); (y is Undefined ? exit_with(x), false : true); y = Undefined)
+var enter_for(var self);
+var exit_for(var self);
+
+#define with(x) with_scanned(x)
+#define with_scanned(x, ...) for(var x = enter_for(__VA_ARGS__); not (x is Undefined); x = exit_for(x))
 
 /** Stream - File like object */
 

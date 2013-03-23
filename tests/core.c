@@ -322,7 +322,7 @@ PT_SUITE(suite_core) {
 
     var x = new(List, 3, $(Int, 1), $(Real, 2.0), $(String, "Hello"));
     
-    foreach(x, y) {
+    foreach(y in x) {
       PT_ASSERT(y);
       PT_ASSERT(type_of(y));
     }

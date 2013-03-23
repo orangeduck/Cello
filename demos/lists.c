@@ -4,7 +4,7 @@ int main(int arc, char** argv) {
   
   var values = new(List, 4, $(Int, 1), $(Int, 10), None, $(Real, 87.2));
 
-  foreach(values, val) {
+  foreach(val in values) {
     
     var t = type_of(val);
 
