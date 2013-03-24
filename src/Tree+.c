@@ -5,6 +5,8 @@
 #include "None+.h"
 #include "Exception+.h"
 
+#include <string.h>
+
 var Tree = methods {
   methods_begin(Tree),
   method(Tree, New),
@@ -14,6 +16,7 @@ var Tree = methods {
   method(Tree, Collection),
   method(Tree, Dict),
   method(Tree, Iter),
+  method(Tree, Show),
   methods_end(Tree),
 };
 
@@ -265,3 +268,40 @@ var Tree_Iter_Next(var self, var curr) {
   TreeData* td = cast(self, Tree);
   return iter_next(td->keys, curr);
 }
+
+int Tree_Show_Size(var self) {
+
+  int total = snprintf(NULL, 0, "<'Tree' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show_size(key);
+    total += strlen(":");
+    total += show_size(get(self, key));
+    total += strlen(", ");
+  }
+  
+  total -= strlen(", ");
+  total += strlen("}>");
+  
+  return total;
+  
+}
+
+int Tree_Show(var self, char* out) {
+
+  int total = sprintf(out, "<'Tree' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show(key, out + total);
+    total += (strcpy(out + total, ":"), strlen(":"));
+    total += show(get(self, key), out + total);
+    total += (strcpy(out + total, ", "), strlen(", "));
+  }
+  
+  total -= strlen(", ");
+  total += (strcpy(out + total, "}>"), strlen("}>"));
+  
+  return total;
+  
+}
+

@@ -9,11 +9,11 @@ int main(int arc, char** argv) {
     var t = type_of(val);
 
     if (t is Int) {
-      printf("%s (%ld)\n", as_str(t), as_long(val));
+      print("%s (%ld)\n", t, val);
     } else if (t is Real) {
-      printf("%s (%f)\n", as_str(t), as_double(val));
+      print("%s (%f)\n", t, val);
     } else {
-      printf("%s\n", as_str(t));
+      print("%s\n", t);
     }
   }
 

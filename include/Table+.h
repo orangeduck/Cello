@@ -46,6 +46,9 @@ var Table_Iter_Start(var self);
 var Table_Iter_End(var self);
 var Table_Iter_Next(var self, var curr);
 
+int Table_Show_Size(var self);
+int Table_Show(var self, char* out);
+
 instance(Table, New) = { sizeof(TableData), Table_New, Table_Delete };
 instance(Table, Assign) = { Table_Assign };
 instance(Table, Copy) = { Table_Copy };
@@ -53,6 +56,7 @@ instance(Table, Eq) = { Table_Eq };
 instance(Table, Collection) = { Table_Len, Table_Clear, Table_Contains, Table_Discard };
 instance(Table, Dict) = { Table_Get, Table_Put };
 instance(Table, Iter) = { Table_Iter_Start, Table_Iter_End, Table_Iter_Next };
+instance(Table, Show) = { Table_Show_Size, Table_Show };
 
 
 #endif

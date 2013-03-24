@@ -35,9 +35,11 @@ var Type_Implements_Name(var self, const char* class_name);
 var Type_Class_Name(var self, const char* class_name, const char* func, const char* file, int line);
 
 const char* Type_AsStr(var self);
+int Type_Show_Size(var self);
+int Type_Show(var self, char* out);
 
 instance(Type, New) = { 0, Type_New, Type_Delete };
 instance(Type, AsStr) = { Type_AsStr };
-
+instance(Type, Show) = { Type_Show_Size, Type_Show };  
 
 #endif

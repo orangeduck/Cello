@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
   lambda(hello_name, args) {
     /* Input is a list of arguments */
     var name = cast(at(args, 0), String);
-    printf("Hello %s!\n", as_str(name));
+    print("Hello %s!\n", name);
     
     /* Always must return */
     return None;
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
   ** Then they can be uncurried.
   */
   var Welcome_Pair(var fst, var snd) {
-    printf("Hello %s and %s!\n", as_str(fst), as_str(snd));
+    print("Hello %s and %s!\n", fst, snd);
     return None;
   }
   

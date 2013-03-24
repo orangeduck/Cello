@@ -5,6 +5,8 @@
 #include "None+.h"
 #include "Exception+.h"
 
+#include <string.h>
+
 var Map = methods {
   methods_begin(Map),
   method(Map, New),
@@ -14,6 +16,7 @@ var Map = methods {
   method(Map, Collection),
   method(Map, Dict),
   method(Map, Iter),
+  method(Map, Show),
   methods_end(Map),
 };
 
@@ -242,3 +245,40 @@ var Map_Iter_Next(var self, var curr) {
   MapData* md = cast(self, Map);
   return iter_next(md->keys, curr);
 }
+
+int Map_Show_Size(var self) {
+
+  int total = snprintf(NULL, 0, "<'Map' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show_size(key);
+    total += strlen(":");
+    total += show_size(get(self, key));
+    total += strlen(", ");
+  }
+  
+  total -= strlen(", ");
+  total += strlen("}>");
+  
+  return total;
+  
+}
+
+int Map_Show(var self, char* out) {
+
+  int total = sprintf(out, "<'Map' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show(key, out + total);
+    total += (strcpy(out + total, ":"), strlen(":"));
+    total += show(get(self, key), out + total);
+    total += (strcpy(out + total, ", "), strlen(", "));
+  }
+  
+  total -= strlen(", ");
+  total += (strcpy(out + total, "}>"), strlen("}>"));
+  
+  return total;
+  
+}
+

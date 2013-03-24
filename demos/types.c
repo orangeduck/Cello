@@ -45,12 +45,12 @@ int main(int argc, char** argv) {
     (var[]){ &hello_new_instance, &hello_eq_instance }, 
     (const char*[]){ "New", "Eq" } );
   
-  printf("%s is a %s!\n", as_str(Hello), as_str(type_of(Hello)));
+  print("%s is a %s!\n", Hello, type_of(Hello));
 
   var hello_obj1 = new(Hello, 1);
   var hello_obj2 = new(Hello, 2);
 
-  printf("Equal? %d\n", (int)as_long(eq(hello_obj1, hello_obj2)) );
+  print("Equal? %d\n", eq(hello_obj1, hello_obj2));
   
   delete(hello_obj1);
   delete(hello_obj2);

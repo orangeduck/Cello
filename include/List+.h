@@ -55,6 +55,9 @@ var List_Iter_Next(var self, var curr);
 void List_Reverse(var self);
 void List_Sort(var self);
 
+int List_Show_Size(var self);
+int List_Show(var self, char* out);
+
 instance(List, New) = { sizeof(ListData), List_New, List_Delete };
 instance(List, Assign) = { List_Assign };
 instance(List, Copy) = { List_Copy };
@@ -66,6 +69,7 @@ instance(List, Iter) = { List_Iter_Start, List_Iter_End, List_Iter_Next };
 instance(List, Reverse) = { List_Reverse };
 instance(List, Sort) = { List_Sort };
 instance(List, Append) = { List_Push_Back };
+instance(List, Show) = { List_Show_Size, List_Show };
 
 
 #endif

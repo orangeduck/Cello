@@ -508,5 +508,20 @@ PT_SUITE(suite_core) {
     PT_ASSERT(type_class(Type, AsStr));
     
   }
+  
+  PT_TEST(test_show) {
+    
+    var out = new(String,"");
+    
+    print_string(out, "This is an %s lala %0.1f %i %i %f %lu\n",
+      $(String, "example"), $(Real, 0.1), $(Int, 0),
+      $(Int, 1), $(Int, 10), $(Int, 999));
+    
+    PT_ASSERT_STR_EQ(as_str(out), "This is an example lala 0.1 0 1 10.000000 999\n");
+    
+    delete(out);
+    
+  }
+  
 
 }

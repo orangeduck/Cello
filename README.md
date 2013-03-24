@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   foreach(item in items) {
     /* Types are also objects */
     var type = type_of(item);
-    printf("Type: '%s'\n", as_str(type));
+    printf("Type: '%$'\n", type);
   }
   
   /* Heap objects destroyed with "delete" */
@@ -38,12 +38,12 @@ int main(int argc, char** argv) {
   put(prices, $(String, "Pear"),   $(Int, 55)); 
   
   var pear_price = get(prices, $(String, "Pear"));
-  printf("Price of a 'Pear' is '%li'\n", as_long(pear_price));
+  print("Price of a 'Pear' is '%$'\n", pear_price);
 
   /* Tables also supports iteration */
   foreach(key in prices) {
     var price = get(prices, key);
-    printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
+    print("Price of '%$' is '%$'\n", key, price);
   }
   
   /* "with" automatically closes file at end of scope. */
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
   
     /* Input is a list of arguments */
     var name = cast(at(args, 0), String);
-    printf("Hello %s!\n", as_str(name));
+    print("Hello %s!\n", name);
     
     /* Always must return */
     return None; 
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
   ** Then they can be uncurried.
   */
   var Welcome_Pair(var fst, var snd) {
-    printf("Hello %s and %s!\n", as_str(fst), as_str(snd));
+    print("Hello %s and %s!\n", fst, snd);
     return None;
   }
   
@@ -284,10 +284,10 @@ Memory management is hard. Very hard when combined with a lack of rich stack typ
 local void object_lifetime_example(void) {
   
   with(liferef in $(Reference, new(String, "Life is long"))) {
-    printf("This string is alive: '%s'\n", as_str(at(liferef,0)));
+    print("This string is alive: '%s'\n", at(liferef,0));
   }
 
-  printf("Now it has been cleared up!\n");
+  print("Now it has been cleared up!\n");
   
 }
 
@@ -298,7 +298,7 @@ local void many_object_lifetimes(void) {
   with(liferef0 in $(Reference, new(String, "Life is long")))
   with(liferef1 in $(Reference, new(String, "Life is Beautiful")))
   with(liferef2 in $(Reference, new(String, "Life is Grand"))) {
-    printf("%s :: %s :: %s\n", as_str(at(liferef0,0)), as_str(at(liferef1,0)), as_str(at(liferef2,0)));  
+    print("%s :: %s :: %s\n", at(liferef0,0), at(liferef1,0), at(liferef2,0));
   }
 
 }
@@ -377,8 +377,8 @@ One can also catch multiple objects and then write conditional code based on eac
 try {
   do_some_work();
 } catch (e in TypeError, ClassError) {
-  if (e is TypeError) { printf("Got TypeError!\n"); }
-  if (e is ClassError) { printf("Got ClassError!\n"); }
+  if (e is TypeError) { print("Got TypeError!\n"); }
+  if (e is ClassError) { print("Got ClassError!\n"); }
 }
 ```
 

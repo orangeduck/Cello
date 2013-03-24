@@ -3,6 +3,8 @@
 #include "Prelude+.h"
 #include "Type+.h"
 
+#include <string.h>
+
 var Bool = methods {
   methods_begin(Bool),
   method(Bool, Eq),
@@ -12,6 +14,7 @@ var Bool = methods {
   method(Bool, AsLong),
   method(Bool, AsDouble),
   method(Bool, AsStr),
+  method(Bool, Show),
   methods_end(Bool)
 };
 
@@ -53,4 +56,24 @@ long Bool_AsLong(var self) {
 double Bool_AsDouble(var self) {
   return (double)(self is True);
 }
+
+int Bool_Show_Size(var self) {
+  if (self) {
+    return strlen(true_str);
+  } else {
+    return strlen(false_str);
+  }
+}
+
+int Bool_Show(var self, char* out) {
+  if (self) {
+    strcpy(out, true_str);
+    return strlen(true_str);
+  } else {
+    strcpy(out, false_str);
+    return strlen(false_str);
+  }
+}
+
+
 

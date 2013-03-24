@@ -55,6 +55,9 @@ var Array_Iter_Next(var self, var curr);
 void Array_Reverse(var self);
 void Array_Sort(var self);
 
+int Array_Show_Size(var self);
+int Array_Show(var self, char* out);
+
 instance(Array, New) = { sizeof(ArrayData), Array_New, Array_Delete };
 instance(Array, Assign) = { Array_Assign };
 instance(Array, Copy) = { Array_Copy };
@@ -66,5 +69,6 @@ instance(Array, Iter) = { Array_Iter_Start, Array_Iter_End, Array_Iter_Next };
 instance(Array, Reverse) = { Array_Reverse };
 instance(Array, Sort) = { Array_Sort };
 instance(Array, Append) = { Array_Push_Back };
+instance(Array, Show) = { Array_Show_Size, Array_Show };
 
 #endif

@@ -18,6 +18,7 @@ var String = methods {
   method(String, Parse),
   method(String, AsStr), 
   method(String, Append), 
+  method(String, Show),
   methods_end(String)
 };
 
@@ -226,5 +227,13 @@ void String_Reverse(var self) {
     s->value[i] = s->value[strlen(s->value)-1-i];
     s->value[strlen(s->value)-1-i] = temp;
   }
+}
+
+int String_Show_Size(var self) {
+  return snprintf(NULL, 0, "\"%s\"", as_str(self));
+}
+
+int String_Show(var self, char* out) {
+  return sprintf(out, "\"%s\"", as_str(self));
 }
 

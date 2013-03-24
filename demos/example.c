@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
   foreach(item in items) {
     /* Types are also objects */
     var type = type_of(item);
-    printf("Type: '%s'\n", as_str(type));
+    print("Type: '%$'\n", type);
   }
   
   /* Heap objects destroyed with "delete" */
@@ -31,35 +31,35 @@ int main(int argc, char** argv) {
   put(prices, $(String, "Pear"),   $(Int, 55)); 
   
   var pear_price = get(prices, $(String, "Pear"));
-  printf("Price of a 'Pear' is '%li'\n", as_long(pear_price));
+  print("Price of a 'Pear' is '%$'\n", pear_price);
 
   /* Hashtable also supports iteration */
   foreach(key in prices) {
     var price = get(prices, key);
-    printf("Price of '%s' is '%li'\n", as_str(key), as_long(price));
+    print("Price of '%$' is '%$'\n", key, price);
   }
   
   /* File-like objects can "open" and "close" */
-  var file = open($(File, NULL), "prices.bin", "wb");
+  with(file in open($(File, NULL), "prices.bin", "wb")) {
   
-  /* First class function object */
-  lambda(write_pair, args) {
+    /* First class function object */
+    lambda(write_pair, args) {
+      
+      /* Run time type-checking with "cast" */
+      var key = cast(at(args, 0), String);
+      var val = cast(get(prices, key), Int);
+      
+      /* File implements "put/get" like Hashtable */
+      put(file, String, key);
+      put(file, Int, val);
+      
+      return None;
+    };
     
-    /* Run time type-checking with "cast" */
-    var key = cast(at(args, 0), String);
-    var val = cast(get(prices, key), Int);
-    
-    /* File implements "put/get" like Hashtable */
-    put(file, String, key);
-    put(file, Int, val);
-    
-    return None;
-  };
+    /* Higher order functions */
+    map(prices, write_pair);
   
-  /* Higher order functions */
-  map(prices, write_pair);
-  
-  close(file);
+  }
   
   delete(prices);
   

@@ -21,8 +21,8 @@ int main(int arc, char** argv) {
     var first = get(f, Int);
     var second = get(f, Int);
     
-    printf("Got String: '%s'\n", as_str(string));
-    printf("Got Numbers: '%ld' and '%ld'", as_long(first), as_long(second));
+    print("Got String: '%s'\n", string);
+    print("Got Numbers: '%i' and '%i'\n", first, second);
     
     delete(string);
     delete(first);

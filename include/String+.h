@@ -42,6 +42,9 @@ const char* String_AsStr(var self);
 void String_Append(var self, var obj);
 void String_Reverse(var self);
 
+int String_Show_Size(var self);
+int String_Show(var self, char* out);
+
 instance(String, New) = { sizeof(StringData), String_New, String_Delete };
 instance(String, Assign) = { String_Assign };
 instance(String, Copy) = { String_Copy };
@@ -53,6 +56,7 @@ instance(String, Reverse) = { String_Reverse  };
 instance(String, Parse) = { String_Parse_Read, String_Parse_Write };
 instance(String, AsStr) = { String_AsStr  };
 instance(String, Append) = { String_Append  };
+instance(String, Show) = { String_Show_Size, String_Show };
 
 
 #endif

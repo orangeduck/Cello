@@ -23,14 +23,14 @@ var File_New(var self, va_list* args) {
 
 var File_Delete(var self) {
   FileData* fd = cast(self, File);
-  if (fd->f != NULL and tell(self) != -1) { close(self); }
+  if (fd->f != NULL) { close(self); }
   return self;
 }
 
 var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
   
-  if (fd->f != NULL and tell(self) != -1) { close(self); }
+  if (fd->f != NULL) { close(self); }
   
   fd->f = fopen(filename, access);
   

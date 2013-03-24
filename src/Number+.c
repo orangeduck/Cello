@@ -55,6 +55,7 @@ var Int = methods {
   method(Int, AsLong),
   method(Int, AsDouble),
   method(Int, Num),
+  method(Int, Show),
   methods_end(Int)
 };
 
@@ -151,6 +152,14 @@ double Int_AsDouble(var self) {
   return io->value;
 }
 
+int Int_Show_Size(var self) {
+  return snprintf(NULL, 0, "%li", as_long(self));
+}
+
+int Int_Show(var self, char* out) {
+  return sprintf(out, "%li", as_long(self));
+}
+
 var Real = methods {
   methods_begin(Real),
   method(Real, New),
@@ -162,7 +171,8 @@ var Real = methods {
   method(Real, Parse),
   method(Real, AsDouble),
   method(Real, AsLong), 
-  method(Real, Num), 
+  method(Real, Num),
+  method(Real, Show), 
   methods_end(Real)
 };
 
@@ -266,3 +276,12 @@ long Real_AsLong(var self) {
   RealData* ro = cast(self, Real);
   return ro->value;
 }
+
+int Real_Show_Size(var self) {
+  return snprintf(NULL, 0, "%f", as_double(self));
+}
+
+int Real_Show(var self, char* out) {
+  return sprintf(out, "%f", as_double(self));
+}
+

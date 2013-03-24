@@ -31,6 +31,9 @@ var Reference_At(var self, int i);
 void Reference_Set(var self, int i, var x);
 void Reference_Exit(var self);
 
+int Reference_Show_Size(var self);
+int Reference_Show(var self, char* out);
+
 instance(Reference, New) = { sizeof(ReferenceData), Reference_New, Reference_Delete };
 instance(Reference, Assign) = { Reference_Assign };
 instance(Reference, Copy) = { Reference_Copy };
@@ -38,5 +41,6 @@ instance(Reference, Eq) = { Reference_Eq };
 instance(Reference, Hash) = { Reference_Hash };
 instance(Reference, At) = { Reference_At, Reference_Set };
 instance(Reference, With) = { NULL, Reference_Exit };
+instance(Reference, Show) = { Reference_Show_Size, Reference_Show };
 
 #endif

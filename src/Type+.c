@@ -9,6 +9,7 @@ var Type = methods {
   methods_begin(Type),
   method(Type, New),
   method(Type, AsStr),
+  method(Type, Show),
   methods_end(Type),
 };
 
@@ -113,3 +114,14 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
     
   }
 }
+
+int Type_Show_Size(var self) {
+  return strlen(as_str(self));
+}
+
+int Type_Show(var self, char* out) {
+  strcpy(out, as_str(self));
+  return strlen(as_str(self));
+}
+
+

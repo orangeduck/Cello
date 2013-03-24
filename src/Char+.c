@@ -9,6 +9,7 @@ var Char = methods {
   method(Char, Ord),
   method(Char, Hash),
   method(Char, AsChar),
+  method(Char, Show),
   methods_end(Char)
 };
 
@@ -56,3 +57,13 @@ char Char_AsChar(var self) {
   CharData* cd = cast(self, Char);
   return cd->value;
 }
+
+int Char_Show_Size(var self) {
+  return snprintf(NULL, 0, "'%c'", as_char(self));
+}
+
+int Char_Show(var self, char* out) {
+  return sprintf(out, "'%c'", as_char(self));
+}
+
+

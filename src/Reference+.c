@@ -1,6 +1,8 @@
 #include "Reference+.h"
 #include "Type+.h"
 
+#include <string.h>
+
 var Reference = methods {
   methods_begin(Reference),
   method(Reference, New), 
@@ -10,6 +12,7 @@ var Reference = methods {
   method(Reference, Hash),
   method(Reference, At),
   method(Reference, With),
+  method(Reference, Show),
   methods_end(Reference)
 };
 
@@ -59,4 +62,23 @@ void Reference_Exit(var self) {
   ReferenceData* rd = cast(self, Reference);
   delete(rd->ref);
 }
+
+int Reference_Show_Size(var self) {
+  ReferenceData* rd = cast(self, Reference);
+  
+  int total = snprintf(NULL, 0, "<'Reference' at 0x%p [", self);
+  total += show_size(rd->ref);
+  total += strlen("]>");
+  return total;
+}
+
+int Reference_Show(var self, char* out) {
+  ReferenceData* rd = cast(self, Reference);
+  
+  int total = sprintf(out, "<'Reference' at 0x%p [", self);
+  total += show(rd->ref, out + total);
+  total += (strcpy(out + total, "]>"), strlen("]>"));
+  return total;
+}
+
 

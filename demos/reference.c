@@ -19,11 +19,12 @@ local void object_lifetime_example(void) {
   
   with(liferef in $(Reference, new(String, "Life is long"))) {
   
-    printf("This string is alive: '%s'\n", as_str(at(liferef,0)));
+    print("This reference is: %$\n", liferef);
+    print("This string is alive: '%s'\n", at(liferef,0));
   
   }
 
-  printf("Now it has been cleared up!\n");
+  print("Now it has been cleared up!\n");
   
 }
 
@@ -33,7 +34,7 @@ local void many_object_lifetimes(void) {
   with(liferef1 in $(Reference, new(String, "Life is Beautiful")))
   with(liferef2 in $(Reference, new(String, "Life is Grand"))) {
   
-    printf("%s :: %s :: %s\n", as_str(at(liferef0,0)), as_str(at(liferef1,0)), as_str(at(liferef2,0)));
+    print("%s :: %s :: %s\n", at(liferef0,0), at(liferef1,0), at(liferef2,0));
   
   }
 

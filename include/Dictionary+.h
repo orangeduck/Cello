@@ -44,6 +44,9 @@ var Dictionary_Iter_Start(var self);
 var Dictionary_Iter_End(var self);
 var Dictionary_Iter_Next(var self, var curr);
 
+int Dictionary_Show_Size(var self);
+int Dictionary_Show(var self, char* out);
+
 instance(Dictionary, New) = { sizeof(DictionaryData), Dictionary_New, Dictionary_Delete };
 instance(Dictionary, Assign) = { Dictionary_Assign };
 instance(Dictionary, Copy) = { Dictionary_Copy };
@@ -51,5 +54,6 @@ instance(Dictionary, Eq) = { Dictionary_Eq };
 instance(Dictionary, Collection) = { Dictionary_Len, Dictionary_Clear, Dictionary_Contains, Dictionary_Discard };
 instance(Dictionary, Dict) = { Dictionary_Get, Dictionary_Put };
 instance(Dictionary, Iter) = { Dictionary_Iter_Start, Dictionary_Iter_End, Dictionary_Iter_Next };
+instance(Dictionary, Show) = { Dictionary_Show_Size, Dictionary_Show };
 
 #endif

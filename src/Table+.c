@@ -18,6 +18,7 @@ var Table = methods {
   method(Table, Collection),
   method(Table, Dict),
   method(Table, Iter),
+  method(Table, Show),
   methods_end(Table)
 };
 
@@ -191,5 +192,41 @@ var Table_Iter_End(var self) {
 var Table_Iter_Next(var self, var curr) {
   TableData* tab = cast(self, Table);
   return iter_next(tab->keys, curr);
+}
+
+int Table_Show_Size(var self) {
+
+  int total = snprintf(NULL, 0, "<'Table' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show_size(key);
+    total += strlen(":");
+    total += show_size(get(self, key));
+    total += strlen(", ");
+  }
+  
+  total -= strlen(", ");
+  total += strlen("}>");
+  
+  return total;
+  
+}
+
+int Table_Show(var self, char* out) {
+
+  int total = sprintf(out, "<'Table' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show(key, out + total);
+    total += (strcpy(out + total, ":"), strlen(":"));
+    total += show(get(self, key), out + total);
+    total += (strcpy(out + total, ", "), strlen(", "));
+  }
+  
+  total -= strlen(", ");
+  total += (strcpy(out + total, "}>"), strlen("}>"));
+  
+  return total;
+  
 }
 

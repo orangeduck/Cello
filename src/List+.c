@@ -22,6 +22,7 @@ var List = methods {
   method(List, Reverse),
   method(List, Append),
   method(List, Sort),
+  method(List, Show),
   methods_end(List)
 };
 
@@ -318,3 +319,38 @@ local void List_Sort_Part(var self, int left, int right) {
 void List_Sort(var self) {
   List_Sort_Part(self, 0, len(self)-1);
 }
+
+int List_Show_Size(var self) {
+  
+  int total = snprintf(NULL, 0, "<'List' At 0x%p [", self);
+  foreach(item in self) {
+    total += show_size(item);
+    total += strlen(", ");
+  }
+  
+  total -= strlen(", ");
+  total += strlen("]>");
+  return total;
+  
+}
+
+local int strapp(char* dst, const char* src) {
+  strcpy(dst, src);
+  return strlen(src);
+}
+
+int List_Show(var self, char* out) {
+  
+  int total = sprintf(out, "<'List' At 0x%p [", self);
+  foreach(item in self) {
+    total += show(item, out + total);
+    total += strapp(out + total, ", ");
+  }
+  
+  total -= strlen(", ");
+  total += strapp(out + total, "]>");
+  
+  return total;
+  
+}
+

@@ -10,6 +10,7 @@ var IndexOutOfBoundsError = Singleton(IndexOutOfBoundsError);
 var KeyError = Singleton(KeyError);
 var OutOfMemoryError = Singleton(OutOfMemoryError);
 var IOError = Singleton(IOError);
+var FormatError = Singleton(FormatError);
 
 bool __exc_active = false;
 int __exc_depth = -1;

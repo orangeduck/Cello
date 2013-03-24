@@ -17,6 +17,7 @@ var Dictionary = methods {
   method(Dictionary, Collection),
   method(Dictionary, Dict),
   method(Dictionary, Iter),
+  method(Dictionary, Show),
   methods_end(Dictionary)
 };
 
@@ -193,3 +194,39 @@ var Dictionary_Iter_Next(var self, var curr) {
   DictionaryData* dict = cast(self, Dictionary);
   return iter_next(dict->keys, curr);
 }
+
+int Dictionary_Show_Size(var self) {
+
+  int total = snprintf(NULL, 0, "<'Dictionary' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show_size(key);
+    total += strlen(":");
+    total += show_size(get(self, key));
+    total += strlen(", ");
+  }
+  
+  total -= strlen(", ");
+  total += strlen("}>");
+  
+  return total;
+}
+
+int Dictionary_Show(var self, char* out) {
+
+  int total = sprintf(out, "<'Dictionary' At 0x%p {", self);
+  
+  foreach(key in self) {
+    total += show(key, out + total);
+    total += (strcpy(out + total, ":"), strlen(":"));
+    total += show(get(self, key), out + total);
+    total += (strcpy(out + total, ", "), strlen(", "));
+  }
+  
+  total -= strlen(", ");
+  total += (strcpy(out + total, "}>"), strlen("}>"));
+  
+  return total;
+  
+}
+
