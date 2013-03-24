@@ -320,37 +320,13 @@ void List_Sort(var self) {
   List_Sort_Part(self, 0, len(self)-1);
 }
 
-int List_Show_Size(var self) {
-  
-  int total = snprintf(NULL, 0, "<'List' At 0x%p [", self);
-  foreach(item in self) {
-    total += show_size(item);
-    total += strlen(", ");
+int List_Show(var self, var output, int pos) {
+  pos = print_to(output, pos, "<'List' At 0x%p [", self);
+  for(int i = 0; i < len(self); i++) {
+    pos = print_to(output, pos, "%$", at(self, i));
+    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
   }
-  
-  total -= strlen(", ");
-  total += strlen("]>");
-  return total;
-  
-}
-
-local int strapp(char* dst, const char* src) {
-  strcpy(dst, src);
-  return strlen(src);
-}
-
-int List_Show(var self, char* out) {
-  
-  int total = sprintf(out, "<'List' At 0x%p [", self);
-  foreach(item in self) {
-    total += show(item, out + total);
-    total += strapp(out + total, ", ");
-  }
-  
-  total -= strlen(", ");
-  total += strapp(out + total, "]>");
-  
-  return total;
-  
+  pos = print_to(output, pos, "]>");
+  return pos;
 }
 

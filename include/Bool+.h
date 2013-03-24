@@ -14,6 +14,7 @@
 #define BoolPlus_h
 
 #include "Prelude+.h"
+#include "Format+.h"
 
 global var Bool;
 
@@ -30,8 +31,7 @@ const char* Bool_AsStr(var self);
 long Bool_AsLong(var self);
 double Bool_AsDouble(var self);
 
-int Bool_Show_Size(var self);
-int Bool_Show(var self, char* out);
+int Bool_Show(var self, var output, int pos);
 
 instance(Bool, Eq) = { Bool_Eq };
 instance(Bool, Ord) = { Bool_Gt, Bool_Lt };
@@ -40,6 +40,6 @@ instance(Bool, AsChar) = { Bool_AsChar };
 instance(Bool, AsLong) = { Bool_AsLong };
 instance(Bool, AsDouble) = { Bool_AsDouble };
 instance(Bool, AsStr) = { Bool_AsStr };
-instance(Bool, Show) = { Bool_Show_Size, Bool_Show };
+instance(Bool, Show) = { Bool_Show, NULL };
 
 #endif

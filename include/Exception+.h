@@ -25,6 +25,17 @@ global var OutOfMemoryError;
 global var IOError;
 global var FormatError;
 
+global var ProgramAbortedError;
+global var DivisionByZeroError;
+global var IllegalInstructionError;
+global var ProgramInterruptedError;
+global var SegmentationError;
+global var ProgramTerminationError;
+
+/* Register Signals as Exceptions */
+
+void Exception_Register_Signals(void);
+
 /* Internal Exception Stuff */
 
 enum {

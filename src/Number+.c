@@ -2,6 +2,7 @@
 
 #include "Type+.h"
 #include "Bool+.h"
+#include "Exception+.h"
 
 #include <assert.h>
 #include <math.h>
@@ -152,12 +153,18 @@ double Int_AsDouble(var self) {
   return io->value;
 }
 
-int Int_Show_Size(var self) {
-  return snprintf(NULL, 0, "%li", as_long(self));
+int Int_Show(var self, var output, int pos) {
+  IntData* io = cast(self, Int);
+  pos += format_to(output, pos, "%li", io->value);
+  return pos;
 }
 
-int Int_Show(var self, char* out) {
-  return sprintf(out, "%li", as_long(self));
+int Int_Look(var self, var input, int pos) {
+  IntData* io = cast(self, Int);
+  int off = 0;
+  int err = format_from(input, pos, "%li%n", &io->value, &off);
+  pos += off;
+  return pos;
 }
 
 var Real = methods {
@@ -277,11 +284,11 @@ long Real_AsLong(var self) {
   return ro->value;
 }
 
-int Real_Show_Size(var self) {
-  return snprintf(NULL, 0, "%f", as_double(self));
+int Real_Show(var self, var output, int pos) {
+  return print_to(output, pos, "%f", self);
 }
 
-int Real_Show(var self, char* out) {
-  return sprintf(out, "%f", as_double(self));
+int Real_Look(var self, var input, int pos) {
+  return scan_from(input, pos, "%f", self);
 }
 

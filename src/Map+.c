@@ -159,6 +159,8 @@ void Map_Discard(var self, var key) {
         
         node->leaf_key = inorder_key;
         node->leaf_val = inorder_val;
+        
+        discard(md->keys, key);
         return;
       }
           
@@ -246,39 +248,20 @@ var Map_Iter_Next(var self, var curr) {
   return iter_next(md->keys, curr);
 }
 
-int Map_Show_Size(var self) {
-
-  int total = snprintf(NULL, 0, "<'Map' At 0x%p {", self);
+int Map_Show(var self, var output, int pos) {
+  MapData* md = cast(self, Map);
   
-  foreach(key in self) {
-    total += show_size(key);
-    total += strlen(":");
-    total += show_size(get(self, key));
-    total += strlen(", ");
+  pos = print_to(output, pos, "<'Map' At 0x%p {", self);
+  
+  for(int i = 0; i < len(self); i++) {
+    var key = at(md->keys, i);
+    var val = get(self, key);
+    pos = print_to(output, pos, "%$:%$", key, get(self, key));
+    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
   }
   
-  total -= strlen(", ");
-  total += strlen("}>");
+  pos = print_to(output, pos, "}>");
   
-  return total;
-  
-}
-
-int Map_Show(var self, char* out) {
-
-  int total = sprintf(out, "<'Map' At 0x%p {", self);
-  
-  foreach(key in self) {
-    total += show(key, out + total);
-    total += (strcpy(out + total, ":"), strlen(":"));
-    total += show(get(self, key), out + total);
-    total += (strcpy(out + total, ", "), strlen(", "));
-  }
-  
-  total -= strlen(", ");
-  total += (strcpy(out + total, "}>"), strlen("}>"));
-  
-  return total;
-  
+  return pos;
 }
 

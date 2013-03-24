@@ -1,5 +1,7 @@
 #include "Reference+.h"
+
 #include "Type+.h"
+#include "Exception+.h"
 
 #include <string.h>
 
@@ -63,22 +65,7 @@ void Reference_Exit(var self) {
   delete(rd->ref);
 }
 
-int Reference_Show_Size(var self) {
-  ReferenceData* rd = cast(self, Reference);
-  
-  int total = snprintf(NULL, 0, "<'Reference' at 0x%p [", self);
-  total += show_size(rd->ref);
-  total += strlen("]>");
-  return total;
+int Reference_Show(var self, var output, int pos) {
+  return print_to(output, pos, "<'Reference' at 0x%p (%$)>", self, at(self,0));
 }
-
-int Reference_Show(var self, char* out) {
-  ReferenceData* rd = cast(self, Reference);
-  
-  int total = sprintf(out, "<'Reference' at 0x%p [", self);
-  total += show(rd->ref, out + total);
-  total += (strcpy(out + total, "]>"), strlen("]>"));
-  return total;
-}
-
 

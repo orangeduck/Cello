@@ -129,7 +129,7 @@ static void pt_title_case(char* output, const char* input) {
   
   strcpy(output, input);
   
-  for(int i = 0; i < strlen(output); i++) {
+  for(unsigned int i = 0; i < strlen(output); i++) {
     
     if (output[i] == '_') {
       space = true;

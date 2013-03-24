@@ -3,6 +3,8 @@
 #include "Type+.h"
 #include "None+.h"
 
+#include <signal.h>
+
 var TypeError = Singleton(TypeError);
 var ValueError = Singleton(ValueError);
 var ClassError = Singleton(ClassError);
@@ -11,6 +13,34 @@ var KeyError = Singleton(KeyError);
 var OutOfMemoryError = Singleton(OutOfMemoryError);
 var IOError = Singleton(IOError);
 var FormatError = Singleton(FormatError);
+
+var ProgramAbortedError = Singleton(ProgramAbortedError);
+var DivisionByZeroError = Singleton(DivisionByZeroError);
+var IllegalInstructionError = Singleton(IllegalInstructionError);
+var ProgramInterruptedError = Singleton(ProgramInterruptedError);
+var SegmentationError = Singleton(SegmentationError);
+var ProgramTerminationError = Singleton(ProgramTerminationError);
+
+static void Exception_Signal(int sig) {
+  switch(sig) {
+    case SIGABRT: throw(ProgramAbortedError, "Program Aborted");
+    case SIGFPE: throw(DivisionByZeroError, "Division by Zero");
+    case SIGILL: throw(IllegalInstructionError, "Illegal Instruction");
+    case SIGINT: throw(ProgramInterruptedError, "Program Interrupted");
+    case SIGSEGV: throw(SegmentationError, "Segmentation fault");
+    case SIGTERM: throw(ProgramTerminationError, "Program Terminated");
+  }
+}
+
+
+void Exception_Register_Signals(void) {
+  signal(SIGABRT, Exception_Signal);
+  signal(SIGFPE, Exception_Signal);
+  signal(SIGILL, Exception_Signal);
+  signal(SIGINT, Exception_Signal);
+  signal(SIGSEGV, Exception_Signal);
+  signal(SIGTERM, Exception_Signal);
+}
 
 bool __exc_active = false;
 int __exc_depth = -1;

@@ -31,8 +31,8 @@ long Char_Hash(var self);
 
 char Char_AsChar(var self);
 
-int Char_Show_Size(var self);
-int Char_Show(var self, char* out);
+int Char_Show(var self, var output, int pos);
+int Char_Look(var self, var input, int pos);
 
 instance(Char, New) = { sizeof(CharData), Char_New, Char_Delete };
 instance(Char, Assign) = { Char_Assign };
@@ -41,6 +41,6 @@ instance(Char, Eq) = { Char_Eq };
 instance(Char, Ord) = { Char_Gt, Char_Lt };
 instance(Char, Hash) = { Char_Hash  };
 instance(Char, AsChar) = { Char_AsChar  };
-instance(Char, Show) = { Char_Show_Size, Char_Show };
+instance(Char, Show) = { Char_Show, Char_Look };
 
 #endif

@@ -11,6 +11,7 @@
 
 #include "Prelude+.h"
 #include "Type+.h"
+#include "Format+.h"
 
 global var File;
 
@@ -41,9 +42,13 @@ void File_Write_Data(var self, var input);
 var File_Get(var self, var type);
 void File_Put(var self, var type, var obj);
 
+int File_Format_To(var self, int pos, const char* fmt, va_list va);
+int File_Format_From(var self, int pos, const char* fmt, va_list va);
+
 instance(File, New) = { sizeof(FileData), File_New, File_Delete };
 instance(File, With) = { NULL, File_Close };
 instance(File, Stream) = { File_Open, File_Close, File_Seek, File_Tell, File_Flush, File_EOF, File_Read, File_Write };
 instance(File, Dict) = { File_Get, File_Put };
+instance(File, Format) = { File_Format_To, File_Format_From };
 
 #endif

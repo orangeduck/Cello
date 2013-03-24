@@ -1,9 +1,10 @@
-#include <string.h>
-#include <stdio.h>
+#include "String+.h"
 
 #include "Bool+.h"
+#include "Exception+.h"
 
-#include "String+.h"
+#include <string.h>
+#include <stdio.h>
 
 var String = methods {
   methods_begin(String),
@@ -18,6 +19,7 @@ var String = methods {
   method(String, Parse),
   method(String, AsStr), 
   method(String, Append), 
+  method(String, Format),
   method(String, Show),
   methods_end(String)
 };
@@ -26,6 +28,7 @@ var String_New(var self, va_list* args) {
   StringData* s = cast(self, String);
   const char* init = va_arg(*args, const char*);
   s->value = malloc(strlen(init) + 1);
+  if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   strcpy(s->value, init);
   return self;
 }
@@ -40,6 +43,7 @@ void String_Assign(var self, var obj) {
   StringData* s = cast(self, String);
   const char* value = as_str(obj);
   s->value = realloc(s->value, strlen(value) + 1);
+  if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   strcpy(s->value, value);
 }
 
@@ -106,6 +110,7 @@ int String_Len(var self) {
 void String_Clear(var self) {
   StringData* s = cast(self, String);
   s->value = realloc(s->value, 1);
+  if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   s->value[0] = '\0';
 }
 
@@ -215,25 +220,45 @@ void String_Append(var self, var obj) {
   
   size_t newlen = strlen(s->value) + strlen(os);
   
-  s->value = realloc(s->value, newlen+1);
+  s->value = realloc(s->value, newlen + 1);
+  if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   
   strcat(s->value, os);
 }
 
 void String_Reverse(var self) {
   StringData* s = cast(self, String);
-  for(int i = 0; i < strlen(s->value) / 2; i++) {
+  for(unsigned int i = 0; i < strlen(s->value) / 2; i++) {
     char temp = s->value[i];
     s->value[i] = s->value[strlen(s->value)-1-i];
     s->value[strlen(s->value)-1-i] = temp;
   }
 }
 
-int String_Show_Size(var self) {
-  return snprintf(NULL, 0, "\"%s\"", as_str(self));
+int String_Format_To(var self, int pos, const char* fmt, va_list va) {
+  StringData* s = cast(self, String);
+  
+  va_list va_tmp;
+  va_copy(va_tmp, va);
+  int size = snprintf(NULL, 0, fmt, va_tmp);
+  va_end(va_tmp);
+  
+  s->value = realloc(s->value, pos + size + 1);
+  if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
+  
+  return vsprintf(s->value + pos, fmt, va); 
 }
 
-int String_Show(var self, char* out) {
-  return sprintf(out, "\"%s\"", as_str(self));
+int String_Format_From(var self, int pos, const char* fmt, va_list va) {
+  StringData* s = cast(self, String);
+  return vsscanf(s->value + pos, fmt, va);
+}
+
+int String_Show(var self, var out, int pos) {
+  return print_to(out, pos, "\"%s\"", self);
+}
+
+int String_Look(var self, var input, int pos) {
+  return scan_from(input, pos, "\"%[^\"]\"", self);
 }
 

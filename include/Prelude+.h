@@ -365,45 +365,5 @@ class {
 void parse_read(var self, var stream);
 void parse_write(var self, var stream);
 
-/** Show - Conversion to string */
-
-class {
-  int (*show_size)(var);
-  int (*show)(var, char*);
-} Show;
-
-int show_size(var self);
-int show(var self, char* out);
-void show_string(var self, var out);
-void show_stream(var self, var out);
-
-void print(const char* fmt, ...);
-void print_stream(var out, const char* fmt, ...);
-void print_string(var out, const char* fmt, ...);
-
-void print_va(const char* fmt, va_list va);
-void print_stream_va(var out, const char* fmt, va_list va);
-void print_string_va(var out, const char* fmt, va_list va);
-
-/** Look - Conversion from string */
-
-class {
-  int (*look_size)(var, const char*);
-  int (*look)(var, const char*);
-} Look;
-
-int look_size(var self, const char* input);
-int look(var self, const char* input);
-void look_string(var self, var input);
-void look_stream(var self, var input);
-
-void scan(const char* input, const char* fmt, ...);
-void scan_stream(var input, const char* fmt, ...);
-void scan_string(var input, const char* fmt, ...);
-
-void scan_va(const char* input, const char* fmt, va_list va);
-void scan_stream_va(var input, const char* fmt, va_list va);
-void scan_string_va(var input, const char* fmt, va_list va);
-
 
 #endif

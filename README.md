@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   foreach(item in items) {
     /* Types are also objects */
     var type = type_of(item);
-    printf("Type: '%$'\n", type);
+    print("Type: '%$'\n", type);
   }
   
   /* Heap objects destroyed with "delete" */

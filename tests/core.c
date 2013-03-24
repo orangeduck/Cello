@@ -33,7 +33,7 @@ instance(TestType, New) = { sizeof(TestTypeData), TestType_New, TestType_Delete 
 instance(TestType, Eq) = { TestType_Eq };
 
 PT_SUITE(suite_core) {
-
+  
   PT_TEST(test_type) {
     PT_ASSERT(type_of($(Int, 1)) is Int);
     PT_ASSERT(type_of($(Real, 1.0)) is Real);
@@ -513,13 +513,28 @@ PT_SUITE(suite_core) {
     
     var out = new(String,"");
     
-    print_string(out, "This is an %s lala %0.1f %i %i %f %lu\n",
-      $(String, "example"), $(Real, 0.1), $(Int, 0),
-      $(Int, 1), $(Int, 10), $(Int, 999));
+    print_to(out, 0, "This is an %s %i %i",
+      $(String, "example"), $(Int, 10), $(Int, 1));
     
-    PT_ASSERT_STR_EQ(as_str(out), "This is an example lala 0.1 0 1 10.000000 999\n");
+    PT_ASSERT_STR_EQ(as_str(out), "This is an example 10 1");
     
     delete(out);
+    
+  }
+  
+  PT_TEST(test_look) {
+    
+    var x = $(Int, 0); 
+    var y = $(Int, 0); 
+    var z = $(Real, 0);
+    var w = $(Real, 0);
+    
+    scan_from($(String, "5 10 0.21 0.11"), 0, "%i %i %f %f", x, y, z, w);
+    
+    PT_ASSERT(eq(x, $(Int, 5)));
+    PT_ASSERT(eq(y, $(Int, 10)));
+    PT_ASSERT(eq(z, $(Real, 0.21)));
+    PT_ASSERT(eq(w, $(Real, 0.11)));
     
   }
   

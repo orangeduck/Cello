@@ -178,6 +178,7 @@ void Tree_Discard(var self, var key) {
         destruct(inorder_key);
         destruct(inorder_val);
         
+        discard(td->keys, key);
         return;
       }
           
@@ -269,39 +270,20 @@ var Tree_Iter_Next(var self, var curr) {
   return iter_next(td->keys, curr);
 }
 
-int Tree_Show_Size(var self) {
-
-  int total = snprintf(NULL, 0, "<'Tree' At 0x%p {", self);
+int Tree_Show(var self, var output, int pos) {
+  TreeData* td = cast(self, Tree);
   
-  foreach(key in self) {
-    total += show_size(key);
-    total += strlen(":");
-    total += show_size(get(self, key));
-    total += strlen(", ");
+  pos = print_to(output, pos, "<'Tree' At 0x%p {", self);
+  
+  for(int i = 0; i < len(self); i++) {
+    var key = at(td->keys, i);
+    var val = get(self, key);
+    pos = print_to(output, pos, "%$:%$", key, get(self, key));
+    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
   }
   
-  total -= strlen(", ");
-  total += strlen("}>");
+  pos = print_to(output, pos, "}>");
   
-  return total;
-  
-}
-
-int Tree_Show(var self, char* out) {
-
-  int total = sprintf(out, "<'Tree' At 0x%p {", self);
-  
-  foreach(key in self) {
-    total += show(key, out + total);
-    total += (strcpy(out + total, ":"), strlen(":"));
-    total += show(get(self, key), out + total);
-    total += (strcpy(out + total, ", "), strlen(", "));
-  }
-  
-  total -= strlen(", ");
-  total += (strcpy(out + total, "}>"), strlen("}>"));
-  
-  return total;
-  
+  return pos;
 }
 

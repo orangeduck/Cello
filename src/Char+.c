@@ -1,5 +1,7 @@
 #include "Char+.h"
 
+#include "Exception+.h"
+
 var Char = methods {
   methods_begin(Char),
   method(Char, New),
@@ -58,12 +60,11 @@ char Char_AsChar(var self) {
   return cd->value;
 }
 
-int Char_Show_Size(var self) {
-  return snprintf(NULL, 0, "'%c'", as_char(self));
+int Char_Show(var self, var output, int pos) {
+  return print_to(output, pos, "%c", self);
 }
 
-int Char_Show(var self, char* out) {
-  return sprintf(out, "'%c'", as_char(self));
+int Char_Look(var self, var input, int pos) {
+  return scan_from(input, pos, "%c", self);
 }
-
 

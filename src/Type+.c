@@ -36,7 +36,7 @@ var Type_New(var self, va_list* args) {
   
   TypeData* newtype = malloc(sizeof(TypeData) * (count + 2));
   
-  newtype[0].class_object = Type;
+  newtype[0].class_object = NULL;
   newtype[0].class_name = "__Type";
   
   newtype[1].class_object = (void*)name;
@@ -58,32 +58,38 @@ const char* Type_AsStr(var self) {
   return type_class(self, __Name);
 }
 
-local void Type_Print(var self) {
+var Type_Implements_Name(var self, const char* class_name, const char* func, const char* file, int line) {
   TypeData* t = self;
-  printf("(Type: '%p')\n", t);
-  while(t->class_name) {
-    if (strcmp(t->class_name, "__Name") == 0) {
-      printf("(%s, %p '%s')\n", t->class_name, t->class_object, (const char*)t->class_object);
-    } else {
-      printf("(%s, %p)\n", t->class_name, t->class_object);
-    }
-    t++;
+  
+  if (t[0].class_object != NULL) {
+    return throw(ClassError,
+      "Function '%s' at '%s:%i' :: "
+      "Object '%p' is not a type! :: "
+      "It does not start with a NULL pointer",
+      func, file, line, self);
   }
-}
-
-var Type_Implements_Name(var self, const char* class_name) {
-  TypeData* t = self;
+  
   while(t->class_name) {
     if (strcmp(t->class_name, class_name) == 0) return True;
     t++;
   }
+  
   return False;
 }
 
 var Type_Class_Name(var self, const char* class_name, const char* func, const char* file, int line) {
   TypeData* t = self;
   
+  if (t[0].class_object != NULL) {
+    return throw(ClassError,
+      "Function '%s' at '%s:%i' :: "
+      "Object '%p' is not a type! :: "
+      "It does not start with a NULL pointer",
+      func, file, line, self);
+  }
+  
   const char* type_name = NULL;
+  
   while(t->class_name) {
     if (strcmp(t->class_name, "__Name") == 0) {
       type_name = t->class_object;
@@ -96,32 +102,25 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
   
   if (type_name == NULL) {
   
-    throw(ClassError,
+    return throw(ClassError,
       "Function '%s' at '%s:%i' :: "
       "Cannot find class '__Name' for object '%p' :: "
       "Was is correctly Constructed? :: "
       "Does it start with a 'type' entry?",
       func, file, line, self);
-    return Undefined;
       
   } else {
   
-    throw(ClassError,
+    return throw(ClassError,
       "Function '%s' at '%s:%i' :: "
       "Type '%s' does not implement class '%s'",
       func, file, line, type_name, class_name);
-    return Undefined;
     
   }
 }
 
-int Type_Show_Size(var self) {
-  return strlen(as_str(self));
-}
-
-int Type_Show(var self, char* out) {
-  strcpy(out, as_str(self));
-  return strlen(as_str(self));
+int Type_Show(var self, var output, int pos) {
+  return print_to(output, pos, "%s", self);
 }
 
 

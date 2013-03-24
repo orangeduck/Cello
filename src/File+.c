@@ -10,6 +10,7 @@ var File = methods {
   method(File, With),
   method(File, Stream),
   method(File, Dict),
+  method(File, Format),
   methods_end(File),
 };
 
@@ -129,11 +130,18 @@ var File_Get(var self, var type) {
   return ret;
 }
 
-
 void File_Put(var self, var type, var obj) {
   self = cast(self, File);
   parse_write(obj, self);
 }
 
+int File_Format_To(var self, int pos, const char* fmt, va_list va) {
+  FileData* fd = cast(self, File);
+  return vfprintf(fd->f, fmt, va);
+}
 
+int File_Format_From(var self, int pos, const char* fmt, va_list va) {
+  FileData* fd = cast(self, File);
+  return vfscanf(fd->f, fmt, va);
+}
 

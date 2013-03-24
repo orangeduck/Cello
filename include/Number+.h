@@ -61,8 +61,8 @@ void Int_Parse_Write(var self, var stream);
 long Int_AsLong(var self);
 double Int_AsDouble(var self);
 
-int Int_Show_Size(var self);
-int Int_Show(var self, char* out);
+int Int_Show(var self, var output, int pos);
+int Int_Look(var self, var input, int pos);
 
 instance(Int, New) = { sizeof(IntData), Int_New, Int_Delete };
 instance(Int, Assign) = { Int_Assign };
@@ -74,7 +74,7 @@ instance(Int, Parse) = { Int_Parse_Read, Int_Parse_Write };
 instance(Int, AsLong) = { Int_AsLong };
 instance(Int, AsDouble) = { Int_AsDouble };
 instance(Int, Num) = { Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Neg, Int_Abs };
-instance(Int, Show) = { Int_Show_Size, Int_Show };
+instance(Int, Show) = { Int_Show, Int_Look };
 
 /*
 ** == Real ==
@@ -114,8 +114,8 @@ void Real_Parse_Write(var self, var stream);
 double Real_AsDouble(var self);
 long Real_AsLong(var self);
 
-int Real_Show_Size(var self);
-int Real_Show(var self, char* out);
+int Real_Show(var self, var output, int pos);
+int Real_Look(var self, var input, int pos);
 
 instance(Real, New) = { sizeof(RealData), Real_New, Real_Delete };
 instance(Real, Assign) = { Real_Assign };
@@ -127,6 +127,6 @@ instance(Real, Parse) = { Real_Parse_Read, Real_Parse_Write };
 instance(Real, AsDouble) = { Real_AsDouble };
 instance(Real, AsLong) = { Real_AsLong };
 instance(Real, Num) = { Real_Add, Real_Sub, Real_Mul, Real_Div, Real_Neg, Real_Abs };
-instance(Real, Show) = { Real_Show_Size, Real_Show };
+instance(Real, Show) = { Real_Show, Real_Look };
 
 #endif

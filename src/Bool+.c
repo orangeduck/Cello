@@ -57,23 +57,9 @@ double Bool_AsDouble(var self) {
   return (double)(self is True);
 }
 
-int Bool_Show_Size(var self) {
-  if (self) {
-    return strlen(true_str);
-  } else {
-    return strlen(false_str);
-  }
+int Bool_Show(var self, var output, int pos) {
+  if (self) { pos = print_to(output, pos, true_str); }
+  else { pos = print_to(output, pos, false_str); }
+  return pos;
 }
-
-int Bool_Show(var self, char* out) {
-  if (self) {
-    strcpy(out, true_str);
-    return strlen(true_str);
-  } else {
-    strcpy(out, false_str);
-    return strlen(false_str);
-  }
-}
-
-
 

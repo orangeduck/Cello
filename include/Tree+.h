@@ -52,8 +52,7 @@ var Tree_Iter_Start(var self);
 var Tree_Iter_End(var self);
 var Tree_Iter_Next(var self, var curr);
 
-int Tree_Show_Size(var self);
-int Tree_Show(var self, char* out);
+int Tree_Show(var self, var output, int pos);
 
 instance(Tree, New) = { sizeof(TreeData), Tree_New, Tree_Delete };
 instance(Tree, Assign) = { Tree_Assign };
@@ -62,7 +61,7 @@ instance(Tree, Eq) = { Tree_Eq };
 instance(Tree, Collection) = { Tree_Len, Tree_Clear, Tree_Contains, Tree_Discard };
 instance(Tree, Dict) = { Tree_Get, Tree_Put };
 instance(Tree, Iter) = { Tree_Iter_Start, Tree_Iter_End, Tree_Iter_Next };
-instance(Tree, Show) = { Tree_Show_Size, Tree_Show };
+instance(Tree, Show) = { Tree_Show, NULL };
 
 
 

@@ -9,6 +9,7 @@
 
 #include "Prelude+.h"
 #include "Type+.h"
+#include "Format+.h"
 
 global var String;
 
@@ -42,8 +43,11 @@ const char* String_AsStr(var self);
 void String_Append(var self, var obj);
 void String_Reverse(var self);
 
-int String_Show_Size(var self);
-int String_Show(var self, char* out);
+int String_Format_To(var self, int pos, const char* fmt, va_list va);
+int String_Format_From(var self, int pos, const char* fmt, va_list va);
+
+int String_Show(var self, var out, int pos);
+int String_Look(var self, var input, int pos);
 
 instance(String, New) = { sizeof(StringData), String_New, String_Delete };
 instance(String, Assign) = { String_Assign };
@@ -51,12 +55,12 @@ instance(String, Copy) = { String_Copy };
 instance(String, Eq) = { String_Eq };
 instance(String, Ord) = { String_Gt, String_Lt };
 instance(String, Collection) = { String_Len, String_Clear, String_Contains, String_Discard };
-instance(String, Hash) = { String_Hash  };
-instance(String, Reverse) = { String_Reverse  };
+instance(String, Hash) = { String_Hash };
+instance(String, Reverse) = { String_Reverse };
 instance(String, Parse) = { String_Parse_Read, String_Parse_Write };
-instance(String, AsStr) = { String_AsStr  };
-instance(String, Append) = { String_Append  };
-instance(String, Show) = { String_Show_Size, String_Show };
-
+instance(String, AsStr) = { String_AsStr };
+instance(String, Append) = { String_Append };
+instance(String, Format) = { String_Format_To, String_Format_From };
+instance(String, Show) = { String_Show, String_Look };
 
 #endif

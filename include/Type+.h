@@ -13,6 +13,7 @@
 #define TypePlus_h
 
 #include "Prelude+.h"
+#include "Format+.h"
 
 global var Type;
 
@@ -28,18 +29,17 @@ var Type_Delete(var self);
 #define cast(X, T) Type_Cast(X, T, __func__, __FILE__, __LINE__)
 var Type_Cast(var self, var type, const char* func, const char* file, int line);
 
-#define type_implements(T, C) Type_Implements_Name(T, #C)
-var Type_Implements_Name(var self, const char* class_name);
+#define type_implements(T, C) Type_Implements_Name(T, #C, __func__, __FILE__, __LINE__)
+var Type_Implements_Name(var self, const char* class_name, const char* func, const char* file, int line);
 
 #define type_class(T, C) Type_Class_Name(T, #C, __func__, __FILE__, __LINE__)
 var Type_Class_Name(var self, const char* class_name, const char* func, const char* file, int line);
 
 const char* Type_AsStr(var self);
-int Type_Show_Size(var self);
-int Type_Show(var self, char* out);
+int Type_Show(var self, var output, int pos);
 
 instance(Type, New) = { 0, Type_New, Type_Delete };
 instance(Type, AsStr) = { Type_AsStr };
-instance(Type, Show) = { Type_Show_Size, Type_Show };  
+instance(Type, Show) = { Type_Show, NULL };  
 
 #endif

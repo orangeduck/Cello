@@ -332,37 +332,13 @@ void Array_Sort(var self) {
   Array_Sort_Part(self, 0, len(self)-1);
 }
 
-int Array_Show_Size(var self) {
-  
-  int total = snprintf(NULL, 0, "<'Array' At 0x%p [", self);
-  foreach(item in self) {
-    total += show_size(item);
-    total += strlen(", ");
+int Array_Show(var self, var output, int pos) {
+  pos = print_to(output, pos, "<'Array' At 0x%p [", self);
+  for(int i = 0; i < len(self); i++) {
+    pos = print_to(output, pos, "%$", at(self, i));
+    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
   }
-  
-  total -= strlen(", ");
-  total += strlen("]>");
-  return total;
-  
-}
-
-local int strapp(char* dst, const char* src) {
-  strcat(dst, src);
-  return strlen(src);
-}
-
-int Array_Show(var self, char* out) {
-  
-  int total = sprintf(out, "<'Array' At 0x%p [", self);
-  foreach(item in self) {
-    total += show(item, out + total);
-    total += strapp(out + total, ", ");
-  }
-  
-  total -= strlen(", ");
-  total += strapp(out + total, "]>");
-  
-  return total;
-  
+  pos = print_to(output, pos, "]>");
+  return pos;
 }
 
