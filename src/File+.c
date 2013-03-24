@@ -115,24 +115,24 @@ int File_Write(var self, void* input, int size) {
 
 void File_Read_Data(var self, var output) {
   self = cast(self, File);
-  parse_read(output, self);
+  serial_read(output, self);
 }
 
 void File_Write_Data(var self, var input) {
   self = cast(self, File);
-  parse_write(input, self);
+  serial_write(input, self);
 }
 
 var File_Get(var self, var type) {
   self = cast(self, File);
   var ret = allocate(type);
-  parse_read(ret, self);
+  serial_read(ret, self);
   return ret;
 }
 
 void File_Put(var self, var type, var obj) {
   self = cast(self, File);
-  parse_write(obj, self);
+  serial_write(obj, self);
 }
 
 int File_Format_To(var self, int pos, const char* fmt, va_list va) {

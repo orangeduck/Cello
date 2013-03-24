@@ -355,15 +355,14 @@ bool eof(var self);
 int read(var self, void* output, int size);
 int write(var self, void* input, int size);
 
-/** Parse - Readable/Writeable to Stream */
+/** Serialize - Serializable to Stream */
 
 class {
-  void (*parse_read)(var,var);
-  void (*parse_write)(var,var);
-} Parse;
+  void (*serial_read)(var,var);
+  void (*serial_write)(var,var);
+} Serialize;
 
-void parse_read(var self, var stream);
-void parse_write(var self, var stream);
-
+void serial_read(var self, var input);
+void serial_write(var self, var output);
 
 #endif

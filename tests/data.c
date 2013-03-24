@@ -340,30 +340,6 @@ PT_SUITE(suite_data) {
     
   }
 
-  PT_TEST(test_string_parse) {
-    
-    var f = open($(File, NULL), "test.bin", "w");
-    
-    put(f, String, $(String, "Hello"));
-    put(f, String, $(String, "There"));
-    
-    close(f);
-    
-    f = open($(File, NULL), "test.bin", "r");
-    
-    var fst = get(f, String);
-    var snd = get(f, String);
-    
-    close(f);
-    
-    PT_ASSERT_STR_EQ(as_str(fst), "Hello");
-    PT_ASSERT_STR_EQ(as_str(snd), "There");
-    
-    delete(fst);
-    delete(snd);
-    
-  }
-
   PT_TEST(test_string_reverse) {
     
     var s0 = new(String, "Hello");
@@ -1355,26 +1331,6 @@ PT_SUITE(suite_data) {
     
     PT_ASSERT_STR_EQ(testinput, testoutput1);
     
-    open(f0, "test.txt" , "w");
-    
-    put(f0, String, $(String, "This is an apple\n"));
-    seek(f0, 9, SEEK_SET );
-    
-    PT_ASSERT(tell(f0) is 9);
-    PT_ASSERT((var)eof(f0) is False);
-    
-    flush(f0);
-    
-    write(f0, " sam", 4);
-    
-    close(f0);
-    
-    open(f0, "test.txt", "r");
-    read(f0, testinput, sizeof(testoutput2));
-    close(f0);
-    
-    PT_ASSERT_STR_EQ(testinput, testoutput2);
-    
   }
 
   PT_TEST(test_file_dict) {
@@ -1383,7 +1339,6 @@ PT_SUITE(suite_data) {
     
     open(f, "test.bin", "w");
       
-      put(f, String, $(String, "Hello"));
       put(f, Int, $(Int, 1));
       put(f, Int, $(Int, 22));
     
@@ -1391,15 +1346,12 @@ PT_SUITE(suite_data) {
     
     open(f, "test.bin", "r");
       
-      var string = get(f, String);
       var first = get(f, Int);
       var second = get(f, Int);
       
-      PT_ASSERT( eq(string, $(String, "Hello")) );
       PT_ASSERT( eq(first, $(Int, 1)) );
       PT_ASSERT( eq(second, $(Int, 22)) );
       
-      delete(string);
       delete(first);
       delete(second);
       

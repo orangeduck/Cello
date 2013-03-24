@@ -31,6 +31,9 @@ long Char_Hash(var self);
 
 char Char_AsChar(var self);
 
+void Char_Serial_Read(var self, var input);
+void Char_Serial_Write(var self, var output);
+
 int Char_Show(var self, var output, int pos);
 int Char_Look(var self, var input, int pos);
 
@@ -41,6 +44,7 @@ instance(Char, Eq) = { Char_Eq };
 instance(Char, Ord) = { Char_Gt, Char_Lt };
 instance(Char, Hash) = { Char_Hash  };
 instance(Char, AsChar) = { Char_AsChar  };
+instance(Char, Serialize) = { Char_Serial_Read, Char_Serial_Write };
 instance(Char, Show) = { Char_Show, Char_Look };
 
 #endif

@@ -400,16 +400,16 @@ int write(var self, void* input, int size) {
   return istream->write(self, input, size);
 }
 
-void parse_read(var self, var stream) {
-  Parse* iparse = type_class(type_of(self), Parse);
-  assert(iparse->parse_read);
-  iparse->parse_read(self, stream);
+void serial_read(var self, var input) {
+  Serialize* iserialize = type_class(type_of(self), Serialize);
+  assert(iserialize->serial_read);
+  iserialize->serial_read(self, input);
 }
 
-void parse_write(var self, var stream) {
-  Parse* iparse = type_class(type_of(self), Parse);
-  assert(iparse->parse_write);
-  iparse->parse_write(self, stream);
+void serial_write(var self, var output) {
+  Serialize* iserialize = type_class(type_of(self), Serialize);
+  assert(iserialize->serial_write);
+  iserialize->serial_write(self, output);
 }
 
 void enter_with(var self) {

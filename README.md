@@ -38,12 +38,12 @@ int main(int argc, char** argv) {
   put(prices, $(String, "Pear"),   $(Int, 55)); 
   
   var pear_price = get(prices, $(String, "Pear"));
-  print("Price of a 'Pear' is '%$'\n", pear_price);
+  print("Price of a 'Pear' is %$\n", pear_price);
 
   /* Tables also supports iteration */
   foreach(key in prices) {
     var price = get(prices, key);
-    print("Price of '%$' is '%$'\n", key, price);
+    print("Price of %$ is %$\n", key, price);
   }
   
   /* "with" automatically closes file at end of scope. */
@@ -56,9 +56,8 @@ int main(int argc, char** argv) {
       var key = cast(at(args, 0), String);
       var val = cast(get(prices, key), Int);
       
-      /* File implements "put/get" like Table */
-      put(file, String, key);
-      put(file, Int, val);
+      /* Format specifier for objects is %$ */
+      print_to(file, 0, "%$ :: %$\n", key, val);
       
       return None;
     };
@@ -76,7 +75,7 @@ int main(int argc, char** argv) {
 About
 -----
 
-C+ is a C GNU99 _library_ which brings higher level programming tools to C. It takes inspiration from C++, Obj-C, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic/duck typing, and some syntactic sugar. There are a selection of new keywords, and many generically named functions in the namespace are taken, but other than that it should be fully compatible with normal C code.
+C+ is a C GNU99 __library__ which brings higher level programming tools to C. It takes inspiration from C++, Obj-C, Haskell and Python. Most closely C+ resembles C with interfaces, dynamic/duck typing, and some syntactic sugar. There are a selection of new keywords, and many generically named functions in the namespace are taken, but other than that it should be fully compatible with normal C code.
 
 Although I've made the syntax pleasant, this isn't a library for beginners. It is for C power users, as manual memory management doesn't play nicely with many higher-order concepts.
 
@@ -284,7 +283,7 @@ Memory management is hard. Very hard when combined with a lack of rich stack typ
 local void object_lifetime_example(void) {
   
   with(liferef in $(Reference, new(String, "Life is long"))) {
-    print("This string is alive: '%s'\n", at(liferef,0));
+    print("This string is alive: %$\n", at(liferef,0));
   }
 
   print("Now it has been cleared up!\n");
@@ -382,7 +381,7 @@ try {
 }
 ```
 
-Throwing an exception will jump the program control to the innermost `catch` block where it must be handled (exceptions to not propagate outward). To catch an exception one must put a reference to the thrown object. Any objacet can be thrown and caught as an Exception in C+ so users can create their own Exception types or find other applications for the semanitcs. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location.
+Throwing an exception will jump the program control to the innermost `catch` block where it must be handled (exceptions to not propagate outward). To catch an exception one must put a reference to the thrown object. Any object can be thrown and caught as an Exception in C+ so users can create their own Exception types or find other applications for the semanitcs. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location.
 
 More More More More More Examples
 ---------------------------------

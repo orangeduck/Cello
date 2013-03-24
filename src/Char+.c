@@ -11,6 +11,7 @@ var Char = methods {
   method(Char, Ord),
   method(Char, Hash),
   method(Char, AsChar),
+  method(Char, Serialize),
   method(Char, Show),
   methods_end(Char)
 };
@@ -58,6 +59,16 @@ long Char_Hash(var self) {
 char Char_AsChar(var self) {
   CharData* cd = cast(self, Char);
   return cd->value;
+}
+
+void Char_Serial_Read(var self, var input) {
+  CharData* cd = cast(self, Char);
+  read(input, &cd->value, 1);
+}
+
+void Char_Serial_Write(var self, var output) {
+  CharData* cd = cast(self, Char);
+  write(output, &cd->value, 1);
 }
 
 int Char_Show(var self, var output, int pos) {

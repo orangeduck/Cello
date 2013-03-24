@@ -114,7 +114,6 @@ int print_to_va(var out, int pos, const char* fmt, va_list va) {
       if (*fmt == '$') { pos = show_to(a, out, pos); }
       
       if (*fmt == 's') {
-        printf("Formatting a string: '%s' '%s'\n", fmt_buf, as_str(a));
         int off = format_to(out, pos, fmt_buf, as_str(a));
         if (off < 0) { throw(FormatError, "Unable to output String!"); }
         pos += off;

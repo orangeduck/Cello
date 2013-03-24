@@ -442,7 +442,6 @@ PT_SUITE(suite_core) {
       
       PT_ASSERT(f);
       
-      put(f, String, $(String, "Hello"));
       put(f, Int, $(Int, 1));
       put(f, Int, $(Int, 22));
     
@@ -452,15 +451,12 @@ PT_SUITE(suite_core) {
       
       PT_ASSERT(f);
       
-      var string = get(f, String);
       var first = get(f, Int);
       var second = get(f, Int);
       
-      PT_ASSERT_STR_EQ(as_str(string), "Hello");
       PT_ASSERT(as_long(first) is 1);
       PT_ASSERT(as_long(second) is 22);
       
-      delete(string);
       delete(first);
       delete(second);
       
@@ -526,15 +522,15 @@ PT_SUITE(suite_core) {
     
     var x = $(Int, 0); 
     var y = $(Int, 0); 
-    var z = $(Real, 0);
-    var w = $(Real, 0);
+    var z = $(Int, 0);
+    var w = $(Int, 0);
     
-    scan_from($(String, "5 10 0.21 0.11"), 0, "%i %i %f %f", x, y, z, w);
+    scan_from($(String, "5 10 1 0"), 0, "%i %i %i %i", x, y, z, w);
     
     PT_ASSERT(eq(x, $(Int, 5)));
     PT_ASSERT(eq(y, $(Int, 10)));
-    PT_ASSERT(eq(z, $(Real, 0.21)));
-    PT_ASSERT(eq(w, $(Real, 0.11)));
+    PT_ASSERT(eq(z, $(Int, 1)));
+    PT_ASSERT(eq(w, $(Int, 0)));
     
   }
   

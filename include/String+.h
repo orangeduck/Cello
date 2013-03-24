@@ -35,8 +35,6 @@ void String_Discard(var self, var sub);
 
 long String_Hash(var self);
 
-void String_Parse_Read(var self, var stream);
-void String_Parse_Write(var self, var stream);
 
 const char* String_AsStr(var self);
 
@@ -57,7 +55,6 @@ instance(String, Ord) = { String_Gt, String_Lt };
 instance(String, Collection) = { String_Len, String_Clear, String_Contains, String_Discard };
 instance(String, Hash) = { String_Hash };
 instance(String, Reverse) = { String_Reverse };
-instance(String, Parse) = { String_Parse_Read, String_Parse_Write };
 instance(String, AsStr) = { String_AsStr };
 instance(String, Append) = { String_Append };
 instance(String, Format) = { String_Format_To, String_Format_From };

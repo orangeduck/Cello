@@ -21,6 +21,8 @@ var Vec2 = methods {
   method(Vec2, Assign),
   method(Vec2, Copy),
   method(Vec2, Eq),
+  method(Vec2, Show),
+  method(Vec2, Vector),
   methods_end(Vec2)
 };
 
@@ -51,6 +53,21 @@ var Vec2_Eq(var self, var obj) {
   Vec2Data* v1 = cast(self, Vec2);
   Vec2Data* v2 = cast(obj, Vec2);
   return (var)(intptr_t)(v1->x is v2->x and v1->y is v2->y);
+}
+
+int Vec2_Show(var self, var output, int pos) {
+  Vec2Data* v = cast(self, Vec2);
+  return print_to(output, pos, "(%f, %f)", $(Real, v->x), $(Real, v->y));
+}
+
+int Vec2_Look(var self, var input, int pos) {
+  Vec2Data* v = cast(self, Vec2);
+  var x = $(Real, 0);
+  var y = $(Real, 0);
+  pos = scan_from(input, pos, "(%f, %f)", x, y);
+  v->x = as_double(x);
+  v->y = as_double(y);
+  return pos;
 }
 
 float Vec2_Dot(var self, var obj) {

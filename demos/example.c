@@ -31,12 +31,12 @@ int main(int argc, char** argv) {
   put(prices, $(String, "Pear"),   $(Int, 55)); 
   
   var pear_price = get(prices, $(String, "Pear"));
-  print("Price of a 'Pear' is '%$'\n", pear_price);
+  print("Price of a 'Pear' is %$\n", pear_price);
 
   /* Hashtable also supports iteration */
   foreach(key in prices) {
     var price = get(prices, key);
-    print("Price of '%$' is '%$'\n", key, price);
+    print("Price of %$ is %$\n", key, price);
   }
   
   /* File-like objects can "open" and "close" */

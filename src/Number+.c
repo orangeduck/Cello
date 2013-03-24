@@ -52,10 +52,10 @@ var Int = methods {
   method(Int, Eq), 
   method(Int, Ord),
   method(Int, Hash),
-  method(Int, Parse),
   method(Int, AsLong),
   method(Int, AsDouble),
   method(Int, Num),
+  method(Int, Serialize),
   method(Int, Show),
   methods_end(Int)
 };
@@ -133,12 +133,12 @@ void Int_Abs(var self) {
   io->value = abs(io->value);
 }
 
-void Int_Parse_Read(var self, var stream) {
+void Int_Serial_Read(var self, var stream) {
   IntData* io = cast(self, Int);
   read(stream, &io->value, sizeof(long));
 }
 
-void Int_Parse_Write(var self, var stream) {
+void Int_Serial_Write(var self, var stream) {
   IntData* io = cast(self, Int);
   write(stream, &io->value, sizeof(long));
 }
@@ -175,10 +175,10 @@ var Real = methods {
   method(Real, Eq),
   method(Real, Ord),
   method(Real, Hash),
-  method(Real, Parse),
   method(Real, AsDouble),
   method(Real, AsLong), 
   method(Real, Num),
+  method(Real, Serialize),
   method(Real, Show), 
   methods_end(Real)
 };
@@ -264,12 +264,12 @@ void Real_Abs(var self) {
   ro->value = fabs(ro->value);
 }
 
-void Real_Parse_Read(var self, var stream) {
+void Real_Serial_Read(var self, var stream) {
   RealData* ro = cast(self, Real);
   read(stream, &ro->value, sizeof(double));
 }
 
-void Real_Parse_Write(var self, var stream) {
+void Real_Serial_Write(var self, var stream) {
   RealData* ro = cast(self, Real);
   write(stream, &ro->value, sizeof(double));
 }
