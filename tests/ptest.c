@@ -92,7 +92,7 @@ void pt_assert_run(bool result, const char* expr, const char* func, const char* 
   if (result) {
     num_assert_passes++;
   } else {
-    sprintf(assert_err_buff, "        %i. Assert [ %1024s ] (%512s:%i)\n", assert_err_num+1, expr, file, line );
+    sprintf(assert_err_buff, "        %i. Assert [ %s ] (%s:%i)\n", assert_err_num+1, expr, file, line );
     strcat(assert_err, assert_err_buff);
     assert_err_num++;
     num_assert_fails++;

@@ -113,7 +113,7 @@ int print_to_va(var out, int pos, const char* fmt, va_list va) {
       
       if (*fmt == '$') { pos = show_to(a, out, pos); }
       
-      if (*fmt == 's') {
+      if (*fmt == 's') {      
         int off = format_to(out, pos, fmt_buf, as_str(a));
         if (off < 0) { throw(FormatError, "Unable to output String!"); }
         pos += off;
@@ -238,7 +238,7 @@ int scan_from_va(var input, int pos, const char* fmt, va_list va) {
       
       int off = 0;
       
-      if (*fmt == 's') {
+      if (*fmt == 's') {      
         int err = format_from(input, pos, fmt_buf, as_str(a), &off);
         if (err < 1) { throw(FormatError, "Unable to input String!"); }
         pos += off;

@@ -205,7 +205,11 @@ int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   
   va_list va_tmp;
   va_copy(va_tmp, va);
+#ifdef _WIN32
+  int size = _vscprintf(fmt, va_tmp);
+#else
   int size = snprintf(NULL, 0, fmt, va_tmp);
+#endif
   va_end(va_tmp);
   
   s->value = realloc(s->value, pos + size + 1);

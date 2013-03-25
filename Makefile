@@ -7,7 +7,7 @@ AR?=ar
 
 LAC_CPPFLAGS= -I./include
 LAC_CFLAGS= -std=gnu99 -Wall -Werror -Wextra -Wno-unused -g 
-LAC_LDFLAGS= -g -rdynamic
+LAC_LDFLAGS= -g 
 LAC_LIBS= -lm 
 
 LIB_C_FILES= $(wildcard src/*.c)
@@ -26,7 +26,7 @@ STATIC_LIB= $(STATIC_LIB_PREFIX)C+$(STATIC_LIB_SUFFIX)
 
 ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	LAC_CFLAGS+= -fPIC
-	LAC_LDFLAGS+= -fPIC
+	LAC_LDFLAGS+= -fPIC -rdynamic
 	SHARED_LIB_PREFIX:=lib
 	SHARED_LIB_SUFFIX:=.so
 	STATIC_LIB_PREFIX:=lib
@@ -34,7 +34,7 @@ ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	EXE_SUFFIX:=
 else ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	LAC_CFLAGS+= -fPIC
-	LAC_LDFLAGS+= -fPIC
+	LAC_LDFLAGS+= -fPIC -rdynamic
 	SHARED_LIB_PREFIX:=lib
 	SHARED_LIB_SUFFIX:=.so
 	STATIC_LIB_PREFIX:=lib
