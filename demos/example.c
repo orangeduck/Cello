@@ -1,8 +1,8 @@
 /*
-** Example C+ Program
+** Example libCello Program
 */
 
-#include "C+.h"
+#include "Cello.h"
 
 int main(int argc, char** argv) {
 

@@ -1,8 +1,5 @@
 
-#include "Prelude+.h"
-#include "String+.h"
-#include "Number+.h"
-#include "File+.h"
+#include "Cello.h"
 
 int main(int arc, char** argv) {
   

@@ -1,7 +1,5 @@
 
-#include "Prelude+.h"
-#include "Type+.h"
-#include "Bool+.h"
+#include "Cello.h"
 
 /*
 ** This example shows dynamic creation of a Type on the heap.

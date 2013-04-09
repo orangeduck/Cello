@@ -1,6 +1,6 @@
 
 #include "ptest.h"
-#include "C+.h"
+#include "Cello.h"
 
 local var DivideByZeroError = Singleton(DivideByZeroError);
 
