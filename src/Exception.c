@@ -2,6 +2,9 @@
 
 #include "Type.h"
 #include "None.h"
+#include "File.h"
+#include "String.h"
+#include "Number.h"
 
 #include <signal.h>
 
@@ -61,31 +64,25 @@ local int __exc_backtrace_count;
 
 local void __exc_error(void)  {
   
-  fprintf(stderr, "\n");
-  fprintf(stderr, "!!\t\n");
-  
-  if (type_implements(type_of(__exc_obj), AsStr)) {
-    fprintf(stderr, "!!\tUncaught '%s' at (%s:%s:%i) \n", as_str(__exc_obj), __exc_file, __exc_func, __exc_lineno);
-  } else {
-    fprintf(stderr, "!!\tUncaught Object at (%s:%s:%i) \n", __exc_file, __exc_func, __exc_lineno);
-  }
-  
-  fprintf(stderr, "!!\t\n");
-  fprintf(stderr, "!!\t\t '%s'\n", __exc_msg);
-  fprintf(stderr, "!!\t\n");
+  print_to($(File, stderr), 0, "\n");
+  print_to($(File, stderr), 0, "!!\t\n");
+  print_to($(File, stderr), 0, "!!\tUncaught %$ at (%s:%s:%i) \n", __exc_obj, $(String, (char*)__exc_file), $(String, (char*)__exc_func), $(Int, __exc_lineno));
+  print_to($(File, stderr), 0, "!!\t\n");
+  print_to($(File, stderr), 0, "!!\t\t '%s'\n", $(String, __exc_msg));
+  print_to($(File, stderr), 0, "!!\t\n");
   
 #ifdef __unix__
   
-  fprintf(stderr, "!!\tStack Trace: \n");
-  fprintf(stderr, "!!\t\n");
+  print_to($(File, stderr), 0, "!!\tStack Trace: \n");
+  print_to($(File, stderr), 0, "!!\t\n");
   
   char** symbols = backtrace_symbols(__exc_backtrace, __exc_backtrace_count);
   
   for (int i = 0; i < __exc_backtrace_count; i++){
-    fprintf(stderr, "!!\t\t[%i] %s\n", i, symbols[i]);
+    print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", $(Int, i), $(String, symbols[i]));
   }
   
-  fprintf(stderr, "!!\t\n");
+  print_to($(File, stderr), 0, "!!\t\n");
   
   free(symbols);
   

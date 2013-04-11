@@ -64,7 +64,8 @@ int print(const char* fmt, ...) {
 int println(const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  int ret = print_to_va($(File, stdout), 0, fmt, va), print("\n");
+  int ret = print_to_va($(File, stdout), 0, fmt, va);
+  ret = print("\n");
   va_end(va);
   return ret;
 }
@@ -186,7 +187,8 @@ int scan(const char* fmt, ...) {
 int scanln(const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  int ret = scan_from_va($(File, stdin), 0, fmt, va), scan("\n");
+  int ret = scan_from_va($(File, stdin), 0, fmt, va);
+  ret = scan("\n");
   va_end(va);
   return ret;
 }

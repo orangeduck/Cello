@@ -53,7 +53,7 @@ var __exc_catch(void* unused, ...);
   if (!setjmp(__exc_buffers[__exc_depth]))   
 
 #define catch(...) catch_scanned(__VA_ARGS__)
-#define catch_scanned(x, ...) else { __exc_active = true; } __exc_depth++; for (var x = __exc_catch(NULL, ##__VA_ARGS__, Undefined); x != Undefined; x = Undefined)
+#define catch_scanned(x, ...) else { __exc_active = true; } for (var x = __exc_catch(NULL, ##__VA_ARGS__, Undefined); x != Undefined; x = Undefined)
 #define throw(e, fmt, ...) __exc_throw(e, fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 
 
