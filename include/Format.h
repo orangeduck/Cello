@@ -57,6 +57,7 @@ int show(var self);
 int show_to(var self, var out, int pos);
 
 int print(const char* fmt, ...);
+int println(const char* fmt, ...);
 int print_to(var out, int pos, const char* fmt, ...);
 
 int print_va(const char* fmt, va_list va);
@@ -66,6 +67,7 @@ int look(var self);
 int look_from(var self, var input, int pos);
 
 int scan(const char* fmt, ...);
+int scanln(const char* fmt, ...);
 int scan_from(var input, int pos, const char* fmt, ...);
 
 int scan_va(const char* fmt, va_list va);

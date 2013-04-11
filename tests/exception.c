@@ -3,6 +3,7 @@
 #include "Cello.h"
 
 local var DivideByZeroError = Singleton(DivideByZeroError);
+loval var OtherError = Singleton(OtherError);
 
 local int exception_divide(int x, int y) {
   if (y == 0) {
@@ -75,6 +76,48 @@ PT_SUITE(suite_exception) {
       reached0 = true;
     }
     
+  }
+  
+  PT_TEST(test_catch_all) {
+    
+    volatile bool reached0 = false;
+    volatile bool reached1 = false;
+
+    try {
+      exception_result(2, 0);
+    } catch (e) {
+      reached0 = true;
+    }
+    
+    try {
+      throw(OtherError, "Something else went wrong");
+    } catch (e) {
+      reached1 = true;
+    }
+    
+    PT_ASSERT(reached0);
+    PT_ASSERT(reached1);
+    
+  }
+  
+  PT_TEST(test_catch_outer) {
+  
+    volatile bool reached0 = false;
+    volatile bool reached1 = false;
+    
+    try {
+      try {
+        exception_result(2, 0);
+      } catch (e in TypeError) {
+        reached0 = true;
+      }
+    } catch (e) {
+      reached1  = true;
+    }
+    
+    PT_ASSERT(not reached0);
+    PT_ASSERT(reached1);
+  
   }
 
 }

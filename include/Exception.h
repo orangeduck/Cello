@@ -2,13 +2,9 @@
 ** == Exceptions ==
 **
 **  Exceptions in libCello follow fairly normal
-**  semantics with two main differences.
+**  semantics with one main difference.
 **
-**  The first is that they do not propagate
-**  and so must be caught by the innermost block.
-**
-**  The second is that any object can be
-**  thrown and caught.
+**  Any object can be thrown and caught.
 **
 */
 #ifndef CelloException_H
@@ -47,7 +43,7 @@ extern int __exc_depth;
 extern jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
 var __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
-var __exc_catch(void*, ...);
+var __exc_catch(void* unused, ...);
 
 /* Exception Macros */
 

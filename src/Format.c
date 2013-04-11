@@ -25,15 +25,17 @@ int format_from_va(var self, int pos, const char* fmt, va_list va) {
 int format_to(var self, int pos, const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  return format_to_va(self, pos, fmt, va);
+  int ret = format_to_va(self, pos, fmt, va);
   va_end(va);
+  return ret;
 }
 
 int format_from(var self, int pos, const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  return format_from_va(self, pos, fmt, va);
+  int ret = format_from_va(self, pos, fmt, va);
   va_end(va);
+  return ret;
 }
 
 int show(var self) {
@@ -54,15 +56,25 @@ int show_to(var self, var out, int pos) {
 int print(const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  return print_to_va($(File, stdout), 0, fmt, va);
+  int ret = print_to_va($(File, stdout), 0, fmt, va);
   va_end(va);
+  return ret;
+}
+
+int println(const char* fmt, ...) {
+  va_list va;
+  va_start(va, fmt);
+  int ret = print_to_va($(File, stdout), 0, fmt, va), print("\n");
+  va_end(va);
+  return ret;
 }
 
 int print_to(var out, int pos, const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  return print_to_va(out, pos, fmt, va);
+  int ret = print_to_va(out, pos, fmt, va);
   va_end(va);
+  return ret;
 }
 
 int print_va(const char* fmt, va_list va) {
@@ -166,14 +178,25 @@ int look_from(var self, var input, int pos) {
 int scan(const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  return scan_from_va($(File, stdin), 0, fmt, va);
+  int ret = scan_from_va($(File, stdin), 0, fmt, va);
   va_end(va);
+  return ret;
+}
+
+int scanln(const char* fmt, ...) {
+  va_list va;
+  va_start(va, fmt);
+  int ret = scan_from_va($(File, stdin), 0, fmt, va), scan("\n");
+  va_end(va);
+  return ret;
 }
 
 int scan_from(var input, int pos, const char* fmt, ...) {
   va_list va;
   va_start(va, fmt);
-  return scan_from_va(input, pos, fmt, va);
+  int ret = scan_from_va(input, pos, fmt, va);
+  va_end(va);
+  return ret;
 }
 
 int scan_va(const char* fmt, va_list va) {

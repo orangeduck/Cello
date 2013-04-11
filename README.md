@@ -378,7 +378,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-One can also catch multiple objects and then write conditional code based on each.
+One can also catch multiple objects and then write conditional code based on each. Or one can catch all exceptions or any thown object by leaving the specifer list empty.
 
 ```c
 try {
@@ -387,9 +387,15 @@ try {
   if (e is TypeError) { print("Got TypeError!\n"); }
   if (e is ClassError) { print("Got ClassError!\n"); }
 }
+
+try {
+  do_some_other_word();
+} catch (e) {
+  print("Got Exception: %$\n", e);
+}
 ```
 
-Throwing an exception will jump the program control to the innermost `catch` block where it must be handled (exceptions to not propagate outward). To catch an exception one must put a reference to the thrown object. Any object can be thrown and caught as an Exception in libCello so users can create their own Exception types or find other applications for the semanitcs. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location.
+Throwing an exception will jump the program control to the innermost `catch` block. If it is not handled here it is passed on to an outer block. To catch an exception one must put a reference to the thrown object. Any object can be thrown and caught as an Exception in libCello so users can create their own Exception types or find other applications for the semantics. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location.
 
 More More More More More Examples
 ---------------------------------
