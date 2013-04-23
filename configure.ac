@@ -20,6 +20,7 @@ AM_PROG_CC_C_O
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 

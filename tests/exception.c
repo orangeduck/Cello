@@ -31,6 +31,8 @@ PT_SUITE(suite_exception) {
     PT_ASSERT(r1 == 2);
     PT_ASSERT(r2 == 3);
     
+    PT_ASSERT(__exc_depth is -1);
+    
   }
   
   PT_TEST(test_catch) {
@@ -61,6 +63,8 @@ PT_SUITE(suite_exception) {
     PT_ASSERT(not reached1);
     PT_ASSERT(not reached2);
     
+    PT_ASSERT(__exc_depth is -1);
+    
   }
   
   PT_TEST(test_throw_int) {
@@ -75,6 +79,8 @@ PT_SUITE(suite_exception) {
       PT_ASSERT(neq(e, $(Int, 1)));
       reached0 = true;
     }
+    
+    PT_ASSERT(__exc_depth is -1);
     
   }
   
@@ -97,6 +103,7 @@ PT_SUITE(suite_exception) {
     
     PT_ASSERT(reached0);
     PT_ASSERT(reached1);
+    PT_ASSERT(__exc_depth is -1);
     
   }
   
@@ -106,18 +113,27 @@ PT_SUITE(suite_exception) {
     volatile bool reached1 = false;
     
     try {
+
+    PT_ASSERT(__exc_depth is 0);
+
       try {
+        PT_ASSERT(__exc_depth is 1);
         exception_result(2, 0);
       } catch (e in TypeError) {
         reached0 = true;
-      }
+      }    
+
+      PT_ASSERT(__exc_depth is 0);
+    
     } catch (e) {
       reached1  = true;
     }
     
     PT_ASSERT(not reached0);
     PT_ASSERT(reached1);
-  
+    
+    PT_ASSERT(__exc_depth is -1);
+    
   }
 
 }
