@@ -7,7 +7,7 @@ local var OtherError = Singleton(OtherError);
 
 local int exception_divide(int x, int y) {
   if (y == 0) {
-    throw(DivideByZeroError, "Division By Zero: %i / %i", x, y);
+    throw(DivideByZeroError, "%i / %i", $(Int, x), $(Int, y));
     return 0;
   } else {
     return x / y;
