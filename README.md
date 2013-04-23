@@ -425,15 +425,6 @@ Other than these things there is not much surprising in the code which cannot be
 
 finally the `instance` and `methods` macros are helpers for defining Type objects statically. Because Type objects are somewhat complicated the syntax is very awkward otherwise.
 
-Compiling
----------
-
-To build the just run `make`
-
-To build the tests run `make tests`
-
-To build the examples run `make demos`
-
 
 Questions & Contributions
 -------------------------

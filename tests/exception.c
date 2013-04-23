@@ -3,7 +3,7 @@
 #include "Cello.h"
 
 local var DivideByZeroError = Singleton(DivideByZeroError);
-loval var OtherError = Singleton(OtherError);
+local var OtherError = Singleton(OtherError);
 
 local int exception_divide(int x, int y) {
   if (y == 0) {
@@ -12,11 +12,6 @@ local int exception_divide(int x, int y) {
   } else {
     return x / y;
   }
-}
-
-local void exception_result(int x, int y) {
-  var result = $(Int, x + y);
-  throw(result, "Unexpected Result");
 }
 
 PT_SUITE(suite_exception) {
@@ -67,30 +62,13 @@ PT_SUITE(suite_exception) {
     
   }
   
-  PT_TEST(test_throw_int) {
-    
-    volatile bool reached0 = false;
-    volatile bool reached1 = false;
-    
-    try {
-      exception_result(2, 2);
-    } catch (e in $(Int, 1), $(Int, 2), $(Int, 3), $(Int, 4)) {
-      PT_ASSERT(eq(e, $(Int, 4)));
-      PT_ASSERT(neq(e, $(Int, 1)));
-      reached0 = true;
-    }
-    
-    PT_ASSERT(__exc_depth is -1);
-    
-  }
-  
   PT_TEST(test_catch_all) {
     
     volatile bool reached0 = false;
     volatile bool reached1 = false;
 
     try {
-      exception_result(2, 0);
+      exception_divide(2, 0);
     } catch (e) {
       reached0 = true;
     }
