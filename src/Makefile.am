@@ -1,4 +1,3 @@
-
 lib_LTLIBRARIES = libCello.la
 
 libCello_la_SOURCES = \
@@ -23,7 +22,7 @@ libCello_la_SOURCES = \
   Type.c
   
 libCello_la_CPPFLAGS = -I$(top_srcdir)/include
-libCello_la_CFLAGS = -std=gnu99 -Wall -Werror -Wextra -Wno-unused
+libCello_la_CFLAGS = -std=gnu99 -Wall -Wextra -Wno-unused
 libCello_la_LDFLAGS = -lm
 
 include_HEADERS = $(top_srcdir)/include/Cello.h
