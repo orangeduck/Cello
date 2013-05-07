@@ -102,7 +102,10 @@ var __exc_throw(var obj, const char* fmt, const char* file, const char* func, in
   __exc_backtrace_count = backtrace(__exc_backtrace, 25);
 #endif
   
+  va_list va;
+  va_start(va, lineno);
   print_to_va($(String, __exc_msg), 0, fmt, va);
+  va_end(va);
   
   if (__exc_depth >= 0) {
     longjmp(__exc_buffers[__exc_depth], 1);
