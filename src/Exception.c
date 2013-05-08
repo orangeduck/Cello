@@ -49,7 +49,7 @@ int __exc_depth = -1;
 jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
 local var __exc_obj = NULL;
-local char __exc_msg[2048];
+local void* __exc_msg = NULL;
 local const char* __exc_file = "";
 local const char* __exc_func = "";
 local unsigned int __exc_lineno = 0;
@@ -143,7 +143,6 @@ var __exc_catch(void* unused, ...) {
   va_end(va);
   
   /* No matches found. Propagate to outward block */
-  __exc_depth--;
   if (__exc_depth >= 0) {
     longjmp(__exc_buffers[__exc_depth], 1);
   } else {  

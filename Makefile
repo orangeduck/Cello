@@ -159,17 +159,17 @@ OTOOL64 =
 PACKAGE = libcello
 PACKAGE_BUGREPORT = contact@theorangeduck.com
 PACKAGE_NAME = libCello
-PACKAGE_STRING = libCello 0.9
+PACKAGE_STRING = libCello 0.9.2
 PACKAGE_TARNAME = libcello
 PACKAGE_URL = 
-PACKAGE_VERSION = 0.9
+PACKAGE_VERSION = 0.9.2
 PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = strip
-VERSION = 0.9
+VERSION = 0.9.2
 abs_builddir = /home/dan/Projects/libCello
 abs_srcdir = /home/dan/Projects/libCello
 abs_top_builddir = /home/dan/Projects/libCello
@@ -223,7 +223,6 @@ top_build_prefix =
 top_builddir = .
 top_srcdir = .
 SUBDIRS = src tests
-ACLOCAL_AMFLAGS = -I m4
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
