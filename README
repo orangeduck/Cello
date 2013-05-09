@@ -81,6 +81,8 @@ Although I've made the syntax pleasant, libCello isn't a library for beginners. 
 
 The high level stucture of libCello projects is inspired by Haskell and C, while the syntax and semantics are inspired by Python and Obj-C. Object Orientation in C was not the goal of this project, but I hope that with libCello I've turned C into something of a dynamic and powerful functional language which it may have once been.
 
+libCello was created *just for fun* as an experiment to see how far we could push the C language. Therefore __libCello should NOT be used for production code!__ Many of the data structures are still inefficient in their implementation and using this library sacrifices much of the compile-time safety of the C language. Please understand the risks before you choose to use libCello.
+
 More Examples
 -------------
 
