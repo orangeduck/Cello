@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
-AC_INIT([libCello], [0.9], [contact@theorangeduck.com])
+AC_PREREQ([2.65])
+AC_INIT([libCello], [0.9.2], [contact@theorangeduck.com])
 AM_INIT_AUTOMAKE
 LT_INIT
 
@@ -29,5 +29,5 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor memmove memset pow sqrt strchr strstr])
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile demos/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_OUTPUT

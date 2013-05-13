@@ -1,4 +1,3 @@
-
 #include "ptest.h"
 #include "Cello.h"
 
@@ -96,7 +95,7 @@ PT_SUITE(suite_exception) {
 
       try {
         PT_ASSERT(__exc_depth is 1);
-        exception_result(2, 0);
+        exception_divide(2, 0);
       } catch (e in TypeError) {
         reached0 = true;
       }    

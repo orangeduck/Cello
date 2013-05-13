@@ -49,7 +49,7 @@ int __exc_depth = -1;
 jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
 local var __exc_obj = NULL;
-local char __exc_msg[2048];
+local void* __exc_msg = NULL;
 local const char* __exc_file = "";
 local const char* __exc_func = "";
 local unsigned int __exc_lineno = 0;
@@ -98,9 +98,14 @@ var __exc_throw(var obj, const char* fmt, const char* file, const char* func, in
   __exc_file = file;
   __exc_func = func;
   __exc_lineno = lineno;
+#ifdef __unix__
   __exc_backtrace_count = backtrace(__exc_backtrace, 25);
+#endif
   
+  va_list va;
+  va_start(va, lineno);
   print_to_va($(String, __exc_msg), 0, fmt, va);
+  va_end(va);
   
   if (__exc_depth >= 0) {
     longjmp(__exc_buffers[__exc_depth], 1);
@@ -138,7 +143,6 @@ var __exc_catch(void* unused, ...) {
   va_end(va);
   
   /* No matches found. Propagate to outward block */
-  __exc_depth--;
   if (__exc_depth >= 0) {
     longjmp(__exc_buffers[__exc_depth], 1);
   } else {  
