@@ -49,6 +49,7 @@ int __exc_depth = -1;
 jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
 local var __exc_obj = NULL;
+local bool __exc_msg_hook = false;
 local void* __exc_msg = NULL;
 local const char* __exc_file = "";
 local const char* __exc_func = "";
@@ -114,7 +115,7 @@ var __exc_throw(var obj, const char* fmt, const char* file, const char* func, in
   print_to_va(exc_msg, 0, fmt, va);
   va_end(va);
   
-  __exc_msg = as_str(exc_msg);
+  __exc_msg = (char*)as_str(exc_msg);
   if (!__exc_msg_hook) {
     __exc_msg_hook = true;
     atexit(__exc_free_msg);
