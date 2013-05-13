@@ -50,9 +50,7 @@ int main(int argc, char** argv) {
       var val = cast(get(prices, key), Int);
       
       /* File implements "put/get" like Hashtable */
-      put(file, String, key);
-      put(file, Int, val);
-      
+      print_to(file, 0, "%$ :: %$\n", key, val);      
       return None;
     };
     

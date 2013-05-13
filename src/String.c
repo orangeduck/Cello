@@ -212,7 +212,10 @@ int String_Format_To(var self, int pos, const char* fmt, va_list va) {
 #endif
   va_end(va_tmp);
   
+  printf("Old Value: %p\n", s->value);
+  printf("New size: %i\n", pos + size + 1);
   s->value = realloc(s->value, pos + size + 1);
+  printf("New Value: %p\n", s->value);
   if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   
   return vsprintf(s->value + pos, fmt, va); 
@@ -230,4 +233,3 @@ int String_Show(var self, var out, int pos) {
 int String_Look(var self, var input, int pos) {
   return scan_from(input, pos, "\"%[^\"]\"", self);
 }
-
