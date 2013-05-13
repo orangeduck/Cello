@@ -189,7 +189,7 @@ var Map_Get(var self, var key) {
     else node = node->right;
   }
   
-  return throw(KeyError, "Key not in Map!");
+  return throw(KeyError, "Key '%$' not in Map!", key);
 }
 
 local struct MapNode* Map_Node_New(var key, var val) {

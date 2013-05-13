@@ -1,6 +1,8 @@
 #include "File.h"
 
 #include "Exception.h"
+#include "Number.h"
+#include "String.h"
 
 #include <assert.h>
 
@@ -36,7 +38,7 @@ var File_Open(var self, const char* filename, const char* access) {
   fd->f = fopen(filename, access);
   
   if (fd->f == NULL) {
-    throw(IOError, "Could not open file: %s", filename);
+    throw(IOError, "Could not open file: %s", $(String, filename));
   }
   
   return self;
@@ -47,7 +49,7 @@ void File_Close(var self) {
   int err = fclose(fd->f);
   
   if (err != 0) {
-    throw(IOError, "Failed to close file: %i", err);
+    throw(IOError, "Failed to close file: %i", $(Int, err));
   }
   
   fd->f = NULL;
@@ -58,7 +60,7 @@ void File_Seek(var self, int pos, int origin) {
   int err = fseek(fd->f, pos, origin);
   
   if (err != 0) {
-    throw(IOError, "Failed to seek in file: %i", err);
+    throw(IOError, "Failed to seek in file: %i", $(Int, err));
   }
   
 }
@@ -68,7 +70,7 @@ int File_Tell(var self) {
   int i = ftell(fd->f); 
   
   if (i == -1) {
-    throw(IOError, "Failed to tell file: %li", i);
+    throw(IOError, "Failed to tell file: %i", $(Int, i));
   }
   
   return i;
@@ -79,7 +81,7 @@ void File_Flush(var self) {
   int err = fflush(fd->f);
   
   if (err != 0) {
-    throw(IOError, "Failed to flush file: %i", err);
+    throw(IOError, "Failed to flush file: %i", $(Int, err));
   }
   
 }
@@ -95,7 +97,7 @@ int File_Read(var self, void* output, int size) {
   int num = fread(output, size, 1, fd->f);
   
   if (num == -1) {
-    throw(IOError, "Failed to read from file: %i", num);
+    throw(IOError, "Failed to read from file: %i", $(Int, num));
     return num;
   }
   
@@ -107,7 +109,7 @@ int File_Write(var self, void* input, int size) {
   int num = fwrite(input, size, 1, fd->f);
   
   if (num != 1 && size != 0) {
-    throw(IOError, "Failed to write to file: %i", num);
+    throw(IOError, "Failed to write to file: %i", $(Int, num));
   }
   
   return num;

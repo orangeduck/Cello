@@ -107,7 +107,7 @@ int print_to_va(var out, int pos, const char* fmt, va_list va) {
     /* Match %% */
     if (*fmt == '%' && *(fmt+1) == '%') {
       int off = format_to(out, pos, "%%");
-      if (off < 0) { throw(FormatError, "Unable to output '%%'!"); }
+      if (off < 0) { throw(FormatError, "Unable to output '%%%%'!"); }
       pos += off;
       fmt += 2;
       continue;
@@ -237,7 +237,7 @@ int scan_from_va(var input, int pos, const char* fmt, va_list va) {
     if (*fmt == '%' && *(fmt+1) == '%') {
       
       int err = format_from(input, pos, "%%");
-      if (err < 0) { throw(FormatError, "Unable to input '%%'!"); }
+      if (err < 0) { throw(FormatError, "Unable to input '%%%%'!"); }
       
       pos += 2;
       fmt += 2;

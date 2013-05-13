@@ -151,7 +151,7 @@ var Dictionary_Get(var self, var key) {
     if_eq(k, key) { return v; }
   }
   
-  return throw(KeyError, "Key not in Dictionary!");
+  return throw(KeyError, "Key '%$' not in Dictionary!", key);
 }
 
 void Dictionary_Put(var self, var key, var val) {

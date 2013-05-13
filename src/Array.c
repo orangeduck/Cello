@@ -3,6 +3,7 @@
 #include "Bool.h"
 #include "None.h"
 #include "Exception.h"
+#include "Number.h"
 
 #include <math.h>
 #include <assert.h>
@@ -203,7 +204,7 @@ var Array_Pop_At(var self, int index) {
   ArrayData* ad = cast(self, Array);
   
   if (is_empty(self)) {
-    return throw(IndexOutOfBoundsError, "Cannot pop at %i. Array is empty!", index);
+    return throw(IndexOutOfBoundsError, "Cannot pop at %i. Array is empty!", $(Int, index));
   }
   
   destruct(at(self, index));
@@ -221,7 +222,9 @@ var Array_Pop_At(var self, int index) {
 
 var Array_At(var self, int i) {
   if (i < 0 or i >= len(self)) {
-    return throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", i, 0, len(self));
+    return throw(IndexOutOfBoundsError,
+      "Index %i out of bounds [%i-%i]", 
+      $(Int, i), $(Int, 0), $(Int, len(self)));
   }
   
   ArrayData* ad = cast(self, Array);
@@ -231,7 +234,9 @@ var Array_At(var self, int i) {
 
 void Array_Set(var self, int i, var obj) {
   if (i < 0 or i >= len(self)) {
-    throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", i, 0, len(self));
+    throw(IndexOutOfBoundsError, 
+      "Index %i out of bounds [%i-%i]", 
+      $(Int, i), $(Int, 0), $(Int, len(self)));
     return;
   }
   

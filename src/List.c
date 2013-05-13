@@ -3,6 +3,7 @@
 #include "Bool.h"
 #include "None.h"
 #include "Exception.h"
+#include "Number.h"
 
 #include <math.h>
 #include <assert.h>
@@ -191,7 +192,9 @@ var List_Pop_At(var self, int index) {
   ListData* lo = cast(self, List);
   
   if (index < 0 or index > lo->num_items-1) {
-    return throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", index, 0, len(self));
+    return throw(IndexOutOfBoundsError, 
+      "Index %i out of bounds [%i-%i]", 
+      $(Int, index), $(Int, 0), $(Int, len(self)));
   }
   
   var retval = lo->items[index];
@@ -211,7 +214,9 @@ var List_At(var self, int index) {
   ListData* lo = cast(self, List);
   
   if (index < 0 or index > lo->num_items-1) {
-    return throw(IndexOutOfBoundsError, "Index %i out of bounds [%i-%i]", index, 0, len(self));
+    return throw(IndexOutOfBoundsError, 
+      "Index %i out of bounds [%i-%i]", 
+      $(Int, index), $(Int, 0), $(Int, len(self)));
   }
   
   return lo->items[index];

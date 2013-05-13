@@ -2,6 +2,8 @@
 
 #include "Bool.h"
 #include "Exception.h"
+#include "Number.h"
+#include "String.h"
 
 #include <string.h>
 
@@ -22,7 +24,7 @@ var Type_Cast(var obj, var t, const char* func, const char* file, int line) {
       "Argument to function '%s' at '%s:%i' :: "
       "Got Type '%s' :: "
       "Expected Type '%s'", 
-      func, file, line, as_str(type_of(obj)), as_str(t));
+      $(String, func), $(String, file), $(Int, line), type_of(obj), t);
   }
   
 }
@@ -66,7 +68,7 @@ var Type_Implements_Name(var self, const char* class_name, const char* func, con
       "Function '%s' at '%s:%i' :: "
       "Object '%p' is not a type! :: "
       "It does not start with a NULL pointer",
-      func, file, line, self);
+      $(String, func), $(String, file), $(Int, line), self);
   }
   
   while(t->class_name) {
@@ -85,7 +87,7 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
       "Function '%s' at '%s:%i' :: "
       "Object '%p' is not a type! :: "
       "It does not start with a NULL pointer",
-      func, file, line, self);
+      $(String, func), $(String, file), $(Int, line), self);
   }
   
   const char* type_name = NULL;
@@ -107,14 +109,15 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
       "Cannot find class '__Name' for object '%p' :: "
       "Was is correctly Constructed? :: "
       "Does it start with a 'type' entry?",
-      func, file, line, self);
+      $(String, func), $(String, file), $(Int, line), self);
       
   } else {
   
     return throw(ClassError,
       "Function '%s' at '%s:%i' :: "
       "Type '%s' does not implement class '%s'",
-      func, file, line, type_name, class_name);
+      $(String, func), $(String, file), $(Int, line), 
+      $(String, type_name), $(String, class_name));
     
   }
 }
