@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([libCello], [0.9.2], [contact@theorangeduck.com])
+AC_INIT([libCello], [0.9.3], [contact@theorangeduck.com])
 AM_INIT_AUTOMAKE
 LT_INIT
 
