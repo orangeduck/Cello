@@ -42,7 +42,7 @@ PT_SUITE(suite_data) {
     
     assign(char1, char2);
     
-    PT_ASSERT(char1 != char2);
+    PT_ASSERT(char1 isnt char2);
     PT_ASSERT(as_char(char1) is 'a');
     
     delete(char1);
@@ -366,9 +366,9 @@ PT_SUITE(suite_data) {
     PT_ASSERT(a1);
     PT_ASSERT(a2);
     
-    PT_ASSERT(a0 != a1);
-    PT_ASSERT(a0 != a2);
-    PT_ASSERT(a1 != a2);
+    PT_ASSERT(a0 isnt a1);
+    PT_ASSERT(a0 isnt a2);
+    PT_ASSERT(a1 isnt a2);
     
     PT_ASSERT( eq(at(a0, 0), $(Int, 1)) );
     PT_ASSERT( eq(at(a1, 0), $(Real, 1.1)) );
@@ -376,7 +376,7 @@ PT_SUITE(suite_data) {
     
     assign(a2, a1);
     
-    PT_ASSERT(a2 != a1);
+    PT_ASSERT(a2 isnt a1);
     PT_ASSERT( eq(at(a2, 0), $(Real, 1.1)) );
     
     delete(a0);
@@ -391,8 +391,8 @@ PT_SUITE(suite_data) {
     var a1 = new(Array, Int, 3, $(Int, 1), $(Int, 5), $(Int, 10));
     var a2 = new(Array, Int, 3, $(Int, 2), $(Int, 5), $(Int, 10));
     
-    PT_ASSERT(a0 != a1);
-    PT_ASSERT(a0 != a2);
+    PT_ASSERT(a0 isnt a1);
+    PT_ASSERT(a0 isnt a2);
     
     PT_ASSERT( eq(a0, a1) );
     PT_ASSERT( neq(a0, a2) );
@@ -569,8 +569,8 @@ PT_SUITE(suite_data) {
     PT_ASSERT(t1);
     PT_ASSERT(t2);
     
-    PT_ASSERT(t0 != t2);
-    PT_ASSERT(t0 != t1);
+    PT_ASSERT(t0 isnt t2);
+    PT_ASSERT(t0 isnt t1);
     
     PT_ASSERT(contains(t0, $(String, "Hello")));
     PT_ASSERT(contains(t1, $(String, "Bonjour")));
@@ -680,8 +680,8 @@ PT_SUITE(suite_data) {
     PT_ASSERT(t1);
     PT_ASSERT(t2);
     
-    PT_ASSERT(t0 != t2);
-    PT_ASSERT(t0 != t1);
+    PT_ASSERT(t0 isnt t2);
+    PT_ASSERT(t0 isnt t1);
     
     PT_ASSERT(contains(t0, $(String, "Hello")));
     PT_ASSERT(contains(t1, $(String, "Bonjour")));
@@ -818,9 +818,9 @@ PT_SUITE(suite_data) {
     PT_ASSERT(l1);
     PT_ASSERT(l2);
     
-    PT_ASSERT(l0 != l1);
-    PT_ASSERT(l0 != l2);
-    PT_ASSERT(l1 != l2);
+    PT_ASSERT(l0 isnt l1);
+    PT_ASSERT(l0 isnt l2);
+    PT_ASSERT(l1 isnt l2);
     
     PT_ASSERT(at(l0, 0) is li0);
     PT_ASSERT(at(l0, 2) is li2);
@@ -849,9 +849,9 @@ PT_SUITE(suite_data) {
     var l2 = new(List, 4, li0, li1, li2, li3);
     var l3 = new(List, 2, li0, li6);
     
-    PT_ASSERT(l0 != l1);
-    PT_ASSERT(l0 != l2);
-    PT_ASSERT(l1 != l2);
+    PT_ASSERT(l0 isnt l1);
+    PT_ASSERT(l0 isnt l2);
+    PT_ASSERT(l1 isnt l2);
     
     PT_ASSERT( eq(l0, l2) );
     PT_ASSERT( eq(l1, l3) );
@@ -1055,9 +1055,9 @@ PT_SUITE(suite_data) {
     PT_ASSERT(d1);
     PT_ASSERT(d2);
     
-    PT_ASSERT(d0 != d1);
-    PT_ASSERT(d0 != d2);
-    PT_ASSERT(d1 != d2);
+    PT_ASSERT(d0 isnt d1);
+    PT_ASSERT(d0 isnt d2);
+    PT_ASSERT(d1 isnt d2);
     
     PT_ASSERT(contains(d0, dk0));
     PT_ASSERT(contains(d0, dk1));
@@ -1186,9 +1186,9 @@ PT_SUITE(suite_data) {
     PT_ASSERT(m1);
     PT_ASSERT(m2);
     
-    PT_ASSERT(m0 != m1);
-    PT_ASSERT(m0 != m2);
-    PT_ASSERT(m1 != m2);
+    PT_ASSERT(m0 isnt m1);
+    PT_ASSERT(m0 isnt m2);
+    PT_ASSERT(m1 isnt m2);
     
     PT_ASSERT(contains(m0, mk0));
     PT_ASSERT(contains(m0, mk1));
@@ -1307,7 +1307,7 @@ PT_SUITE(suite_data) {
     PT_ASSERT(f0);
     PT_ASSERT(f1);
     
-    PT_ASSERT(f0 != f1);
+    PT_ASSERT(f0 isnt f1);
     
     delete(f0);
     
