@@ -21,6 +21,7 @@
 
 typedef void* var;
 #define is ==
+#define isnt !=
 #define not !
 #define and &&
 #define or ||

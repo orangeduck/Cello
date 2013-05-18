@@ -86,16 +86,16 @@ PT_SUITE(suite_core) {
     
     var x = new(Int, 10);
     var y = new(Int, 20);
-    
+
     PT_ASSERT(as_long(x) is 10);
     PT_ASSERT(as_long(y) is 20);
-    PT_ASSERT(x != y);
+    PT_ASSERT(x isnt y);
 
     assign(x, y);
     
     PT_ASSERT(as_long(x) is 20);
     PT_ASSERT(as_long(y) is 20);
-    PT_ASSERT(x != y);
+    PT_ASSERT(x isnt y);
     
     delete(x);
     delete(y);
@@ -107,15 +107,15 @@ PT_SUITE(suite_core) {
     
     PT_ASSERT_STR_EQ(as_str(xs), "Hello");
     PT_ASSERT_STR_EQ(as_str(ys), "There");
-    PT_ASSERT(as_str(xs) != as_str(ys));
-    PT_ASSERT(xs != ys);
+    PT_ASSERT(as_str(xs) isnt as_str(ys));
+    PT_ASSERT(xs isnt ys);
 
     assign(xs, ys);
     
     PT_ASSERT_STR_EQ(as_str(xs), "There");
     PT_ASSERT_STR_EQ(as_str(ys), "There");
-    PT_ASSERT(as_str(xs) != as_str(ys));
-    PT_ASSERT(xs != ys);
+    PT_ASSERT(as_str(xs) isnt as_str(ys));
+    PT_ASSERT(xs isnt ys);
     
     delete(xs);
     delete(ys);
@@ -127,8 +127,8 @@ PT_SUITE(suite_core) {
     var y = copy(x);
     
     PT_ASSERT_STR_EQ(as_str(x), as_str(y));
-    PT_ASSERT(as_str(x) != as_str(y));
-    PT_ASSERT(x != y);
+    PT_ASSERT(as_str(x) isnt as_str(y));
+    PT_ASSERT(x isnt y);
     
     delete(x);
     delete(y);
