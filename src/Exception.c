@@ -44,9 +44,9 @@ void Exception_Register_Signals(void) {
   signal(SIGTERM, Exception_Signal);
 }
 
-bool __exc_active = false;
-int __exc_depth = -1;
-jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
+__thread bool __exc_active = false;
+__thread int __exc_depth = -1;
+__thread jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
 local var __exc_obj = NULL;
 local bool __exc_msg_hook = false;

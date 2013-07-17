@@ -38,9 +38,9 @@ enum {
   __EXC_MAX_DEPTH = 2048,
 };
 
-extern bool __exc_active;
-extern int __exc_depth;
-extern jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
+extern __thread bool __exc_active;
+extern __thread int __exc_depth;
+extern __thread jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
 
 var __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
 var __exc_catch(void* unused, ...);
