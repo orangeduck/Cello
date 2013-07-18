@@ -1,14 +1,14 @@
-#include "Prelude.h"
+#include "Cello/Prelude.h"
 
-#include "Type.h"
-#include "Bool.h"
-#include "None.h"
-#include "Exception.h"
-#include "File.h"
-#include "String.h"
-#include "Number.h"
-#include "Char.h"
-#include "Reference.h"
+#include "Cello/Type.h"
+#include "Cello/Bool.h"
+#include "Cello/None.h"
+#include "Cello/Exception.h"
+#include "Cello/File.h"
+#include "Cello/String.h"
+#include "Cello/Number.h"
+#include "Cello/Char.h"
+#include "Cello/Reference.h"
 
 #include <stdio.h>
 #include <stdlib.h>

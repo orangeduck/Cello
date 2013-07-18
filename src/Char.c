@@ -1,6 +1,6 @@
-#include "Char.h"
+#include "Cello/Char.h"
 
-#include "Exception.h"
+#include "Cello/Exception.h"
 
 var Char = methods {
   methods_begin(Char),

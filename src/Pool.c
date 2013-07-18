@@ -1,7 +1,7 @@
-#include "Pool.h"
+#include "Cello/Pool.h"
 
-#include "Reference.h"
-#include "Number.h"
+#include "Cello/Reference.h"
+#include "Cello/Number.h"
 
 #include <assert.h>
 

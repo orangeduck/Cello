@@ -1,8 +1,8 @@
-#include "Number.h"
+#include "Cello/Number.h"
 
-#include "Type.h"
-#include "Bool.h"
-#include "Exception.h"
+#include "Cello/Type.h"
+#include "Cello/Bool.h"
+#include "Cello/Exception.h"
 
 #include <assert.h>
 #include <math.h>
