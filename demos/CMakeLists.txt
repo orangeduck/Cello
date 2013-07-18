@@ -1,5 +1,3 @@
-ADD_DEFINITIONS(-std=gnu99 -Wall -Werror -Wextra -Wno-unused)
-
 ADD_EXECUTABLE(example EXCLUDE_FROM_ALL example.c)
 TARGET_LINK_LIBRARIES(example Cello)
 

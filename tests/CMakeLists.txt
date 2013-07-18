@@ -1,6 +1,12 @@
 FILE(GLOB_RECURSE
     TESTS_SRC
-    *.c
+        core.c
+        data.c
+        exception.c
+        functional.c
+        memory.c
+        ptest.c
+        test.c
     )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
