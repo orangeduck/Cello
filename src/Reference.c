@@ -1,7 +1,7 @@
-#include "Reference.h"
+#include "Cello/Reference.h"
 
-#include "Type.h"
-#include "Exception.h"
+#include "Cello/Type.h"
+#include "Cello/Exception.h"
 
 #include <string.h>
 

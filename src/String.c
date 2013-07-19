@@ -1,7 +1,7 @@
-#include "String.h"
+#include "Cello/String.h"
 
-#include "Bool.h"
-#include "Exception.h"
+#include "Cello/Bool.h"
+#include "Cello/Exception.h"
 
 #include <string.h>
 #include <stdio.h>
