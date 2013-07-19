@@ -1,7 +1,7 @@
-#include "Bool.h"
+#include "Cello/Bool.h"
 
-#include "Prelude.h"
-#include "Type.h"
+#include "Cello/Prelude.h"
+#include "Cello/Type.h"
 
 #include <string.h>
 
