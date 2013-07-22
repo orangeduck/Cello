@@ -214,12 +214,6 @@ void unlock(var self) {
   ilockable->unlock(self);
 }
 
-var lock_try(var self) {
-  Lockable* ilockable = type_class(type_of(self), Lockable);
-  assert(ilockable->lock_try);
-  return ilockable->lock_try(self);  
-}
-
 int lock_status(var self) {
   Lockable* ilockable = type_class(type_of(self), Lockable);
   assert(ilockable->lock_status);
@@ -286,30 +280,5 @@ void Mutex_Unlock(var self) {
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Unlock"); }
   if (err is EPERM)  { throw(ResourceError, "Mutex cannot be held by caller"); }
 }
-
-var Semaphore_New(var self, va_list* args) {
-
-}
-
-var Semaphore_Delete(var self) {
-
-}
-
-void Semaphore_Lock(var self) {
-
-}
-
-void Semaphore_Unlock(var self) {
-
-}
-
-var  Semaphore_LockTimeout(var self, int timeout) {
-
-}
-
-int  Semaphore_LockValue(var self) {
-
-}
-
 
 #endif

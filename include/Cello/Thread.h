@@ -98,13 +98,11 @@ class {
   void (*lock)(var);
   void (*unlock)(var);
   var  (*lock_try)(var);
-  int  (*lock_status)(var);
 } Lockable;
 
 void lock(var self);
 void unlock(var self);
 var lock_try(var self);
-int lock_status(var self);
 
 /* Mutex Type */
 
@@ -132,32 +130,7 @@ void Mutex_Unlock(var self);
 instance(Mutex, New) = { sizeof(MutexData), Mutex_New, Mutex_Delete };
 instance(Mutex, Assign) = { Mutex_Assign };
 instance(Mutex, Copy) = { Mutex_Copy };
-instance(Mutex, Lockable) = { Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try, NULL };
+instance(Mutex, Lockable) = { Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try };
 instance(Mutex, With) = { Mutex_Lock, Mutex_Unlock };
-
-/* Semaphor Type */
-
-global var Semaphore;
-
-#ifdef __unix__
- 
-  data {
-    var type;
-
-  } SemaphoreData;
-  
-#endif
-
-/** Semaphore_New(var self, int val) */
-var Semaphore_New(var self, va_list* args);
-var Semaphore_Delete(var self);
-
-void Semaphore_Lock(var self);
-void Semaphore_Unlock(var self);
-var  Semaphore_LockTimeout(var self, int timeout);
-int  Semaphore_LockValue(var self);
-
-instance(Semaphore, New) = { sizeof(SemaphoreData), Semaphore_New, Semaphore_Delete };
-instance(Semaphore, Lockable) = { Semaphore_Lock, Semaphore_Unlock, Semaphore_LockTimeout, Semaphore_LockValue };
 
 #endif
