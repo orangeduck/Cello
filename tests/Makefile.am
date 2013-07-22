@@ -7,11 +7,12 @@ tests_SOURCES = \
   exception.c \
   functional.c \
   memory.c \
+	threading.c \
   ptest.c \
   test.c
   
 tests_CPPFLAGS = -I$(top_srcdir)/tests
 tests_CFLAGS = -std=gnu99 -Wall -Werror -Wextra -Wno-unused
-tests_LDFLAGS = -lCello
+tests_LDFLAGS = -lCello -lpthread
 
 TESTS = tests

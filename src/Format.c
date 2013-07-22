@@ -23,6 +23,9 @@ int format_from_va(var self, int pos, const char* fmt, va_list va) {
 }
 
 int format_to(var self, int pos, const char* fmt, ...) {
+
+  assert(self);
+
   va_list va;
   va_start(va, fmt);
   int ret = format_to_va(self, pos, fmt, va);

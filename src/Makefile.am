@@ -14,12 +14,13 @@ libCello_la_SOURCES = \
   Map.c \
   Number.c \
   Pool.c \
+  PosixThread.c \
   Prelude.c \
   Reference.c \
   String.c \
   Table.c \
   Tree.c \
-  Type.c
+  Type.c 
   
 libCello_la_CPPFLAGS = -I$(top_srcdir)/include
 libCello_la_CFLAGS = -std=gnu99 -Wall -Wextra -Wno-unused
@@ -49,7 +50,8 @@ pkginclude_HEADERS = \
   $(top_srcdir)/include/Cello/Reference.h \
   $(top_srcdir)/include/Cello/String.h \
   $(top_srcdir)/include/Cello/Table.h \
+  $(top_srcdir)/include/Cello/Thread.h \
   $(top_srcdir)/include/Cello/Tree.h \
   $(top_srcdir)/include/Cello/Type.h \
-  $(top_srcdir)/include/Cello/Value.h
+  $(top_srcdir)/include/Cello/Value.h 
   

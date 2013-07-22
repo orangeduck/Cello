@@ -108,17 +108,18 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
       "Function '%s' at '%s:%i' :: "
       "Cannot find class '__Name' for object '%p' :: "
       "Was is correctly Constructed? :: "
-      "Does it start with a 'type' entry?",
+      "Does it start with a 'type' entry? ::"
+      "Was `methods_begin` used?",
       $(String, (char*)func), $(String, (char*)file), $(Int, line), self);
       
   } else {
-  
+    
     return throw(ClassError,
       "Function '%s' at '%s:%i' :: "
       "Type '%s' does not implement class '%s'",
       $(String, (char*)func), $(String, (char*)file), $(Int, line), 
-      $(String, type_name), $(String, class_name));
-    
+      $(String, (char*)type_name), $(String, (char*)class_name));
+      
   }
 }
 

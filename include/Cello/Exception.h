@@ -20,6 +20,8 @@ global var KeyError;
 global var OutOfMemoryError;
 global var IOError;
 global var FormatError;
+global var BusyError;
+global var ResourceError;
 
 global var ProgramAbortedError;
 global var DivisionByZeroError;
@@ -34,27 +36,27 @@ void Exception_Register_Signals(void);
 
 /* Internal Exception Stuff */
 
-enum {
-  __EXC_MAX_DEPTH = 2048,
-};
+void Exception_Inc(void);
+void Exception_Dec(void);
+bool Exception_Active(void);
+void Exception_Activate(void);
+void Exception_Deactivate(void);
 
-extern __thread bool __exc_active;
-extern __thread int __exc_depth;
-extern __thread jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
+var Exception_Object(void);
+var Exception_Message(void);
+int  Exception_Depth(void);
+void* Exception_Buffer(void);
 
-var __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
-var __exc_catch(void* unused, ...);
+var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
+var Exception_Catch(void* unused, ...);
 
 /* Exception Macros */
 
-#define try \
-  __exc_depth++; __exc_active = false; \
-  if (__exc_depth == __EXC_MAX_DEPTH) { fprintf(stderr, "Maximum Exception Depth Exceeded!\n"); abort(); } \
-  if (!setjmp(__exc_buffers[__exc_depth]))   
+#define try Exception_Inc(); Exception_Deactivate(); if (!setjmp(Exception_Buffer()))   
 
 #define catch(...) catch_scanned(__VA_ARGS__)
-#define catch_scanned(x, ...) else { __exc_active = true; } __exc_depth--; for (var x = __exc_catch(NULL, ##__VA_ARGS__, Undefined); x != Undefined; x = Undefined)
-#define throw(e, fmt, ...) __exc_throw(e, fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
+#define catch_scanned(x, ...) else { Exception_Activate(); } Exception_Dec(); for (var x = Exception_Catch(NULL, ##__VA_ARGS__, Undefined); x != Undefined; x = Undefined)
+#define throw(e, fmt, ...) Exception_Throw(e, fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 
 
 #endif

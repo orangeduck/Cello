@@ -445,7 +445,7 @@ PT_SUITE(suite_core) {
       put(f, Int, $(Int, 1));
       put(f, Int, $(Int, 22));
     
-    close(f);
+    done(f);
     
     open(f, "test.bin", "r");
       
@@ -460,7 +460,7 @@ PT_SUITE(suite_core) {
       delete(first);
       delete(second);
       
-    close(f);
+    done(f);
     
     PT_ASSERT(f);
   }

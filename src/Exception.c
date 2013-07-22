@@ -5,6 +5,7 @@
 #include "Cello/File.h"
 #include "Cello/String.h"
 #include "Cello/Number.h"
+#include "Cello/Thread.h"
 
 #include <signal.h>
 
@@ -16,6 +17,8 @@ var KeyError = Singleton(KeyError);
 var OutOfMemoryError = Singleton(OutOfMemoryError);
 var IOError = Singleton(IOError);
 var FormatError = Singleton(FormatError);
+var BusyError = Singleton(BusyError);
+var ResourceError = Singleton(ResourceError);
 
 var ProgramAbortedError = Singleton(ProgramAbortedError);
 var DivisionByZeroError = Singleton(DivisionByZeroError);
@@ -44,96 +47,130 @@ void Exception_Register_Signals(void) {
   signal(SIGTERM, Exception_Signal);
 }
 
-__thread bool __exc_active = false;
-__thread int __exc_depth = -1;
-__thread jmp_buf __exc_buffers[__EXC_MAX_DEPTH];
-
-local var __exc_obj = NULL;
-local bool __exc_msg_hook = false;
-local void* __exc_msg = NULL;
-local const char* __exc_file = "";
-local const char* __exc_func = "";
-local unsigned int __exc_lineno = 0;
-
 #ifdef __unix__
+
 #include <execinfo.h>
 
-local void* __exc_backtrace[25];
-local int __exc_backtrace_count;
+void Exception_Inc(void) {
+  ThreadData* td = current(Thread);
+  if (td->exc_depth == EXC_MAX_DEPTH) {
+    fprintf(stderr, "Cello Fatal Error: Exception Buffer Overflow!\n"); abort();
+  }
+  td->exc_depth++;
+}
 
-#endif
+void Exception_Dec(void) {
+  ThreadData* td = current(Thread);
+  if (td->exc_depth == -1) {
+    fprintf(stderr, "Cello Fatal Error: Exception Buffer Underflow!\n"); abort();
+  }
+  td->exc_depth--;
+}
 
-local void __exc_error(void)  {
+bool Exception_Active(void) {
+  ThreadData* td = current(Thread);
+  return td->exc_active;
+}
+
+void Exception_Activate(void) {
+  ThreadData* td = current(Thread);
+  td->exc_active = true;
+}
+
+void Exception_Deactivate(void) {
+  ThreadData* td = current(Thread);
+  td->exc_active = false;  
+}
+
+var Exception_Object(void) {
+  ThreadData* td = current(Thread);
+  return td->exc_obj;  
+}
+
+var Exception_Message(void) {
+  ThreadData* td = current(Thread);
+  return td->exc_msg;
+}
+
+void* Exception_Buffer(void) {
+  ThreadData* td = current(Thread);
+  if (td->exc_depth == -1) {
+    fprintf(stderr, "Cello Fatal Error: Exception Buffer Out of Bounds!\n"); abort();
+  }
+  return td->exc_buffers[td->exc_depth];
+}
+
+int Exception_Depth(void) {
+  ThreadData* td = current(Thread);
+  return td->exc_depth;
+}
+
+local void Exception_Error(void)  {
+  
+  ThreadData* td = current(Thread);
   
   print_to($(File, stderr), 0, "\n");
   print_to($(File, stderr), 0, "!!\t\n");
-  print_to($(File, stderr), 0, "!!\tUncaught %$ at (%s:%s:%i) \n", __exc_obj, $(String, (char*)__exc_file), $(String, (char*)__exc_func), $(Int, __exc_lineno));
+  //print_to($(File, stderr), 0, "!!\tThread ID %i\n", $(Int, as_long(td)));
+  print_to($(File, stderr), 0, "!!\tUncaught %$ at (%s:%s:%i) \n", Exception_Object(), $(String, (char*)td->exc_file), $(String, (char*)td->exc_func), $(Int, td->exc_lineno));
   print_to($(File, stderr), 0, "!!\t\n");
-  print_to($(File, stderr), 0, "!!\t\t %s\n", $(String, __exc_msg));
+  print_to($(File, stderr), 0, "!!\t\t %s\n", Exception_Message());
   print_to($(File, stderr), 0, "!!\t\n");
-  
-#ifdef __unix__
   
   print_to($(File, stderr), 0, "!!\tStack Trace: \n");
   print_to($(File, stderr), 0, "!!\t\n");
+
+  char** symbols = backtrace_symbols(td->exc_backtrace, td->exc_backtrace_count);  
   
-  char** symbols = backtrace_symbols(__exc_backtrace, __exc_backtrace_count);
-  
-  for (int i = 0; i < __exc_backtrace_count; i++){
+  for (int i = 0; i < td->exc_backtrace_count; i++) {
     print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", $(Int, i), $(String, symbols[i]));
   }
-  
   print_to($(File, stderr), 0, "!!\t\n");
   
   free(symbols);
-  
-#endif
   
   exit(EXIT_FAILURE);
   
 }
 
-local void __exc_free_msg(void) {
-  free(__exc_msg);
+local var main_exc_msg = NULL;
+local void main_exc_msg_free(void) {
+  free(main_exc_msg);
 }
 
-var __exc_throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...) {
-  
-  __exc_obj = obj;
-  __exc_file = file;
-  __exc_func = func;
-  __exc_lineno = lineno;
-  
-#ifdef __unix__
-  __exc_backtrace_count = backtrace(__exc_backtrace, 25);
-#endif
-  
-  var exc_msg = $(String, __exc_msg);
+var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...) {
 
-  va_list va;
-  va_start(va, lineno);
-  print_to_va(exc_msg, 0, fmt, va);
-  va_end(va);
+  ThreadData* td = current(Thread);
+  td->exc_backtrace_count = backtrace(td->exc_backtrace, 25);
+  td->exc_obj = obj;
+  td->exc_file = file;
+  td->exc_func = func;
+  td->exc_lineno = lineno;
   
-  __exc_msg = (char*)as_str(exc_msg);
-  if (!__exc_msg_hook) {
-    __exc_msg_hook = true;
-    atexit(__exc_free_msg);
+  if ((td->is_main) and (main_exc_msg == NULL)) {
+    main_exc_msg = new(String, "Test");
+    td->exc_msg = main_exc_msg;
+    atexit(main_exc_msg_free);
   }
   
-  if (__exc_depth >= 0) {
-    longjmp(__exc_buffers[__exc_depth], 1);
+  va_list va;
+  va_start(va, lineno);
+  print_to_va(td->exc_msg, 0, fmt, va);
+  va_end(va);
+  
+  if (Exception_Depth() >= 0) {
+    longjmp(Exception_Buffer(), 1);
   } else {
-    __exc_error();
+    Exception_Error();
   }
   
   return Undefined;
   
 }
 
-var __exc_catch(void* unused, ...) {
+var Exception_Catch(void* unused, ...) {
   
-  if (!__exc_active) { return Undefined; }
+  if (not Exception_Active()) { return Undefined; }
   
   va_list va;
   va_start(va, unused);
@@ -142,14 +179,14 @@ var __exc_catch(void* unused, ...) {
   /* If no Arguments catch all */
   if (e is Undefined) {
     va_end(va);
-    return __exc_obj;
+    return Exception_Object();
   }
   
   /* Check Exception against Arguments */
-  while (e != Undefined) {
-    if_eq(e, __exc_obj) {
+  while (e isnt Undefined) {
+    if_eq(e, Exception_Object()) {
       va_end(va);
-      return __exc_obj;
+      return Exception_Object();
     }
     e = va_arg(va, var);
   }
@@ -157,12 +194,14 @@ var __exc_catch(void* unused, ...) {
   va_end(va);
   
   /* No matches found. Propagate to outward block */
-  if (__exc_depth >= 0) {
-    longjmp(__exc_buffers[__exc_depth], 1);
+  if (Exception_Depth() >= 0) {
+    longjmp(Exception_Buffer(), 1);
   } else {  
-    __exc_error();
+    Exception_Error();
   }
   
   return Undefined;
   
 }
+
+#endif

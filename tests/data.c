@@ -144,14 +144,14 @@ PT_SUITE(suite_data) {
     put(f, Int, $(Int, 10));
     put(f, Int, $(Int, 32));
     
-    close(f);
+    done(f);
     
     f = open($(File, NULL), "test.bin", "r");
     
     var fst = get(f, Int);
     var snd = get(f, Int);
     
-    close(f);
+    done(f);
     
     PT_ASSERT(as_long(fst) is 10);
     PT_ASSERT(as_long(snd) is 32);
@@ -250,14 +250,14 @@ PT_SUITE(suite_data) {
     put(f, Real, $(Real, 1.0));
     put(f, Real, $(Real, 3.2));
     
-    close(f);
+    done(f);
     
     f = open($(File, NULL), "test.bin", "r");
     
     var fst = get(f, Real);
     var snd = get(f, Real);
     
-    close(f);
+    done(f);
     
     PT_ASSERT(as_double(fst) is 1.0);
     PT_ASSERT(as_double(snd) is 3.2);
@@ -1322,12 +1322,12 @@ PT_SUITE(suite_data) {
     var f0 = $(File, NULL);
     
     open(f0, "test.txt", "w");
-    write(f0, testoutput1, sizeof(testoutput1));
-    close(f0);  
+    write_to(f0, testoutput1, sizeof(testoutput1));
+    done(f0);  
     
     open(f0, "test.txt", "r");
-    read(f0, testinput, sizeof(testoutput1));
-    close(f0);
+    read_from(f0, testinput, sizeof(testoutput1));
+    done(f0);
     
     PT_ASSERT_STR_EQ(testinput, testoutput1);
     
@@ -1342,7 +1342,7 @@ PT_SUITE(suite_data) {
       put(f, Int, $(Int, 1));
       put(f, Int, $(Int, 22));
     
-    close(f);
+    done(f);
     
     open(f, "test.bin", "r");
       
@@ -1355,7 +1355,7 @@ PT_SUITE(suite_data) {
       delete(first);
       delete(second);
       
-    close(f);
+    done(f);
     
   }
 
