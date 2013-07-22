@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   }
   
   /* "with" automatically closes file at end of scope. */
-  with(file in open($(File, NULL), "prices.bin", "wb"))) {
+  with(file in open($(File, NULL), "prices.bin", "wb")) {
   
     /* First class function object */
     lambda(write_pair, args) {
@@ -418,7 +418,7 @@ The idea of `with` is stolen from Python and will execute `enter_with` and `exit
 
 Other than these things there is not much surprising in the code which cannot be explained via syntactic sugar.
 
-* `is`, `not`, `and`, `or` -> `==`, `!`, `&&`, `||`
+* `is`, `isnt`, `not`, `and`, `or` -> `==`, `!=`, `!`, `&&`, `||`
 * `elif` -> `else if`
 * `local` -> `static`
 * `global` -> `extern`

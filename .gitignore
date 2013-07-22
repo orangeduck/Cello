@@ -1,3 +1,4 @@
+# Main
 *.log
 *~
 *.libs
@@ -7,3 +8,5 @@
 *.a
 *.lo
 
+# VIM related
+.clang_complete

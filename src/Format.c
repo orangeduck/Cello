@@ -1,11 +1,11 @@
-#include "Format.h"
+#include "Cello/Format.h"
 
-#include "Type.h"
-#include "Exception.h"
-#include "File.h"
-#include "Number.h"
-#include "Char.h"
-#include "Reference.h"
+#include "Cello/Type.h"
+#include "Cello/Exception.h"
+#include "Cello/File.h"
+#include "Cello/Number.h"
+#include "Cello/Char.h"
+#include "Cello/Reference.h"
 
 #include <assert.h>
 #include <string.h>
@@ -23,6 +23,9 @@ int format_from_va(var self, int pos, const char* fmt, va_list va) {
 }
 
 int format_to(var self, int pos, const char* fmt, ...) {
+
+  assert(self);
+
   va_list va;
   va_start(va, fmt);
   int ret = format_to_va(self, pos, fmt, va);

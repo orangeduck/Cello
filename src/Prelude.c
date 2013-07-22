@@ -1,14 +1,14 @@
-#include "Prelude.h"
+#include "Cello/Prelude.h"
 
-#include "Type.h"
-#include "Bool.h"
-#include "None.h"
-#include "Exception.h"
-#include "File.h"
-#include "String.h"
-#include "Number.h"
-#include "Char.h"
-#include "Reference.h"
+#include "Cello/Type.h"
+#include "Cello/Bool.h"
+#include "Cello/None.h"
+#include "Cello/Exception.h"
+#include "Cello/File.h"
+#include "Cello/String.h"
+#include "Cello/Number.h"
+#include "Cello/Char.h"
+#include "Cello/Reference.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -359,10 +359,10 @@ var open(var self, const char* name, const char* access) {
   return istream->open(self, name, access);
 }
 
-void close(var self) {
+void done(var self) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->close);
-  istream->close(self);
+  assert(istream->done);
+  istream->done(self);
 }
 
 void seek(var self, int pos, int origin) {
@@ -389,16 +389,16 @@ bool eof(var self) {
   return istream->eof(self);
 }
 
-int read(var self, void* output, int size) {
+int read_from(var self, void* output, int size) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->read);
-  return istream->read(self, output, size);
+  assert(istream->read_from);
+  return istream->read_from(self, output, size);
 }
 
-int write(var self, void* input, int size) {
+int write_to(var self, void* input, int size) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->write);
-  return istream->write(self, input, size);
+  assert(istream->write_to);
+  return istream->write_to(self, input, size);
 }
 
 void serial_read(var self, var input) {

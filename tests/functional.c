@@ -28,7 +28,7 @@ PT_SUITE(suite_functional) {
     var f1 = new(Function, empty_function);
     var f2 = new(Function, empty_function2);
     
-    PT_ASSERT(((FunctionData*)f1)->func != ((FunctionData*)f2)->func);
+    PT_ASSERT(((FunctionData*)f1)->func isnt ((FunctionData*)f2)->func);
     
     assign(f1, f2);
     

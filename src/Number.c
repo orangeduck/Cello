@@ -1,8 +1,8 @@
-#include "Number.h"
+#include "Cello/Number.h"
 
-#include "Type.h"
-#include "Bool.h"
-#include "Exception.h"
+#include "Cello/Type.h"
+#include "Cello/Bool.h"
+#include "Cello/Exception.h"
 
 #include <assert.h>
 #include <math.h>
@@ -135,12 +135,12 @@ void Int_Abs(var self) {
 
 void Int_Serial_Read(var self, var stream) {
   IntData* io = cast(self, Int);
-  read(stream, &io->value, sizeof(long));
+  read_from(stream, &io->value, sizeof(long));
 }
 
 void Int_Serial_Write(var self, var stream) {
   IntData* io = cast(self, Int);
-  write(stream, &io->value, sizeof(long));
+  write_to(stream, &io->value, sizeof(long));
 }
 
 long Int_AsLong(var self) {
@@ -266,12 +266,12 @@ void Real_Abs(var self) {
 
 void Real_Serial_Read(var self, var stream) {
   RealData* ro = cast(self, Real);
-  read(stream, &ro->value, sizeof(double));
+  read_from(stream, &ro->value, sizeof(double));
 }
 
 void Real_Serial_Write(var self, var stream) {
   RealData* ro = cast(self, Real);
-  write(stream, &ro->value, sizeof(double));
+  write_to(stream, &ro->value, sizeof(double));
 }
 
 double Real_AsDouble(var self) {

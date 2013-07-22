@@ -21,6 +21,7 @@
 
 typedef void* var;
 #define is ==
+#define isnt !=
 #define not !
 #define and &&
 #define or ||
@@ -337,23 +338,23 @@ var exit_for(var self);
 
 class {
   var (*open)(var,const char*,const char*);
-  void (*close)(var);
+  void (*done)(var);
   void (*seek)(var,int,int);
   int (*tell)(var);
   void (*flush)(var);
   bool (*eof)(var);
-  int (*read)(var,void*,int);
-  int (*write)(var,void*,int);
+  int (*read_from)(var,void*,int);
+  int (*write_to)(var,void*,int);
 } Stream;
 
 var open(var self, const char* name, const char* access);
-void close(var self);
+void done(var self);
 void seek(var self, int pos, int origin);
 int tell(var self);
 void flush(var self);
 bool eof(var self);
-int read(var self, void* output, int size);
-int write(var self, void* input, int size);
+int read_from(var self, void* output, int size);
+int write_to(var self, void* input, int size);
 
 /** Serialize - Serializable to Stream */
 

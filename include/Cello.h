@@ -4,6 +4,7 @@
 /* Core */
 #include "Cello/Prelude.h"
 #include "Cello/Type.h"
+#include "Cello/Thread.h"
 #include "Cello/Exception.h"
 
 /* Functional */

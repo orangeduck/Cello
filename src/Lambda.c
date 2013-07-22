@@ -1,9 +1,9 @@
-#include "Lambda.h"
+#include "Cello/Lambda.h"
 
-#include "List.h"
-#include "Bool.h"
-#include "None.h"
-#include "Number.h"
+#include "Cello/List.h"
+#include "Cello/Bool.h"
+#include "Cello/None.h"
+#include "Cello/Number.h"
 
 void map(var self, var func) {
   foreach(item in self) {

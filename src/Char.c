@@ -1,6 +1,6 @@
-#include "Char.h"
+#include "Cello/Char.h"
 
-#include "Exception.h"
+#include "Cello/Exception.h"
 
 var Char = methods {
   methods_begin(Char),
@@ -63,12 +63,12 @@ char Char_AsChar(var self) {
 
 void Char_Serial_Read(var self, var input) {
   CharData* cd = cast(self, Char);
-  read(input, &cd->value, 1);
+  read_from(input, &cd->value, 1);
 }
 
 void Char_Serial_Write(var self, var output) {
   CharData* cd = cast(self, Char);
-  write(output, &cd->value, 1);
+  write_to(output, &cd->value, 1);
 }
 
 int Char_Show(var self, var output, int pos) {

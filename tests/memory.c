@@ -18,8 +18,8 @@ PT_SUITE(suite_memory) {
     
     var rx = $(Reference, x);
     
-    PT_ASSERT(rx != x);
-    PT_ASSERT(x != y);
+    PT_ASSERT(rx isnt x);
+    PT_ASSERT(x isnt y);
     PT_ASSERT(neq(x, y));
     PT_ASSERT(x is at(rx,0));
     PT_ASSERT(eq(x, at(rx,0)));

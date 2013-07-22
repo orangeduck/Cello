@@ -42,9 +42,9 @@ data {
 } FunctionData;
 
 #define lambda(name, args) \
-  auto var __LambdaPlus_##name(var); \
-  var name = $(Function, __LambdaPlus_##name); \
-  var __LambdaPlus_##name(var args)
+  auto var __LambdaCello_##name(var); \
+  var name = $(Function, __LambdaCello_##name); \
+  var __LambdaCello_##name(var args)
 
 /** Function_New(var self, var(*func)(var) ); */
 var Function_New(var self, va_list* args);

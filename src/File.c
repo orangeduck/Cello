@@ -1,8 +1,8 @@
-#include "File.h"
+#include "Cello/File.h"
 
-#include "Exception.h"
-#include "Number.h"
-#include "String.h"
+#include "Cello/Exception.h"
+#include "Cello/Number.h"
+#include "Cello/String.h"
 
 #include <assert.h>
 
@@ -26,25 +26,25 @@ var File_New(var self, va_list* args) {
 
 var File_Delete(var self) {
   FileData* fd = cast(self, File);
-  if (fd->f != NULL) { close(self); }
+  if (fd->f != NULL) { done(self); }
   return self;
 }
 
 var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
   
-  if (fd->f != NULL) { close(self); }
+  if (fd->f != NULL) { done(self); }
   
   fd->f = fopen(filename, access);
   
   if (fd->f == NULL) {
-    throw(IOError, "Could not open file: %s", $(String, filename));
+    throw(IOError, "Could not open file: %s", $(String, (char*)filename));
   }
   
   return self;
 }
 
-void File_Close(var self) {
+void File_Done(var self) {
   FileData* fd = cast(self, File);
   int err = fclose(fd->f);
   
@@ -92,7 +92,7 @@ bool File_EOF(var self) {
 }
 
 
-int File_Read(var self, void* output, int size) {
+int File_Read_From(var self, void* output, int size) {
   FileData* fd = cast(self, File);
   int num = fread(output, size, 1, fd->f);
   
@@ -104,7 +104,7 @@ int File_Read(var self, void* output, int size) {
   return num;
 }
 
-int File_Write(var self, void* input, int size) {
+int File_Write_To(var self, void* input, int size) {
   FileData* fd = cast(self, File);
   int num = fwrite(input, size, 1, fd->f);
   
