@@ -7,6 +7,9 @@
 *.so*
 *.a
 *.lo
+*.dll
+*.exe
+*.gz
 
 # VIM related
 .clang_complete

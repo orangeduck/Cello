@@ -1,5 +1,7 @@
-CC=gcc
-AR=ar
+CC = gcc
+AR = ar
+
+VERSION = 0.9.7
 
 SRC = $(wildcard src/*.c)
 OBJ = $(addprefix obj/,$(notdir $(SRC:.c=.o)))
@@ -72,6 +74,11 @@ demos: $(DEMOS_EXE)
 
 demos/%: demos/%.c $(STATIC) | obj
 	$(CC) $< $(STATIC) $(CFLAGS) -o $@
+
+# Dist
+
+dist: all
+	tar -czf libcello-$(VERSION).tar.gz * --exclude=obj --exclude=*.a --exclude=*.so --exclude=*.dll --exclude=*.gz
   
 # Clean
   
