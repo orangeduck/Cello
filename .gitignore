@@ -1,44 +1,9 @@
-# Basic
 *.log
-
-# Autotools
-*.html
-/autom4te.cache
-/stamp-h1
-Makefile
-/config.status
-/config.log
-/config.h
-/aclocal.m4
-Makefile.in
-/config/
-/config.h.in
-/configure
 *~
-/build*/
-m4
-GIT_REVISION
-SVN_REVISION
-libtool
-config.guess
-config.sub
-depcomp
-install-sh
-ltmain.sh
-missing
-compile
 *.libs
 *.o
 *.la
 *.so*
 *.a
-.deps
-*.tar*
-*.zip
 *.lo
-*.gcno
-*.gcda
-app.info
-coverage_report
-
 
