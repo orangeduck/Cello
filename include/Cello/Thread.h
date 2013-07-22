@@ -49,7 +49,7 @@ data {
   var func;
   var args;
   
-#if defined(_unix__)
+#if defined(__unix__)
   pthread_t thread;
 #elif defined(_WIN32)
   HANDLE thread;
