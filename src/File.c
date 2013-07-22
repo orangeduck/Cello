@@ -20,20 +20,20 @@ var File_New(var self, va_list* args) {
   FileData* fd = cast(self, File);
   const char* filename = va_arg(*args, const char*);
   const char* access = va_arg(*args, const char*);
-  open(self, filename, access);
+  stream_open(self, filename, access);
   return self;
 }
 
 var File_Delete(var self) {
   FileData* fd = cast(self, File);
-  if (fd->f != NULL) { done(self); }
+  if (fd->f != NULL) { stream_close(self); }
   return self;
 }
 
 var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
   
-  if (fd->f != NULL) { done(self); }
+  if (fd->f != NULL) { stream_close(self); }
   
   fd->f = fopen(filename, access);
   
@@ -44,7 +44,7 @@ var File_Open(var self, const char* filename, const char* access) {
   return self;
 }
 
-void File_Done(var self) {
+void File_Close(var self) {
   FileData* fd = cast(self, File);
   int err = fclose(fd->f);
   
@@ -92,7 +92,7 @@ bool File_EOF(var self) {
 }
 
 
-int File_Read_From(var self, void* output, int size) {
+int File_Read(var self, void* output, int size) {
   FileData* fd = cast(self, File);
   int num = fread(output, size, 1, fd->f);
   
@@ -104,7 +104,7 @@ int File_Read_From(var self, void* output, int size) {
   return num;
 }
 
-int File_Write_To(var self, void* input, int size) {
+int File_Write(var self, void* input, int size) {
   FileData* fd = cast(self, File);
   int num = fwrite(input, size, 1, fd->f);
   

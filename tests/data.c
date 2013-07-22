@@ -139,19 +139,19 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_int_parse) {
     
-    var f = open($(File, NULL), "test.bin", "w");
+    var f = stream_open($(File, NULL), "test.bin", "w");
     
     put(f, Int, $(Int, 10));
     put(f, Int, $(Int, 32));
     
-    done(f);
+    stream_close(f);
     
-    f = open($(File, NULL), "test.bin", "r");
+    f = stream_open($(File, NULL), "test.bin", "r");
     
     var fst = get(f, Int);
     var snd = get(f, Int);
     
-    done(f);
+    stream_close(f);
     
     PT_ASSERT(as_long(fst) is 10);
     PT_ASSERT(as_long(snd) is 32);
@@ -245,19 +245,19 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_real_parse) {
     
-    var f = open($(File, NULL), "test.bin", "w");
+    var f = stream_open($(File, NULL), "test.bin", "w");
     
     put(f, Real, $(Real, 1.0));
     put(f, Real, $(Real, 3.2));
     
-    done(f);
+    stream_close(f);
     
-    f = open($(File, NULL), "test.bin", "r");
+    f = stream_open($(File, NULL), "test.bin", "r");
     
     var fst = get(f, Real);
     var snd = get(f, Real);
     
-    done(f);
+    stream_close(f);
     
     PT_ASSERT(as_double(fst) is 1.0);
     PT_ASSERT(as_double(snd) is 3.2);
@@ -1321,13 +1321,13 @@ PT_SUITE(suite_data) {
     
     var f0 = $(File, NULL);
     
-    open(f0, "test.txt", "w");
-    write_to(f0, testoutput1, sizeof(testoutput1));
-    done(f0);  
+    stream_open(f0, "test.txt", "w");
+    stream_write(f0, testoutput1, sizeof(testoutput1));
+    stream_close(f0);  
     
-    open(f0, "test.txt", "r");
-    read_from(f0, testinput, sizeof(testoutput1));
-    done(f0);
+    stream_open(f0, "test.txt", "r");
+    stream_read(f0, testinput, sizeof(testoutput1));
+    stream_close(f0);
     
     PT_ASSERT_STR_EQ(testinput, testoutput1);
     
@@ -1337,14 +1337,14 @@ PT_SUITE(suite_data) {
     
     var f = $(File, NULL);
     
-    open(f, "test.bin", "w");
+    stream_open(f, "test.bin", "w");
       
       put(f, Int, $(Int, 1));
       put(f, Int, $(Int, 22));
     
-    done(f);
+    stream_close(f);
     
-    open(f, "test.bin", "r");
+    stream_open(f, "test.bin", "r");
       
       var first = get(f, Int);
       var second = get(f, Int);
@@ -1355,7 +1355,7 @@ PT_SUITE(suite_data) {
       delete(first);
       delete(second);
       
-    done(f);
+    stream_close(f);
     
   }
 

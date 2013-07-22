@@ -353,52 +353,52 @@ double as_double(var self) {
   return iasdouble->as_double(self);
 }
 
-var open(var self, const char* name, const char* access) {
+var stream_open(var self, const char* name, const char* access) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->open);
-  return istream->open(self, name, access);
+  assert(istream->stream_open);
+  return istream->stream_open(self, name, access);
 }
 
-void done(var self) {
+void stream_close(var self) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->done);
-  istream->done(self);
+  assert(istream->stream_close);
+  istream->stream_close(self);
 }
 
-void seek(var self, int pos, int origin) {
+void stream_seek(var self, int pos, int origin) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->seek);
-  istream->seek(self, pos, origin);
+  assert(istream->stream_seek);
+  istream->stream_seek(self, pos, origin);
 }
 
-int tell(var self) {
+int stream_tell(var self) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->tell);
-  return istream->tell(self);
+  assert(istream->stream_tell);
+  return istream->stream_tell(self);
 }
 
-void flush(var self) {
+void stream_flush(var self) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->flush);
-  istream->flush(self);
+  assert(istream->stream_flush);
+  istream->stream_flush(self);
 }
 
-bool eof(var self) {
+bool stream_eof(var self) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->eof);
-  return istream->eof(self);
+  assert(istream->stream_eof);
+  return istream->stream_eof(self);
 }
 
-int read_from(var self, void* output, int size) {
+int stream_read(var self, void* output, int size) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->read_from);
-  return istream->read_from(self, output, size);
+  assert(istream->stream_read);
+  return istream->stream_read(self, output, size);
 }
 
-int write_to(var self, void* input, int size) {
+int stream_write(var self, void* input, int size) {
   Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->write_to);
-  return istream->write_to(self, input, size);
+  assert(istream->stream_write);
+  return istream->stream_write(self, input, size);
 }
 
 void serial_read(var self, var input) {

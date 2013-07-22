@@ -135,12 +135,12 @@ void Int_Abs(var self) {
 
 void Int_Serial_Read(var self, var stream) {
   IntData* io = cast(self, Int);
-  read_from(stream, &io->value, sizeof(long));
+  stream_read(stream, &io->value, sizeof(long));
 }
 
 void Int_Serial_Write(var self, var stream) {
   IntData* io = cast(self, Int);
-  write_to(stream, &io->value, sizeof(long));
+  stream_write(stream, &io->value, sizeof(long));
 }
 
 long Int_AsLong(var self) {
@@ -266,12 +266,12 @@ void Real_Abs(var self) {
 
 void Real_Serial_Read(var self, var stream) {
   RealData* ro = cast(self, Real);
-  read_from(stream, &ro->value, sizeof(double));
+  stream_read(stream, &ro->value, sizeof(double));
 }
 
 void Real_Serial_Write(var self, var stream) {
   RealData* ro = cast(self, Real);
-  write_to(stream, &ro->value, sizeof(double));
+  stream_write(stream, &ro->value, sizeof(double));
 }
 
 double Real_AsDouble(var self) {

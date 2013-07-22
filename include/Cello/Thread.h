@@ -6,8 +6,14 @@
 #ifndef CelloThread_h
 #define CelloThread_h
 
-#ifdef __unix__
+#if defined(__unix__)
   #include <pthread.h>
+#elif defined(_WIN32)
+  #undef data
+  #undef in
+  #include <windows.h>
+  #define data typedef struct
+  #define in ,
 #else
   #error "Unsupported Threading Environment"
 #endif
@@ -30,41 +36,44 @@ void terminate(var self);
 /* Thread Type */
 
 global var Thread;
+ 
+enum {
+  EXC_MAX_DEPTH = 2048,
+};
 
-#ifdef __unix__
- 
-  enum {
-    EXC_MAX_DEPTH = 2048,
-  };
- 
-  data {
-    
-    var type;
-    
-    /* Function Details */
-    var func;
-    var args;
-    pthread_t thread;
-    bool is_main;
-    bool running;
-    
-    /* Exception Details */
-    bool exc_active;
-    int exc_depth;
-    jmp_buf exc_buffers[EXC_MAX_DEPTH];
-    
-    var exc_obj;
-    var exc_msg;
-    const char* exc_func;
-    const char* exc_file;
-    unsigned int exc_lineno;
-    
-    void* exc_backtrace[25];
-    int exc_backtrace_count;
-    
-  } ThreadData;
+data {
   
+  var type;
+  
+  /* Function Details */
+  var func;
+  var args;
+  
+#if defined(_unix__)
+  pthread_t thread;
+#elif defined(_WIN32)
+  HANDLE thread;
+  DWORD id;
 #endif
+
+  bool is_main;
+  bool running;
+  
+  /* Exception Details */
+  bool exc_active;
+  int exc_depth;
+  jmp_buf exc_buffers[EXC_MAX_DEPTH];
+  
+  var exc_obj;
+  var exc_msg;
+  const char* exc_func;
+  const char* exc_file;
+  unsigned int exc_lineno;
+  
+  void* exc_backtrace[25];
+  int exc_backtrace_count;
+  
+} ThreadData;
 
 /** Thread_New(var self, var function) */
 var Thread_New(var self, va_list* args);
@@ -107,15 +116,16 @@ var lock_try(var self);
 /* Mutex Type */
 
 global var Mutex;
-
-#ifdef __unix__
  
-  data {
-    var type;
-    pthread_mutex_t mutex;
-  } MutexData;
-    
+data {
+  var type;
+#if defined(__unix__)
+  pthread_mutex_t mutex;
+#elif defined(_WIN32)
+  HANDLE mutex;
 #endif
+
+} MutexData;
 
 /** Mutex_New(var self) */
 var Mutex_New(var self, va_list* args);

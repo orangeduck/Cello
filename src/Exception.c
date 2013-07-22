@@ -47,10 +47,6 @@ void Exception_Register_Signals(void) {
   signal(SIGTERM, Exception_Signal);
 }
 
-#ifdef __unix__
-
-#include <execinfo.h>
-
 void Exception_Inc(void) {
   ThreadData* td = current(Thread);
   if (td->exc_depth == EXC_MAX_DEPTH) {
@@ -120,6 +116,7 @@ local void Exception_Error(void)  {
   print_to($(File, stderr), 0, "!!\tStack Trace: \n");
   print_to($(File, stderr), 0, "!!\t\n");
 
+#if defined(__unix__) 
   char** symbols = backtrace_symbols(td->exc_backtrace, td->exc_backtrace_count);  
   
   for (int i = 0; i < td->exc_backtrace_count; i++) {
@@ -128,6 +125,7 @@ local void Exception_Error(void)  {
   print_to($(File, stderr), 0, "!!\t\n");
   
   free(symbols);
+#endif
   
   exit(EXIT_FAILURE);
   
@@ -141,7 +139,9 @@ local void main_exc_msg_free(void) {
 var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...) {
 
   ThreadData* td = current(Thread);
+#if defined(__unix__) 
   td->exc_backtrace_count = backtrace(td->exc_backtrace, 25);
+#endif
   td->exc_obj = obj;
   td->exc_file = file;
   td->exc_func = func;
@@ -203,5 +203,3 @@ var Exception_Catch(void* unused, ...) {
   return Undefined;
   
 }
-
-#endif

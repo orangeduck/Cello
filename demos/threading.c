@@ -3,15 +3,14 @@
 #include "Cello.h"
 
 int main(int argc, char** argv) {
-  
-  srand(time(NULL));
-  
+
   var mut = new(Mutex);
   
   lambda(thread_function, args) {
     with(m in mut) {
       println("Hello from %$! with Arguments %$", current(Thread), args);
     }
+    return None;
   }
   
   var threads = new(List, 5,
@@ -22,10 +21,7 @@ int main(int argc, char** argv) {
     new(Thread, thread_function));
   
   foreach(t in threads) {
-    int a0 = rand();
-    int a1 = rand();
-    call(t, $(Int, a0), $(Int, a1));
-    sleep(1);
+    call(t, None);
   }
   
   foreach(t in threads) {

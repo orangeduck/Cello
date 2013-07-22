@@ -337,24 +337,24 @@ var exit_for(var self);
 /** Stream - File like object */
 
 class {
-  var (*open)(var,const char*,const char*);
-  void (*done)(var);
-  void (*seek)(var,int,int);
-  int (*tell)(var);
-  void (*flush)(var);
-  bool (*eof)(var);
-  int (*read_from)(var,void*,int);
-  int (*write_to)(var,void*,int);
+  var (*stream_open)(var,const char*,const char*);
+  void (*stream_close)(var);
+  void (*stream_seek)(var,int,int);
+  int (*stream_tell)(var);
+  void (*stream_flush)(var);
+  bool (*stream_eof)(var);
+  int (*stream_read)(var,void*,int);
+  int (*stream_write)(var,void*,int);
 } Stream;
 
-var open(var self, const char* name, const char* access);
-void done(var self);
-void seek(var self, int pos, int origin);
-int tell(var self);
-void flush(var self);
-bool eof(var self);
-int read_from(var self, void* output, int size);
-int write_to(var self, void* input, int size);
+var stream_open(var self, const char* name, const char* access);
+void stream_close(var self);
+void stream_seek(var self, int pos, int origin);
+int stream_tell(var self);
+void stream_flush(var self);
+bool stream_eof(var self);
+int stream_read(var self, void* output, int size);
+int stream_write(var self, void* input, int size);
 
 /** Serialize - Serializable to Stream */
 

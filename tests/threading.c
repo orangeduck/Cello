@@ -1,7 +1,23 @@
 #include "ptest.h"
 #include "Cello.h"
 
+#if defined(__unix__)
 #include <unistd.h>
+#elif defined(_WIN32)
+#undef in
+#undef data
+#include <windows.h>
+#define in ,
+#define data typedef struct
+#endif
+
+void pause(int ms) {
+#if defined(__unix__)
+  usleep(ms * 1000);
+#elif defined(_WIN32)
+  Sleep(ms);
+#endif
+}
 
 PT_SUITE(suite_threading) {
   
@@ -101,7 +117,7 @@ PT_SUITE(suite_threading) {
     
     lambda(f, args) {
       try {
-        sleep(2);
+        pause(20);
         PT_ASSERT(Exception_Depth() is 0);
       } catch(e) {
       }
@@ -111,7 +127,7 @@ PT_SUITE(suite_threading) {
     var t = new(Thread, f);
     
     call(t, None);
-    sleep(1);
+    pause(10);
     PT_ASSERT(Exception_Depth() is -1);
     join(t);
     

@@ -438,16 +438,16 @@ PT_SUITE(suite_core) {
     
     PT_ASSERT(f);
     
-    open(f, "test.bin", "w");
+    stream_open(f, "test.bin", "w");
       
       PT_ASSERT(f);
       
       put(f, Int, $(Int, 1));
       put(f, Int, $(Int, 22));
     
-    done(f);
+    stream_close(f);
     
-    open(f, "test.bin", "r");
+    stream_open(f, "test.bin", "r");
       
       PT_ASSERT(f);
       
@@ -460,7 +460,7 @@ PT_SUITE(suite_core) {
       delete(first);
       delete(second);
       
-    done(f);
+    stream_close(f);
     
     PT_ASSERT(f);
   }
