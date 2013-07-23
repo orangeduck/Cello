@@ -11,7 +11,7 @@
 #define data typedef struct
 #endif
 
-void pause(int ms) {
+void cello_sleep(int ms) {
 #if defined(__unix__)
   usleep(ms * 1000);
 #elif defined(_WIN32)
@@ -117,7 +117,7 @@ PT_SUITE(suite_threading) {
     
     lambda(f, args) {
       try {
-        pause(20);
+        cello_sleep(20);
         PT_ASSERT(Exception_Depth() is 0);
       } catch(e) {
       }
@@ -127,7 +127,7 @@ PT_SUITE(suite_threading) {
     var t = new(Thread, f);
     
     call(t, None);
-    pause(10);
+    cello_sleep(10);
     PT_ASSERT(Exception_Depth() is -1);
     join(t);
     

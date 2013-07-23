@@ -101,6 +101,10 @@ int Exception_Depth(void) {
   return td->exc_depth;
 }
 
+#if defined(__unix__) 
+#include <execinfo.h>
+#endif
+
 local void Exception_Error(void)  {
   
   ThreadData* td = current(Thread);

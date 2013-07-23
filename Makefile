@@ -22,7 +22,7 @@ ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
 	CFLAGS += -fPIC
-	LFLAGS += -lpthread
+	LIBS = -lpthread -lm
 	INSTALL_LIB = cp $(STATIC) /usr/local/lib/$(STATIC)
 	INSTALL_INC = cp -r include/* /usr/local/include/
 endif
@@ -31,7 +31,7 @@ ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
 	CFLAGS += -fPIC -fnested-functions
-	LFLAGS += -lpthread
+	LIBS = -lpthread -lm
 	INSTALL_LIB = cp $(STATIC) /usr/local/lib/$(STATIC)
 	INSTALL_INC = cp -r include/* /usr/local/include/
 endif
@@ -39,6 +39,7 @@ endif
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	DYNAMIC = libCello.dll
 	STATIC = libCello.a
+	LIBS = 
 	INSTALL_LIB = cp $(STATIC) C:/MinGW64/x86_64-w64-mingw32/lib/$(STATIC); cp $(DYNAMIC) C:/MinGW64/x86_64-w64-mingw32/bin/$(DYNAMIC)
 	INSTALL_INC = cp -r include/* C:/MinGW64/x86_64-w64-mingw32/include/
 endif
@@ -49,20 +50,20 @@ all: $(DYNAMIC) $(STATIC)
 
 $(DYNAMIC): $(OBJ)
 	$(CC) $(OBJ) $(LFLAGS) -o $@
-	
+
 $(STATIC): $(OBJ)
 	$(AR) rcs $@ $(OBJ)
-	
+
 obj/%.o: src/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
   
 obj:
 	mkdir obj
-	
+
 # Tests
 
 check: $(TESTS_OBJ) $(STATIC)
-	$(CC) $(TESTS_OBJ) $(STATIC) -o test
+	$(CC) $(TESTS_OBJ) $(STATIC) $(LIBS) -o test
 	./test
   
 obj/%.o: tests/%.c | obj
@@ -73,7 +74,7 @@ obj/%.o: tests/%.c | obj
 demos: $(DEMOS_EXE)
 
 demos/%: demos/%.c $(STATIC) | obj
-	$(CC) $< $(STATIC) $(CFLAGS) -o $@
+	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) -o $@
 
 # Dist
 
