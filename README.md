@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   }
   
   /* "with" automatically closes file at end of scope. */
-  with(file in open($(File, NULL), "prices.bin", "wb")) {
+  with(file in stream_open($(File, NULL), "prices.bin", "wb")) {
   
     /* First class function object */
     lambda(write_pair, args) {

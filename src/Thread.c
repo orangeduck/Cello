@@ -266,13 +266,13 @@ void Thread_Terminate(var self) {
 }
 
 void lock(var self) {
-  Lockable* ilockable = type_class(type_of(self), Lockable);
+  Lock* ilockable = type_class(type_of(self), Lock);
   assert(ilockable->lock);
   ilockable->lock(self);  
 }
 
 void unlock(var self) {
-  Lockable* ilockable = type_class(type_of(self), Lockable);
+  Lock* ilockable = type_class(type_of(self), Lock);
   assert(ilockable->unlock);
   ilockable->unlock(self);
 }
@@ -283,7 +283,7 @@ var Mutex = methods {
   method(Mutex, Assign),
   method(Mutex, Copy),
   method(Mutex, With),
-  method(Mutex, Lockable),
+  method(Mutex, Lock),
   methods_end(Mutex)
 };
 

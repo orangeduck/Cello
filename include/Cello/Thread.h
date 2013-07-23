@@ -101,13 +101,13 @@ instance(Thread, Call) = { Thread_Call };
 instance(Thread, Process) = { Thread_Current, Thread_Join, Thread_Terminate };
 instance(Thread, AsLong) = { Thread_AsLong };
 
-/* Lockable */
+/* Lock */
 
 class {
   void (*lock)(var);
   void (*unlock)(var);
   var  (*lock_try)(var);
-} Lockable;
+} Lock;
 
 void lock(var self);
 void unlock(var self);
@@ -140,7 +140,7 @@ void Mutex_Unlock(var self);
 instance(Mutex, New) = { sizeof(MutexData), Mutex_New, Mutex_Delete };
 instance(Mutex, Assign) = { Mutex_Assign };
 instance(Mutex, Copy) = { Mutex_Copy };
-instance(Mutex, Lockable) = { Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try };
+instance(Mutex, Lock) = { Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try };
 instance(Mutex, With) = { Mutex_Lock, Mutex_Unlock };
 
 #endif
