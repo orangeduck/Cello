@@ -1,13 +1,20 @@
 libCello
 ========
 
+Cello is a GNU99 C library which brings higher level programming to C.
+
+* __Interfaces__ allow for structured design
+* __Duck Typing__ allows for generic functions
+* __Exceptions__ control error handling
+* __Constructors/Destructors__ aid memory management
+* __Syntactic Sugar__ increases readability
+* __C Library__ means excellent performance and integration
+
 Example
 -------
 
 ```c
-/*
-** Example libCello Program
-*/
+/* Example libCello Program */
 
 #include "Cello.h"
 
@@ -20,68 +27,71 @@ int main(int argc, char** argv) {
 
   /* Heap objects are created using "new" */
   var items = new(List, 3, int_item, float_item, string_item);
-	
+
   /* Collections can be looped over */
-  foreach(item in items) {
+  foreach (item in items) {
     /* Types are also objects */
     var type = type_of(item);
-    print("Type: '%$'\n", type);
+    print("Object %$ has type %$\n", item, type);
   }
-  
+
   /* Heap objects destroyed with "delete" */
-  delete(items);
-  
+  delete(items); 
+}
+```
+
+```c
+/* Another Example Cello Program */
+
+#include "Cello.h"
+
+int main(int argc, char** argv) {
+
   /* Tables require "Eq" and "Hash" on key type */
   var prices = new(Table, String, Int);
   put(prices, $(String, "Apple"),  $(Int, 12)); 
   put(prices, $(String, "Banana"), $(Int,  6)); 
-  put(prices, $(String, "Pear"),   $(Int, 55)); 
-  
-  var pear_price = get(prices, $(String, "Pear"));
-  print("Price of a 'Pear' is %$\n", pear_price);
+  put(prices, $(String, "Pear"),   $(Int, 55));
 
   /* Tables also supports iteration */
-  foreach(key in prices) {
+  foreach (key in prices) {
     var price = get(prices, key);
     print("Price of %$ is %$\n", key, price);
   }
-  
+
   /* "with" automatically closes file at end of scope. */
-  with(file in stream_open($(File, NULL), "prices.bin", "wb")) {
-  
+  with (file in open($(File, NULL), "prices.bin", "wb")) {
+
     /* First class function object */
     lambda(write_pair, args) {
-      
+
       /* Run time type-checking with "cast" */
       var key = cast(at(args, 0), String);
       var val = cast(get(prices, key), Int);
-      
-      /* Format specifier for objects is %$ */
-      print_to(file, 0, "%$ :: %$\n", key, val);
-      
+
+      try {
+        print_to(file, 0, "%$ :: %$\n", key, val);
+      } catch (e in IOError) {
+        println("Could not write to file - got %$", e);
+      }
+
       return None;
     };
-    
+
     /* Higher order functions */
     map(prices, write_pair);
-  
   }
-  
+
   delete(prices);
-  
 }
 ```
 
-About
------
+Inspiration
+-----------
 
-libCello is a GNU99 C __library__ which brings higher level programming to C. It takes inspiration from Obj-C, Haskell and Python. Most closely libCello resembles a C dialect with interfaces, dynamic/duck typing, exceptions, and some syntactic sugar. There are a selection of new keywords, and many generically named functions in the namespace, but other than that it should be fully compatible with normal C code.
+The high level stucture of Cello projects is inspired by Haskell, while the syntax and semantics are inspired by Python and Obj-C. Cello isn't about Object Orientation in C, but I hope that with Cello I've turned C into something of a dynamic and powerful functional language which it may have once been.
 
-Although I've made the syntax pleasant, libCello isn't a library for beginners. It is for C power users, as manual memory management doesn't play nicely with many higher-order concepts.
-
-The high level stucture of libCello projects is inspired by Haskell and C, while the syntax and semantics are inspired by Python and Obj-C. Object Orientation in C was not the goal of this project, but I hope that with libCello I've turned C into something of a dynamic and powerful functional language which it may have once been.
-
-libCello was created *just for fun* as an experiment to see how far we could push the C language. Therefore __libCello should NOT be used for production code!__ Many of the data structures are still inefficient in their implementation and using this library sacrifices much of the compile-time safety of the C language. Please understand the risks before you choose to use libCello.
+Although the syntax is pleasant, Cello isn't a library for beginners. It is for C power users, as manual memory management doesn't play nicely with many higher-order concepts. Most of all Cello is just a fun experiment to see what C would look like when hacked to its limits.
 
 More Examples
 -------------
@@ -437,4 +447,4 @@ You can e-mail me at:
 
 `contact@theorangeduck.com`
 
-Or get in contact via the IRC channel at #libCello on Freenode
+Or get in contact via the IRC channel at `#libCello` on Freenode
