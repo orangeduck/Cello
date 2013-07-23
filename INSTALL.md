@@ -12,7 +12,7 @@ One can build the source distribution using
 
     $ make
 
-This will build `libCello.a` and `libCello.so` which can then be included directly into any projects.
+This will build `libCello.a` and `libCello.so` which can then be included directly into any projects as required.
 
 
 Installing
