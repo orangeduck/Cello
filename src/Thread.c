@@ -106,7 +106,7 @@ long Thread_Hash(var self) {
 long Thread_AsLong(var self) {
   ThreadData* td = cast(self, Thread);
   if (not td->running) { throw(ValueError, "Cannot get thread ID, thread not running!"); }
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   return (long)td->thread;
 #elif defined(_WIN32)
   return (long)td->id;
@@ -128,7 +128,7 @@ var Thread_Lt(var self, var obj) {
 
 local bool tls_key_created = false;
 
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
 
 local pthread_key_t key_thread_wrapper;
 local void tls_key_create(void) {
@@ -211,7 +211,7 @@ local ThreadData main_thread_wrapper = { is_main: true, exc_depth: -1 };
 
 var Thread_Current(void) {
   
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   var wrapper = pthread_getspecific(key_thread_wrapper);
 #elif defined(_WIN32)
   var wrapper = TlsGetValue(key_thread_wrapper);
@@ -325,7 +325,7 @@ void Mutex_Lock(var self) {
 
 var Mutex_Lock_Try(var self) {
   MutexData* md = cast(self, Mutex);
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   int err = pthread_mutex_trylock(&md->mutex);
   if (err == EBUSY) { return False; }
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Lock Try"); }
