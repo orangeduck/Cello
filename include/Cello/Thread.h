@@ -6,7 +6,7 @@
 #ifndef CelloThread_h
 #define CelloThread_h
 
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   #include <pthread.h>
 #elif defined(_WIN32)
   #undef data
@@ -49,7 +49,7 @@ data {
   var func;
   var args;
   
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   pthread_t thread;
 #elif defined(_WIN32)
   HANDLE thread;
@@ -119,7 +119,7 @@ global var Mutex;
  
 data {
   var type;
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_t mutex;
 #elif defined(_WIN32)
   HANDLE mutex;
