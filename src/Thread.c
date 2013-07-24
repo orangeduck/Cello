@@ -191,7 +191,7 @@ var Thread_Call(var self, var args) {
   
   /* Call Init Thread & Run */
   
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   int err = pthread_create(&td->thread, NULL, Thread_Init_Run, td->args);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Creation"); }
   if (err is EAGAIN) { throw(OutOfMemoryError, "Not enough resources to create another Thread"); }
@@ -220,7 +220,7 @@ var Thread_Current(void) {
   if (wrapper) {
     return wrapper;
   } else {
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
     main_thread_wrapper.thread = pthread_self();
 #elif defined(_WIN32)
     main_thread_wrapper.thread = GetCurrentThread();
@@ -234,7 +234,7 @@ void Thread_Join(var self) {
   ThreadData* td = cast(self, Thread);
   if (not td->thread) { return; }
   
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   int err = pthread_join(td->thread, NULL);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Join"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
@@ -248,7 +248,7 @@ void Thread_Terminate(var self) {
   ThreadData* td = cast(self, Thread);
   if (not td->thread) { return; }
   
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   int err = pthread_kill(td->thread, SIGINT);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Kill"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
@@ -278,7 +278,7 @@ var Mutex = methods {
 
 var Mutex_New(var self, va_list* args) {
   MutexData* md = cast(self, Mutex);
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_init(&md->mutex, NULL);
 #elif defined(_WIN32)
   md->mutex = CreateMutex(NULL, false, NULL);
@@ -288,7 +288,7 @@ var Mutex_New(var self, va_list* args) {
 
 var Mutex_Delete(var self) {
   MutexData* md = cast(self, Mutex);
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_destroy(&md->mutex);
 #elif defined(_WIN32)
   CloseHandle(md->mutex);
@@ -310,7 +310,7 @@ var Mutex_Copy(var self) {
 
 void Mutex_Lock(var self) {
   MutexData* md = cast(self, Mutex);
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   int err = pthread_mutex_lock(&md->mutex);
   if (err is EINVAL)     { throw(ValueError, "Invalid Argument to Mutex Lock"); }
   //if (err is EDESTROYED) { throw(ResourceError, "Mutex has been Destroyed"); }
@@ -339,7 +339,7 @@ var Mutex_Lock_Try(var self) {
 
 void Mutex_Unlock(var self) {
   MutexData* md = cast(self, Mutex);
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
   int err = pthread_mutex_unlock(&md->mutex);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Unlock"); }
   if (err is EPERM)  { throw(ResourceError, "Mutex cannot be held by caller"); }
