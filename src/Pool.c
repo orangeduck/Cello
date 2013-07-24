@@ -3,18 +3,12 @@
 #include "Cello/Reference.h"
 #include "Cello/Number.h"
 
-#include <assert.h>
-
 var retain(var p, var x) {
-  Retain* iretain = type_class(type_of(p), Retain);
-  assert(iretain->retain);
-  return iretain->retain(p, x);
+  return type_class_method(type_of(p), Retain, retain, p, x);
 }
 
 void release(var p, var x) {
-  Retain* iretain = type_class(type_of(p), Retain);
-  assert(iretain->release);
-  iretain->release(p, x);
+  type_class_method(type_of(p), Retain, release, p, x);
 }
 
 var Pool = methods {

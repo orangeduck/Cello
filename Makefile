@@ -2,6 +2,7 @@ CC = gcc
 AR = ar
 
 VERSION = 0.9.7
+PACKAGE = libCello-$(VERSION)
 
 SRC = $(wildcard src/*.c)
 OBJ = $(addprefix obj/,$(notdir $(SRC:.c=.o)))
@@ -78,9 +79,13 @@ demos/%: demos/%.c $(STATIC) | obj
 
 # Dist
 
-dist: all
-	tar -czf libcello-$(VERSION).tar.gz * --exclude=obj --exclude=*.a --exclude=*.so --exclude=*.dll --exclude=*.gz
-  
+dist: all | $(PACKAGE)
+	cp -R demos include src tests INSTALL.md LICENSE.md Makefile README.md $(PACKAGE)
+	tar -czf $(PACKAGE).tar.gz $(PACKAGE)
+ 
+$(PACKAGE):
+	mkdir $(PACKAGE)
+ 
 # Clean
   
 clean:

@@ -190,15 +190,11 @@ And in the source file...
 
 ```c
 float dot(var self, var obj) {
-  Vector* ivector = type_class(type_of(self), Vector);
-  assert(ivector->dot);
-  return ivector->dot(self, obj);
+  return type_class_method(type_of(self), Vector, dot, self, obj);
 }
 
 float length(var self) {
-  Vector* ivector = type_class(type_of(self), Vector);
-  assert(ivector->length);
-  return ivector->length(self);
+  return type_class_method(type_of(self), Vector, length, self);
 }
 ```
 

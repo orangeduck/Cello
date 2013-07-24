@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 var Undefined = Singleton(Undefined);
 
@@ -91,42 +90,32 @@ void delete(var self) {
 }
 
 var construct(var self, ...) {
-  New* inew = type_class(type_of(self), New);
-  assert(inew->construct);
   va_list args;
   va_start(args, self);
-  self = inew->construct(self, &args);
+  self = type_class_method(type_of(self), New, construct, self, &args);
   va_end(args);
   return self;
 }
 
 var destruct(var self) {
-  New* inew = type_class(type_of(self), New);
-  assert(inew->destruct); 
-  return inew->destruct(self);
+  return type_class_method(type_of(self), New, destruct, self);
 }
 
 void assign(var self, var obj) {
-  Assign* iassign = type_class(type_of(self), Assign);
-  assert(iassign->assign);
-  iassign->assign(self, obj);
+  type_class_method(type_of(self), Assign, assign, self, obj);
 }
 
 var copy(var self) {
-  Copy* icopy = type_class(type_of(self), Copy);
-  assert(icopy->copy);
-  return icopy->copy(self);
+  return type_class_method(type_of(self), Copy, copy, self);
 }
 
 var eq(var lhs, var rhs) {
   
   if (not type_implements(type_of(lhs), Eq)) {
     return (var)(intptr_t)(lhs == rhs);
+  } else {
+    return type_class_method(type_of(lhs), Eq, eq, lhs, rhs);
   }
-  
-  Eq* ieq = type_class(type_of(lhs), Eq);
-  assert(ieq->eq);
-  return ieq->eq(lhs, rhs);
   
 }
 
@@ -135,15 +124,12 @@ var neq(var lhs, var rhs) {
 }
 
 var gt(var lhs, var rhs) {
-  Ord* iord = type_class(type_of(lhs), Ord);
-  assert(iord->gt);
-  return iord->gt(lhs, rhs);
+  return type_class_method(type_of(lhs), Ord, gt, lhs, rhs);
 }
 
 var lt(var lhs, var rhs) {
-  Ord* iord = type_class(type_of(lhs), Ord);
-  assert(iord->lt);
-  return iord->lt(lhs, rhs);
+  return type_class_method(type_of(lhs), Ord, lt, lhs, rhs);
+
 }
 
 var ge(var lhs, var rhs) {
@@ -155,9 +141,7 @@ var le(var lhs, var rhs) {
 }
 
 int len(var self) {
-  Collection* icollection = type_class(type_of(self), Collection);
-  assert(icollection->len);
-  return icollection->len(self);
+  return type_class_method(type_of(self), Collection, len, self);
 }
 
 var is_empty(var self) {
@@ -165,21 +149,15 @@ var is_empty(var self) {
 }
 
 void clear(var self) {
-  Collection* icollection = type_class(type_of(self), Collection);
-  assert(icollection->clear);
-  icollection->clear(self);
+  type_class_method(type_of(self), Collection, clear, self);
 }
 
 var contains(var self, var obj) {
-  Collection* icollection = type_class(type_of(self), Collection);
-  assert(icollection->contains);
-  return icollection->contains(self, obj);
+  return type_class_method(type_of(self), Collection, contains, self, obj);
 }
 
 void discard(var self, var obj) {
-  Collection* icollection = type_class(type_of(self), Collection);
-  assert(icollection->discard);
-  icollection->discard(self, obj);
+  type_class_method(type_of(self), Collection, discard, self, obj);
 }
 
 var maximum(var self) {
@@ -211,206 +189,140 @@ var minimum(var self) {
 }
 
 void reverse(var self) {
-  Reverse* ireverse = type_class(type_of(self), Reverse);
-  assert(ireverse->reverse);
-  ireverse->reverse(self);
+  type_class_method(type_of(self), Reverse, reverse, self);
 }
 
 void sort(var self) {
-  Sort* isort = type_class(type_of(self), Sort);
-  assert(isort->sort);
-  isort->sort(self);
+  type_class_method(type_of(self), Sort, sort, self);
 }
 
 void append(var self, var obj) {
-  Append* iappend = type_class(type_of(self), Append);
-  assert(iappend->append);
-  iappend->append(self, obj);
+  type_class_method(type_of(self), Append, append, self, obj);
 }
 
 var iter_start(var self) {
-  Iter* iiter = type_class(type_of(self), Iter);
-  assert(iiter->iter_start);
-  return iiter->iter_start(self);
+  return type_class_method(type_of(self), Iter, iter_start, self);
 }
 
 var iter_end(var self) {
-  Iter* iiter = type_class(type_of(self), Iter);
-  assert(iiter->iter_end);
-  return iiter->iter_end(self);
+  return type_class_method(type_of(self), Iter, iter_end, self);
 }
 
 var iter_next(var self, var curr) {
-  Iter* iiter = type_class(type_of(self), Iter);
-  assert(iiter->iter_next);
-  return iiter->iter_next(self, curr);
+  return type_class_method(type_of(self), Iter, iter_next, self, curr);
 }
 
 var at(var self, int index) {
-  At* iat = type_class(type_of(self), At);
-  assert(iat->at);
-  return iat->at(self, index);
+  return type_class_method(type_of(self), At, at, self, index);
 }
 
 void set(var self, int index, var value) {
-  At* iat = type_class(type_of(self), At);
-  assert(iat->set);
-  iat->set(self, index, value);
+  type_class_method(type_of(self), At, set, self, index, value);
 }
 
 void push(var self, var val) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->push);
-  ipush->push(self, val);
+  type_class_method(type_of(self), Push, push, self, val);
 }
 
 void push_at(var self, var val, int index) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->push_at);
-  ipush->push_at(self, val, index);
+  type_class_method(type_of(self), Push, push_at, self, val, index);
 }
 
 void push_back(var self, var val) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->push_back);
-  ipush->push_back(self, val);
+  type_class_method(type_of(self), Push, push_back, self, val);
 }
 
 void push_front(var self, var val) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->push_front);
-  ipush->push_front(self, val);
+  type_class_method(type_of(self), Push, push_front, self, val);
 }
 
 var pop(var self) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->pop);
-  return ipush->pop(self);
+  return type_class_method(type_of(self), Push, pop, self);
 }
 
 var pop_at(var self, int index) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->pop_at);
-  return ipush->pop_at(self, index);
+  return type_class_method(type_of(self), Push, pop_at, self, index);
 }
 
 var pop_back(var self) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->pop_back);
-  return ipush->pop_back(self);
+  return type_class_method(type_of(self), Push, pop_back, self);
 }
 
 var pop_front(var self) {
-  Push* ipush = type_class(type_of(self), Push);
-  assert(ipush->pop_front);
-  return ipush->pop_front(self);
+  return type_class_method(type_of(self), Push, pop_front, self);
 }
 
 long hash(var self) {
 
   if (not type_implements(type_of(self), Hash)) {
     return (long)(intptr_t)self;
+  } else {
+    return type_class_method(type_of(self), Hash, hash, self);
   }
-  
-  Hash* ihash = type_class(type_of(self), Hash);
-  assert(ihash->hash);
-  return ihash->hash(self);
 }
 
 var get(var self, var key) {
-  Dict* idict = type_class(type_of(self), Dict);
-  assert(idict->get);
-  return idict->get(self, key);
+  return type_class_method(type_of(self), Dict, get, self, key);
 }
 
 void put(var self, var key, var val) {
-  Dict* idict = type_class(type_of(self), Dict);
-  assert(idict->put);
-  return idict->put(self, key, val);
+  type_class_method(type_of(self), Dict, put, self, key, val);
 }
 
 char as_char(var self) {
-  AsChar* iaschar = type_class(type_of(self), AsChar);
-  assert(iaschar->as_char);
-  return iaschar->as_char(self);
+  return type_class_method(type_of(self), AsChar, as_char, self);
 }
 
 const char* as_str(var self) {
-  AsStr* iasstr = type_class(type_of(self), AsStr);
-  assert(iasstr->as_str);
-  return iasstr->as_str(self);
+  return type_class_method(type_of(self), AsStr, as_str, self);
 }
 
 long as_long(var self) {
-  AsLong* iaslong = type_class(type_of(self), AsLong);
-  assert(iaslong->as_long);
-  return iaslong->as_long(self);
+  return type_class_method(type_of(self), AsLong, as_long, self);
 }
 
 double as_double(var self) {
-  AsDouble* iasdouble = type_class(type_of(self), AsDouble);
-  assert(iasdouble->as_double);
-  return iasdouble->as_double(self);
+  return type_class_method(type_of(self), AsDouble, as_double, self);
 }
 
 var stream_open(var self, const char* name, const char* access) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_open);
-  return istream->stream_open(self, name, access);
+  return type_class_method(type_of(self), Stream, stream_open, self, name, access);
 }
 
 void stream_close(var self) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_close);
-  istream->stream_close(self);
+  type_class_method(type_of(self), Stream, stream_close, self);
 }
 
 void stream_seek(var self, int pos, int origin) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_seek);
-  istream->stream_seek(self, pos, origin);
+  type_class_method(type_of(self), Stream, stream_seek, self, pos, origin);
 }
 
 int stream_tell(var self) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_tell);
-  return istream->stream_tell(self);
+  return type_class_method(type_of(self), Stream, stream_tell, self);
 }
 
 void stream_flush(var self) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_flush);
-  istream->stream_flush(self);
+  type_class_method(type_of(self), Stream, stream_flush, self);
 }
 
 bool stream_eof(var self) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_eof);
-  return istream->stream_eof(self);
+  return type_class_method(type_of(self), Stream, stream_eof, self);
 }
 
 int stream_read(var self, void* output, int size) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_read);
-  return istream->stream_read(self, output, size);
+  return type_class_method(type_of(self), Stream, stream_read, self, output, size);
 }
 
 int stream_write(var self, void* input, int size) {
-  Stream* istream = type_class(type_of(self), Stream);
-  assert(istream->stream_write);
-  return istream->stream_write(self, input, size);
+  return type_class_method(type_of(self), Stream, stream_write, self, input, size);
 }
 
 void serial_read(var self, var input) {
-  Serialize* iserialize = type_class(type_of(self), Serialize);
-  assert(iserialize->serial_read);
-  iserialize->serial_read(self, input);
+  type_class_method(type_of(self), Serialize, serial_read, self, input);
 }
 
 void serial_write(var self, var output) {
-  Serialize* iserialize = type_class(type_of(self), Serialize);
-  assert(iserialize->serial_write);
-  iserialize->serial_write(self, output);
+  type_class_method(type_of(self), Serialize, serial_write, self, output);
 }
 
 void enter_with(var self) {

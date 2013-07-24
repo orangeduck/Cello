@@ -4,8 +4,6 @@
 #include "Cello/Number.h"
 #include "Cello/String.h"
 
-#include <assert.h>
-
 var File = methods {
   methods_begin(File),
   method(File, New),

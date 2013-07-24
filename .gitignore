@@ -11,5 +11,14 @@
 *.exe
 *.gz
 
+# Tests
+test.bin
+test.txt
+test.exe
+test
+
+# Dist
+libCello*
+
 # VIM related
 .clang_complete

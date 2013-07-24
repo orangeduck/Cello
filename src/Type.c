@@ -123,6 +123,22 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
   }
 }
 
+var Type_Class_Name_Method(var self, var method, const char* class_name, const char* method_name, const char* func, const char* file, int line) {
+  
+  var c = Type_Class_Name(self, class_name, func, file, line);
+  
+  if (method == NULL) {
+    return throw(ClassError,
+      "Function '%s' at '%s:%i' :: "
+      "Type '%s' implements class '%s' but not the specific method '%s' required",
+      $(String, (char*)func), $(String, (char*)file), $(Int, line), 
+      self, $(String, (char*)class_name), $(String, (char*)method_name));
+  } else {
+    return c;
+  }
+  
+}
+
 int Type_Show(var self, var output, int pos) {
   return print_to(output, pos, "%s", self);
 }

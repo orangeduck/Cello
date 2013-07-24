@@ -2,8 +2,6 @@
 
 #include "Cello/List.h"
 
-#include <assert.h>
-
 var call_with_ptr(var self, var* args) {
   int num = 0;
   while(args[num] != (var)-1) { num++; }
@@ -11,9 +9,7 @@ var call_with_ptr(var self, var* args) {
 }
 
 var call_with(var self, var args) {
-  Call* icall = type_class(type_of(self), Call);
-  assert(icall->call_with);
-  return icall->call_with(self, args);
+  return type_class_method(type_of(self), Call, call_with, self, args);
 }
 
 var Function = methods {

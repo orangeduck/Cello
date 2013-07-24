@@ -7,25 +7,17 @@
 #include "Cello/Char.h"
 #include "Cello/Reference.h"
 
-#include <assert.h>
 #include <string.h>
 
 int format_to_va(var self, int pos, const char* fmt, va_list va) {
-  Format* iformat = type_class(type_of(self), Format);
-  assert(iformat->format_to);
-  return iformat->format_to(self, pos, fmt, va);
+  return type_class_method(type_of(self), Format, format_to, self, pos, fmt, va);
 }
 
 int format_from_va(var self, int pos, const char* fmt, va_list va) {
-  Format* iformat = type_class(type_of(self), Format);
-  assert(iformat->format_from);
-  return iformat->format_from(self, pos, fmt, va);
+  return type_class_method(type_of(self), Format, format_from, self, pos, fmt, va);
 }
 
 int format_to(var self, int pos, const char* fmt, ...) {
-
-  assert(self);
-
   va_list va;
   va_start(va, fmt);
   int ret = format_to_va(self, pos, fmt, va);
@@ -174,9 +166,7 @@ int look(var self) {
 }
 
 int look_from(var self, var input, int pos) {
-  Show* ishow = type_class(type_of(self), Show);
-  assert(ishow->look);
-  return ishow->look(self, input, pos);
+  return type_class_method(type_of(self), Show, look, self, input, pos);
 }
 
 int scan(const char* fmt, ...) {

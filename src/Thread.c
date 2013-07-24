@@ -8,24 +8,17 @@
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
-#include <assert.h>
 
 var current(var type) {
-  Process* iprocess = type_class(type, Process);
-  assert(iprocess->current);
-  return iprocess->current();  
+  return type_class_method(type, Process, current);
 }
 
 void join(var self) {
-  Process* iprocess = type_class(type_of(self), Process);
-  assert(iprocess->join);
-  return iprocess->join(self);
+  type_class_method(type_of(self), Process, join, self);
 }
 
 void terminate(var self) {
-  Process* iprocess = type_class(type_of(self), Process);
-  assert(iprocess->terminate);
-  return iprocess->terminate(self);
+  type_class_method(type_of(self), Process, terminate, self);
 }
 
 var Thread = methods {
@@ -266,15 +259,11 @@ void Thread_Terminate(var self) {
 }
 
 void lock(var self) {
-  Lock* ilockable = type_class(type_of(self), Lock);
-  assert(ilockable->lock);
-  ilockable->lock(self);  
+  type_class_method(type_of(self), Lock, lock, self);
 }
 
 void unlock(var self) {
-  Lock* ilockable = type_class(type_of(self), Lock);
-  assert(ilockable->unlock);
-  ilockable->unlock(self);
+  type_class_method(type_of(self), Lock, unlock, self);
 }
 
 var Mutex = methods {

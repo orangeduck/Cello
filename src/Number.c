@@ -4,44 +4,31 @@
 #include "Cello/Bool.h"
 #include "Cello/Exception.h"
 
-#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 
 void add(var lhs, var rhs) {
-  Num* inum = type_class(type_of(lhs), Num);
-  assert(inum->add);
-  inum->add(lhs, rhs);
+  return type_class_method(type_of(lhs), Num, add, lhs, rhs);
 }
 
 void sub(var lhs, var rhs) {
-  Num* inum = type_class(type_of(lhs), Num);
-  assert(inum->sub);
-  inum->sub(lhs, rhs);
+  return type_class_method(type_of(lhs), Num, sub, lhs, rhs);
 }
 
 void mul(var lhs, var rhs) {
-  Num* inum = type_class(type_of(lhs), Num);
-  assert(inum->mul);
-  inum->mul(lhs, rhs);
+  return type_class_method(type_of(lhs), Num, mul, lhs, rhs);
 }
 
 void divide(var lhs, var rhs) {
-  Num* inum = type_class(type_of(lhs), Num);
-  assert(inum->div);
-  inum->div(lhs, rhs);
+  return type_class_method(type_of(lhs), Num, div, lhs, rhs);
 }
 
 void negate(var self) {
-  Num* inum = type_class(type_of(self), Num);
-  assert(inum->negate);
-  inum->negate(self);
+  return type_class_method(type_of(self), Num, negate, self);
 }
 
 void absolute(var self) {
-  Num* inum = type_class(type_of(self), Num);
-  assert(inum->absolute);
-  inum->absolute(self);
+  return type_class_method(type_of(self), Num, absolute, self);
 }
 
 var Int = methods {
