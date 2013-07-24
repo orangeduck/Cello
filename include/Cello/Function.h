@@ -36,16 +36,31 @@ var call_with(var self, var args);
 
 global var Function;
 
-data {
-  var type;
-  var (*func)(var);
-} FunctionData;
+#if defined(__APPLE__)
 
-#define lambda(name, args) \
-  auto var __LambdaCello_##name(var); \
-  var name = $(Function, __LambdaCello_##name); \
-  var __LambdaCello_##name(var args)
+  data {
+    var type;
+    var (^func)(var);
+  } FunctionData;
 
+  #define lambda(name, args) \
+    var name = $(Function, NULL); \
+    name->func = ^ var(var args)
+
+#else
+
+  data {
+    var type;
+    var (*func)(var);
+  } FunctionData;
+
+  #define lambda(name, args) \
+    auto var __LambdaCello_##name(var); \
+    var name = $(Function, __LambdaCello_##name); \
+    var __LambdaCello_##name(var args)
+
+#endif
+  
 /** Function_New(var self, var(*func)(var) ); */
 var Function_New(var self, va_list* args);
 var Function_Delete(var self);

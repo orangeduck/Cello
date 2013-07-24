@@ -1,7 +1,7 @@
 CC = gcc
 AR = ar
 
-VERSION = 0.9.7
+VERSION = 0.9.8
 PACKAGE = libCello-$(VERSION)
 
 SRC = $(wildcard src/*.c)
@@ -31,7 +31,7 @@ endif
 ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
-	CFLAGS += -fPIC -fnested-functions
+	CFLAGS += -fPIC -fblocks -fnested-functions
 	LIBS = -lpthread -lm
 	INSTALL_LIB = cp $(STATIC) /usr/local/lib/$(STATIC)
 	INSTALL_INC = cp -r include/* /usr/local/include/
