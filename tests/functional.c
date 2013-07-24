@@ -3,10 +3,40 @@
 #include "Cello.h"
 
 PT_SUITE(suite_functional) {
+  
+  #if defined(__APPLE__)
+    
+    var (^empty_function)(var) = ^ var (var args) {
+      return None;
+    };
 
-  var empty_function(var args) {
-    return None;
-  }
+    var (^empty_function2)(var) = ^ var (var args) {
+      return Some;
+    };
+    
+    var (^asserts_args)(var) = ^ var (var args) {
+      PT_ASSERT(at(args,0));
+      PT_ASSERT(at(args,1));
+      return None;
+    };
+    
+  #else
+
+    var empty_function(var args) {
+      return None;
+    }
+
+    var empty_function2(var args) {
+      return Some;
+    }
+    
+    var asserts_args(var args) {
+      PT_ASSERT(at(args,0));
+      PT_ASSERT(at(args,1));
+      return None;
+    }
+    
+  #endif
   
   PT_TEST(test_stack_function) {
     var f = $(Function, empty_function);
@@ -17,10 +47,6 @@ PT_SUITE(suite_functional) {
     var f = new(Function, empty_function);
     PT_ASSERT(f);
     delete(f);
-  }
-
-  var empty_function2(var args) {
-    return Some;
   }
 
   PT_TEST(test_function_assign) {
@@ -61,12 +87,6 @@ PT_SUITE(suite_functional) {
     
   }
 
-  var asserts_args(var args) {
-    PT_ASSERT(at(args,0));
-    PT_ASSERT(at(args,1));
-    return None;
-  }
-
   PT_TEST(test_call_with) {
     
     var args = new(List, 2, $(Int, 1), $(Int, 5));
@@ -102,7 +122,7 @@ PT_SUITE(suite_functional) {
       var out = cast(at(args, 1), String);
       assign(out, name);
       return None;
-    }
+    };
     
     call(hello_name, $(String, "Hello Bob!"), out);
     
@@ -115,7 +135,7 @@ PT_SUITE(suite_functional) {
     
     lambda(return_new_int1, args) {
       return new(Int, 1);
-    }
+    };
     
     lambda_id(return_new_int2, return_new_int1);
     
@@ -145,13 +165,13 @@ PT_SUITE(suite_functional) {
     
     lambda(return_some, args) {
       return new(List, 1, Some);
-    }
+    };
     
     lambda(return_arg0, args) {
       var fst = at(args, 0);
       delete(args);
       return fst;
-    }
+    };
     
     lambda_compose(return_compose, return_arg0, return_some);
     
@@ -165,7 +185,7 @@ PT_SUITE(suite_functional) {
     
     lambda(return_first, args) {
       return at(args, 0);
-    }
+    };
     
     lambda_flip(return_first_flip, return_first);
     
@@ -187,17 +207,17 @@ PT_SUITE(suite_functional) {
     lambda(add_one, args) {
       add( at(args,0) , $(Int, 1) );
       return args;
-    }
+    };
     
     lambda(add_ten, args) {
       add( at(args,0) , $(Int, 10) );
       return args;
-    }
+    };
     
     lambda(add_hundred, args) {
       add( at(args,0) , $(Int, 100) );
       return args;
-    }
+    };
     
     lambda_pipe(add_all, add_one, add_ten, add_hundred);
     
@@ -214,17 +234,17 @@ PT_SUITE(suite_functional) {
     lambda(cat_fizz, args) {
       append(at(args, 0), $(String, "Fizz"));
       return None;
-    }
+    };
     
     lambda(cat_buzz, args) {
       append(at(args, 0), $(String, "Buzz"));
       return None;
-    }
+    };
     
     lambda(cat_boo, args) {
       append(at(args, 0), $(String, "Boo"));
       return None;
-    }
+    };
     
     lambda_method_pipe(cat_all, cat_fizz, cat_buzz, cat_boo);
     
@@ -243,7 +263,7 @@ PT_SUITE(suite_functional) {
       add(at(args,0), at(args,2));
       add(at(args,0), at(args,3));
       return None;
-    }
+    };
     
     var total = $(Int, 0);
     
@@ -261,7 +281,7 @@ PT_SUITE(suite_functional) {
       add(at(args,3), at(args,1));
       add(at(args,3), at(args,2));
       return None;
-    }
+    };
     
     var total = $(Int, 0);
     
@@ -309,7 +329,7 @@ PT_SUITE(suite_functional) {
     lambda(add_one, args) {
       add(at(args, 0), $(Int, 1));
       return None;
-    }
+    };
     
     var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
     
@@ -327,7 +347,7 @@ PT_SUITE(suite_functional) {
     
     lambda(copy_values, args) {
       return at(args, 0);
-    }
+    };
     
     var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
     
@@ -345,7 +365,7 @@ PT_SUITE(suite_functional) {
     
     lambda(only_some, args) {
       return (var)(intptr_t)(at(args,0) is Some);
-    }
+    };
     
     var values = new(List, 3, Some, Some, None);
     var somes = new_filter(values, only_some);
@@ -388,7 +408,7 @@ PT_SUITE(suite_functional) {
       var item = at(args, 1);
       add(base, item);
       return None;
-    }
+    };
     
     var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
     var total = new_foldl(values, fold_sum, $(Int, 0));
@@ -407,7 +427,7 @@ PT_SUITE(suite_functional) {
       var item = at(args, 1);
       add(base, item);
       return None;
-    }
+    };
     
     var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
     var total = new_foldr(values, fold_sum, $(Int, 0));

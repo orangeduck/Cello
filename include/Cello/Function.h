@@ -44,8 +44,8 @@ global var Function;
   } FunctionData;
 
   #define lambda(name, args) \
-    var name = $(Function, NULL); \
-    name->func = ^ var(var args)
+    FunctionData* name = $(Function, NULL); \
+    name->func = ^ var (var args)
 
 #else
 

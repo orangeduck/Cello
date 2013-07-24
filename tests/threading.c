@@ -28,7 +28,7 @@ PT_SUITE(suite_threading) {
     lambda(f, args) {
       in_func = true;
       return None;
-    }
+    };
     
     var t = new(Thread, f);
     
@@ -48,7 +48,7 @@ PT_SUITE(suite_threading) {
     lambda(f, args) {
       set(inside, as_long(at(args, 0)), True);
       return None;
-    }
+    };
     
     var threads = new(List, 5,
       new(Thread, f), new(Thread, f),
@@ -88,7 +88,7 @@ PT_SUITE(suite_threading) {
         add(total, $(Int, 1));
       }
       return None;
-    }
+    };
     
     var threads = new(List, 5,
       new(Thread, f), new(Thread, f),
@@ -119,10 +119,9 @@ PT_SUITE(suite_threading) {
       try {
         cello_sleep(20);
         PT_ASSERT(Exception_Depth() is 0);
-      } catch(e) {
-      }
+      } catch(e) { }
       return None;
-    }
+    };
     
     var t = new(Thread, f);
     
