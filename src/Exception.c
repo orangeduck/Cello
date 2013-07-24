@@ -111,7 +111,6 @@ local void Exception_Error(void)  {
   
   print_to($(File, stderr), 0, "\n");
   print_to($(File, stderr), 0, "!!\t\n");
-  //print_to($(File, stderr), 0, "!!\tThread ID %i\n", $(Int, as_long(td)));
   print_to($(File, stderr), 0, "!!\tUncaught %$ at (%s:%s:%i) \n", Exception_Object(), $(String, (char*)td->exc_file), $(String, (char*)td->exc_func), $(Int, td->exc_lineno));
   print_to($(File, stderr), 0, "!!\t\n");
   print_to($(File, stderr), 0, "!!\t\t %s\n", Exception_Message());
@@ -152,7 +151,7 @@ var Exception_Throw(var obj, const char* fmt, const char* file, const char* func
   td->exc_lineno = lineno;
   
   if ((td->is_main) and (main_exc_msg == NULL)) {
-    main_exc_msg = new(String, "Test");
+    main_exc_msg = new(String, "");
     td->exc_msg = main_exc_msg;
     atexit(main_exc_msg_free);
   }

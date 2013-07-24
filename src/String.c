@@ -201,21 +201,52 @@ void String_Reverse(var self) {
 }
 
 int String_Format_To(var self, int pos, const char* fmt, va_list va) {
+
   StringData* s = cast(self, String);
+  
+#if defined(_WIN32)
   
   va_list va_tmp;
   va_copy(va_tmp, va);
-#ifdef _WIN32
   int size = _vscprintf(fmt, va_tmp);
-#else
-  int size = snprintf(NULL, 0, fmt, va_tmp);
-#endif
   va_end(va_tmp);
   
   s->value = realloc(s->value, pos + size + 1);
   if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   
   return vsprintf(s->value + pos, fmt, va); 
+  
+#elif defined(__APPLE__)
+  
+  va_list va_tmp;
+  va_copy(va_tmp, va);
+  char* tmp = NULL;
+  int size = vasprintf(&tmp, fmt, va_tmp);
+  va_end(va_tmp);
+  
+  s->value = realloc(s->value, pos + size + 1);
+  if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
+  
+  s->value[pos] = '\0';
+  strcat(s->value, tmp);
+  free(tmp);
+  
+  return size;
+  
+#else
+
+  va_list va_tmp;
+  va_copy(va_tmp, va);
+  int size = snprintf(NULL, 0, fmt, va_tmp);
+  va_end(va_tmp);
+  
+  s->value = realloc(s->value, pos + size + 1);
+  if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
+  
+  return vsprintf(s->value + pos, fmt, va); 
+  
+#endif
+
 }
 
 int String_Format_From(var self, int pos, const char* fmt, va_list va) {
