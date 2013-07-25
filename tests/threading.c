@@ -118,7 +118,7 @@ PT_SUITE(suite_threading) {
     lambda(f, args) {
       try {
         cello_sleep(20);
-        PT_ASSERT(Exception_Depth() is 0);
+        PT_ASSERT(Exception_Depth() is 1);
       } catch(e) { }
       return None;
     };
@@ -127,7 +127,7 @@ PT_SUITE(suite_threading) {
     
     call(t, None);
     cello_sleep(10);
-    PT_ASSERT(Exception_Depth() is -1);
+    PT_ASSERT(Exception_Depth() is 0);
     join(t);
     
     delete(t);

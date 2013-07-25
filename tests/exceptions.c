@@ -25,7 +25,7 @@ PT_SUITE(suite_exception) {
     PT_ASSERT(r1 == 2);
     PT_ASSERT(r2 == 3);
     
-    PT_ASSERT(Exception_Depth() is -1);
+    PT_ASSERT(Exception_Depth() is 0);
     
   }
   
@@ -57,7 +57,7 @@ PT_SUITE(suite_exception) {
     PT_ASSERT(not reached1);
     PT_ASSERT(not reached2);
     
-    PT_ASSERT(Exception_Depth() is -1);
+    PT_ASSERT(Exception_Depth() is 0);
     
   }
   
@@ -80,7 +80,7 @@ PT_SUITE(suite_exception) {
     
     PT_ASSERT(reached0);
     PT_ASSERT(reached1);
-    PT_ASSERT(Exception_Depth() is -1);
+    PT_ASSERT(Exception_Depth() is 0);
     
   }
   
@@ -91,16 +91,16 @@ PT_SUITE(suite_exception) {
     
     try {
 
-    PT_ASSERT(Exception_Depth() is 0);
+    PT_ASSERT(Exception_Depth() is 1);
 
       try {
-        PT_ASSERT(Exception_Depth() is 1);
+        PT_ASSERT(Exception_Depth() is 2);
         exception_divide(2, 0);
       } catch (e in TypeError) {
         reached0 = true;
       }    
 
-      PT_ASSERT(Exception_Depth() is 0);
+      PT_ASSERT(Exception_Depth() is 1);
     
     } catch (e) {
       reached1  = true;
@@ -109,7 +109,7 @@ PT_SUITE(suite_exception) {
     PT_ASSERT(not reached0);
     PT_ASSERT(reached1);
     
-    PT_ASSERT(Exception_Depth() is -1);
+    PT_ASSERT(Exception_Depth() is 0);
     
   }
 

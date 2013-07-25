@@ -4,52 +4,40 @@
 
 PT_SUITE(suite_functional) {
   
+  PT_TEST(test_stack_function) {
+  
   #if defined(__APPLE__)
-    
-    var (^empty_function)(var) = ^ var (var args) {
-      return None;
-    };
-
-    var (^empty_function2)(var) = ^ var (var args) {
-      return Some;
-    };
-    
-    var (^asserts_args)(var) = ^ var (var args) {
-      PT_ASSERT(at(args,0));
-      PT_ASSERT(at(args,1));
-      return None;
-    };
-    
+    var (^empty_function)(var) = ^ var (var args) { return None; };
   #else
-
-    var empty_function(var args) {
-      return None;
-    }
-
-    var empty_function2(var args) {
-      return Some;
-    }
-    
-    var asserts_args(var args) {
-      PT_ASSERT(at(args,0));
-      PT_ASSERT(at(args,1));
-      return None;
-    }
-    
+    var empty_function(var args) { return None; }  
   #endif
   
-  PT_TEST(test_stack_function) {
     var f = $(Function, empty_function);
     PT_ASSERT(f);
   }
 
   PT_TEST(test_heap_function) {
+  
+  #if defined(__APPLE__)
+    var (^empty_function)(var) = ^ var (var args) { return None; };
+  #else
+    var empty_function(var args) { return None; }  
+  #endif
+  
     var f = new(Function, empty_function);
     PT_ASSERT(f);
     delete(f);
   }
 
   PT_TEST(test_function_assign) {
+    
+  #if defined(__APPLE__)
+    var (^empty_function)(var) = ^ var (var args) { return None; };
+    var (^empty_function2)(var) = ^ var (var args) { return Some; };
+  #else
+    var empty_function(var args) { return None; }  
+    var empty_function2(var args) { return Some; }
+  #endif
     
     var f1 = new(Function, empty_function);
     var f2 = new(Function, empty_function2);
@@ -67,6 +55,12 @@ PT_SUITE(suite_functional) {
 
   PT_TEST(test_function_copy) {
 
+  #if defined(__APPLE__)
+    var (^empty_function)(var) = ^ var (var args) { return None; };
+  #else
+    var empty_function(var args) { return None; }  
+  #endif
+  
     var f1 = new(Function, empty_function);
     var f2 = copy(f1);
     
@@ -79,6 +73,14 @@ PT_SUITE(suite_functional) {
 
   PT_TEST(test_call) {
     
+  #if defined(__APPLE__)
+    var (^empty_function)(var) = ^ var (var args) { return None; };
+    var (^empty_function2)(var) = ^ var (var args) { return Some; };
+  #else
+    var empty_function(var args) { return None; }  
+    var empty_function2(var args) { return Some; }
+  #endif
+    
     var result1 = call($(Function, empty_function), None);
     var result2 = call($(Function, empty_function2), None);
     
@@ -88,6 +90,24 @@ PT_SUITE(suite_functional) {
   }
 
   PT_TEST(test_call_with) {
+    
+  #if defined(__APPLE__)
+  
+    var (^asserts_args)(var) = ^ var (var args) {
+      PT_ASSERT(at(args,0));
+      PT_ASSERT(at(args,1));
+      return None;
+    };
+    
+  #else
+
+    var asserts_args(var args) {
+      PT_ASSERT(at(args,0));
+      PT_ASSERT(at(args,1));
+      return None;
+    }
+    
+  #endif
     
     var args = new(List, 2, $(Int, 1), $(Int, 5));
     
@@ -103,6 +123,24 @@ PT_SUITE(suite_functional) {
 
   PT_TEST(test_call_with_ptr) {
 
+  #if defined(__APPLE__)
+  
+    var (^asserts_args)(var) = ^ var (var args) {
+      PT_ASSERT(at(args,0));
+      PT_ASSERT(at(args,1));
+      return None;
+    };
+    
+  #else
+
+    var asserts_args(var args) {
+      PT_ASSERT(at(args,0));
+      PT_ASSERT(at(args,1));
+      return None;
+    }
+    
+  #endif
+  
     var* args = (var[]){ $(Int, 1), $(Int, 5), (var)-1 };
     
     var assert_func = $(Function, asserts_args);

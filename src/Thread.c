@@ -41,7 +41,7 @@ var Thread_New(var self, va_list* args) {
   td->running = false;
   
   td->exc_active = false;
-  td->exc_depth = -1;
+  td->exc_depth = 0;
   memset(td->exc_buffers, 0, sizeof(jmp_buf) * EXC_MAX_DEPTH);
   
   td->exc_obj = Undefined;
@@ -207,7 +207,7 @@ var Thread_Call(var self, var args) {
   
 }
 
-local ThreadData main_thread_wrapper = { is_main: true, exc_depth: -1 };
+local ThreadData main_thread_wrapper;
 
 var Thread_Current(void) {
   
@@ -220,6 +220,7 @@ var Thread_Current(void) {
   if (wrapper) {
     return wrapper;
   } else {
+    main_thread_wrapper.is_main = true;
 #if defined(__unix__) || defined(__APPLE__)
     main_thread_wrapper.thread = pthread_self();
 #elif defined(_WIN32)

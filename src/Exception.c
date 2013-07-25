@@ -57,7 +57,7 @@ void Exception_Inc(void) {
 
 void Exception_Dec(void) {
   ThreadData* td = current(Thread);
-  if (td->exc_depth == -1) {
+  if (td->exc_depth == 0) {
     fprintf(stderr, "Cello Fatal Error: Exception Buffer Underflow!\n"); abort();
   }
   td->exc_depth--;
@@ -90,10 +90,10 @@ var Exception_Message(void) {
 
 void* Exception_Buffer(void) {
   ThreadData* td = current(Thread);
-  if (td->exc_depth == -1) {
+  if (td->exc_depth == 0) {
     fprintf(stderr, "Cello Fatal Error: Exception Buffer Out of Bounds!\n"); abort();
   }
-  return td->exc_buffers[td->exc_depth];
+  return td->exc_buffers[td->exc_depth-1];
 }
 
 int Exception_Depth(void) {
@@ -161,7 +161,7 @@ var Exception_Throw(var obj, const char* fmt, const char* file, const char* func
   print_to_va(td->exc_msg, 0, fmt, va);
   va_end(va);
   
-  if (Exception_Depth() >= 0) {
+  if (Exception_Depth() >= 1) {
     longjmp(Exception_Buffer(), 1);
   } else {
     Exception_Error();
@@ -197,7 +197,7 @@ var Exception_Catch(void* unused, ...) {
   va_end(va);
   
   /* No matches found. Propagate to outward block */
-  if (Exception_Depth() >= 0) {
+  if (Exception_Depth() >= 1) {
     longjmp(Exception_Buffer(), 1);
   } else {  
     Exception_Error();
