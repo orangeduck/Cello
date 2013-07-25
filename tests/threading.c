@@ -23,19 +23,19 @@ PT_SUITE(suite_threading) {
   
   PT_TEST(test_new) {
     
-    bool in_func = false;
+    var in_func = $(Reference, False);
     
     lambda(f, args) {
-      in_func = true;
+      set(in_func, 0, True);
       return None;
     };
     
     var t = new(Thread, f);
     
-    PT_ASSERT(not in_func);
+    PT_ASSERT(not at(in_func, 0));
     call(t, None);
     join(t);
-    PT_ASSERT(in_func);
+    PT_ASSERT(at(in_func, 0));
     
     delete(t);
   
