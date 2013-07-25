@@ -4,6 +4,11 @@ AR = ar
 VERSION = 0.9.8
 PACKAGE = libCello-$(VERSION)
 
+PREFIX=/usr/local
+DESTDIR=
+INCDIR=${PREFIX}/include
+LIBDIR=${PREFIX}/lib
+
 SRC = $(wildcard src/*.c)
 OBJ = $(addprefix obj/,$(notdir $(SRC:.c=.o)))
 
@@ -15,7 +20,7 @@ DEMOS_OBJ = $(addprefix obj/,$(notdir $(DEMOS:.c=.o)))
 DEMOS_EXE = $(DEMOS:.c=)
 
 CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
-LFLAGS = -shared -g
+LFLAGS = -shared -g -ggdb
 
 PLATFORM = $(shell uname)
 
@@ -24,8 +29,8 @@ ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	STATIC = libCello.a
 	CFLAGS += -fPIC
 	LIBS = -lpthread -lm
-	INSTALL_LIB = cp $(STATIC) /usr/local/lib/$(STATIC)
-	INSTALL_INC = cp -r include/* /usr/local/include/
+	INSTALL_LIB = cp -f $(STATIC) ${DESTDIR}/${LIBDIR}/$(STATIC)
+	INSTALL_INC = cp -r include/* ${DESTDIR}/${INCDIR}
 endif
 
 ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
@@ -33,8 +38,8 @@ ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	STATIC = libCello.a
 	CFLAGS += -fPIC -fblocks -fnested-functions
 	LIBS = -lpthread -lm
-	INSTALL_LIB = cp $(STATIC) /usr/local/lib/$(STATIC)
-	INSTALL_INC = cp -r include/* /usr/local/include/
+	INSTALL_LIB = cp -f $(STATIC) ${LIBDIR}/$(STATIC)
+	INSTALL_INC = cp -r include/* ${INCDIR}
 endif
 
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
