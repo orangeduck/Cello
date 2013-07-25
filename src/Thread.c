@@ -217,6 +217,19 @@ var Thread_Current(void) {
   var wrapper = TlsGetValue(key_thread_wrapper);
 #endif
   
+  /*
+  ** Here is a nasty one. On OSX instead of
+  ** returning NULL for an unset key it
+  ** decides to return uninitialized rubbish
+  ** (even though the spec says otherwise).
+  **
+  ** Luckily we can test directly for the main
+  ** thread on OSX using this non-portable method
+  */
+#if defined(__APPLE__)
+  if (pthread_main_np()) { wrapper = NULL; }
+#endif
+  
   if (wrapper) {
     return wrapper;
   } else {
@@ -314,10 +327,7 @@ void Mutex_Lock(var self) {
 #if defined(__unix__) || defined(__APPLE__)
   int err = pthread_mutex_lock(&md->mutex);
   if (err is EINVAL)     { throw(ValueError, "Invalid Argument to Mutex Lock"); }
-  //if (err is EDESTROYED) { throw(ResourceError, "Mutex has been Destroyed"); }
-  //if (err is EOWNERTERM) { throw(ResourceError, "Thread Holding Mutex has been Terminated"); }
   if (err is EDEADLK)    { throw(ResourceError, "Attempt to relock already held mutex"); }
-  //if (err is ERECURSE)   { throw(ResourceError, "Recursive Mutex cannot be held again"); }
 #elif defined(_WIN32)
   WaitForSingleObject(md->mutex, INFINITE);
 #endif
@@ -330,7 +340,6 @@ var Mutex_Lock_Try(var self) {
   int err = pthread_mutex_trylock(&md->mutex);
   if (err == EBUSY) { return False; }
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Lock Try"); }
-  //if (err is ERECURSE)   { throw(ResourceError, "Recursive Mutex cannot be held again"); }
   return True;
 #elif defined(_WIN32)
   return (var)(intptr_t)(not (WaitForSingleObject(md->mutex, 0) is WAIT_TIMEOUT));
