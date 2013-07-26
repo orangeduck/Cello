@@ -8,6 +8,8 @@ PREFIX=/usr/local
 DESTDIR=
 INCDIR=${PREFIX}/include
 LIBDIR=${PREFIX}/lib
+I=${DESTDIR}/${INCDIR}
+L=${DESTDIR}/${LIBDIR}
 
 SRC = $(wildcard src/*.c)
 OBJ = $(addprefix obj/,$(notdir $(SRC:.c=.o)))
@@ -29,8 +31,8 @@ ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	STATIC = libCello.a
 	CFLAGS += -fPIC
 	LIBS = -lpthread -lm
-	INSTALL_LIB = cp -f $(STATIC) ${DESTDIR}/${LIBDIR}/$(STATIC)
-	INSTALL_INC = cp -r include/* ${DESTDIR}/${INCDIR}
+	INSTALL_LIB = mkdir -p ${L} && cp -f ${STATIC} ${L}/$(STATIC)
+	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
 endif
 
 ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
@@ -38,8 +40,8 @@ ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	STATIC = libCello.a
 	CFLAGS += -fPIC -fblocks -fnested-functions
 	LIBS = -lpthread -lm
-	INSTALL_LIB = cp -f $(STATIC) ${LIBDIR}/$(STATIC)
-	INSTALL_INC = cp -r include/* ${INCDIR}
+	INSTALL_LIB = mkdir -p ${L} && cp -f $(STATIC) ${L}/$(STATIC)
+	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
 endif
 
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
@@ -64,7 +66,7 @@ obj/%.o: src/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
   
 obj:
-	mkdir obj
+	mkdir -p obj
 
 # Tests
 
@@ -89,12 +91,12 @@ dist: all | $(PACKAGE)
 	tar -czf $(PACKAGE).tar.gz $(PACKAGE)
  
 $(PACKAGE):
-	mkdir $(PACKAGE)
+	mkdir -p $(PACKAGE)
  
 # Clean
   
 clean:
-	rm $(OBJ) $(TESTS_OBJ) $(DEMOS_OBJ) $(STATIC) $(DYNAMIC)
+	rm -f $(OBJ) $(TESTS_OBJ) $(DEMOS_OBJ) $(STATIC) $(DYNAMIC)
   
 # Install
   
