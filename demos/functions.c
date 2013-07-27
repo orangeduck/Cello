@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     
     /* Always must return */
     return None;
-  }
+  };
   
   /* Functions called with "call" */
   call(hello_name, $(String, "Bob"));
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     int snd = as_long(cast(at(args, 1), Int));
     printf("%i + %i = %i\n", fst, snd, fst+snd);
     return None;
-  }
+  };
   
   /*
   ** Notice arguments to "call" in curried form.

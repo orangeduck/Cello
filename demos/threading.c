@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
       println("Hello from %$! with Arguments %$", current(Thread), args);
     }
     return None;
-  }
+  };
   
   var threads = new(List, 5,
     new(Thread, thread_function),
