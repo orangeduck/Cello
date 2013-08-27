@@ -16,7 +16,7 @@
 **  var is not and or elif in
 **  local global class data instance
 **  foreach with try throw catch
-**  $ lit cast
+**  $ lit
 */
 
 typedef void* var;
@@ -75,15 +75,6 @@ var type_of(var obj);
 */
 
 global var Undefined;
-
-/*
-** == Cast ==
-**
-**  Perform run-time type check for object.
-**  Ensure object X is of certain type T.
-*/
-
-#define cast(X, T) Type_Cast(X, T, __func__, __FILE__, __LINE__)
 
 
 /* 
