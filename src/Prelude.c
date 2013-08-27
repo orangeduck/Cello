@@ -28,7 +28,7 @@ var Undefined = Singleton(Undefined);
 var type_of(var self) {
   
   /* Test against Builtins */
-  if (self is Undefined) return throw(ValueError, "Recieved 'Undefined' as value to 'type_of'");
+  if (self is Undefined) return throw(ValueError, "Received 'Undefined' as value to 'type_of'");
   if (self is True) return Bool;
   if (self is False) return Bool;
 
