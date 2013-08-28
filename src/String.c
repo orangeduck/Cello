@@ -17,6 +17,7 @@ var String = methods {
   method(String, Hash),
   method(String, Reverse),
   method(String, AsStr), 
+  method(String, AsLong),
   method(String, Append), 
   method(String, Format),
   method(String, Show),
@@ -177,6 +178,11 @@ long String_Hash(var self) {
 const char* String_AsStr(var self) {
   StringData* s = cast(self, String);
   return s->value;
+}
+
+long String_AsLong(var self) {
+  StringData* s = cast(self, String);
+  return atoi(s->value);
 }
 
 void String_Append(var self, var obj) {
