@@ -1166,6 +1166,30 @@ PT_SUITE(suite_data) {
     
   }
 
+  PT_TEST(test_dictionary_rehash) {
+
+    // try 100 different keys
+    int max = 1000000;
+
+    var d0 = new(Dictionary);
+    var value = $(String, "There");
+    var test_key;
+
+    int r = random() % max;
+
+    for (int i = 0; i< max; i++) {
+      var key = new(Int, i); // differnet keys
+      if (i==r){
+        test_key = key;
+      }
+      put(d0, key, value);
+    }
+
+    PT_ASSERT(get(d0, test_key) is value);
+    PT_ASSERT(len(d0) is (max));
+    delete(d0);
+  }
+
   PT_TEST(test_map_create) {
     
     TEST_VALUES();

@@ -97,6 +97,7 @@ $(PACKAGE):
   
 clean:
 	rm -f $(OBJ) $(TESTS_OBJ) $(DEMOS_OBJ) $(STATIC) $(DYNAMIC)
+	rm -f test
   
 # Install
   

@@ -20,8 +20,7 @@ data {
   var type;
   int size;
   var keys;
-  var* key_buckets;
-  var* val_buckets;
+  var* buckets;
 } DictionaryData;
 
 /** Dictionary_New(var self); */
