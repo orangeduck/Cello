@@ -1168,8 +1168,7 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_dictionary_rehash) {
 
-    // try 100 different keys
-    int max = 1000000;
+    int max = 500000;
 
     var d0 = new(Dictionary);
     var value = $(String, "There");

@@ -23,7 +23,7 @@ static int __DELETED_BUCKET;
 #define DELETED_BUCKET (var)&__DELETED_BUCKET
 #define Dictionary_Threshold 0.7f
 
-var Dictionary_Find_Bucket(DictionaryData* dict, var key, int creation, int *index);
+var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *index);
 void Dictionary_Rehash(DictionaryData* dict);
 
 data {
@@ -133,11 +133,11 @@ var Dictionary_Contains(var self, var key) {
 
 void Dictionary_Discard(var self, var key) {
   DictionaryData* dict = cast(self, Dictionary);
-  int found;
-  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, 0, &found);
+  int index;
+  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, False, &index);
   if(bucket != NULL){
     free(bucket);
-    dict->buckets[found] = DELETED_BUCKET;
+    dict->buckets[index] = DELETED_BUCKET;
   }
   discard(dict->keys, key);
 }
@@ -145,7 +145,7 @@ void Dictionary_Discard(var self, var key) {
 var Dictionary_Get(var self, var key) {
 
   DictionaryData* dict = cast(self, Dictionary);
-  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, 0, NULL);
+  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, False, NULL);
 
   if (bucket)
     return bucket->value;
@@ -162,9 +162,8 @@ void Dictionary_Put(var self, var key, var val) {
     /* Exceeded threshold we have to rehash. doh' */
     Dictionary_Rehash(dict);
   }
-  int *indice = malloc(sizeof(int));
-  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, 1, indice);
 
+  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, True, NULL);
   if (bucket != NULL) {
     bucket->key = key;
     bucket->value = val;
@@ -186,7 +185,6 @@ void Dictionary_Rehash(DictionaryData* dict)
       break;
     }
   }
-
   if (has_prime is False) {
     // primes are ended
     dict->size *= 2;
@@ -195,8 +193,8 @@ void Dictionary_Rehash(DictionaryData* dict)
   clear(dict->keys);
 
   dict->buckets = calloc(dict->size, sizeof(DictionaryBucket));
-  int i;
-  for (i = 0; i < old_size; i++) {
+
+  for (int i = 0; i < old_size; i++) {
     DictionaryBucket *bucket = old_buckets[i];
     if(bucket != NULL && bucket != DELETED_BUCKET){
       put(dict, bucket->key, bucket->value);
@@ -208,7 +206,7 @@ void Dictionary_Rehash(DictionaryData* dict)
   free(old_buckets);
 }
 
-var Dictionary_Find_Bucket(DictionaryData* dict, var key, int creation, int *index)
+var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *index)
 {
 
   int i = abs(hash(key) % dict->size);
@@ -216,24 +214,23 @@ var Dictionary_Find_Bucket(DictionaryData* dict, var key, int creation, int *ind
 
   int probe_seq = 2;
   int new_i = i;
-  if (index != NULL)
-     *index = new_i;
+  if (index != NULL) *index = new_i;
 
   while(bucket != NULL) {
+
     if ((var)bucket == DELETED_BUCKET && creation) {
       break;
     } else if ( (var)bucket != DELETED_BUCKET && eq(key, bucket->key) ) {
       // it's our Bucket yay o/
       return bucket;
     } else {
-      // cubic probing inefficent for size differents from given primes
-      //new_i = (int)(i + pow(probe_seq+2, 3) ) % dict->size;
-      new_i = (int)(new_i + 2*probe_seq)  % dict->size; // 2 4 6 8 10
+      // linear probing could be improved
+      new_i = (int)(new_i + 3*probe_seq)  % dict->size;
       bucket = dict->buckets[new_i];
     }
+
     probe_seq++;
-    if (index != NULL)
-       *index = new_i;
+    if (index != NULL) *index = new_i;
 
     if (probe_seq > dict->size) {
       return NULL;
@@ -241,7 +238,7 @@ var Dictionary_Find_Bucket(DictionaryData* dict, var key, int creation, int *ind
   }
 
   // bucket is null if we reach here
-  if (creation) {
+  if (creation is True) {
     bucket = malloc(sizeof(DictionaryBucket));
     dict->buckets[new_i] = bucket;
   }
