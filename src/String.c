@@ -5,6 +5,9 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 
 var String = methods {
   methods_begin(String),
@@ -182,7 +185,18 @@ const char* String_AsStr(var self) {
 
 long String_AsLong(var self) {
   StringData* s = cast(self, String);
-  return atoi(s->value);
+  char* p = NULL;
+  long value = 0;
+  errno = 0;                    // To distinguish success/failure after call
+  value = strtol(s->value, &p, 10);
+  if (  (errno == ERANGE && (value == LONG_MAX || value == LONG_MIN))
+      ||(errno != 0 && value == 0)) {
+    throw(FormatError, "Failed to represent String as Long");
+  }
+  if (p == s->value) {
+    throw(FormatError, "No digits were found");
+  }
+  return value;
 }
 
 void String_Append(var self, var obj) {
