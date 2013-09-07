@@ -6,6 +6,7 @@
 #include "Cello/Type.h"
 #include "Cello/Thread.h"
 #include "Cello/Exception.h"
+#include "Cello/Module.h"
 
 /* Functional */
 #include "Cello/Function.h"

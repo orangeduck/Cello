@@ -29,7 +29,7 @@ class {
   void (*terminate)(var);
 } Process;
 
-var  current(var);
+var  current(var type);
 void join(var self);
 void terminate(var self);
 

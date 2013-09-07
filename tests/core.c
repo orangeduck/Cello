@@ -534,5 +534,34 @@ PT_SUITE(suite_core) {
     
   }
   
+  PT_TEST(test_module) {
+    
+#ifdef _WIN32
+    var libname = "python27.dll";
+#else
+    var libname = "python27.so";
+#endif
+
+    with(python in module(libname)) {
+
+    
+      const char* (*Py_GetVersion)(void) = get(python, $(String, "Py_GetVersion"));
+      const char* (*Py_GetPlatform)(void) = get(python, $(String, "Py_GetPlatform"));
+      const char* (*Py_GetCopyright)(void) = get(python, $(String, "Py_GetCopyright"));
+    
+      //println("");
+      //println("Python Version is '%s'", $(String, (char*)Py_GetVersion()));
+      //println("Python Platform is '%s'", $(String, (char*)Py_GetPlatform()));
+      //println("Python Copyright is '%s'", $(String, (char*)Py_GetCopyright()));
+      
+      PT_ASSERT(Py_GetVersion());
+      PT_ASSERT(Py_GetPlatform());
+      PT_ASSERT(Py_GetCopyright());
+      
+    }
+    
+    
+  }
+  
 
 }
