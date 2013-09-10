@@ -35,9 +35,7 @@ void String_Discard(var self, var sub);
 
 long String_Hash(var self);
 
-
 const char* String_AsStr(var self);
-long String_AsLong(var self);
 
 void String_Append(var self, var obj);
 void String_Reverse(var self);
@@ -57,7 +55,6 @@ instance(String, Collection) = { String_Len, String_Clear, String_Contains, Stri
 instance(String, Hash) = { String_Hash };
 instance(String, Reverse) = { String_Reverse };
 instance(String, AsStr) = { String_AsStr };
-instance(String, AsLong) = { String_AsLong };
 instance(String, Append) = { String_Append };
 instance(String, Format) = { String_Format_To, String_Format_From };
 instance(String, Show) = { String_Show, String_Look };

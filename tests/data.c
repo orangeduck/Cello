@@ -356,45 +356,6 @@ PT_SUITE(suite_data) {
     
   }
 
-  PT_TEST(test_string_as_long) {
-    var s0 = new(String, "1234");
-    var s1 = new(String, "0456");
-    var s2 = new(String, "987.65");
-    var s3 = new(String, "-67890");
-    var s4 = new(String, ":89");
-    var s5 = new(String, "");
-
-    volatile bool reached4 = false;
-    volatile bool reached5 = false;
-
-    PT_ASSERT( as_long(s0) is 1234 );
-    PT_ASSERT( as_long(s1) is 456 );
-    PT_ASSERT( as_long(s2) is 987 );   
-    PT_ASSERT( as_long(s3) is -67890 );
-
-    try {
-      long i = as_long(s4);
-    } catch (e) {
-      reached4 = true;
-    }
-
-    try {
-      long i = as_long(s5);
-    } catch (e) {
-      reached5 = true;
-    }
-
-    PT_ASSERT( reached4 );
-    PT_ASSERT( reached5 );
-
-    delete(s0);
-    delete(s1);
-    delete(s2);
-    delete(s3);
-    delete(s4);
-    delete(s5);
-  }
-
   PT_TEST(test_array_create) {
     
     var a0 = new(Array, Int, 3, $(Int, 1), $(Int, 5), $(Int, 10));

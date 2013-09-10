@@ -70,11 +70,7 @@ var Int_Copy(var self) {
 var Int_Eq(var self, var other) {
   IntData* io = cast(self, Int);
   if (type_implements(type_of(other), AsLong)) {
-    var result = False;
-    try {
-      result = (var)(intptr_t)(io->value == as_long(other));
-    } catch (e) {}
-    return result;
+    return (var)(intptr_t)(io->value == as_long(other));
   } else {
     return False;
   }

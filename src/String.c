@@ -20,7 +20,6 @@ var String = methods {
   method(String, Hash),
   method(String, Reverse),
   method(String, AsStr), 
-  method(String, AsLong),
   method(String, Append), 
   method(String, Format),
   method(String, Show),
@@ -181,22 +180,6 @@ long String_Hash(var self) {
 const char* String_AsStr(var self) {
   StringData* s = cast(self, String);
   return s->value;
-}
-
-long String_AsLong(var self) {
-  StringData* s = cast(self, String);
-  char* p = NULL;
-  long value = 0;
-  errno = 0;                    // To distinguish success/failure after call
-  value = strtol(s->value, &p, 10);
-  if (  (errno == ERANGE && (value == LONG_MAX || value == LONG_MIN))
-      ||(errno != 0 && value == 0)) {
-    throw(FormatError, "Failed to represent String as Long");
-  }
-  if (p == s->value) {
-    throw(FormatError, "No digits were found");
-  }
-  return value;
 }
 
 void String_Append(var self, var obj) {
