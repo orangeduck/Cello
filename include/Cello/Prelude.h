@@ -102,17 +102,19 @@ global var Undefined;
 **
 **  This is a set of macros that provide
 **  a method for 'variable argument' like
-**  behaviour where all arguments to a function
+**  behaviour.
+**
+**  There are two main differences to the C
+**  like variable arguments. First all arguments 
 **  must be of type `var`.
 **
-**  Another advantage is that it provides a method
+**  Secondly this mechanism provides a method
 **  to tell when no arguments are left.
 **
-**  VAR_LIST must always be used like this:
+**  This makes it far safer for use in Cello.
 **
-**    VAR_LIST(_, ##__VA_ARGS__, Undefined)
-**
-**  Otherwise correct behaviour cannot be ensured
+**  Argument lists can be constructed using macro
+**  variable arguments and the macro `var_list_new`
 */
 
 typedef var* var_list;

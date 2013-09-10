@@ -13,9 +13,8 @@
 **  On the other hand it is essential for objects such
 **  as strings.
 **
-**  The format specifier for rich objects is '%$'. It
-**  is important you _only_ pass rich objects to the
-**  "Show" functions. Otherwise they will segfault.
+**  The format specifier for rich objects is '%$'. The
+**  "Show" functions will only accept rich objects.
 **
 **  Another important thing to note is that the return
 **  value of the "Format" functions and the "Show"
