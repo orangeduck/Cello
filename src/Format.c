@@ -48,36 +48,18 @@ int show_to(var self, var out, int pos) {
   
 }
 
-int print(const char* fmt, ...) {
-  va_list va;
-  va_start(va, fmt);
-  int ret = print_to_va($(File, stdout), 0, fmt, va);
-  va_end(va);
+int print_vl(const char* fmt, var_list vl) {
+  return print_to_vl($(File, stdout), 0, fmt, vl);
+}
+
+int println_vl(const char* fmt, var_list vl) {
+  int ret = 0;
+  ret = print_to_vl($(File, stdout), ret, fmt, vl);
+  ret = print_to($(File, stdout), ret, "\n");
   return ret;
 }
 
-int println(const char* fmt, ...) {
-  va_list va;
-  va_start(va, fmt);
-  int ret = print_to_va($(File, stdout), 0, fmt, va);
-  ret = print("\n");
-  va_end(va);
-  return ret;
-}
-
-int print_to(var out, int pos, const char* fmt, ...) {
-  va_list va;
-  va_start(va, fmt);
-  int ret = print_to_va(out, pos, fmt, va);
-  va_end(va);
-  return ret;
-}
-
-int print_va(const char* fmt, va_list va) {
-  return print_to_va($(File, stdout), 0, fmt, va);
-}
-
-int print_to_va(var out, int pos, const char* fmt, va_list va) {
+int print_to_vl(var out, int pos, const char* fmt, var_list vl) {
 
   char fmt_buf[strlen(fmt)+1]; 
   
@@ -116,7 +98,11 @@ int print_to_va(var out, int pos, const char* fmt, va_list va) {
       strncpy(fmt_buf, start, (fmt - start)+1);
       fmt_buf[(fmt - start)+1] = '\0';
       
-      var a = va_arg(va, var);
+      if (var_list_end(vl)) {
+        throw(FormatError, "Not enough arguments to Format String!");
+      }
+      
+      var a = var_list_get(vl);
       
       if (*fmt == '$') { pos = show_to(a, out, pos); }
       
@@ -169,36 +155,18 @@ int look_from(var self, var input, int pos) {
   return type_class_method(type_of(self), Show, look, self, input, pos);
 }
 
-int scan(const char* fmt, ...) {
-  va_list va;
-  va_start(va, fmt);
-  int ret = scan_from_va($(File, stdin), 0, fmt, va);
-  va_end(va);
+int scan_vl(const char* fmt, var_list vl) {
+  return scan_from_vl($(File, stdin), 0, fmt, vl);
+}
+
+int scanln_vl(const char* fmt, var_list vl) {
+  int ret = 0;
+  ret = scan_from_vl($(File, stdin), ret, fmt, vl);
+  ret = scan_from($(File, stdin), ret, "\n");
   return ret;
 }
 
-int scanln(const char* fmt, ...) {
-  va_list va;
-  va_start(va, fmt);
-  int ret = scan_from_va($(File, stdin), 0, fmt, va);
-  ret = scan("\n");
-  va_end(va);
-  return ret;
-}
-
-int scan_from(var input, int pos, const char* fmt, ...) {
-  va_list va;
-  va_start(va, fmt);
-  int ret = scan_from_va(input, pos, fmt, va);
-  va_end(va);
-  return ret;
-}
-
-int scan_va(const char* fmt, va_list va) {
-  return scan_from_va($(File, stdin), 0, fmt, va);
-}
-
-int scan_from_va(var input, int pos, const char* fmt, va_list va) {
+int scan_from_vl(var input, int pos, const char* fmt, var_list vl) {
 
   char fmt_buf[strlen(fmt)+1];
   
@@ -245,7 +213,11 @@ int scan_from_va(var input, int pos, const char* fmt, va_list va) {
       strncpy(fmt_buf, start, (fmt - start)+1);
       fmt_buf[(fmt - start)+1] = '\0';
       
-      var a = va_arg(va, var);
+      if (var_list_end(vl)) {
+        throw(FormatError, "Not enough arguments to Format String!");
+      }
+      
+      var a = var_list_get(vl);
       
       if (*fmt == '$') { pos = look_from(a, input, pos); }
       

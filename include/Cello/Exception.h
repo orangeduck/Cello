@@ -47,16 +47,16 @@ var Exception_Message(void);
 int  Exception_Depth(void);
 void* Exception_Buffer(void);
 
-var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...);
-var Exception_Catch(void* unused, ...);
+var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, var_list vl);
+var Exception_Catch(var_list vl);
 
 /* Exception Macros */
 
 #define try Exception_Inc(); Exception_Deactivate(); if (!setjmp(Exception_Buffer()))   
 
 #define catch(...) catch_scanned(__VA_ARGS__)
-#define catch_scanned(x, ...) else { Exception_Activate(); } Exception_Dec(); for (var x = Exception_Catch(NULL, ##__VA_ARGS__, Undefined); x != Undefined; x = Undefined)
-#define throw(e, fmt, ...) Exception_Throw(e, fmt, __FILE__, __func__, __LINE__, ##__VA_ARGS__)
+#define catch_scanned(x, ...) else { Exception_Activate(); } Exception_Dec(); for (var x = Exception_Catch(var_list_new(__VA_ARGS__)); x != Undefined; x = Undefined)
+#define throw(e, fmt, ...) Exception_Throw(e, fmt, __FILE__, __func__, __LINE__, var_list_new(__VA_ARGS__))
 
 
 #endif

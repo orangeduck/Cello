@@ -96,6 +96,33 @@ global var Undefined;
 #define $ lit
 #define lit(T, ...) (T##Data[]){{T, __VA_ARGS__}}
 
+/*
+**
+**  == var_list ==
+**
+**  This is a set of macros that provide
+**  a method for 'variable argument' like
+**  behaviour where all arguments to a function
+**  must be of type `var`.
+**
+**  Another advantage is that it provides a method
+**  to tell when no arguments are left.
+**
+**  VAR_LIST must always be used like this:
+**
+**    VAR_LIST(_, ##__VA_ARGS__, Undefined)
+**
+**  Otherwise correct behaviour cannot be ensured
+*/
+
+typedef var* var_list;
+
+#define var_list_parse(_, ...) (var[]){ __VA_ARGS__ }
+
+#define var_list_new(...) var_list_parse(_, ##__VA_ARGS__, Undefined)
+#define var_list_end(vl) (*vl is Undefined)
+#define var_list_get(vl) (*vl++)
+
 
 /*
 ** == Class ==

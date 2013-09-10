@@ -56,21 +56,23 @@ class {
 int show(var self);
 int show_to(var self, var out, int pos);
 
-int print(const char* fmt, ...);
-int println(const char* fmt, ...);
-int print_to(var out, int pos, const char* fmt, ...);
+#define print(fmt, ...) print_vl(fmt, var_list_new(__VA_ARGS__))
+#define println(fmt, ...) println_vl(fmt, var_list_new(__VA_ARGS__))
+#define print_to(out, pos, fmt, ...) print_to_vl(out, pos, fmt, var_list_new(__VA_ARGS__))
 
-int print_va(const char* fmt, va_list va);
-int print_to_va(var out, int pos, const char* fmt, va_list va);
+int print_vl(const char* fmt, var_list vl);
+int println_vl(const char* fmt, var_list vl);
+int print_to_vl(var out, int pos, const char* fmt, var_list vl);
 
 int look(var self);
 int look_from(var self, var input, int pos);
 
-int scan(const char* fmt, ...);
-int scanln(const char* fmt, ...);
-int scan_from(var input, int pos, const char* fmt, ...);
+#define scan(fmt, ...) scan_vl(fmt, var_list_new(__VA_ARGS__))
+#define scanln(fmt, ...) scanln_vl(fmt, var_list_new(__VA_ARGS__))
+#define scan_from(input, pos, fmt, ...) scan_from_vl(input, pos, fmt, var_list_new(__VA_ARGS__))
 
-int scan_va(const char* fmt, va_list va);
-int scan_from_va(var input, int pos, const char* fmt, va_list va);
+int scan_vl(const char* fmt, var_list vl);
+int scanln_vl(const char* fmt, var_list vl);
+int scan_from_vl(var input, int pos, const char* fmt, var_list vl);
 
 #endif

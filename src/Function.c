@@ -2,13 +2,12 @@
 
 #include "Cello/List.h"
 
-var call_with_ptr(var self, var* args) {
+var call_vl(var self, var_list vl) {
   
   var wrapped = new(List, 0);
   
-  while((*args) != (var)-1) {
-    push(wrapped, *args);
-    args++;
+  while(not var_list_end(vl)) {
+    push(wrapped, var_list_get(vl));
   }
   
   var res = call_with(self, wrapped);

@@ -10,8 +10,8 @@ class {
   var (*call_with)(var,var);
 } Call;
 
-#define call(x, ...) call_with_ptr(x, (var[]){ __VA_ARGS__, (var)-1 })
-var call_with_ptr(var self, var* args);
+#define call(x, ...) call_vl(x, var_list_new(__VA_ARGS__))
+var call_vl(var self, var_list vl);
 var call_with(var self, var args);
 
 /*
