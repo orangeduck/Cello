@@ -47,7 +47,7 @@ var Vec2_Copy(var self) {
 var Vec2_Eq(var self, var obj) {
   Vec2Data* v1 = cast(self, Vec2);
   Vec2Data* v2 = cast(obj, Vec2);
-  return (var)(intptr_t)(v1->x is v2->x and v1->y is v2->y);
+  return bool_var(v1->x is v2->x and v1->y is v2->y);
 }
 
 int Vec2_Show(var self, var output, int pos) {

@@ -1,5 +1,6 @@
 #include "Cello/Char.h"
 
+#include "Cello/Bool.h"
 #include "Cello/Exception.h"
 
 var Char = methods {
@@ -26,6 +27,10 @@ var Char_Delete(var self) {
   return self;
 }
 
+size_t Char_Size(void) {
+  return sizeof(CharData);
+}
+
 void Char_Assign(var self, var obj) {
   CharData* cd = cast(self, Char);
   cd->value = as_char(obj);
@@ -38,17 +43,17 @@ var Char_Copy(var self) {
 
 var Char_Eq(var self, var other) {
   CharData* cd = cast(self, Char);
-  return (var)(intptr_t)(cd->value == as_char(other));
+  return bool_var(cd->value == as_char(other));
 }
 
 var Char_Gt(var self, var other) {
   CharData* cd = cast(self, Char);
-  return (var)(intptr_t)(cd->value > as_char(other));
+  return bool_var(cd->value > as_char(other));
 }
 
 var Char_Lt(var self, var other) {
   CharData* cd = cast(self, Char);
-  return (var)(intptr_t)(cd->value < as_char(other));
+  return bool_var(cd->value < as_char(other));
 }
 
 long Char_Hash(var self) {

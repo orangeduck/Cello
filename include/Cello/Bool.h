@@ -21,6 +21,8 @@ global var Bool;
 local var True = (var)1;
 local var False = (var)0;
 
+var bool_var(bool x);
+
 var Bool_Eq(var self, var obj);
 var Bool_Gt(var self, var obj);
 var Bool_Lt(var self, var obj);

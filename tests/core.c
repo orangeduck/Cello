@@ -19,6 +19,10 @@ local var TestType_Delete(var self) {
   return self;
 }
 
+local size_t TestType_Size(void) {
+  return sizeof(TestTypeData);
+}
+
 local var TestType_Eq(var self, var obj) {
   TestTypeData* lhs = cast(self, TestType);
   TestTypeData* rhs = cast(obj, TestType);
@@ -29,7 +33,7 @@ local var TestType_Eq(var self, var obj) {
   }
 }
 
-instance(TestType, New) = { sizeof(TestTypeData), TestType_New, TestType_Delete };
+instance(TestType, New) = { TestType_New, TestType_Delete, TestType_Size };
 instance(TestType, Eq) = { TestType_Eq };
 
 PT_SUITE(suite_core) {

@@ -1,5 +1,6 @@
 #include "Cello/Reference.h"
 
+#include "Cello/Bool.h"
 #include "Cello/Type.h"
 #include "Cello/Exception.h"
 
@@ -28,6 +29,10 @@ var Reference_Delete(var self) {
   return self;
 }
 
+size_t Reference_Size(void) {
+  return sizeof(ReferenceData);
+}
+
 void Reference_Assign(var self, var obj) {
   ReferenceData* rd0 = cast(self, Reference);
   ReferenceData* rd1 = cast(obj, Reference);
@@ -42,7 +47,7 @@ var Reference_Copy(var self) {
 var Reference_Eq(var self, var obj) {
   ReferenceData* rd0 = cast(self, Reference);
   ReferenceData* rd1 = cast(obj, Reference);
-  return (var)(intptr_t)(rd0->ref is rd1->ref);
+  return bool_var(rd0->ref is rd1->ref);
 }
 
 long Reference_Hash(var self) {

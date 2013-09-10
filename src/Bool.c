@@ -5,6 +5,10 @@
 
 #include <string.h>
 
+var bool_var(bool x) {
+  return (var)(intptr_t)(x);
+}
+
 var Bool = methods {
   methods_begin(Bool),
   method(Bool, Eq),
@@ -19,15 +23,15 @@ var Bool = methods {
 };
 
 var Bool_Eq(var self, var obj) {
-  return (var)(intptr_t)(self == obj);
+  return bool_var(self == obj);
 }
 
 var Bool_Gt(var self, var obj) {
-  return (var)(intptr_t)(self > obj);
+  return bool_var(self > obj);
 }
 
 var Bool_Lt(var self, var obj) {
-  return (var)(intptr_t)(self < obj);
+  return bool_var(self < obj);
 }
 
 long Bool_Hash(var self) {

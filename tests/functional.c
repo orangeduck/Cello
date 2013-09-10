@@ -81,8 +81,8 @@ PT_SUITE(suite_functional) {
     var empty_function2(var args) { return Some; }
   #endif
     
-    var result1 = call($(Function, empty_function), None);
-    var result2 = call($(Function, empty_function2), None);
+    var result1 = call($(Function, empty_function));
+    var result2 = call($(Function, empty_function2));
     
     PT_ASSERT(result1 is None);
     PT_ASSERT(result2 is Some);
@@ -121,7 +121,7 @@ PT_SUITE(suite_functional) {
     
   }
 
-  PT_TEST(test_call_with_ptr) {
+  PT_TEST(test_call_vl) {
 
   #if defined(__APPLE__)
   
@@ -141,11 +141,11 @@ PT_SUITE(suite_functional) {
     
   #endif
   
-    var* args = (var[]){ $(Int, 1), $(Int, 5), (var)-1 };
+    var_list args = var_list_new($(Int, 1), $(Int, 5));
     
     var assert_func = $(Function, asserts_args);
     
-    var result = call_with_ptr(assert_func, args);
+    var result = call_vl(assert_func, args);
     
     PT_ASSERT(result is None);
 
@@ -402,7 +402,7 @@ PT_SUITE(suite_functional) {
   PT_TEST(test_new_filter) {
     
     lambda(only_some, args) {
-      return (var)(intptr_t)(at(args,0) is Some);
+      return bool_var(at(args,0) is Some);
     };
     
     var values = new(List, 3, Some, Some, None);

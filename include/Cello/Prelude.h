@@ -16,7 +16,7 @@
 **  var is not and or elif in
 **  local global class data instance
 **  foreach with try throw catch
-**  $ lit cast
+**  $ lit
 */
 
 typedef void* var;
@@ -76,15 +76,6 @@ var type_of(var obj);
 
 global var Undefined;
 
-/*
-** == Cast ==
-**
-**  Perform run-time type check for object.
-**  Ensure object X is of certain type T.
-*/
-
-#define cast(X, T) Type_Cast(X, T, __func__, __FILE__, __LINE__)
-
 
 /* 
 ** == Lit ==
@@ -105,6 +96,35 @@ global var Undefined;
 #define $ lit
 #define lit(T, ...) (T##Data[]){{T, __VA_ARGS__}}
 
+/*
+**
+**  == var_list ==
+**
+**  This is a set of macros that provide
+**  a method for 'variable argument' like
+**  behaviour.
+**
+**  There are two main differences to the C
+**  like variable arguments. First all arguments 
+**  must be of type `var`.
+**
+**  Secondly this mechanism provides a method
+**  to tell when no arguments are left.
+**
+**  This makes it far safer for use in Cello.
+**
+**  Argument lists can be constructed using macro
+**  variable arguments and the macro `var_list_new`
+*/
+
+typedef var* var_list;
+
+#define var_list_parse(_, ...) (var[]){ __VA_ARGS__ }
+
+#define var_list_new(...) var_list_parse(_, ##__VA_ARGS__, Undefined)
+#define var_list_end(vl) (*vl is Undefined)
+#define var_list_get(vl) (*vl++)
+
 
 /*
 ** == Class ==
@@ -117,9 +137,9 @@ global var Undefined;
 /** New - heap allocation & constructor/destructor */
 
 class {
-  size_t size;
   var (*construct)(var, va_list*);
   var (*destruct)(var);
+  size_t (*size)(void);
 } New;
 
 var new(var type, ...);
@@ -128,6 +148,7 @@ void delete(var obj);
 var allocate(var type);
 void deallocate(var obj);
 
+size_t size(var type);
 var construct(var obj, ...);
 var destruct(var obj);
 

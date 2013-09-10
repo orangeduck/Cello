@@ -8,6 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+data {
+  var type;
+  int size;
+  var keys;
+  var* key_buckets;
+  var* val_buckets;
+} DictionaryData;
+
 var Dictionary = methods {
   methods_begin(Dictionary),
   method(Dictionary, New),
@@ -51,6 +59,10 @@ var Dictionary_Delete(var self) {
   free(dict->val_buckets);
   
   return self;
+}
+
+size_t Dictionary_Size(void) {
+  return sizeof(DictionaryData);
 }
 
 void Dictionary_Assign(var self, var obj) {

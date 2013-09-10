@@ -23,6 +23,7 @@ data {
 /** File_New(var self, const char* filename, const char* access); */
 var File_New(var self, va_list* args);
 var File_Delete(var self);
+size_t File_Size(void);
 
 var File_Open(var self, const char* filename, const char* access);
 void File_Close(var self);
@@ -45,7 +46,7 @@ void File_Put(var self, var type, var obj);
 int File_Format_To(var self, int pos, const char* fmt, va_list va);
 int File_Format_From(var self, int pos, const char* fmt, va_list va);
 
-instance(File, New) = { sizeof(FileData), File_New, File_Delete };
+instance(File, New) = { File_New, File_Delete, File_Size };
 instance(File, With) = { NULL, File_Close };
 instance(File, Stream) = { File_Open, File_Close, File_Seek, File_Tell, File_Flush, File_EOF, File_Read, File_Write };
 instance(File, Dict) = { File_Get, File_Put };

@@ -16,22 +16,10 @@
 
 global var Map;
 
-struct MapNode {
-  var leaf_key;
-  var leaf_val;
-  struct MapNode* left;
-  struct MapNode* right;
-};
-
-data {
-  var type;
-  var keys;
-  struct MapNode* root;
-} MapData;
-
 /** Map_New(var self); */
 var Map_New(var self, va_list* args);
 var Map_Delete(var self);
+size_t Map_Size(void);
 
 void Map_Assign(var self, var obj);
 var Map_Copy(var self);
@@ -52,7 +40,7 @@ var Map_Iter_Next(var self, var curr);
 
 int Map_Show(var self, var output, int pos);
 
-instance(Map, New) = { sizeof(MapData), Map_New, Map_Delete };
+instance(Map, New) = { Map_New, Map_Delete, Map_Size };
 instance(Map, Assign) = { Map_Assign };
 instance(Map, Copy) = { Map_Copy };
 instance(Map, Eq) = { Map_Eq };

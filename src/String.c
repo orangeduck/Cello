@@ -5,6 +5,9 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 
 var String = methods {
   methods_begin(String),
@@ -38,6 +41,10 @@ var String_Delete(var self) {
   return self;
 }
 
+size_t String_Size(void) {
+  return sizeof(StringData);
+}
+
 void String_Assign(var self, var obj) {
   StringData* s = cast(self, String);
   const char* value = as_str(obj);
@@ -54,7 +61,7 @@ var String_Copy(var self) {
 var String_Eq(var self, var other) {
   StringData* fst = cast(self, String);
   if (type_implements(type_of(other), AsStr)) {
-    return (var)(intptr_t)(strcmp(fst->value, as_str(other)) == 0);
+    return bool_var(strcmp(fst->value, as_str(other)) == 0);
   } else {
     return False;
   }

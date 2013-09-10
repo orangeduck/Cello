@@ -9,6 +9,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+data {
+  var type;
+  var key_type;
+  var val_type;
+  int size;
+  var keys;
+  var* key_buckets;
+  var* val_buckets;
+} TableData;
+
 var Table = methods {
   methods_begin(Table),
   method(Table, New),
@@ -59,6 +69,10 @@ var Table_Delete(var self) {
   free(tab->val_buckets);
   
   return self;
+}
+
+size_t Table_Size(void) {
+  return sizeof(TableData);
 }
 
 void Table_Assign(var self, var obj) {

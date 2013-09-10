@@ -39,6 +39,7 @@ data {
 /** Int_New(var self, long value); */
 var Int_New(var self, va_list* args);
 var Int_Delete(var self);
+size_t Int_Size(void);
 void Int_Assign(var self, var obj);
 var Int_Copy(var self);
 
@@ -64,7 +65,7 @@ void Int_Serial_Write(var self, var output);
 int Int_Show(var self, var output, int pos);
 int Int_Look(var self, var input, int pos);
 
-instance(Int, New) = { sizeof(IntData), Int_New, Int_Delete };
+instance(Int, New) = { Int_New, Int_Delete, Int_Size };
 instance(Int, Assign) = { Int_Assign };
 instance(Int, Copy) = { Int_Copy };
 instance(Int, Eq) = { Int_Eq };
@@ -92,6 +93,7 @@ data {
 /** Real_New(var self, double value); */
 var Real_New(var self, va_list* args);
 var Real_Delete(var self);
+size_t Real_Size(void);
 void Real_Assign(var self, var obj);
 var Real_Copy(var self);
 
@@ -117,7 +119,7 @@ void Real_Serial_Write(var self, var output);
 int Real_Show(var self, var output, int pos);
 int Real_Look(var self, var input, int pos);
 
-instance(Real, New) = { sizeof(RealData), Real_New, Real_Delete };
+instance(Real, New) = { Real_New, Real_Delete, Real_Size };
 instance(Real, Assign) = { Real_Assign };
 instance(Real, Copy) = { Real_Copy };
 instance(Real, Eq) = { Real_Eq };
