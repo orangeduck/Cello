@@ -24,6 +24,7 @@ data {
 /** Reference_New(var self, var obj); */
 var Reference_New(var self, va_list* args);
 var Reference_Delete(var self);
+size_t Reference_Size(void);
 void Reference_Assign(var self, var obj);
 var Reference_Copy(var self);
 var Reference_Eq(var self, var obj);
@@ -34,7 +35,7 @@ void Reference_Exit(var self);
 
 int Reference_Show(var self, var output, int pos);
 
-instance(Reference, New) = { sizeof(ReferenceData), Reference_New, Reference_Delete };
+instance(Reference, New) = { Reference_New, Reference_Delete, Reference_Size };
 instance(Reference, Assign) = { Reference_Assign };
 instance(Reference, Copy) = { Reference_Copy };
 instance(Reference, Eq) = { Reference_Eq };

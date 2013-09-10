@@ -64,13 +64,14 @@ global var Function;
 /** Function_New(var self, var(*func)(var) ); */
 var Function_New(var self, va_list* args);
 var Function_Delete(var self);
+size_t Function_Size(void);
 
 var Function_Copy(var self);
 void Function_Assign(var self, var obj);
 
 var Function_Call(var self, var args);
 
-instance(Function, New) = { sizeof(FunctionData), Function_New, Function_Delete };
+instance(Function, New) = { Function_New, Function_Delete, Function_Size };
 instance(Function, Copy) = { Function_Copy };
 instance(Function, Assign) = { Function_Assign };
 instance(Function, Call) = { Function_Call };

@@ -11,6 +11,11 @@ void release(var p, var x) {
   type_class_method(type_of(p), Retain, release, p, x);
 }
 
+data {
+  var type;
+  var tab;
+} PoolData;
+
 var Pool = methods {
   methods_begin(Pool),
   method(Pool, New), 
@@ -30,6 +35,10 @@ var Pool_Delete(var self) {
   PoolData* pd = cast(self, Pool);
   delete(pd->tab);
   return self;
+}
+
+size_t Pool_Size(void) {
+  return sizeof(PoolData);
 }
 
 var Pool_Retain(var self, var x) {

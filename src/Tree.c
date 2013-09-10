@@ -7,6 +7,21 @@
 
 #include <string.h>
 
+struct TreeNode {
+  var leaf_key;
+  var leaf_val;
+  struct TreeNode* left;
+  struct TreeNode* right;
+};
+
+data {
+  var type;
+  var key_type;
+  var val_type;
+  var keys;
+  struct TreeNode* root;
+} TreeData;
+
 var Tree = methods {
   methods_begin(Tree),
   method(Tree, New),
@@ -34,6 +49,10 @@ var Tree_Delete(var self) {
   clear(self);
   delete(td->keys);
   return self;
+}
+
+size_t Tree_Size(void) {
+  return sizeof(TreeData);
 }
 
 void Tree_Assign(var self, var obj) {

@@ -402,7 +402,7 @@ PT_SUITE(suite_functional) {
   PT_TEST(test_new_filter) {
     
     lambda(only_some, args) {
-      return (var)(intptr_t)(at(args,0) is Some);
+      return bool_var(at(args,0) is Some);
     };
     
     var values = new(List, 3, Some, Some, None);

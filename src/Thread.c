@@ -67,6 +67,10 @@ var Thread_Delete(var self) {
   return td;
 }
 
+size_t Thread_Size(void) {
+  return sizeof(ThreadData);
+}
+
 void Thread_Assign(var self, var obj) {
   
   ThreadData* td = cast(self, Thread);
@@ -115,15 +119,15 @@ long Thread_AsLong(var self) {
 }
 
 var Thread_Eq(var self, var obj) {
-  return (var)(intptr_t)(as_long(self) == as_long(obj));
+  return bool_var(as_long(self) == as_long(obj));
 }
 
 var Thread_Gt(var self, var obj) {
-  return (var)(intptr_t)(as_long(self) > as_long(obj));
+  return bool_var(as_long(self) > as_long(obj));
 }
 
 var Thread_Lt(var self, var obj) {
-  return (var)(intptr_t)(as_long(self) < as_long(obj));
+  return bool_var(as_long(self) < as_long(obj));
 }
 
 local bool tls_key_created = false;
@@ -280,6 +284,16 @@ void unlock(var self) {
   type_class_method(type_of(self), Lock, unlock, self);
 }
 
+data {
+  var type;
+#if defined(__unix__) || defined(__APPLE__)
+  pthread_mutex_t mutex;
+#elif defined(_WIN32)
+  HANDLE mutex;
+#endif
+
+} MutexData;
+
 var Mutex = methods {
   methods_begin(Mutex),
   method(Mutex, New),
@@ -308,6 +322,10 @@ var Mutex_Delete(var self) {
   CloseHandle(md->mutex);
 #endif
   return md;
+}
+
+size_t Mutex_Size(void) {
+  return sizeof(MutexData);
 }
 
 void Mutex_Assign(var self, var obj) {
@@ -342,7 +360,7 @@ var Mutex_Lock_Try(var self) {
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Lock Try"); }
   return True;
 #elif defined(_WIN32)
-  return (var)(intptr_t)(not (WaitForSingleObject(md->mutex, 0) is WAIT_TIMEOUT));
+  return bool_var(not (WaitForSingleObject(md->mutex, 0) is WAIT_TIMEOUT));
 #endif
   
 }

@@ -8,6 +8,13 @@
 #include <math.h>
 #include <string.h>
 
+data {
+  var type;
+  int num_items;
+  int num_slots;
+  var* items;
+  int cursor;
+} ListData;
 
 var List = methods {
   methods_begin(List),
@@ -48,6 +55,10 @@ var List_Delete(var self) {
   ListData* lo = cast(self, List);
   free(lo->items);
   return self;
+}
+
+size_t List_Size(void) {
+  return sizeof(ListData);
 }
 
 void List_Assign(var self, var obj) {

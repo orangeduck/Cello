@@ -3,9 +3,19 @@
 #include "Cello/List.h"
 
 var call_with_ptr(var self, var* args) {
-  int num = 0;
-  while(args[num] != (var)-1) { num++; }
-  return call_with(self, $(List, num, num, args, 0));
+  
+  var wrapped = new(List, 0);
+  
+  while((*args) != (var)-1) {
+    push(wrapped, *args);
+    args++;
+  }
+  
+  var res = call_with(self, wrapped);
+  
+  delete(wrapped);
+  
+  return res;
 }
 
 var call_with(var self, var args) {
@@ -29,6 +39,10 @@ var Function_New(var self, va_list* args) {
 
 var Function_Delete(var self) {
   return self;
+}
+
+size_t Function_Size(void) {
+  return sizeof(FunctionData);
 }
 
 var Function_Copy(var self) {

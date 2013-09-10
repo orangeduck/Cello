@@ -7,6 +7,19 @@
 
 #include <string.h>
 
+struct MapNode {
+  var leaf_key;
+  var leaf_val;
+  struct MapNode* left;
+  struct MapNode* right;
+};
+
+data {
+  var type;
+  var keys;
+  struct MapNode* root;
+} MapData;
+
 var Map = methods {
   methods_begin(Map),
   method(Map, New),
@@ -32,6 +45,10 @@ var Map_Delete(var self) {
   clear(self);
   delete(md->keys);
   return self;
+}
+
+size_t Map_Size(void) {
+  return sizeof(MapData);
 }
 
 void Map_Assign(var self, var obj) {

@@ -28,6 +28,10 @@ var File_Delete(var self) {
   return self;
 }
 
+size_t File_Size(void) {
+  return sizeof(FileData);
+}
+
 var File_Open(var self, const char* filename, const char* access) {
   FileData* fd = cast(self, File);
   

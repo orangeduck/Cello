@@ -57,6 +57,10 @@ var Int_Delete(var self) {
   return self;
 }
 
+size_t Int_Size(void) {
+  return sizeof(IntData);
+}
+
 void Int_Assign(var self, var obj) {
   IntData* intdata = cast(self, Int);
   intdata->value = as_long(obj);
@@ -70,7 +74,7 @@ var Int_Copy(var self) {
 var Int_Eq(var self, var other) {
   IntData* io = cast(self, Int);
   if (type_implements(type_of(other), AsLong)) {
-    return (var)(intptr_t)(io->value == as_long(other));
+    return bool_var(io->value == as_long(other));
   } else {
     return False;
   }
@@ -78,11 +82,11 @@ var Int_Eq(var self, var other) {
 
 var Int_Gt(var self, var other) {
   IntData* io = cast(self, Int);
-  return (var)(intptr_t)(io->value > as_long(other));
+  return bool_var(io->value > as_long(other));
 }
 var Int_Lt(var self, var other) {
   IntData* io = cast(self, Int);
-  return (var)(intptr_t)(io->value < as_long(other));
+  return bool_var(io->value < as_long(other));
 }
 
 long Int_Hash(var self) {
@@ -180,6 +184,10 @@ var Real_Delete(var self) {
   return self;
 }
 
+size_t Real_Size(void) {
+  return sizeof(RealData);
+}
+
 void Real_Assign(var self, var obj) {
   RealData* ro = cast(self, Real);
   ro->value = as_double(obj);
@@ -193,7 +201,7 @@ var Real_Copy(var self) {
 var Real_Eq(var self, var other) {
   RealData* ro = cast(self, Real);
   if (type_implements(type_of(other), AsDouble)) {
-    return (var)(intptr_t)(ro->value == as_double(other));
+    return bool_var(ro->value == as_double(other));
   } else {
     return False;
   }
@@ -201,12 +209,12 @@ var Real_Eq(var self, var other) {
 
 var Real_Gt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return (var)(intptr_t)(ro->value > as_double(other));
+  return bool_var(ro->value > as_double(other));
 }
 
 var Real_Lt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return (var)(intptr_t)(ro->value < as_double(other));
+  return bool_var(ro->value < as_double(other));
 }
 
 union interp_cast {

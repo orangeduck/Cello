@@ -16,24 +16,10 @@
 
 global var Tree;
 
-struct TreeNode {
-  var leaf_key;
-  var leaf_val;
-  struct TreeNode* left;
-  struct TreeNode* right;
-};
-
-data {
-  var type;
-  var key_type;
-  var val_type;
-  var keys;
-  struct TreeNode* root;
-} TreeData;
-
 /** Tree_New(var self, var key_type, var val_type); */
 var Tree_New(var self, va_list* args);
 var Tree_Delete(var self);
+size_t Tree_Size(void);
 
 void Tree_Assign(var self, var obj);
 var Tree_Copy(var self);
@@ -54,7 +40,7 @@ var Tree_Iter_Next(var self, var curr);
 
 int Tree_Show(var self, var output, int pos);
 
-instance(Tree, New) = { sizeof(TreeData), Tree_New, Tree_Delete };
+instance(Tree, New) = { Tree_New, Tree_Delete, Tree_Size };
 instance(Tree, Assign) = { Tree_Assign };
 instance(Tree, Copy) = { Tree_Copy };
 instance(Tree, Eq) = { Tree_Eq };

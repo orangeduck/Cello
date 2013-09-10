@@ -108,9 +108,9 @@ global var Undefined;
 /** New - heap allocation & constructor/destructor */
 
 class {
-  size_t size;
   var (*construct)(var, va_list*);
   var (*destruct)(var);
+  size_t (*size)(void);
 } New;
 
 var new(var type, ...);
@@ -119,6 +119,7 @@ void delete(var obj);
 var allocate(var type);
 void deallocate(var obj);
 
+size_t size(var type);
 var construct(var obj, ...);
 var destruct(var obj);
 

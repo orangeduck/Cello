@@ -21,6 +21,7 @@ data {
 /** String_New(var self, char* value); */
 var String_New(var self, va_list* args);
 var String_Delete(var self);
+size_t String_Size(void);
 void String_Assign(var self, var obj);
 var String_Copy(var self);
 
@@ -46,7 +47,7 @@ int String_Format_From(var self, int pos, const char* fmt, va_list va);
 int String_Show(var self, var out, int pos);
 int String_Look(var self, var input, int pos);
 
-instance(String, New) = { sizeof(StringData), String_New, String_Delete };
+instance(String, New) = { String_New, String_Delete, String_Size };
 instance(String, Assign) = { String_Assign };
 instance(String, Copy) = { String_Copy };
 instance(String, Eq) = { String_Eq };

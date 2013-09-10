@@ -56,6 +56,10 @@ var Type_Delete(var self) {
   return self;
 }
 
+size_t Type_Size(void) {
+  return 0;
+}
+
 const char* Type_AsStr(var self) {
   return type_class(self, __Name);
 }
@@ -77,6 +81,17 @@ var Type_Implements_Name(var self, const char* class_name, const char* func, con
   }
   
   return False;
+}
+
+var Type_Implements_Method_Name(var self, int offset, const char* class_name, const char* func, const char* file, int line) {
+  
+  if (not Type_Implements_Name(self, class_name, func, file, line)) {
+    return False;
+  } else {
+    intptr_t* func_address = Type_Class_Name(self, class_name, func, file, line) + offset;
+    return bool_var(*func_address);
+  }
+  
 }
 
 var Type_Class_Name(var self, const char* class_name, const char* func, const char* file, int line) {
