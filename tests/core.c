@@ -578,16 +578,10 @@ PT_SUITE(suite_core) {
     
   }
   
-  PT_TEST(test_module) {
-    
+  PT_TEST(test_module) {  
+        
 #ifdef _WIN32
-    var libname = "python27.dll";
-#else
-    var libname = "python27.so";
-#endif
-
-    with(python in module(libname)) {
-
+    with(python in module("python27.dll")) {
     
       const char* (*Py_GetVersion)(void) = get(python, $(String, "Py_GetVersion"));
       const char* (*Py_GetPlatform)(void) = get(python, $(String, "Py_GetPlatform"));
@@ -603,6 +597,17 @@ PT_SUITE(suite_core) {
       PT_ASSERT(Py_GetCopyright());
       
     }
+#else
+    //with(math in module("libm.so")) {
+      
+      //double (*cosine)(double) = get(math, $(String, "cos"));
+      
+      //PT_ASSERT(cosine);
+      
+    //}
+#endif
+
+
     
     
   }

@@ -30,7 +30,7 @@ ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
 	CFLAGS += -fPIC
-	LIBS = -lpthread -lm
+	LIBS = -lpthread -ldl -lm
 	INSTALL_LIB = mkdir -p ${L} && cp -f ${STATIC} ${L}/$(STATIC)
 	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
 endif
@@ -39,7 +39,7 @@ ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
 	CFLAGS += -fPIC -fblocks -fnested-functions
-	LIBS = -lpthread -lm
+	LIBS = -lpthread -ldl -lm
 	INSTALL_LIB = mkdir -p ${L} && cp -f $(STATIC) ${L}/$(STATIC)
 	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
 endif

@@ -3,6 +3,8 @@
 #include "Cello/String.h"
 #include "Cello/List.h"
 
+#include <string.h>
+
 var Module = type_data {
   type_begin(Module),
   type_entry(Module, New),
@@ -65,11 +67,16 @@ void Module_Enter(var self) {
 #ifdef _WIN32
   md->lib = LoadLibrary(md->name);
 #else
-  md->lib = dlopen(md->name, RTLD_LAZY);
+  md->lib = dlopen(md->name, RTLD_LAZY | RTLD_NOLOAD);
 #endif
   
   if (md->lib is NULL) {
-    throw(ResourceError, "Could not load dynamic library '%s'!", $(String, md->name));
+#ifdef _WIN32
+    var error = $(String, md->name);
+#else
+    var error = $(String, dlerror());
+#endif
+    throw(ResourceError, "Could not load dynamic library '%s'!", error);
   }
   
 }

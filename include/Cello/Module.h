@@ -7,6 +7,8 @@
   #include <windows.h>
   #define data typedef struct
   #define in ,
+#else
+  #include <dlfcn.h>
 #endif
 
 
