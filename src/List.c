@@ -16,21 +16,21 @@ data {
   int cursor;
 } ListData;
 
-var List = methods {
-  methods_begin(List),
-  method(List, New),
-  method(List, Assign),
-  method(List, Copy),
-  method(List, Eq),
-  method(List, Collection),
-  method(List, Push),
-  method(List, At),
-  method(List, Iter),
-  method(List, Reverse),
-  method(List, Append),
-  method(List, Sort),
-  method(List, Show),
-  methods_end(List)
+var List = type_data {
+  type_begin(List),
+  type_entry(List, New),
+  type_entry(List, Assign),
+  type_entry(List, Copy),
+  type_entry(List, Eq),
+  type_entry(List, Collection),
+  type_entry(List, Push),
+  type_entry(List, At),
+  type_entry(List, Iter),
+  type_entry(List, Reverse),
+  type_entry(List, Append),
+  type_entry(List, Sort),
+  type_entry(List, Show),
+  type_end(List)
 };
 
 var List_New(var self, var_list vl) {

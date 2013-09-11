@@ -31,20 +31,20 @@ void absolute(var self) {
   return type_class_method(type_of(self), Num, absolute, self);
 }
 
-var Int = methods {
-  methods_begin(Int),
-  method(Int, New), 
-  method(Int, Assign),
-  method(Int, Copy),
-  method(Int, Eq), 
-  method(Int, Ord),
-  method(Int, Hash),
-  method(Int, AsLong),
-  method(Int, AsDouble),
-  method(Int, Num),
-  method(Int, Serialize),
-  method(Int, Show),
-  methods_end(Int)
+var Int = type_data {
+  type_begin(Int),
+  type_entry(Int, New), 
+  type_entry(Int, Assign),
+  type_entry(Int, Copy),
+  type_entry(Int, Eq), 
+  type_entry(Int, Ord),
+  type_entry(Int, Hash),
+  type_entry(Int, AsLong),
+  type_entry(Int, AsDouble),
+  type_entry(Int, Num),
+  type_entry(Int, Serialize),
+  type_entry(Int, Show),
+  type_end(Int)
 };
 
 var Int_New(var self, var_list vl) {
@@ -157,20 +157,20 @@ int Int_Look(var self, var input, int pos) {
   return pos;
 }
 
-var Real = methods {
-  methods_begin(Real),
-  method(Real, New),
-  method(Real, Assign),
-  method(Real, Copy),
-  method(Real, Eq),
-  method(Real, Ord),
-  method(Real, Hash),
-  method(Real, AsDouble),
-  method(Real, AsLong), 
-  method(Real, Num),
-  method(Real, Serialize),
-  method(Real, Show), 
-  methods_end(Real)
+var Real = type_data {
+  type_begin(Real),
+  type_entry(Real, New),
+  type_entry(Real, Assign),
+  type_entry(Real, Copy),
+  type_entry(Real, Eq),
+  type_entry(Real, Ord),
+  type_entry(Real, Hash),
+  type_entry(Real, AsDouble),
+  type_entry(Real, AsLong), 
+  type_entry(Real, Num),
+  type_entry(Real, Serialize),
+  type_entry(Real, Show), 
+  type_end(Real)
 };
 
 var Real_New(var self, var_list vl) {

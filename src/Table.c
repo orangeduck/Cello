@@ -19,17 +19,17 @@ data {
   var* val_buckets;
 } TableData;
 
-var Table = methods {
-  methods_begin(Table),
-  method(Table, New),
-  method(Table, Assign),
-  method(Table, Copy),
-  method(Table, Eq),
-  method(Table, Collection),
-  method(Table, Dict),
-  method(Table, Iter),
-  method(Table, Show),
-  methods_end(Table)
+var Table = type_data {
+  type_begin(Table),
+  type_entry(Table, New),
+  type_entry(Table, Assign),
+  type_entry(Table, Copy),
+  type_entry(Table, Eq),
+  type_entry(Table, Collection),
+  type_entry(Table, Dict),
+  type_entry(Table, Iter),
+  type_entry(Table, Show),
+  type_end(Table)
 };
 
 var Table_New(var self, var_list vl) {

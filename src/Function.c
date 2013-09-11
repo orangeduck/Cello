@@ -21,13 +21,13 @@ var call_with(var self, var args) {
   return type_class_method(type_of(self), Call, call_with, self, args);
 }
 
-var Function = methods {
-  methods_begin(Function),
-  method(Function, New),
-  method(Function, Copy),
-  method(Function, Assign),
-  method(Function, Call),
-  methods_end(Function),
+var Function = type_data {
+  type_begin(Function),
+  type_entry(Function, New),
+  type_entry(Function, Copy),
+  type_entry(Function, Assign),
+  type_entry(Function, Call),
+  type_end(Function),
 };
 
 var Function_New(var self, var_list vl) {

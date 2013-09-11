@@ -9,21 +9,21 @@
 #include <errno.h>
 #include <limits.h>
 
-var String = methods {
-  methods_begin(String),
-  method(String, New),
-  method(String, Assign),
-  method(String, Copy),
-  method(String, Eq),
-  method(String, Ord),
-  method(String, Collection),
-  method(String, Hash),
-  method(String, Reverse),
-  method(String, AsStr), 
-  method(String, Append), 
-  method(String, Format),
-  method(String, Show),
-  methods_end(String)
+var String = type_data {
+  type_begin(String),
+  type_entry(String, New),
+  type_entry(String, Assign),
+  type_entry(String, Copy),
+  type_entry(String, Eq),
+  type_entry(String, Ord),
+  type_entry(String, Collection),
+  type_entry(String, Hash),
+  type_entry(String, Reverse),
+  type_entry(String, AsStr), 
+  type_entry(String, Append), 
+  type_entry(String, Format),
+  type_entry(String, Show),
+  type_end(String)
 };
 
 var String_New(var self, var_list vl) {

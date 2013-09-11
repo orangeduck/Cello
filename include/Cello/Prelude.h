@@ -41,10 +41,10 @@ typedef void* var;
 **  of Types statically much easier
 */
 
-#define methods (TypeData*)(const TypeData[])
-#define methods_begin(T) {NULL, "__Type"}, {#T, "__Name"}
-#define method(T,C) {&T##C, #C}
-#define methods_end(T) {NULL, NULL}
+#define type_data (TypeData*)(const TypeData[])
+#define type_begin(T) {NULL, "__Type"}, {#T, "__Name"}, {NULL, "__Parent"}
+#define type_entry(T,C) {&T##C, #C}
+#define type_end(T) {NULL, NULL}
 
 /*
 ** == Singleton ==
@@ -52,7 +52,7 @@ typedef void* var;
 **  Create a empty type object.
 */
 
-#define Singleton(T) methods { methods_begin(T), methods_end(T) }
+#define Singleton(T) type_data { type_begin(T), type_end(T) }
 
 
 /*

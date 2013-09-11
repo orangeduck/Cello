@@ -4,14 +4,14 @@
 #include "Cello/Number.h"
 #include "Cello/String.h"
 
-var File = methods {
-  methods_begin(File),
-  method(File, New),
-  method(File, With),
-  method(File, Stream),
-  method(File, Dict),
-  method(File, Format),
-  methods_end(File),
+var File = type_data {
+  type_begin(File),
+  type_entry(File, New),
+  type_entry(File, With),
+  type_entry(File, Stream),
+  type_entry(File, Dict),
+  type_entry(File, Format),
+  type_end(File),
 };
 
 var File_New(var self, var_list vl) {

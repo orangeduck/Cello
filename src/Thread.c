@@ -21,15 +21,15 @@ void terminate(var self) {
   type_class_method(type_of(self), Process, terminate, self);
 }
 
-var Thread = methods {
-  methods_begin(Thread),
-  method(Thread, New),
-  method(Thread, Assign),
-  method(Thread, Copy),
-  method(Thread, Call),
-  method(Thread, Process),
-  method(Thread, AsLong),
-  methods_end(Thread),
+var Thread = type_data {
+  type_begin(Thread),
+  type_entry(Thread, New),
+  type_entry(Thread, Assign),
+  type_entry(Thread, Copy),
+  type_entry(Thread, Call),
+  type_entry(Thread, Process),
+  type_entry(Thread, AsLong),
+  type_end(Thread),
 };
 
 var Thread_New(var self, var_list vl) {
@@ -294,14 +294,14 @@ data {
 
 } MutexData;
 
-var Mutex = methods {
-  methods_begin(Mutex),
-  method(Mutex, New),
-  method(Mutex, Assign),
-  method(Mutex, Copy),
-  method(Mutex, With),
-  method(Mutex, Lock),
-  methods_end(Mutex)
+var Mutex = type_data {
+  type_begin(Mutex),
+  type_entry(Mutex, New),
+  type_entry(Mutex, Assign),
+  type_entry(Mutex, Copy),
+  type_entry(Mutex, With),
+  type_entry(Mutex, Lock),
+  type_end(Mutex)
 };
 
 var Mutex_New(var self, var_list vl) {

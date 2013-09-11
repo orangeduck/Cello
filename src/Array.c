@@ -16,21 +16,21 @@ data {
   var items;
 } ArrayData;
 
-var Array = methods {
-  methods_begin(Array),
-  method(Array, New),
-  method(Array, Assign),
-  method(Array, Copy),
-  method(Array, Eq),
-  method(Array, Collection),
-  method(Array, Push),
-  method(Array, At),
-  method(Array, Iter),
-  method(Array, Reverse),
-  method(Array, Append),
-  method(Array, Sort),
-  method(Array, Show),
-  methods_end(Array)
+var Array = type_data {
+  type_begin(Array),
+  type_entry(Array, New),
+  type_entry(Array, Assign),
+  type_entry(Array, Copy),
+  type_entry(Array, Eq),
+  type_entry(Array, Collection),
+  type_entry(Array, Push),
+  type_entry(Array, At),
+  type_entry(Array, Iter),
+  type_entry(Array, Reverse),
+  type_entry(Array, Append),
+  type_entry(Array, Sort),
+  type_entry(Array, Show),
+  type_end(Array)
 };
 
 var Array_New(var self, var_list vl) {

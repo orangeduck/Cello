@@ -3,15 +3,15 @@
 #include "Cello/String.h"
 #include "Cello/List.h"
 
-var Module = methods {
-  methods_begin(Module),
-  method(Module, New),
-  method(Module, Copy),
-  method(Module, Assign),
-  method(Module, With),
-  method(Module, Dict),
-  method(Module, Call),
-  methods_end(Module),
+var Module = type_data {
+  type_begin(Module),
+  type_entry(Module, New),
+  type_entry(Module, Copy),
+  type_entry(Module, Assign),
+  type_entry(Module, With),
+  type_entry(Module, Dict),
+  type_entry(Module, Call),
+  type_end(Module),
 };
 
 var Module_New(var self, var_list vl) {

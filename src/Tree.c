@@ -22,17 +22,17 @@ data {
   struct TreeNode* root;
 } TreeData;
 
-var Tree = methods {
-  methods_begin(Tree),
-  method(Tree, New),
-  method(Tree, Assign),
-  method(Tree, Copy),
-  method(Tree, Eq),
-  method(Tree, Collection),
-  method(Tree, Dict),
-  method(Tree, Iter),
-  method(Tree, Show),
-  methods_end(Tree),
+var Tree = type_data {
+  type_begin(Tree),
+  type_entry(Tree, New),
+  type_entry(Tree, Assign),
+  type_entry(Tree, Copy),
+  type_entry(Tree, Eq),
+  type_entry(Tree, Collection),
+  type_entry(Tree, Dict),
+  type_entry(Tree, Iter),
+  type_entry(Tree, Show),
+  type_end(Tree),
 };
 
 var Tree_New(var self, var_list vl) {

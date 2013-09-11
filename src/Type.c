@@ -7,12 +7,12 @@
 
 #include <string.h>
 
-var Type = methods {
-  methods_begin(Type),
-  method(Type, New),
-  method(Type, AsStr),
-  method(Type, Show),
-  methods_end(Type),
+var Type = type_data {
+  type_begin(Type),
+  type_entry(Type, New),
+  type_entry(Type, AsStr),
+  type_entry(Type, Show),
+  type_end(Type),
 };
 
 var Type_Cast(var obj, var t, const char* func, const char* file, int line) {

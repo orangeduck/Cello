@@ -6,17 +6,17 @@
 
 #include <string.h>
 
-var Reference = methods {
-  methods_begin(Reference),
-  method(Reference, New), 
-  method(Reference, Assign),
-  method(Reference, Copy),
-  method(Reference, Eq), 
-  method(Reference, Hash),
-  method(Reference, At),
-  method(Reference, With),
-  method(Reference, Show),
-  methods_end(Reference)
+var Reference = type_data {
+  type_begin(Reference),
+  type_entry(Reference, New), 
+  type_entry(Reference, Assign),
+  type_entry(Reference, Copy),
+  type_entry(Reference, Eq), 
+  type_entry(Reference, Hash),
+  type_entry(Reference, At),
+  type_entry(Reference, With),
+  type_entry(Reference, Show),
+  type_end(Reference)
 };
 
 var Reference_New(var self, var_list vl) {

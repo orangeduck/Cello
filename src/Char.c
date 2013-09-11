@@ -3,18 +3,18 @@
 #include "Cello/Bool.h"
 #include "Cello/Exception.h"
 
-var Char = methods {
-  methods_begin(Char),
-  method(Char, New),
-  method(Char, Assign),
-  method(Char, Copy),
-  method(Char, Eq),
-  method(Char, Ord),
-  method(Char, Hash),
-  method(Char, AsChar),
-  method(Char, Serialize),
-  method(Char, Show),
-  methods_end(Char)
+var Char = type_data {
+  type_begin(Char),
+  type_entry(Char, New),
+  type_entry(Char, Assign),
+  type_entry(Char, Copy),
+  type_entry(Char, Eq),
+  type_entry(Char, Ord),
+  type_entry(Char, Hash),
+  type_entry(Char, AsChar),
+  type_entry(Char, Serialize),
+  type_entry(Char, Show),
+  type_end(Char)
 };
 
 var Char_New(var self, var_list vl) {

@@ -20,17 +20,17 @@ data {
   struct MapNode* root;
 } MapData;
 
-var Map = methods {
-  methods_begin(Map),
-  method(Map, New),
-  method(Map, Assign),
-  method(Map, Copy),
-  method(Map, Eq),
-  method(Map, Collection),
-  method(Map, Dict),
-  method(Map, Iter),
-  method(Map, Show),
-  methods_end(Map),
+var Map = type_data {
+  type_begin(Map),
+  type_entry(Map, New),
+  type_entry(Map, Assign),
+  type_entry(Map, Copy),
+  type_entry(Map, Eq),
+  type_entry(Map, Collection),
+  type_entry(Map, Dict),
+  type_entry(Map, Iter),
+  type_entry(Map, Show),
+  type_end(Map),
 };
 
 var Map_New(var self, var_list vl) {

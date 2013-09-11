@@ -16,13 +16,13 @@ data {
   var tab;
 } PoolData;
 
-var Pool = methods {
-  methods_begin(Pool),
-  method(Pool, New), 
-  method(Pool, Retain),
-  method(Pool, Collection),
-  method(Pool, Dict),
-  methods_end(Pool)
+var Pool = type_data {
+  type_begin(Pool),
+  type_entry(Pool, New), 
+  type_entry(Pool, Retain),
+  type_entry(Pool, Collection),
+  type_entry(Pool, Dict),
+  type_end(Pool)
 };
 
 var Pool_New(var self, var_list vl) {
