@@ -36,6 +36,28 @@ local var TestType_Eq(var self, var obj) {
 instance(TestType, New) = { TestType_New, TestType_Delete, TestType_Size };
 instance(TestType, Eq) = { TestType_Eq };
 
+class {
+  var (*return_true)(var);
+} ReturnTrue;
+
+local var return_true(var self) {
+  return type_class_method(self, ReturnTrue, return_true, self);
+}
+
+global var IntParent;
+
+local var IntParent_ReturnTrue(var self) {
+  return True;
+}
+
+instance(IntParent, ReturnTrue) = { IntParent_ReturnTrue };
+
+var IntParent = type_data {
+  type_begin(IntParent),
+  type_entry(IntParent, ReturnTrue),
+  type_end(IntParent),
+};
+
 PT_SUITE(suite_core) {
   
   PT_TEST(test_type) {
@@ -506,6 +528,24 @@ PT_SUITE(suite_core) {
     PT_ASSERT(type_class(Int, Ord));
     PT_ASSERT(type_class(List, At));
     PT_ASSERT(type_class(Type, AsStr));
+    
+  }
+  
+  PT_TEST(test_type_parent) {
+    
+    PT_ASSERT(not type_implements(Int, ReturnTrue));
+    PT_ASSERT(not type_implements(Real, ReturnTrue));
+    PT_ASSERT(type_implements(IntParent, ReturnTrue));
+    
+    PT_ASSERT(return_true(IntParent));
+    
+    Type_Inherit(Int, IntParent);
+    
+    PT_ASSERT(type_implements(Int, ReturnTrue));
+    PT_ASSERT(not type_implements(Real, ReturnTrue));
+    PT_ASSERT(type_implements(IntParent, ReturnTrue));
+    
+    PT_ASSERT(return_true(Int));
     
   }
   

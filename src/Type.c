@@ -36,7 +36,7 @@ var Type_New(var self, var_list vl) {
   var* ifaces = var_list_get(vl);
   const char** inames = var_list_get(vl);
   
-  TypeData* newtype = malloc(sizeof(TypeData) * (count + 2));
+  TypeData* newtype = malloc(sizeof(TypeData) * (count + 3));
   
   newtype[0].class_object = NULL;
   newtype[0].class_name = "__Type";
@@ -44,9 +44,12 @@ var Type_New(var self, var_list vl) {
   newtype[1].class_object = (void*)name;
   newtype[1].class_name = "__Name";
   
+  newtype[2].class_object = NULL;
+  newtype[2].class_name = "__Parent"; 
+  
   for(int i = 0; i < count; i++) {
-    newtype[2+i].class_object = ifaces[i];
-    newtype[2+i].class_name = inames[i];
+    newtype[3+i].class_object = ifaces[i];
+    newtype[3+i].class_name = inames[i];
   }
   
   return newtype;
@@ -64,37 +67,46 @@ const char* Type_AsStr(var self) {
   return type_class(self, __Name);
 }
 
-var Type_Implements_Name(var self, const char* class_name, const char* func, const char* file, int line) {
+const char* Type_Name(var self) {
+
   TypeData* t = self;
-  
-  if (t[0].class_object != NULL) {
-    return throw(ClassError,
-      "Function '%s' at '%s:%i' :: "
-      "Object '%p' is not a type! :: "
-      "It does not start with a NULL pointer",
-      $(String, (char*)func), $(String, (char*)file), $(Int, line), self);
-  }
-  
+
   while(t->class_name) {
-    if (strcmp(t->class_name, class_name) == 0) return True;
+    if (strcmp(t->class_name, "__Name") == 0) {
+      return t->class_object;
+    }
     t++;
   }
   
-  return False;
+  return throw(ClassError,
+    "Cannot find Class '__Name' for object '%p' :: "
+    "Was is correctly constructed? :: "
+    "Does the data start with a 'type' entry? ::"
+    "Was `type_begin` used?", self);
+  
 }
 
-var Type_Implements_Method_Name(var self, int offset, const char* class_name, const char* func, const char* file, int line) {
-  
-  if (not Type_Implements_Name(self, class_name, func, file, line)) {
-    return False;
-  } else {
-    intptr_t* func_address = Type_Class_Name(self, class_name, func, file, line) + offset;
-    return bool_var(*func_address);
+var Type_Parent(var self) {
+
+  TypeData* t = self;
+
+  while(t->class_name) {
+    if (strcmp(t->class_name, "__Parent") == 0) {
+      return t->class_object;
+    }
+    t++;
   }
   
+  return throw(ClassError,
+    "Cannot find Class '__Parent' for object '%p' :: "
+    "Was is correctly constructed? :: "
+    "Does the data start with a 'type' entry? ::"
+    "Was `type_begin` used?", self);
+  
 }
 
-var Type_Class_Name(var self, const char* class_name, const char* func, const char* file, int line) {
+var Type_Implements(var self, const char* class_name, const char* func, const char* file, int line) {
+  
   TypeData* t = self;
   
   if (t[0].class_object != NULL) {
@@ -105,57 +117,106 @@ var Type_Class_Name(var self, const char* class_name, const char* func, const ch
       $(String, (char*)func), $(String, (char*)file), $(Int, line), self);
   }
   
-  const char* type_name = NULL;
+  while(t->class_name) {
+    if (strcmp(t->class_name, class_name) == 0) { return True; }
+    t++;
+  }
+  
+  var parent = Type_Parent(self);
+  
+  return bool_var(parent isnt NULL and Type_Implements(parent, class_name, func, file, line));
+  
+}
+
+var Type_Implements_Method(var self, int offset, const char* class_name, const char* func, const char* file, int line) {
+  
+  if (not Type_Implements(self, class_name, func, file, line)) {
+    
+    return Type_Implements_Method(Type_Parent(self), offset, class_name, func, file, line);
+    
+  } else {
+  
+    intptr_t* func_address = Type_Class(self, class_name, func, file, line) + offset;
+    return bool_var(*func_address);
+  
+  }
+  
+}
+
+var Type_Class(var self, const char* class_name, const char* func, const char* file, int line) {
+  TypeData* t = self;
+  
+  if (t[0].class_object != NULL) {
+    return throw(ClassError,
+      "Function '%s' at '%s:%i' :: "
+      "Object '%p' is not a type! :: "
+      "It does not start with a NULL pointer",
+      $(String, (char*)func), $(String, (char*)file), $(Int, line), self);
+  }
   
   while(t->class_name) {
-    if (strcmp(t->class_name, "__Name") == 0) {
-      type_name = t->class_object;
-    }
     if (strcmp(t->class_name, class_name) == 0) {
       return (var)t->class_object;
     }
     t++;
   }
   
-  if (type_name == NULL) {
+  var parent = Type_Parent(self);
   
-    return throw(ClassError,
-      "Function '%s' at '%s:%i' :: "
-      "Cannot find class '__Name' for object '%p' :: "
-      "Was is correctly Constructed? :: "
-      "Does it start with a 'type' entry? ::"
-      "Was `methods_begin` used?",
-      $(String, (char*)func), $(String, (char*)file), $(Int, line), self);
-      
-  } else {
-    
-    return throw(ClassError,
-      "Function '%s' at '%s:%i' :: "
-      "Type '%s' does not implement class '%s'",
-      $(String, (char*)func), $(String, (char*)file), $(Int, line), 
-      $(String, (char*)type_name), $(String, (char*)class_name));
-      
+  if (parent isnt NULL and Type_Implements(parent, class_name, func, file, line)) {
+    return Type_Class(parent, class_name, func, file, line);
   }
+  
+  return throw(ClassError,
+    "Function '%s' at '%s:%i' :: "
+    "Type '%s' does not implement class '%s'",
+    $(String, (char*)func), $(String, (char*)file), $(Int, line), 
+    $(String, (char*)Type_Name(self)), $(String, (char*)class_name));
+      
 }
 
-var Type_Class_Name_Method(var self, var method, const char* class_name, const char* method_name, const char* func, const char* file, int line) {
+var Type_Class_Method(var self, int offset, const char* class_name, const char* method_name, const char* func, const char* file, int line) {
   
-  var c = Type_Class_Name(self, class_name, func, file, line);
-  
-  if (method == NULL) {
-    return throw(ClassError,
-      "Function '%s' at '%s:%i' :: "
-      "Type '%s' implements class '%s' but not the specific method '%s' required",
-      $(String, (char*)func), $(String, (char*)file), $(Int, line), 
-      self, $(String, (char*)class_name), $(String, (char*)method_name));
-  } else {
-    return c;
+  if (Type_Implements_Method(self, offset, class_name, func, file, line)) {
+    return Type_Class(self, class_name, func, file, line);
   }
+  
+  var parent = Type_Parent(self);
+  
+  if (Type_Implements_Method(parent, offset, class_name, func, file, line)) {
+    return Type_Class(parent, class_name, func, file, line);
+  }
+  
+  return throw(ClassError,
+    "Function '%s' at '%s:%i' :: "
+    "Type '%s' implements class '%s' but not the specific method '%s' required",
+    $(String, (char*)func), $(String, (char*)file), $(Int, line), 
+    self, $(String, (char*)class_name), $(String, (char*)method_name));
   
 }
 
 int Type_Show(var self, var output, int pos) {
   return print_to(output, pos, "%s", self);
+}
+
+void Type_Inherit(var self, var parent) {
+  
+  TypeData* t = self;
+
+  while(t->class_name) {
+    if (strcmp(t->class_name, "__Parent") == 0) {
+      t->class_object = parent;
+      return;
+    }
+    t++;
+  }
+  
+  throw(ClassError,
+    "Cannot find Class '__Parent' for object '%p' :: "
+    "Was is correctly constructed? :: "
+    "Does the data start with a 'type' entry? ::"
+    "Was `type_begin` used?", self);
+  
 }
 
 
