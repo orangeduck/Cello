@@ -14,10 +14,10 @@ var Module = methods {
   methods_end(Module),
 };
 
-var Module_New(var self, va_list* va) {
+var Module_New(var self, var_list vl) {
   ModuleData* md = cast(self, Module);
   
-  char* filename = va_arg(*va, char*);
+  const char* filename = as_str(var_list_get(vl));
   
   md->name = malloc(strlen(filename) + 1);
   strcpy(md->name, filename);
@@ -32,6 +32,10 @@ var Module_Delete(var self) {
   exit_with(self);
   free(md->name);
   return self;
+}
+
+size_t Module_Size(void) {
+  return sizeof(ModuleData);
 }
 
 var Module_Copy(var self) {

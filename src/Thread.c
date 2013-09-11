@@ -32,11 +32,11 @@ var Thread = methods {
   methods_end(Thread),
 };
 
-var Thread_New(var self, va_list* args) {
+var Thread_New(var self, var_list vl) {
   
   ThreadData* td = cast(self, Thread);
-  td->func = va_arg(*args, var);
-  td->args = new(List, 0);
+  td->func = cast(var_list_get(vl), Function);
+  td->args = new(List);
   td->is_main = false;
   td->running = false;
   
@@ -45,7 +45,7 @@ var Thread_New(var self, va_list* args) {
   memset(td->exc_buffers, 0, sizeof(jmp_buf) * EXC_MAX_DEPTH);
   
   td->exc_obj = Undefined;
-  td->exc_msg = new(String, "");
+  td->exc_msg = new(String, $(String, ""));
   td->exc_func = NULL;
   td->exc_file = NULL;
   td->exc_lineno = 0;
@@ -304,7 +304,7 @@ var Mutex = methods {
   methods_end(Mutex)
 };
 
-var Mutex_New(var self, va_list* args) {
+var Mutex_New(var self, var_list vl) {
   MutexData* md = cast(self, Mutex);
 #if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_init(&md->mutex, NULL);

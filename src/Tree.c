@@ -35,11 +35,11 @@ var Tree = methods {
   methods_end(Tree),
 };
 
-var Tree_New(var self, va_list* args) {
+var Tree_New(var self, var_list vl) {
   TreeData* td = cast(self, Tree);
-  td->key_type = cast(va_arg(*args, var), Type);
-  td->val_type = cast(va_arg(*args, var), Type);
-  td->keys = new(Array, td->key_type, 0);
+  td->key_type = cast(var_list_get(vl), Type);
+  td->val_type = cast(var_list_get(vl), Type);
+  td->keys = new(Array, td->key_type);
   td->root = NULL;
   return self;
 }
@@ -226,7 +226,7 @@ var Tree_Get(var self, var key) {
     else node = node->right;
   }
   
-  return throw(KeyError, "Key not in Tree!");
+  return throw(KeyError, "Key '%$' not in Tree!", key);
 }
 
 local struct TreeNode* Tree_Node_New(var self, var key, var val) {

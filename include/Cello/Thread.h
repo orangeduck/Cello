@@ -75,8 +75,7 @@ data {
   
 } ThreadData;
 
-/** Thread_New(var self, var function) */
-var Thread_New(var self, va_list* args);
+var Thread_New(var self, var_list vl);
 var Thread_Delete(var self);
 size_t Thread_Size(void);
 void Thread_Assign(var self, var obj);
@@ -118,8 +117,7 @@ var lock_try(var self);
 
 global var Mutex;
 
-/** Mutex_New(var self) */
-var Mutex_New(var self, va_list* args);
+var Mutex_New(var self, var_list vl);
 var Mutex_Delete(var self);
 size_t Mutex_Size(void);
 void Mutex_Assign(var self, var obj);

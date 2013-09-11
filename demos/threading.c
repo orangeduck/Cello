@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     return None;
   };
   
-  var threads = new(List, 5,
+  var threads = new(List,
     new(Thread, thread_function),
     new(Thread, thread_function),
     new(Thread, thread_function),

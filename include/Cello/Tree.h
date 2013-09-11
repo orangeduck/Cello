@@ -16,8 +16,7 @@
 
 global var Tree;
 
-/** Tree_New(var self, var key_type, var val_type); */
-var Tree_New(var self, va_list* args);
+var Tree_New(var self, var_list vl);
 var Tree_Delete(var self);
 size_t Tree_Size(void);
 

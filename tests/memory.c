@@ -6,15 +6,15 @@ PT_SUITE(suite_memory) {
   
   PT_TEST(test_new) {
     
-    var x = new(Int, 0);
+    var x = new(Int, $(Int, 0));
     delete(x);
     
   }
   
   PT_TEST(test_reference) {
     
-    var x = new(Int, 1);
-    var y = new(Int, 2);
+    var x = new(Int, $(Int, 1));
+    var y = new(Int, $(Int, 2));
     
     var rx = $(Reference, x);
     
@@ -36,7 +36,7 @@ PT_SUITE(suite_memory) {
   
   PT_TEST(test_reference_with) {
     
-    with(r in $(Reference, new(String, "Almost like an Auto Ptr"))) {
+    with(r in $(Reference, new(String, $(String, "Almost like an Auto Ptr")))) {
       
       PT_ASSERT(eq(at(r,0), $(String, "Almost like an Auto Ptr")));
       PT_ASSERT(neq(at(r,0), $(String, "Blah")));
@@ -47,9 +47,9 @@ PT_SUITE(suite_memory) {
   
   PT_TEST(test_reference_with_many) {
     
-    with(liferef0 in $(Reference, new(String, "Life is Long")))
-    with(liferef1 in $(Reference, new(String, "Life is Beautiful")))
-    with(liferef2 in $(Reference, new(String, "Life is Grand"))) {
+    with(liferef0 in $(Reference, new(String, $(String, "Life is Long"))))
+    with(liferef1 in $(Reference, new(String, $(String, "Life is Beautiful"))))
+    with(liferef2 in $(Reference, new(String, $(String, "Life is Grand")))) {
       
       PT_ASSERT(eq(at(liferef0,0), $(String, "Life is Long")));
       PT_ASSERT(eq(at(liferef1,0), $(String, "Life is Beautiful")));
@@ -63,9 +63,9 @@ PT_SUITE(suite_memory) {
     
     var p = new(Pool);
     
-    var x = retain(p, new(String, "Hello Everyone!"));
-    var y = retain(p, new(String, "Bonjour"));
-    var z = retain(p, new(Int, 3));
+    var x = retain(p, new(String, $(String, "Hello Everyone!")));
+    var y = retain(p, new(String, $(String, "Bonjour")));
+    var z = retain(p, new(Int, $(Int, 3)));
     
     PT_ASSERT(contains(p, x));
     PT_ASSERT(contains(p, y));

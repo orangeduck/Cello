@@ -17,9 +17,9 @@ var Char = methods {
   methods_end(Char)
 };
 
-var Char_New(var self, va_list* args) {
+var Char_New(var self, var_list vl) {
   CharData* cd = cast(self, Char);
-  cd->value = va_arg(*args, int);
+  cd->value = as_char(var_list_get(vl));
   return self;
 }
 
@@ -37,8 +37,7 @@ void Char_Assign(var self, var obj) {
 }
 
 var Char_Copy(var self) {
-  CharData* cd = cast(self, Char);
-  return new(Char, cd->value);
+  return new(Char, self);
 }
 
 var Char_Eq(var self, var other) {

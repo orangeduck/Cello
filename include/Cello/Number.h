@@ -36,8 +36,7 @@ data {
   long value;
 } IntData;
 
-/** Int_New(var self, long value); */
-var Int_New(var self, va_list* args);
+var Int_New(var self, var_list vl);
 var Int_Delete(var self);
 size_t Int_Size(void);
 void Int_Assign(var self, var obj);
@@ -90,8 +89,7 @@ data {
   double value;
 } RealData;
 
-/** Real_New(var self, double value); */
-var Real_New(var self, va_list* args);
+var Real_New(var self, var_list vl);
 var Real_Delete(var self);
 size_t Real_Size(void);
 void Real_Assign(var self, var obj);

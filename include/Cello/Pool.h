@@ -24,8 +24,7 @@ void release(var p, var x);
 
 global var Pool;
 
-/** Pool_New(var self); */
-var Pool_New(var self, va_list* args);
+var Pool_New(var self, var_list vl);
 var Pool_Delete(var self);
 size_t Pool_Size(void);
 

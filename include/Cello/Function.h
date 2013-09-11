@@ -61,8 +61,7 @@ global var Function;
 
 #endif
   
-/** Function_New(var self, var(*func)(var) ); */
-var Function_New(var self, va_list* args);
+var Function_New(var self, var_list vl);
 var Function_Delete(var self);
 size_t Function_Size(void);
 

@@ -17,8 +17,7 @@ data {
   char value;
 } CharData;
 
-/** Char_New(var self, char value); */
-var Char_New(var self, va_list* args);
+var Char_New(var self, var_list vl);
 var Char_Delete(var self);
 size_t Char_Size(void);
 void Char_Assign(var self, var obj);

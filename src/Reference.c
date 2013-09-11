@@ -19,9 +19,9 @@ var Reference = methods {
   methods_end(Reference)
 };
 
-var Reference_New(var self, va_list* args) {
+var Reference_New(var self, var_list vl) {
   ReferenceData* rd = cast(self, Reference);
-  rd->ref = va_arg(*args, var);
+  rd->ref = var_list_get(vl);
   return rd;
 }
 

@@ -47,9 +47,9 @@ var Int = methods {
   methods_end(Int)
 };
 
-var Int_New(var self, va_list* args) {
+var Int_New(var self, var_list vl) {
   IntData* intdata = cast(self, Int);
-  intdata->value = va_arg(*args, int);
+  intdata->value = as_long(var_list_get(vl));
   return self;
 }
 
@@ -67,8 +67,7 @@ void Int_Assign(var self, var obj) {
 }
 
 var Int_Copy(var self) {
-  IntData* intdata = cast(self, Int);
-  return new(Int, intdata->value);
+  return new(Int, self);
 }
 
 var Int_Eq(var self, var other) {
@@ -174,9 +173,9 @@ var Real = methods {
   methods_end(Real)
 };
 
-var Real_New(var self, va_list* args) {
+var Real_New(var self, var_list vl) {
   RealData* ro = cast(self, Real);
-  ro->value = va_arg(*args, double);
+  ro->value = as_double(var_list_get(vl));
   return self;
 }
 
@@ -194,8 +193,7 @@ void Real_Assign(var self, var obj) {
 }
 
 var Real_Copy(var self) {
-  RealData* ro = cast(self, Real);
-  return new(Real, ro->value);
+  return new(Real, self);
 }
 
 var Real_Eq(var self, var other) {

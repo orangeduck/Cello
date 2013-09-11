@@ -32,14 +32,14 @@ var Table = methods {
   methods_end(Table)
 };
 
-var Table_New(var self, va_list* args) {
+var Table_New(var self, var_list vl) {
   TableData* tab = cast(self, Table);
   
-  tab->key_type = cast(va_arg(*args, var), Type);
-  tab->val_type = cast(va_arg(*args, var), Type);
+  tab->key_type = cast(var_list_get(vl), Type);
+  tab->val_type = cast(var_list_get(vl), Type);
   
   tab->size = 1024;
-  tab->keys = new(Array, tab->key_type, 0);
+  tab->keys = new(Array, tab->key_type);
   
   tab->key_buckets = malloc(tab->size * sizeof(var));
   tab->val_buckets = malloc(tab->size * sizeof(var));
@@ -48,8 +48,8 @@ var Table_New(var self, va_list* args) {
   if (tab->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
   
   for (int i = 0; i < tab->size; i++) {
-    tab->key_buckets[i] = new(Array, tab->key_type, 0);
-    tab->val_buckets[i] = new(Array, tab->val_type, 0);
+    tab->key_buckets[i] = new(Array, tab->key_type);
+    tab->val_buckets[i] = new(Array, tab->val_type);
   }
   
   return self;
@@ -172,7 +172,7 @@ var Table_Get(var self, var key) {
     if_eq(at(keys, j), key) { return at(vals, j); }
   }
   
-  return throw(KeyError, "Key not in Table!");
+  return throw(KeyError, "Key '%$' not in Table!", key);
 }
 
 void Table_Put(var self, var key, var val) {

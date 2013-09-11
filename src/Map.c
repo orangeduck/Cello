@@ -33,9 +33,9 @@ var Map = methods {
   methods_end(Map),
 };
 
-var Map_New(var self, va_list* args) {
+var Map_New(var self, var_list vl) {
   MapData* md = cast(self, Map);
-  md->keys = new(List, 0);
+  md->keys = new(List);
   md->root = NULL;
   return self;
 }

@@ -21,8 +21,7 @@ data {
   var ref;
 } ReferenceData;
 
-/** Reference_New(var self, var obj); */
-var Reference_New(var self, va_list* args);
+var Reference_New(var self, var_list vl);
 var Reference_Delete(var self);
 size_t Reference_Size(void);
 void Reference_Assign(var self, var obj);

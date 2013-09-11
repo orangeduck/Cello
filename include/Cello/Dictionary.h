@@ -16,8 +16,7 @@
 
 global var Dictionary;
 
-/** Dictionary_New(var self); */
-var Dictionary_New(var self, va_list* args);
+var Dictionary_New(var self, var_list vl);
 var Dictionary_Delete(var self);
 size_t Dictionary_Size(void);
 void Dictionary_Assign(var self, var obj);

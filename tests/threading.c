@@ -43,19 +43,19 @@ PT_SUITE(suite_threading) {
   
   PT_TEST(test_multiple) {
     
-    var inside = new(List, 5, False, False, False, False, False);
+    var inside = new(List, False, False, False, False, False);
     
     lambda(f, args) {
       set(inside, as_long(at(args, 0)), True);
       return None;
     };
     
-    var threads = new(List, 5,
+    var threads = new(List,
       new(Thread, f), new(Thread, f),
       new(Thread, f), new(Thread, f),
       new(Thread, f));
     
-    var args = new(Array, Int, 5,
+    var args = new(Array, Int,
       $(Int, 0), $(Int, 1), $(Int, 2),
       $(Int, 3), $(Int, 4));
     
@@ -90,7 +90,7 @@ PT_SUITE(suite_threading) {
       return None;
     };
     
-    var threads = new(List, 5,
+    var threads = new(List,
       new(Thread, f), new(Thread, f),
       new(Thread, f), new(Thread, f),
       new(Thread, f));

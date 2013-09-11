@@ -30,7 +30,7 @@ PT_SUITE(suite_data) {
   PT_TEST(test_char_create) {
     
     var char0 = $(Char, 'a');
-    var char1 = new(Char, 'b');
+    var char1 = new(Char, $(Char, 'b'));
     var char2 = copy(char0);
     
     PT_ASSERT(char0);
@@ -74,7 +74,7 @@ PT_SUITE(suite_data) {
   PT_TEST(test_int_create) {
     
     var int0 = $(Int, 1);
-    var int1 = new(Int, 24313);
+    var int1 = new(Int, $(Int, 24313));
     var int2 = copy(int0);
     
     PT_ASSERT(int0);
@@ -164,7 +164,7 @@ PT_SUITE(suite_data) {
   PT_TEST(test_real_create) {
     
     var real0 = $(Real, 1.0);
-    var real1 = new(Real, 24.313);
+    var real1 = new(Real, $(Real, 24.313));
     var real2 = copy(real0);
     
     PT_ASSERT(real0);
@@ -270,7 +270,7 @@ PT_SUITE(suite_data) {
   PT_TEST(test_string_create) {
     
     var s0 = $(String, "Hello");
-    var s1 = new(String, "There");
+    var s1 = new(String, $(String, "There"));
     var s2 = copy(s0);
     
     PT_ASSERT(s0);
@@ -310,7 +310,7 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_string_collection) {
     
-    var s0 = new(String, "Balloons");
+    var s0 = new(String, $(String, "Balloons"));
     
     PT_ASSERT(len(s0) is 8);
     PT_ASSERT(contains(s0, $(String, "Ball")));
@@ -342,8 +342,8 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_string_reverse) {
     
-    var s0 = new(String, "Hello");
-    var s1 = new(String, "olleH");
+    var s0 = new(String, $(String, "Hello"));
+    var s1 = new(String, $(String, "olleH"));
     
     PT_ASSERT( neq(s0, s1) );
     
@@ -358,8 +358,8 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_array_create) {
     
-    var a0 = new(Array, Int, 3, $(Int, 1), $(Int, 5), $(Int, 10));
-    var a1 = new(Array, Real, 2, $(Real, 1.1), $(Real, 2.2));
+    var a0 = new(Array, Int, $(Int, 1), $(Int, 5), $(Int, 10));
+    var a1 = new(Array, Real, $(Real, 1.1), $(Real, 2.2));
     var a2 = copy(a0);
     
     PT_ASSERT(a0);
@@ -387,9 +387,9 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_array_eq) {
     
-    var a0 = new(Array, Int, 3, $(Int, 1), $(Int, 5), $(Int, 10));
-    var a1 = new(Array, Int, 3, $(Int, 1), $(Int, 5), $(Int, 10));
-    var a2 = new(Array, Int, 3, $(Int, 2), $(Int, 5), $(Int, 10));
+    var a0 = new(Array, Int, $(Int, 1), $(Int, 5), $(Int, 10));
+    var a1 = new(Array, Int, $(Int, 1), $(Int, 5), $(Int, 10));
+    var a2 = new(Array, Int, $(Int, 2), $(Int, 5), $(Int, 10));
     
     PT_ASSERT(a0 isnt a1);
     PT_ASSERT(a0 isnt a2);
@@ -405,7 +405,7 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_array_collection) {
     
-    var a0 = new(Array, Int, 3, $(Int, 1), $(Int, 5), $(Int, 10));
+    var a0 = new(Array, Int, $(Int, 1), $(Int, 5), $(Int, 10));
     
     PT_ASSERT(len(a0) is 3);
     PT_ASSERT(contains(a0, $(Int, 1)));
@@ -428,7 +428,7 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_array_push) {
     
-    var a0 = new(Array, Int, 0);
+    var a0 = new(Array, Int);
     
     PT_ASSERT(len(a0) is 0);
     
@@ -486,7 +486,7 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_array_at) {
     
-    var a0 = new(Array, String, 3, $(String, "Hello"), $(String, "There"), $(String, "People"));
+    var a0 = new(Array, String, $(String, "Hello"), $(String, "There"), $(String, "People"));
     
     PT_ASSERT( eq(at(a0, 0), $(String, "Hello")) );
     PT_ASSERT( eq(at(a0, 1), $(String, "There")) );
@@ -511,7 +511,7 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_array_iter) {
     
-    var a0 = new(Array, String, 3, $(String, "Hello"), $(String, "There"), $(String, "People"));
+    var a0 = new(Array, String, $(String, "Hello"), $(String, "There"), $(String, "People"));
     
     int counter = 0;
     
@@ -542,8 +542,8 @@ PT_SUITE(suite_data) {
 
   PT_TEST(test_array_reverse) {
     
-    var a0 = new(Array, String, 3, $(String, "Hello"), $(String, "There"), $(String, "People"));
-    var a1 = new(Array, String, 3, $(String, "People"), $(String, "There"), $(String, "Hello"));
+    var a0 = new(Array, String, $(String, "Hello"), $(String, "There"), $(String, "People"));
+    var a1 = new(Array, String, $(String, "People"), $(String, "There"), $(String, "Hello"));
     
     PT_ASSERT( not eq(a0, a1) );
     
@@ -810,8 +810,8 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var l0 = new(List, 4, li0, li1, li2, li3);
-    var l1 = new(List, 2, li4, li5);
+    var l0 = new(List, li0, li1, li2, li3);
+    var l1 = new(List, li4, li5);
     var l2 = copy(l0);
     
     PT_ASSERT(l0);
@@ -844,10 +844,10 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var l0 = new(List, 4, li0, li1, li2, li3);
-    var l1 = new(List, 2, li4, li5);
-    var l2 = new(List, 4, li0, li1, li2, li3);
-    var l3 = new(List, 2, li0, li6);
+    var l0 = new(List, li0, li1, li2, li3);
+    var l1 = new(List, li4, li5);
+    var l2 = new(List, li0, li1, li2, li3);
+    var l3 = new(List, li0, li6);
     
     PT_ASSERT(l0 isnt l1);
     PT_ASSERT(l0 isnt l2);
@@ -868,7 +868,7 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var l0 = new(List, 4, li0, li1, li2, li3);
+    var l0 = new(List, li0, li1, li2, li3);
     
     PT_ASSERT(len(l0) is 4);
     PT_ASSERT(contains(l0, li0));
@@ -906,7 +906,7 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var l0 = new(List, 0);
+    var l0 = new(List);
     
     PT_ASSERT(len(l0) is 0);
     
@@ -966,7 +966,7 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var l0 = new(List, 4, li0, li1, li2, li3);
+    var l0 = new(List, li0, li1, li2, li3);
     
     PT_ASSERT(at(l0, 0) is li0);
     PT_ASSERT(at(l0, 1) is li1);
@@ -997,7 +997,7 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var l0 = new(List, 4, li0, li1, li2, li3);
+    var l0 = new(List, li0, li1, li2, li3);
     
     int counter = 0;
     
@@ -1021,8 +1021,8 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var l0 = new(List, 4, li0, li1, li2, li3);
-    var l1 = new(List, 4, li3, li2, li1, li0);
+    var l0 = new(List, li0, li1, li2, li3);
+    var l1 = new(List, li3, li2, li1, li0);
 
     PT_ASSERT(neq(l0, l1));
     
@@ -1301,7 +1301,7 @@ PT_SUITE(suite_data) {
     
     TEST_VALUES();
     
-    var f0 = new(File, "test.bin", "w"); 
+    var f0 = new(File, $(String, "test.bin"), $(String, "w")); 
     var f1 = $(File, NULL);
     
     PT_ASSERT(f0);

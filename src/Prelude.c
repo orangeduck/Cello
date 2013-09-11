@@ -67,15 +67,12 @@ void deallocate(var obj) {
   free(obj);
 }
 
-var new(var type, ...) { 
+var new_vl(var type, var_list vl) { 
   
   var self = allocate(type);
   
-  if (type_implements_method(type, New, construct)) {
-    va_list args;
-    va_start(args, type);
-    self = type_class_method(type, New, construct, self, &args);
-    va_end(args);
+  if (type_implements_method(type, New, construct_vl)) {
+    self = type_class_method(type, New, construct_vl, self, vl);
   }
   
   return self;
@@ -90,12 +87,8 @@ void delete(var self) {
   deallocate(self);
 }
 
-var construct(var self, ...) {
-  va_list args;
-  va_start(args, self);
-  self = type_class_method(type_of(self), New, construct, self, &args);
-  va_end(args);
-  return self;
+var construct_vl(var self, var_list vl) {
+  return type_class_method(type_of(self), New, construct_vl, self, vl);
 }
 
 var destruct(var self) {

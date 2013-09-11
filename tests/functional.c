@@ -24,7 +24,7 @@ PT_SUITE(suite_functional) {
     var empty_function(var args) { return None; }  
   #endif
   
-    var f = new(Function, empty_function);
+    var f = new(Function, $(Function, empty_function));
     PT_ASSERT(f);
     delete(f);
   }
@@ -39,8 +39,8 @@ PT_SUITE(suite_functional) {
     var empty_function2(var args) { return Some; }
   #endif
     
-    var f1 = new(Function, empty_function);
-    var f2 = new(Function, empty_function2);
+    var f1 = new(Function, $(Function, empty_function));
+    var f2 = new(Function, $(Function, empty_function2));
     
     PT_ASSERT(((FunctionData*)f1)->func isnt ((FunctionData*)f2)->func);
     
@@ -61,7 +61,7 @@ PT_SUITE(suite_functional) {
     var empty_function(var args) { return None; }  
   #endif
   
-    var f1 = new(Function, empty_function);
+    var f1 = new(Function, $(Function, empty_function));
     var f2 = copy(f1);
     
     PT_ASSERT(((FunctionData*)f1)->func is ((FunctionData*)f2)->func);
@@ -109,7 +109,7 @@ PT_SUITE(suite_functional) {
     
   #endif
     
-    var args = new(List, 2, $(Int, 1), $(Int, 5));
+    var args = new(List, $(Int, 1), $(Int, 5));
     
     var assert_func = $(Function, asserts_args);
     
@@ -153,7 +153,7 @@ PT_SUITE(suite_functional) {
 
   PT_TEST(test_lambda) {
 
-    var out = new(String, "");
+    var out = new(String, $(String, ""));
     
     lambda(hello_name, args) {
       var name = cast(at(args, 0), String);
@@ -172,7 +172,7 @@ PT_SUITE(suite_functional) {
   PT_TEST(test_lambda_id) {
     
     lambda(return_new_int1, args) {
-      return new(Int, 1);
+      return new(Int, $(Int, 1));
     };
     
     lambda_id(return_new_int2, return_new_int1);
@@ -202,7 +202,7 @@ PT_SUITE(suite_functional) {
   PT_TEST(test_lambda_compose) {
     
     lambda(return_some, args) {
-      return new(List, 1, Some);
+      return new(List, Some);
     };
     
     lambda(return_arg0, args) {
@@ -267,7 +267,7 @@ PT_SUITE(suite_functional) {
 
   PT_TEST(test_lambda_method_pipe) {
     
-    var str = new(String, "");
+    var str = new(String, $(String, ""));
     
     lambda(cat_fizz, args) {
       append(at(args, 0), $(String, "Fizz"));
@@ -369,7 +369,7 @@ PT_SUITE(suite_functional) {
       return None;
     };
     
-    var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
+    var values = new(List, $(Int, 5), $(Int, 3), $(Int, 10));
     
     map(values, add_one);
     
@@ -387,7 +387,7 @@ PT_SUITE(suite_functional) {
       return at(args, 0);
     };
     
-    var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
+    var values = new(List, $(Int, 5), $(Int, 3), $(Int, 10));
     
     var new_values = new_map(values, copy_values);
     
@@ -405,7 +405,7 @@ PT_SUITE(suite_functional) {
       return bool_var(at(args,0) is Some);
     };
     
-    var values = new(List, 3, Some, Some, None);
+    var values = new(List, Some, Some, None);
     var somes = new_filter(values, only_some);
     
     PT_ASSERT(len(somes) is 2);
@@ -417,7 +417,7 @@ PT_SUITE(suite_functional) {
 
   PT_TEST(test_new_sum) {
 
-    var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
+    var values = new(List, $(Int, 5), $(Int, 3), $(Int, 10));
     var total = new_sum(values);
 
     PT_ASSERT(as_long(total) is 18);
@@ -429,7 +429,7 @@ PT_SUITE(suite_functional) {
 
   PT_TEST(test_new_product) {
 
-    var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
+    var values = new(List, $(Int, 5), $(Int, 3), $(Int, 10));
     var total = new_product(values);
     
     PT_ASSERT(as_long(total) is 150);
@@ -448,7 +448,7 @@ PT_SUITE(suite_functional) {
       return None;
     };
     
-    var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
+    var values = new(List, $(Int, 5), $(Int, 3), $(Int, 10));
     var total = new_foldl(values, fold_sum, $(Int, 0));
 
     PT_ASSERT(as_long(total) is 18);
@@ -467,7 +467,7 @@ PT_SUITE(suite_functional) {
       return None;
     };
     
-    var values = new(List, 3, $(Int, 5), $(Int, 3), $(Int, 10));
+    var values = new(List, $(Int, 5), $(Int, 3), $(Int, 10));
     var total = new_foldr(values, fold_sum, $(Int, 0));
 
     PT_ASSERT(as_long(total) is 18);

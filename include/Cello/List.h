@@ -17,8 +17,7 @@
 
 global var List;
 
-/** List_New(var self, int count, ... items) */
-var List_New(var self, va_list* args);
+var List_New(var self, var_list vl);
 var List_Delete(var self);
 size_t List_Size(void);
 void List_Assign(var self, var obj);

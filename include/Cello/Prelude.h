@@ -13,7 +13,7 @@
 **
 **  New reserved keywords:
 **
-**  var is not and or elif in
+**  var is isnt not and or elif in
 **  local global class data instance
 **  foreach with try throw catch
 **  $ lit
@@ -137,20 +137,22 @@ typedef var* var_list;
 /** New - heap allocation & constructor/destructor */
 
 class {
-  var (*construct)(var, va_list*);
+  var (*construct_vl)(var, var_list);
   var (*destruct)(var);
   size_t (*size)(void);
 } New;
 
-var new(var type, ...);
-void delete(var obj);
+#define new(type, ...) new_vl(type, var_list_new(__VA_ARGS__))
+var new_vl(var type, var_list vl);
+void delete(var self);
 
 var allocate(var type);
-void deallocate(var obj);
-
+void deallocate(var self);
 size_t size(var type);
-var construct(var obj, ...);
-var destruct(var obj);
+
+#define construct(self, ...) construct_vl(self, var_list_new(__VA_ARGS__))
+var construct_vl(var self, var_list vl);
+var destruct(var self);
 
 /** Assign - assignment (copy constructor) */
 

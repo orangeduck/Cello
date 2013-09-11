@@ -16,8 +16,7 @@
 
 global var Map;
 
-/** Map_New(var self); */
-var Map_New(var self, va_list* args);
+var Map_New(var self, var_list vl);
 var Map_Delete(var self);
 size_t Map_Size(void);
 

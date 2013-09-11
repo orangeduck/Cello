@@ -18,8 +18,7 @@ data {
   char* value;
 } StringData;
 
-/** String_New(var self, char* value); */
-var String_New(var self, va_list* args);
+var String_New(var self, var_list vl);
 var String_Delete(var self);
 size_t String_Size(void);
 void String_Assign(var self, var obj);

@@ -29,12 +29,12 @@ var Type_Cast(var obj, var t, const char* func, const char* file, int line) {
   
 }
 
-var Type_New(var self, va_list* args) {
+var Type_New(var self, var_list vl) {
   
-  const char* name = va_arg(*args, const char*);
-  int count = va_arg(*args, int);
-  var* ifaces = va_arg(*args, var*);
-  const char** inames = va_arg(*args, const char**);
+  const char* name = as_str(var_list_get(vl));
+  int count = as_long(var_list_get(vl));
+  var* ifaces = var_list_get(vl);
+  const char** inames = var_list_get(vl);
   
   TypeData* newtype = malloc(sizeof(TypeData) * (count + 2));
   

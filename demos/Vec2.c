@@ -21,15 +21,19 @@ var Vec2 = methods {
   methods_end(Vec2)
 };
 
-var Vec2_New(var self, va_list* args) {
+var Vec2_New(var self, var_list vl) {
   Vec2Data* v = cast(self, Vec2);
-  v->x = va_arg(*args, double);
-  v->y = va_arg(*args, double);
+  v->x = as_double(var_list_get(vl));
+  v->y = as_double(var_list_get(vl));
   return self;
 }
 
 var Vec2_Delete(var self) {
   return self;
+}
+
+size_t Vec2_Size(void) {
+  return sizeof(Vec2Data);
 }
 
 void Vec2_Assign(var self, var obj) {
@@ -41,7 +45,7 @@ void Vec2_Assign(var self, var obj) {
 
 var Vec2_Copy(var self) {
   Vec2Data* v = cast(self, Vec2);
-  return new(Vec2, v->x, v->y);
+  return new(Vec2, $(Real, v->x), $(Real, v->y));
 }
 
 var Vec2_Eq(var self, var obj) {

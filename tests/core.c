@@ -9,9 +9,9 @@ data {
   int test_data;
 } TestTypeData;
 
-local var TestType_New(var self, va_list* args) {
+local var TestType_New(var self, var_list vl) {
   TestTypeData* ttd = cast(self, TestType);
-  ttd->test_data = va_arg(*args, int);
+  ttd->test_data = as_long(var_list_get(vl));
   return self;
 }
 
@@ -63,7 +63,7 @@ PT_SUITE(suite_core) {
 
   PT_TEST(test_new) {
     
-    var x = new(Int, 1);
+    var x = new(Int, $(Int, 1));
     
     PT_ASSERT(x);
     PT_ASSERT(type_of(x) is Int);
@@ -72,12 +72,12 @@ PT_SUITE(suite_core) {
     delete(x);
     
     var y = $(Real, 0.0);  
-    construct(y, 1.0);
+    construct(y, $(Real, 1.0));
     PT_ASSERT(as_double(y) is 1.0);
     
     var z = allocate(String);
     PT_ASSERT(z);
-    construct(z, "Hello");
+    construct(z, $(String, "Hello"));
     PT_ASSERT_STR_EQ(as_str(z), "Hello");
     z = destruct(z);
     deallocate(z);
@@ -88,8 +88,8 @@ PT_SUITE(suite_core) {
     
     /* Integers */
     
-    var x = new(Int, 10);
-    var y = new(Int, 20);
+    var x = new(Int, $(Int, 10));
+    var y = new(Int, $(Int, 20));
 
     PT_ASSERT(as_long(x) is 10);
     PT_ASSERT(as_long(y) is 20);
@@ -106,8 +106,8 @@ PT_SUITE(suite_core) {
     
     /* Strings */
     
-    var xs = new(String, "Hello");
-    var ys = new(String, "There");
+    var xs = new(String, $(String, "Hello"));
+    var ys = new(String, $(String, "There"));
     
     PT_ASSERT_STR_EQ(as_str(xs), "Hello");
     PT_ASSERT_STR_EQ(as_str(ys), "There");
@@ -127,7 +127,7 @@ PT_SUITE(suite_core) {
 
   PT_TEST(test_copy) {
     
-    var x = new(String, "Hello");
+    var x = new(String, $(String, "Hello"));
     var y = copy(x);
     
     PT_ASSERT_STR_EQ(as_str(x), as_str(y));
@@ -223,7 +223,7 @@ PT_SUITE(suite_core) {
 
   PT_TEST(test_collection) {
     
-    var x = new(List, 3, $(Int, 1), $(Real, 2.0), $(String, "Hello"));
+    var x = new(List, $(Int, 1), $(Real, 2.0), $(String, "Hello"));
     
     PT_ASSERT(x);
     PT_ASSERT(len(x) is 3);
@@ -246,7 +246,7 @@ PT_SUITE(suite_core) {
     
     delete(x);
     
-    var y = new(Array, Real, 4, $(Real, 5.2), $(Real, 7.1), $(Real, 2.2), $(Real, 1.1));
+    var y = new(Array, Real, $(Real, 5.2), $(Real, 7.1), $(Real, 2.2), $(Real, 1.1));
     
     PT_ASSERT(y);
     PT_ASSERT(len(y) is 4);
@@ -270,7 +270,7 @@ PT_SUITE(suite_core) {
     
     delete(y);
     
-    var z = new(List, 4, $(Real, 5.2), $(Real, 7.1), $(Real, 2.2), $(Real, 1.1));
+    var z = new(List, $(Real, 5.2), $(Real, 7.1), $(Real, 2.2), $(Real, 1.1));
     
     sort(z);
     
@@ -281,7 +281,7 @@ PT_SUITE(suite_core) {
     
     delete(z);
     
-    var w = new(List, 6, $(Int, 135), $(Int, 11), $(Int, 254), $(Int, 123213), $(Int, 22), $(Int, 1));
+    var w = new(List, $(Int, 135), $(Int, 11), $(Int, 254), $(Int, 123213), $(Int, 22), $(Int, 1));
     
     sort(w);
     
@@ -322,7 +322,7 @@ PT_SUITE(suite_core) {
 
   PT_TEST(test_iter) {
 
-    var x = new(List, 3, $(Int, 1), $(Real, 2.0), $(String, "Hello"));
+    var x = new(List, $(Int, 1), $(Real, 2.0), $(String, "Hello"));
     
     foreach(y in x) {
       PT_ASSERT(y);
@@ -334,8 +334,8 @@ PT_SUITE(suite_core) {
 
   PT_TEST(test_push) {
     
-    var x = new(Array, Int, 0);
-    var y = new(List, 0);
+    var x = new(Array, Int);
+    var y = new(List);
     
     for(int i = 0; i < 1000; i++) {
       push(x, $(Int, 1));
@@ -370,7 +370,7 @@ PT_SUITE(suite_core) {
     var snd = $(Real, 2.0);
     var trd = $(String, "Hello");
 
-    var x = new(List, 3, fst, snd, trd);
+    var x = new(List, fst, snd, trd);
 
     PT_ASSERT(at(x, 0) is fst);
     PT_ASSERT(at(x, 1) is snd);
@@ -471,16 +471,16 @@ PT_SUITE(suite_core) {
 
   PT_TEST(test_type_new) {
    
-    TestType = new(Type, "TestType", 2, 
+    TestType = new(Type, $(String, "TestType"), $(Int, 2), 
       (var[]){ &TestTypeNew, &TestTypeEq }, 
       (const char*[]){ "New", "Eq" } );
     
     PT_ASSERT(TestType);
     PT_ASSERT_STR_EQ(as_str(TestType), "TestType");
 
-    var test_obj1 = new(TestType, 1);
-    var test_obj2 = new(TestType, 1);
-    var test_obj3 = new(TestType, 4);
+    var test_obj1 = new(TestType, $(Int, 1));
+    var test_obj2 = new(TestType, $(Int, 1));
+    var test_obj3 = new(TestType, $(Int, 4));
 
     PT_ASSERT(test_obj1);
     PT_ASSERT(test_obj2);
@@ -511,7 +511,7 @@ PT_SUITE(suite_core) {
   
   PT_TEST(test_show) {
     
-    var out = new(String,"");
+    var out = new(String, $(String, ""));
     
     print_to(out, 0, "This is an %s %i %i",
       $(String, "example"), $(Int, 10), $(Int, 1));

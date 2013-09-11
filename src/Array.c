@@ -33,17 +33,16 @@ var Array = methods {
   methods_end(Array)
 };
 
-var Array_New(var self, va_list* args) {
+var Array_New(var self, var_list vl) {
   
   ArrayData* ad = cast(self, Array);
-  ad->item_type = cast(va_arg(*args, var), Type);
+  ad->item_type = cast(var_list_get(vl), Type);
   ad->num_items = 0;
   ad->num_slots = 0;
   ad->items = NULL;
   
-  int count = va_arg(*args, int);
-  for(int i = 0; i < count; i++) {
-    push(self, va_arg(*args, var));
+  while(not var_list_end(vl)) {
+    push(self, var_list_get(vl));
   }
   
   return self;
@@ -73,7 +72,7 @@ void Array_Assign(var self, var obj) {
 var Array_Copy(var self) {
   ArrayData* ad = cast(self, Array);
   
-  var newarray = new(Array, ad->item_type, 0);
+  var newarray = new(Array, ad->item_type);
 
   foreach(obj in self) {
     push(newarray, obj);

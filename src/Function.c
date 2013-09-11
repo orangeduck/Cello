@@ -4,7 +4,7 @@
 
 var call_vl(var self, var_list vl) {
   
-  var wrapped = new(List, 0);
+  var wrapped = new(List);
   
   while(not var_list_end(vl)) {
     push(wrapped, var_list_get(vl));
@@ -30,9 +30,9 @@ var Function = methods {
   methods_end(Function),
 };
 
-var Function_New(var self, va_list* args) {
+var Function_New(var self, var_list vl) {
   FunctionData* fd = cast(self, Function);
-  fd->func = va_arg(*args, var);
+  fd->func = cast(var_list_get(vl), Function);
   return self;
 }
 

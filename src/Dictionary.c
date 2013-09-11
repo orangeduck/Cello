@@ -29,17 +29,17 @@ var Dictionary = methods {
   methods_end(Dictionary)
 };
 
-var Dictionary_New(var self, va_list* args) {
+var Dictionary_New(var self, var_list vl) {
   DictionaryData* dict = cast(self, Dictionary);
   dict->size = 1024;
-  dict->keys = new(List, 0);
+  dict->keys = new(List);
   
   dict->key_buckets = calloc(dict->size, sizeof(var));
   dict->val_buckets = calloc(dict->size, sizeof(var));
   
   for (int i = 0; i < dict->size; i++) {
-    dict->key_buckets[i] = new(List, 0);
-    dict->val_buckets[i] = new(List, 0);
+    dict->key_buckets[i] = new(List);
+    dict->val_buckets[i] = new(List);
   }
   
   return self;

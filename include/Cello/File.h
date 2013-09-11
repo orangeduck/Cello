@@ -20,8 +20,7 @@ data {
   FILE* f;
 } FileData;
 
-/** File_New(var self, const char* filename, const char* access); */
-var File_New(var self, va_list* args);
+var File_New(var self, var_list vl);
 var File_Delete(var self);
 size_t File_Size(void);
 

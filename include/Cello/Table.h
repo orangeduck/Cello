@@ -16,8 +16,7 @@
 
 global var Table;
 
-/** Table_New(var self, var key_type, var item_type); */
-var Table_New(var self, va_list* args);
+var Table_New(var self, var_list vl);
 var Table_Delete(var self);
 size_t Table_Size(void);
 void Table_Assign(var self, var obj);

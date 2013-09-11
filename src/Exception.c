@@ -151,7 +151,7 @@ var Exception_Throw(var obj, const char* fmt, const char* file, const char* func
   td->exc_lineno = lineno;
   
   if ((td->is_main) and (main_exc_msg == NULL)) {
-    main_exc_msg = new(String, "");
+    main_exc_msg = new(String, $(String, ""));
     td->exc_msg = main_exc_msg;
     atexit(main_exc_msg_free);
   }

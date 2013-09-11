@@ -26,9 +26,9 @@ var String = methods {
   methods_end(String)
 };
 
-var String_New(var self, va_list* args) {
+var String_New(var self, var_list vl) {
   StringData* s = cast(self, String);
-  const char* init = va_arg(*args, const char*);
+  const char* init = as_str(var_list_get(vl));
   s->value = malloc(strlen(init) + 1);
   if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   strcpy(s->value, init);
@@ -54,8 +54,7 @@ void String_Assign(var self, var obj) {
 }
 
 var String_Copy(var self) {
-  StringData* s = cast(self, String);
-  return new(String, s->value);
+  return new(String, self);
 }
 
 var String_Eq(var self, var other) {

@@ -17,8 +17,7 @@
 
 global var Array;
 
-/** Array_New(var self, var type, int count, ... items) */
-var Array_New(var self, va_list* args);
+var Array_New(var self, var_list vl);
 var Array_Delete(var self);
 size_t Array_Size(void);
 void Array_Assign(var self, var obj);

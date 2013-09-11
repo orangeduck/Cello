@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   var string_item = $(String, "Hello");
 
   /* Heap objects are created using "new" */
-  var items = new(List, 3, int_item, float_item, string_item);
+  var items = new(List, int_item, float_item, string_item);
 
   /* Collections can be looped over */
   foreach (item in items) {
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
   }
 
   /* "with" automatically closes file at end of scope. */
-  with (file in open($(File, NULL), "prices.bin", "wb")) {
+  with (file in stream_open($(File, NULL), "prices.bin", "wb")) {
 
     /* First class function object */
     lambda(write_pair, args) {
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 Inspiration
 -----------
 
-The high level stucture of Cello projects is inspired by Haskell, while the syntax and semantics are inspired by Python and Obj-C. Cello isn't about Object Orientation in C, but I hope that with Cello I've turned C into something of a dynamic and powerful functional language which it may have once been.
+The high level structure of Cello projects is inspired by Haskell, while the syntax and semantics are inspired by Python and Objective-C. Cello isn't about Object Orientation in C, but I hope that with Cello I've turned C into something of a dynamic and powerful functional language which it may have once been.
 
 Although the syntax is pleasant, Cello isn't a library for beginners. It is for C power users, as manual memory management doesn't play nicely with many higher-order concepts. Most of all Cello is just a fun experiment to see what C would look like when hacked to its limits.
 
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
   call(hello_name, $(String, "Bob"));
   
   /* Higher order functions supported */
-  var names = new(List, 3, $(String, "Dan"), $(String, "Robert"), $(String, "Chris"));
+  var names = new(List, $(String, "Dan"), $(String, "Robert"), $(String, "Chris"));
   map(names, hello_name);
   delete(names);
   
@@ -200,7 +200,7 @@ float length(var self) {
 
 __Defining a new Type.__
 
-A Type is an structure which implemenents a number of Classes.
+A Type is an structure which implements a number of Classes.
 
 They typically have an associated data object. They can be defined as follows.
 
@@ -214,9 +214,9 @@ data {
   float x, y;
 } Vec2Data;
 
-/** Vec2_New(var self, float x, float y); */
-var Vec2_New(var self, va_list* args);
+var Vec2_New(var self, var_list vl);
 var Vec2_Delete(var self);
+size_t Vec2_Size(void);
 void Vec2_Assign(var self, var obj);
 var Vec2_Copy(var self);
 
@@ -225,7 +225,7 @@ var Vec2_Eq(var self, var obj);
 float Vec2_Dot(var self, var obj);
 float Vec2_Length(var self);
 
-instance(Vec2, New) = { sizeof(Vec2Data), Vec2_New, Vec2_Delete };
+instance(Vec2, New) = { Vec2_New, Vec2_Delete, Vec2_Size };
 instance(Vec2, Assign) = { Vec2_Assign };
 instance(Vec2, Copy) = { Vec2_Copy };
 instance(Vec2, Eq) = { Vec2_Eq };
@@ -245,15 +245,19 @@ var Vec2 = methods {
   methods_end(Vec2)
 };
 
-var Vec2_New(var self, va_list* args) {
+var Vec2_New(var self, var_list vl) {
   Vec2Data* v = cast(self, Vec2);
-  v->x = va_arg(*args, double);
-  v->y = va_arg(*args, double);
+  v->x = as_double(var_list_get(vl));
+  v->y = as_double(var_list_get(vl));
   return self;
 }
 
 var Vec2_Delete(var self) {
   return self;
+}
+
+size_t Vec2_Size(void) {
+  return sizeof(Vec2Data);
 }
 
 void Vec2_Assign(var self, var obj) {
@@ -265,13 +269,13 @@ void Vec2_Assign(var self, var obj) {
 
 var Vec2_Copy(var self) {
   Vec2Data* v = cast(self, Vec2);
-  return new(Vec2, v->x, v->y);
+  return new(Vec2, $(Real, v->x), $(Real, v->y));
 }
 
 var Vec2_Eq(var self, var obj) {
   Vec2Data* v1 = cast(self, Vec2);
   Vec2Data* v2 = cast(obj, Vec2);
-  return (var)(v1->x is v2->x and v1->y is v2->y);
+  return bool_var(v1->x is v2->x and v1->y is v2->y);
 }
 
 float Vec2_Dot(var self, var obj) {
@@ -291,14 +295,16 @@ More More More Examples
 
 Memory management is hard. Very hard when combined with a lack of rich stack types. Very very hard when combined with a whole load of high level concepts. libCello gives you a few options, which where possible, the standard library is agnostic too. You can use what you think is best.
 
-* __Destructive Operations__ - Most of the standard library uses destructive operations and expects the user to make a copy if they exlicity want one.
+* __Destructive Operations__ - Most of the standard library uses destructive operations and expects the user to make a copy if they explicitly want one.
 * __Output Parameters__ - In some places it is more appropriate to use output parameters and in which case `assign` is used to move the data around. 
 * __Reference Objects__ - References wrap standard objects, where `with` can be used to declare their lifetime. And `at` can be used to dereference.
 
 ```c
 local void object_lifetime_example(void) {
   
-  with(liferef in $(Reference, new(String, "Life is long"))) {
+  var life = $(String, "Life is long")
+  
+  with(liferef in $(Reference, new(String, life))) {
     print("This string is alive: %$\n", at(liferef,0));
   }
 
@@ -310,9 +316,13 @@ local void object_lifetime_example(void) {
 
 local void many_object_lifetimes(void) {
   
-  with(liferef0 in $(Reference, new(String, "Life is long")))
-  with(liferef1 in $(Reference, new(String, "Life is Beautiful")))
-  with(liferef2 in $(Reference, new(String, "Life is Grand"))) {
+  var life0 = $(String, "Life is long")
+  var life1 = $(String, "Life is Beautiful")
+  var life2 = $(String, "Life is Grand")
+  
+  with(liferef0 in $(Reference, new(String, life0)))
+  with(liferef1 in $(Reference, new(String, life1)))
+  with(liferef2 in $(Reference, new(String, life2))) {
     print("%s :: %s :: %s\n", at(liferef0,0), at(liferef1,0), at(liferef2,0));
   }
 
@@ -354,7 +364,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-While useless in such a trivial example, because the pool always cleans up references on delete, it can be very useful to avoid memory leaks in things such as event loops or with general pooled memory. It can be used as a poor mans sweep garbage collector.
+While useless in such a trivial example, because the pool always cleans up references on delete, it can be very useful to avoid memory leaks in things such as event loops or with general pooled memory. It can be used as a poor man's sweep garbage collector.
 
 
 More More More More Examples
@@ -367,7 +377,7 @@ local var DivideByZeroError = Singleton(DivideByZeroError);
 
 local int try_divide(int x, int y) {
   if (y == 0) {
-    throw(DivideByZeroError, "Division By Zero (%i / %i)", x, y);
+    throw(DivideByZeroError, "Division By Zero (%i / %i)", $(Int, x), $(Int, y));
   } else {
     return x / y;
   }
@@ -386,7 +396,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-One can also catch multiple objects and then write conditional code based on each. Or one can catch all exceptions or any thown object by leaving the specifer list empty.
+One can also catch multiple objects and then write conditional code based on each. Or one can catch all exceptions or any thrown object by leaving the specifier list empty.
 
 ```c
 try {
@@ -408,7 +418,7 @@ Throwing an exception will jump the program control to the innermost `catch` blo
 More More More More More Examples
 ---------------------------------
 
-There are some more examples in the demos folder as well as a large amount of reference material under tests and via the source code. Native class definitions (such as for `New`, `Eq`, `Ord`) can be found in `Prelude.h`
+There are some more examples in the demos folder as well as a large amount of reference material under tests, documentation and source code. Native class definitions (such as for `New`, `Eq`, `Ord`) can be found in `Prelude.h`
 
 
 Explanation

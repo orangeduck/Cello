@@ -22,8 +22,7 @@ data {
   const char* class_name;
 } TypeData;
 
-/** Type_New(var self, const char* name, int num_classes, var* class_instances, const char** class_names); */
-var Type_New(var self, va_list* args);
+var Type_New(var self, var_list vl);
 var Type_Delete(var self);
 size_t Type_Size(void);
 

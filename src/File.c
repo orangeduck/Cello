@@ -14,10 +14,10 @@ var File = methods {
   methods_end(File),
 };
 
-var File_New(var self, va_list* args) {
+var File_New(var self, var_list vl) {
   FileData* fd = cast(self, File);
-  const char* filename = va_arg(*args, const char*);
-  const char* access = va_arg(*args, const char*);
+  const char* filename = as_str(var_list_get(vl));
+  const char* access = as_str(var_list_get(vl));
   stream_open(self, filename, access);
   return self;
 }

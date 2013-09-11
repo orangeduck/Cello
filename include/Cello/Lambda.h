@@ -39,7 +39,7 @@
 
 #define lambda_partial_l(name, f, ...) \
   lambda(name, args) { \
-    var partargs = new(List, __VA_ARGC__(__VA_ARGS__), __VA_ARGS__); \
+    var partargs = new(List, __VA_ARGS__); \
     foreach(a in args) { push(partargs, a); } \
     var ret = call_with(f, partargs); \
     return delete(partargs), ret; \
@@ -47,7 +47,7 @@
   
 #define lambda_partial_r(name, f, ...) \
   lambda(name, args) { \
-    var partargs = new(List, __VA_ARGC__(__VA_ARGS__), __VA_ARGS__); \
+    var partargs = new(List, __VA_ARGS__); \
     for(int i = len(args)-1; i >= 0; i--) { \
       push_front(partargs, at(args,i) ); \
     } \
@@ -64,14 +64,14 @@
 /* Compose several Function objects */
 #define lambda_pipe(name, ...) \
   lambda(name, args) { \
-    var funcs = new(List,  __VA_ARGC__(__VA_ARGS__), __VA_ARGS__); \
+    var funcs = new(List, __VA_ARGS__); \
     foreach(f in funcs) { args = call_with(f, args); } \
     return delete(funcs), args; \
   }
 
 #define lambda_method_pipe(name, ...) \
   lambda(name, args) { \
-    var funcs = new(List,  __VA_ARGC__(__VA_ARGS__), __VA_ARGS__); \
+    var funcs = new(List, __VA_ARGS__); \
     foreach(f in funcs) { call_with(f, args); } \
     return delete(funcs), None; \
   }

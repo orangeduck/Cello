@@ -25,7 +25,7 @@ var Pool = methods {
   methods_end(Pool)
 };
 
-var Pool_New(var self, va_list* args) {
+var Pool_New(var self, var_list vl) {
   PoolData* pd = cast(self, Pool);
   pd->tab = new(Table, Reference, Int);
   return self;

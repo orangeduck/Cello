@@ -33,17 +33,15 @@ var List = methods {
   methods_end(List)
 };
 
-var List_New(var self, va_list* args) {
+var List_New(var self, var_list vl) {
   ListData* lo = cast(self, List);
   
   lo->num_items = 0;
   lo->num_slots = 0;
   lo->items = NULL;
   
-  int obj_count = va_arg(*args, int);
-  
-  for(int i = 0; i < obj_count; i++) {
-    push(self, va_arg(*args, var));
+  while(not var_list_end(vl)) {
+    push(self, var_list_get(vl));
   }
   
   lo->cursor = 0;
@@ -76,7 +74,7 @@ void List_Assign(var self, var obj) {
 
 var List_Copy(var self) {
   
-  var newlist = new(List, 0);
+  var newlist = new(List);
   
   foreach(val in self) {
     push(newlist, val);

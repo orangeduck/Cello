@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   call(hello_name, $(String, "Bob"));
   
   /* Higher order functions supported */
-  var names = new(List, 3, $(String, "Dan"), $(String, "Robert"), $(String, "Chris"));
+  var names = new(List, $(String, "Dan"), $(String, "Robert"), $(String, "Chris"));
   map(names, hello_name);
   delete(names);
   
