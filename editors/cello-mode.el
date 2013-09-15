@@ -85,7 +85,7 @@
 			"format_to" "format_from" "format_to_va" "format_from_va" "show" "show_to" 
 			"print" "print_to" "print_va" "print_to_va" "look" "look_from" "scan" 
 			"scan_from" "scan_va" "scan_from_va" "println" "scanln" "current" "join" 
-			"terminate" "lock" "unlock" "lock_try") 
+			"terminate" "lock" "unlock" "lock_try" "New" "Assign" "Copy" "Eq" "Ord" "Hash" "Serialize" "AsLong" "AsDouble" "AsStr" "AsChar" "Num" "Collection" "Reverse" "Iter" "Push" "At" "Dict" "With" "Stream" "Call" "Retain" "Sort" "Append" "Show" "Format" "Process" "Lock") 
 		  'words) . font-lock-builtin-face))
     "A list of Cello keywords.")
 
