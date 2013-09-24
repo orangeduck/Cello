@@ -33,7 +33,7 @@ PT_SUITE(suite_threading) {
     var t = new(Thread, f);
     
     PT_ASSERT(not at(in_func, 0));
-    call(t, None);
+    call(t);
     join(t);
     PT_ASSERT(at(in_func, 0));
     
@@ -98,7 +98,7 @@ PT_SUITE(suite_threading) {
     PT_ASSERT(eq(total, $(Int, 0)));
     
     foreach(t in threads) {
-      call(t, None);
+      call(t);
     }
     
     foreach(t in threads) {
@@ -125,7 +125,7 @@ PT_SUITE(suite_threading) {
     
     var t = new(Thread, f);
     
-    call(t, None);
+    call(t);
     cello_sleep(10);
     PT_ASSERT(Exception_Depth() is 0);
     join(t);

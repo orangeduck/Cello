@@ -149,8 +149,7 @@ local var Thread_Init_Run(var args) {
   
   ThreadData* td = cast(self, Thread);
   td->running = true;
-  return call_with(td->func, td->args);
-  
+  return call_with(td->func, td->args);  
 }
 
 #elif defined(_WIN32)
@@ -164,7 +163,7 @@ local void tls_key_delete(void) {
 }
 
 local DWORD Thread_Init_Run(var args) {
-  
+    
   var self = pop_front(args);
   TlsSetValue(key_thread_wrapper, self);
   
@@ -172,7 +171,6 @@ local DWORD Thread_Init_Run(var args) {
   td->running = true;
   call_with(td->func, td->args);
   return 0;
-  
 }
 
 #endif

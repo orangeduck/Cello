@@ -10,15 +10,15 @@ float length(var self) {
   return type_class_method(type_of(self), Vector, length, self);
 }
 
-var Vec2 = methods {
-  methods_begin(Vec2),
-  method(Vec2, New),
-  method(Vec2, Assign),
-  method(Vec2, Copy),
-  method(Vec2, Eq),
-  method(Vec2, Show),
-  method(Vec2, Vector),
-  methods_end(Vec2)
+var Vec2 = type_data {
+  type_begin(Vec2),
+  type_entry(Vec2, New),
+  type_entry(Vec2, Assign),
+  type_entry(Vec2, Copy),
+  type_entry(Vec2, Eq),
+  type_entry(Vec2, Show),
+  type_entry(Vec2, Vector),
+  type_end(Vec2)
 };
 
 var Vec2_New(var self, var_list vl) {

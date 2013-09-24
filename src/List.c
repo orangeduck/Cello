@@ -156,7 +156,11 @@ void List_Push_Front(var self, var val) {
 void List_Push_At(var self, var val, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 or index > lo->num_items-1) return;
+  if (index < 0 or index > lo->num_items) {
+    throw(IndexOutOfBoundsError, 
+      "Index %i out of bounds [%i-%i]", 
+      $(Int, index), $(Int, 0), $(Int, len(self)));
+  }
   
   lo->num_items++;
   List_Reserve_More(lo);

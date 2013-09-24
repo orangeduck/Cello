@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     new(Thread, thread_function));
   
   foreach(t in threads) {
-    call(t, None);
+    call(t);
   }
   
   foreach(t in threads) {
