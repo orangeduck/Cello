@@ -333,12 +333,23 @@ void exit_with(var self) {
 }
 
 var enter_for(var self) {
-  enter_with(self);
+  try {
+    enter_with(self);
+  }
+  catch(e) {
+    exit_with(self);
+    return Undefined;
+  }
   return self;
 }
 
 var exit_for(var self) {
   exit_with(self);
+  if(Exception_Depth() >= 1) {
+    Exception_Dec();
+  } else {
+    throw(IllegalInstructionError, "exit_for called without try/catch block");
+  }
   return Undefined;
 }
 
