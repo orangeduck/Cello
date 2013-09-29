@@ -81,16 +81,16 @@ var Tree_Eq(var self, var obj) {
   if_neq(type_of(obj), Tree) { return False; }
   
   foreach(key in obj) {
-		if (not contains(self, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(self, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
   foreach(key in self) {
-		if (not contains(obj, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(obj, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
-	return True;
+  return True;
 	
 }
 
@@ -140,8 +140,8 @@ local var Tree_Next_Inorder(struct TreeNode* node) {
 }
 
 local void Tree_Node_Delete(struct TreeNode* node) {
-  destruct(node->leaf_key);
-  destruct(node->leaf_val);
+  delete(node->leaf_key);
+  delete(node->leaf_val);
   free(node);
 }
 

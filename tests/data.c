@@ -537,6 +537,7 @@ PT_SUITE(suite_data) {
     }
     
     PT_ASSERT(counter is 9);
+    delete(a0);
     
   }
 
@@ -551,6 +552,9 @@ PT_SUITE(suite_data) {
     
     PT_ASSERT( eq(a0, a1) );
     
+    delete(a0);
+    delete(a1);
+
   }
 
   PT_TEST(test_table_create) {
@@ -662,6 +666,8 @@ PT_SUITE(suite_data) {
     
     PT_ASSERT(counter is 2);
     
+    delete(t0);
+
   }
 
   PT_TEST(test_tree_create) {
@@ -772,6 +778,7 @@ PT_SUITE(suite_data) {
     }
     
     PT_ASSERT(counter is 2);
+    delete(t0);
 
   }
 
@@ -861,6 +868,7 @@ PT_SUITE(suite_data) {
     delete(l0);
     delete(l1);
     delete(l2);
+    delete(l3);
     
   }
 
@@ -1146,7 +1154,9 @@ PT_SUITE(suite_data) {
     }
     
     PT_ASSERT(counter is 3);
-    
+
+    delete(d0);    
+
   }
 
   PT_TEST(test_dictionary_dict) {
@@ -1277,6 +1287,7 @@ PT_SUITE(suite_data) {
     }
     
     PT_ASSERT(counter is 3);
+    delete(m0);
     
   }
 
