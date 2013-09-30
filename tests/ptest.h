@@ -4,8 +4,13 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define PT_SUITE(name) void name()
-#define PT_TEST(name) auto void name(void); pt_add_test(name, #name, __func__); void name(void) 
+
+#define PT_SUITE(name) void name(void)
+
+#define PT_DECL(name) auto void name(void);
+#define PT_FUNC(name) static void name(void)
+#define PT_REG(name) pt_add_test(name, #name, __func__)
+#define PT_TEST(name) PT_DECL(name); PT_REG(name); void name(void)
 
 #define PT_ASSERT(expr) pt_assert_run((bool)(expr), #expr, __func__, __FILE__, __LINE__)
 #define PT_ASSERT_STR_EQ(fst, snd) pt_assert_run(strcmp(fst, snd) == 0, "strcmp( " #fst ", " #snd " ) == 0", __func__, __FILE__, __LINE__)

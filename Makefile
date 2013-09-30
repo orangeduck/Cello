@@ -1,7 +1,7 @@
 CC = gcc
 AR = ar
 
-VERSION = 1.1.2
+VERSION = 1.1.3
 PACKAGE = libCello-$(VERSION)
 
 PREFIX=/usr/local
