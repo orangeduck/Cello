@@ -40,7 +40,7 @@ global var Function;
 
   data {
     var type;
-    var (^func)(var);
+    var (*func)(var);
   } FunctionData;
 
   #define lambda(name, args) \
@@ -60,7 +60,7 @@ global var Function;
     var __LambdaCello_##name(var args)
 
 #endif
-  
+
 var Function_New(var self, var_list vl);
 var Function_Delete(var self);
 size_t Function_Size(void);
