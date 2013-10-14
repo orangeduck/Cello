@@ -199,7 +199,7 @@ var Thread_Call(var self, var args) {
   if (err is EAGAIN) { throw(OutOfMemoryError, "Not enough resources to create another Thread"); }
   if (err is EBUSY)  { throw(BusyError, "System is too busy to create thread"); }
 #elif defined(_WIN32)
-  td->thread = CreateThread(NULL, 0, Thread_Init_Run, td->args, 0, &td->id);
+  td->thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Thread_Init_Run, td->args, 0, &td->id);
   if (td->thread == NULL) {
     throw(ValueError, "Unable to Create WinThread");
   }
