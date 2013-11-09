@@ -42,7 +42,7 @@ typedef void* var;
 **  of Types statically much easier
 */
 
-#define type_data (TypeData*)(const TypeData[])
+#define type_data (TypeData*)(TypeData[])
 #define type_begin(T) {NULL, "__Type"}, {#T, "__Name"}, {NULL, "__Parent"}
 #define type_entry(T,C) {&T##C, #C}
 #define type_end(T) {NULL, NULL}

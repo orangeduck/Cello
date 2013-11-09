@@ -44,8 +44,6 @@ local var return_true(var self) {
   return type_class_method(self, ReturnTrue, return_true, self);
 }
 
-global var IntParent;
-
 local var IntParent_ReturnTrue(var self) {
   return True;
 }
