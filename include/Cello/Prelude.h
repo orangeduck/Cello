@@ -357,4 +357,12 @@ class {
 void serial_read(var self, var input);
 void serial_write(var self, var output);
 
+
+/** Hashing constants */
+#define Hashing_Primes_Count 20
+extern const uint32_t  Hashing_Primes[Hashing_Primes_Count];
+static int __Hashing_DELETED;
+#define Hashing_DELETED (var)&__Hashing_DELETED
+#define Hashing_Threshold 0.7f
+
 #endif
