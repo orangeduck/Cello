@@ -16,16 +16,6 @@
 
 global var Table;
 
-data {
-  var type;
-  var key_type;
-  var val_type;
-  int size;
-  var keys;
-  var* buckets;
-} TableData;
-
-/** Table_New(var self, var key_type, var item_type); */
 var Table_New(var self, var_list vl);
 var Table_Delete(var self);
 size_t Table_Size(void);

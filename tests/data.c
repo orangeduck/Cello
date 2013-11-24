@@ -639,7 +639,7 @@ PT_FUNC(test_table_dict) {
 
 PT_FUNC(test_table_rehash) {
 
-  int max = 50000;
+  int max = 500000;
 
   var d0 = new(Table, Int, Int);
   var value = $(Int, 23);
@@ -1204,12 +1204,13 @@ PT_FUNC(test_dictionary_rehash) {
 
   var d0 = new(Dictionary);
   var value = $(String, "There");
-  var test_key;
+  var test_key = NULL;
 
   int r = random() % max;
 
   for (int i = 0; i< max; i++) {
-    var key = $(Int, i); // differnet keys
+
+    var key = new(Int, $(Int, i));
     if (i==r){
       test_key = key;
     }
@@ -1448,6 +1449,7 @@ PT_SUITE(suite_data) {
   PT_REG(test_table_create);
   PT_REG(test_table_collection);
   PT_REG(test_table_dict);
+  PT_REG(test_table_rehash);
   PT_REG(test_table_iter);
   PT_REG(test_tree_create);
   PT_REG(test_tree_collection);
@@ -1464,6 +1466,7 @@ PT_SUITE(suite_data) {
   PT_REG(test_dictionary_collection);
   PT_REG(test_dictionary_iter);
   PT_REG(test_dictionary_dict);
+  PT_REG(test_dictionary_rehash);
   PT_REG(test_map_create);
   PT_REG(test_map_collection);
   PT_REG(test_map_iter);

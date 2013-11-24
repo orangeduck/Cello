@@ -9,6 +9,12 @@
 #include <string.h>
 #include <math.h>
 
+data {
+  var type;
+  int size;
+  var keys;
+  var* buckets;
+} DictionaryData;
 
 var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *index);
 void Dictionary_Rehash(DictionaryData* dict);
@@ -35,7 +41,7 @@ var Dictionary = type_data {
 var Dictionary_New(var self, var_list vl) {
   DictionaryData* dict = cast(self, Dictionary);
   dict->size = Hashing_Primes[0];
-  dict->keys = new(List, 0);
+  dict->keys = new(List);
   
   dict->buckets = calloc(dict->size, sizeof(DictionaryBucket));
   

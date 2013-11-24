@@ -16,14 +16,6 @@
 
 global var Dictionary;
 
-data {
-  var type;
-  int size;
-  var keys;
-  var* buckets;
-} DictionaryData;
-
-/** Dictionary_New(var self); */
 var Dictionary_New(var self, var_list vl);
 var Dictionary_Delete(var self);
 size_t Dictionary_Size(void);

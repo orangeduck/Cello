@@ -8,6 +8,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+data {
+  var type;
+  var key_type;
+  var val_type;
+  int size;
+  var keys;
+  var* buckets;
+} TableData;
+
+
 var Table = type_data {
   type_begin(Table),
   type_entry(Table, New),
@@ -38,7 +48,7 @@ var Table_New(var self, var_list vl) {
   tab->val_type = cast(var_list_get(vl), Type);
 
   tab->size = Hashing_Primes[0];
-  tab->keys = new(Array, tab->key_type, 0);
+  tab->keys = new(Array, tab->key_type);
   
   tab->buckets = calloc(tab->size, sizeof(var));
   
@@ -151,8 +161,6 @@ var Table_Get(var self, var key) {
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
 
-  long i = abs(hash(key) % tab->size);
-  
   TableBucket *bucket = Table_Find_Bucket(tab, key, False, NULL);
   if (bucket)
     return bucket->value;
