@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 
 const uint32_t Hashing_Primes[Hashing_Primes_Count] =
@@ -51,17 +52,20 @@ var type_of(var self) {
 
 }
 
-/* Allocate space for type, set type entry */
+size_t size(var type) {
+  return type_class_method(cast(type, Type), New, size);
+}
+
 var allocate(var type) {
+
+  /* Allocate space for type, set type entry */
   type = cast(type, Type);
   
-  New* inew = type_class(type, New);
- 
   var self;
-  if (inew->size <= sizeof(ObjectData)) {
+  if (size(type) <= sizeof(ObjectData)) {
     self = NULL;
   } else {
-    self = calloc(1, inew->size);
+    self = calloc(1, size(type));
     if (self == NULL) { throw(OutOfMemoryError, "Cannot create new '%s', out of memory!", type); }
     ((ObjectData*)self)->type = type;
   }
@@ -73,37 +77,28 @@ void deallocate(var obj) {
   free(obj);
 }
 
-var new(var type, ...) { 
+var new_vl(var type, var_list vl) { 
   
   var self = allocate(type);
   
-  New* inew = type_class(type, New);
-  if (inew->construct) {
-    va_list args;
-    va_start(args, type);
-    self = inew->construct(self, &args);
-    va_end(args);
+  if (type_implements_method(type, New, construct_vl)) {
+    self = type_class_method(type, New, construct_vl, self, vl);
   }
   
   return self;
 }
 
 void delete(var self) {
-  New* inew = type_class(type_of(self), New);
   
-  if (inew->destruct) {
-    self = inew->destruct(self);
+  if (type_implements_method(type_of(self), New, destruct)) {
+    self = type_class_method(type_of(self), New, destruct, self);
   }
   
   deallocate(self);
 }
 
-var construct(var self, ...) {
-  va_list args;
-  va_start(args, self);
-  self = type_class_method(type_of(self), New, construct, self, &args);
-  va_end(args);
-  return self;
+var construct_vl(var self, var_list vl) {
+  return type_class_method(type_of(self), New, construct_vl, self, vl);
 }
 
 var destruct(var self) {
@@ -121,7 +116,7 @@ var copy(var self) {
 var eq(var lhs, var rhs) {
   
   if (not type_implements(type_of(lhs), Eq)) {
-    return (var)(intptr_t)(lhs == rhs);
+    return bool_var(lhs == rhs);
   } else {
     return type_class_method(type_of(lhs), Eq, eq, lhs, rhs);
   }
@@ -129,7 +124,7 @@ var eq(var lhs, var rhs) {
 }
 
 var neq(var lhs, var rhs) {
-  return (var)(intptr_t)(not eq(lhs, rhs));
+  return bool_var(not eq(lhs, rhs));
 }
 
 var gt(var lhs, var rhs) {
@@ -142,11 +137,11 @@ var lt(var lhs, var rhs) {
 }
 
 var ge(var lhs, var rhs) {
-  return (var)(intptr_t)(not lt(lhs, rhs));
+  return bool_var(not lt(lhs, rhs));
 }
 
 var le(var lhs, var rhs) {
-  return (var)(intptr_t)(not gt(lhs, rhs));
+  return bool_var(not gt(lhs, rhs));
 }
 
 int len(var self) {
@@ -154,7 +149,7 @@ int len(var self) {
 }
 
 var is_empty(var self) {
-  return (var)(intptr_t)(len(self) == 0);
+  return bool_var(len(self) == 0);
 }
 
 void clear(var self) {
@@ -335,16 +330,14 @@ void serial_write(var self, var output) {
 }
 
 void enter_with(var self) {
-  With* iwith = type_class(type_of(self), With);
-  if(iwith->enter) {
-    iwith->enter(self);
+  if (type_implements_method(type_of(self), With, enter)) {
+    type_class_method(type_of(self), With, enter, self);
   }
 }
 
 void exit_with(var self) {
-  With* iwith = type_class(type_of(self), With);
-  if(iwith->exit) {
-    iwith->exit(self);
+  if (type_implements_method(type_of(self), With, exit)) {
+    type_class_method(type_of(self), With, exit, self);
   }
 }
 

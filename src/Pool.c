@@ -11,16 +11,21 @@ void release(var p, var x) {
   type_class_method(type_of(p), Retain, release, p, x);
 }
 
-var Pool = methods {
-  methods_begin(Pool),
-  method(Pool, New), 
-  method(Pool, Retain),
-  method(Pool, Collection),
-  method(Pool, Dict),
-  methods_end(Pool)
+data {
+  var type;
+  var tab;
+} PoolData;
+
+var Pool = type_data {
+  type_begin(Pool),
+  type_entry(Pool, New), 
+  type_entry(Pool, Retain),
+  type_entry(Pool, Collection),
+  type_entry(Pool, Dict),
+  type_end(Pool)
 };
 
-var Pool_New(var self, va_list* args) {
+var Pool_New(var self, var_list vl) {
   PoolData* pd = cast(self, Pool);
   pd->tab = new(Table, Reference, Int);
   return self;
@@ -28,8 +33,17 @@ var Pool_New(var self, va_list* args) {
 
 var Pool_Delete(var self) {
   PoolData* pd = cast(self, Pool);
+
+  foreach(k in pd->tab) {
+    delete(at(k,0));
+  }  
+
   delete(pd->tab);
   return self;
+}
+
+size_t Pool_Size(void) {
+  return sizeof(PoolData);
 }
 
 var Pool_Retain(var self, var x) {

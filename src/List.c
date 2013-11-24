@@ -8,35 +8,40 @@
 #include <math.h>
 #include <string.h>
 
+data {
+  var type;
+  int num_items;
+  int num_slots;
+  var* items;
+  int cursor;
+} ListData;
 
-var List = methods {
-  methods_begin(List),
-  method(List, New),
-  method(List, Assign),
-  method(List, Copy),
-  method(List, Eq),
-  method(List, Collection),
-  method(List, Push),
-  method(List, At),
-  method(List, Iter),
-  method(List, Reverse),
-  method(List, Append),
-  method(List, Sort),
-  method(List, Show),
-  methods_end(List)
+var List = type_data {
+  type_begin(List),
+  type_entry(List, New),
+  type_entry(List, Assign),
+  type_entry(List, Copy),
+  type_entry(List, Eq),
+  type_entry(List, Collection),
+  type_entry(List, Push),
+  type_entry(List, At),
+  type_entry(List, Iter),
+  type_entry(List, Reverse),
+  type_entry(List, Append),
+  type_entry(List, Sort),
+  type_entry(List, Show),
+  type_end(List)
 };
 
-var List_New(var self, va_list* args) {
+var List_New(var self, var_list vl) {
   ListData* lo = cast(self, List);
   
   lo->num_items = 0;
   lo->num_slots = 0;
   lo->items = NULL;
   
-  int obj_count = va_arg(*args, int);
-  
-  for(int i = 0; i < obj_count; i++) {
-    push(self, va_arg(*args, var));
+  while(not var_list_end(vl)) {
+    push(self, var_list_get(vl));
   }
   
   lo->cursor = 0;
@@ -48,6 +53,10 @@ var List_Delete(var self) {
   ListData* lo = cast(self, List);
   free(lo->items);
   return self;
+}
+
+size_t List_Size(void) {
+  return sizeof(ListData);
 }
 
 void List_Assign(var self, var obj) {
@@ -65,7 +74,7 @@ void List_Assign(var self, var obj) {
 
 var List_Copy(var self) {
   
-  var newlist = new(List, 0);
+  var newlist = new(List);
   
   foreach(val in self) {
     push(newlist, val);
@@ -147,7 +156,11 @@ void List_Push_Front(var self, var val) {
 void List_Push_At(var self, var val, int index) {
   ListData* lo = cast(self, List);
   
-  if (index < 0 or index > lo->num_items-1) return;
+  if (index < 0 or index > lo->num_items) {
+    throw(IndexOutOfBoundsError, 
+      "Index %i out of bounds [%i-%i]", 
+      $(Int, index), $(Int, 0), $(Int, len(self)));
+  }
   
   lo->num_items++;
   List_Reserve_More(lo);

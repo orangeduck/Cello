@@ -21,22 +21,22 @@ void terminate(var self) {
   type_class_method(type_of(self), Process, terminate, self);
 }
 
-var Thread = methods {
-  methods_begin(Thread),
-  method(Thread, New),
-  method(Thread, Assign),
-  method(Thread, Copy),
-  method(Thread, Call),
-  method(Thread, Process),
-  method(Thread, AsLong),
-  methods_end(Thread),
+var Thread = type_data {
+  type_begin(Thread),
+  type_entry(Thread, New),
+  type_entry(Thread, Assign),
+  type_entry(Thread, Copy),
+  type_entry(Thread, Call),
+  type_entry(Thread, Process),
+  type_entry(Thread, AsLong),
+  type_end(Thread),
 };
 
-var Thread_New(var self, va_list* args) {
+var Thread_New(var self, var_list vl) {
   
   ThreadData* td = cast(self, Thread);
-  td->func = va_arg(*args, var);
-  td->args = new(List, 0);
+  td->func = cast(var_list_get(vl), Function);
+  td->args = new(List);
   td->is_main = false;
   td->running = false;
   
@@ -45,7 +45,7 @@ var Thread_New(var self, va_list* args) {
   memset(td->exc_buffers, 0, sizeof(jmp_buf) * EXC_MAX_DEPTH);
   
   td->exc_obj = Undefined;
-  td->exc_msg = new(String, "");
+  td->exc_msg = new(String, $(String, ""));
   td->exc_func = NULL;
   td->exc_file = NULL;
   td->exc_lineno = 0;
@@ -65,6 +65,10 @@ var Thread_Delete(var self) {
   delete(td->args);
   delete(td->exc_msg);
   return td;
+}
+
+size_t Thread_Size(void) {
+  return sizeof(ThreadData);
 }
 
 void Thread_Assign(var self, var obj) {
@@ -115,15 +119,15 @@ long Thread_AsLong(var self) {
 }
 
 var Thread_Eq(var self, var obj) {
-  return (var)(intptr_t)(as_long(self) == as_long(obj));
+  return bool_var(as_long(self) == as_long(obj));
 }
 
 var Thread_Gt(var self, var obj) {
-  return (var)(intptr_t)(as_long(self) > as_long(obj));
+  return bool_var(as_long(self) > as_long(obj));
 }
 
 var Thread_Lt(var self, var obj) {
-  return (var)(intptr_t)(as_long(self) < as_long(obj));
+  return bool_var(as_long(self) < as_long(obj));
 }
 
 local bool tls_key_created = false;
@@ -145,8 +149,7 @@ local var Thread_Init_Run(var args) {
   
   ThreadData* td = cast(self, Thread);
   td->running = true;
-  return call_with(td->func, td->args);
-  
+  return call_with(td->func, td->args);  
 }
 
 #elif defined(_WIN32)
@@ -160,7 +163,7 @@ local void tls_key_delete(void) {
 }
 
 local DWORD Thread_Init_Run(var args) {
-  
+    
   var self = pop_front(args);
   TlsSetValue(key_thread_wrapper, self);
   
@@ -168,7 +171,6 @@ local DWORD Thread_Init_Run(var args) {
   td->running = true;
   call_with(td->func, td->args);
   return 0;
-  
 }
 
 #endif
@@ -197,7 +199,7 @@ var Thread_Call(var self, var args) {
   if (err is EAGAIN) { throw(OutOfMemoryError, "Not enough resources to create another Thread"); }
   if (err is EBUSY)  { throw(BusyError, "System is too busy to create thread"); }
 #elif defined(_WIN32)
-  td->thread = CreateThread(NULL, 0, Thread_Init_Run, td->args, 0, &td->id);
+  td->thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Thread_Init_Run, td->args, 0, &td->id);
   if (td->thread == NULL) {
     throw(ValueError, "Unable to Create WinThread");
   }
@@ -280,17 +282,27 @@ void unlock(var self) {
   type_class_method(type_of(self), Lock, unlock, self);
 }
 
-var Mutex = methods {
-  methods_begin(Mutex),
-  method(Mutex, New),
-  method(Mutex, Assign),
-  method(Mutex, Copy),
-  method(Mutex, With),
-  method(Mutex, Lock),
-  methods_end(Mutex)
+data {
+  var type;
+#if defined(__unix__) || defined(__APPLE__)
+  pthread_mutex_t mutex;
+#elif defined(_WIN32)
+  HANDLE mutex;
+#endif
+
+} MutexData;
+
+var Mutex = type_data {
+  type_begin(Mutex),
+  type_entry(Mutex, New),
+  type_entry(Mutex, Assign),
+  type_entry(Mutex, Copy),
+  type_entry(Mutex, With),
+  type_entry(Mutex, Lock),
+  type_end(Mutex)
 };
 
-var Mutex_New(var self, va_list* args) {
+var Mutex_New(var self, var_list vl) {
   MutexData* md = cast(self, Mutex);
 #if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_init(&md->mutex, NULL);
@@ -308,6 +320,10 @@ var Mutex_Delete(var self) {
   CloseHandle(md->mutex);
 #endif
   return md;
+}
+
+size_t Mutex_Size(void) {
+  return sizeof(MutexData);
 }
 
 void Mutex_Assign(var self, var obj) {
@@ -342,7 +358,7 @@ var Mutex_Lock_Try(var self) {
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Lock Try"); }
   return True;
 #elif defined(_WIN32)
-  return (var)(intptr_t)(not (WaitForSingleObject(md->mutex, 0) is WAIT_TIMEOUT));
+  return bool_var(not (WaitForSingleObject(md->mutex, 0) is WAIT_TIMEOUT));
 #endif
   
 }

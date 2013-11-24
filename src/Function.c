@@ -2,33 +2,46 @@
 
 #include "Cello/List.h"
 
-var call_with_ptr(var self, var* args) {
-  int num = 0;
-  while(args[num] != (var)-1) { num++; }
-  return call_with(self, $(List, num, num, args, 0));
+var call_vl(var self, var_list vl) {
+  
+  var wrapped = new(List);
+  
+  while(not var_list_end(vl)) {
+    push(wrapped, var_list_get(vl));
+  }
+  
+  var res = call_with(self, wrapped);
+  
+  delete(wrapped);
+  
+  return res;
 }
 
 var call_with(var self, var args) {
   return type_class_method(type_of(self), Call, call_with, self, args);
 }
 
-var Function = methods {
-  methods_begin(Function),
-  method(Function, New),
-  method(Function, Copy),
-  method(Function, Assign),
-  method(Function, Call),
-  methods_end(Function),
+var Function = type_data {
+  type_begin(Function),
+  type_entry(Function, New),
+  type_entry(Function, Copy),
+  type_entry(Function, Assign),
+  type_entry(Function, Call),
+  type_end(Function),
 };
 
-var Function_New(var self, va_list* args) {
+var Function_New(var self, var_list vl) {
   FunctionData* fd = cast(self, Function);
-  fd->func = va_arg(*args, var);
+  fd->func = cast(var_list_get(vl), Function);
   return self;
 }
 
 var Function_Delete(var self) {
   return self;
+}
+
+size_t Function_Size(void) {
+  return sizeof(FunctionData);
 }
 
 var Function_Copy(var self) {

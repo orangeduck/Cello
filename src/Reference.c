@@ -1,31 +1,36 @@
 #include "Cello/Reference.h"
 
+#include "Cello/Bool.h"
 #include "Cello/Type.h"
 #include "Cello/Exception.h"
 
 #include <string.h>
 
-var Reference = methods {
-  methods_begin(Reference),
-  method(Reference, New), 
-  method(Reference, Assign),
-  method(Reference, Copy),
-  method(Reference, Eq), 
-  method(Reference, Hash),
-  method(Reference, At),
-  method(Reference, With),
-  method(Reference, Show),
-  methods_end(Reference)
+var Reference = type_data {
+  type_begin(Reference),
+  type_entry(Reference, New), 
+  type_entry(Reference, Assign),
+  type_entry(Reference, Copy),
+  type_entry(Reference, Eq), 
+  type_entry(Reference, Hash),
+  type_entry(Reference, At),
+  type_entry(Reference, With),
+  type_entry(Reference, Show),
+  type_end(Reference)
 };
 
-var Reference_New(var self, va_list* args) {
+var Reference_New(var self, var_list vl) {
   ReferenceData* rd = cast(self, Reference);
-  rd->ref = va_arg(*args, var);
+  rd->ref = var_list_get(vl);
   return rd;
 }
 
 var Reference_Delete(var self) {
   return self;
+}
+
+size_t Reference_Size(void) {
+  return sizeof(ReferenceData);
 }
 
 void Reference_Assign(var self, var obj) {
@@ -42,7 +47,7 @@ var Reference_Copy(var self) {
 var Reference_Eq(var self, var obj) {
   ReferenceData* rd0 = cast(self, Reference);
   ReferenceData* rd1 = cast(obj, Reference);
-  return (var)(intptr_t)(rd0->ref is rd1->ref);
+  return bool_var(rd0->ref is rd1->ref);
 }
 
 long Reference_Hash(var self) {

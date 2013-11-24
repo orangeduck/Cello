@@ -3,7 +3,7 @@
 
 int main(int arc, char** argv) {
   
-  var values = new(List, 4, $(Int, 1), $(Int, 10), None, $(Real, 87.2));
+  var values = new(List, $(Int, 1), $(Int, 10), None, $(Real, 87.2));
 
   foreach(val in values) {
     
@@ -34,7 +34,7 @@ int main(int arc, char** argv) {
   //scan("%$ %$ %$ %$", x, y, z, w);
   //print("%$ %$ %$ %$\n", x, y, z, w);
   
-  var l = new(List, 4, x, y, z, w);
+  var l = new(List, x, y, z, w);
   print("%$\n", l);
   delete(l);
   

@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     return None;
   };
   
-  var threads = new(List, 5,
+  var threads = new(List,
     new(Thread, thread_function),
     new(Thread, thread_function),
     new(Thread, thread_function),
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     new(Thread, thread_function));
   
   foreach(t in threads) {
-    call(t, None);
+    call(t);
   }
   
   foreach(t in threads) {

@@ -1,7 +1,7 @@
 CC = gcc
 AR = ar
 
-VERSION = 1.0.0
+VERSION = 1.1.5
 PACKAGE = libCello-$(VERSION)
 
 PREFIX=/usr/local
@@ -30,7 +30,7 @@ ifeq ($(findstring Linux,$(PLATFORM)),Linux)
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
 	CFLAGS += -fPIC
-	LIBS = -lpthread -lm
+	LIBS = -lpthread -ldl -lm
 	INSTALL_LIB = mkdir -p ${L} && cp -f ${STATIC} ${L}/$(STATIC)
 	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
 endif
@@ -38,8 +38,8 @@ endif
 ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
-	CFLAGS += -fPIC -fblocks -fnested-functions
-	LIBS = -lpthread -lm
+	CFLAGS += -fPIC -fblocks
+	LIBS = -lpthread -ldl -lm -lBlocksRuntime
 	INSTALL_LIB = mkdir -p ${L} && cp -f $(STATIC) ${L}/$(STATIC)
 	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
 endif

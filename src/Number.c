@@ -31,30 +31,34 @@ void absolute(var self) {
   return type_class_method(type_of(self), Num, absolute, self);
 }
 
-var Int = methods {
-  methods_begin(Int),
-  method(Int, New), 
-  method(Int, Assign),
-  method(Int, Copy),
-  method(Int, Eq), 
-  method(Int, Ord),
-  method(Int, Hash),
-  method(Int, AsLong),
-  method(Int, AsDouble),
-  method(Int, Num),
-  method(Int, Serialize),
-  method(Int, Show),
-  methods_end(Int)
+var Int = type_data {
+  type_begin(Int),
+  type_entry(Int, New), 
+  type_entry(Int, Assign),
+  type_entry(Int, Copy),
+  type_entry(Int, Eq), 
+  type_entry(Int, Ord),
+  type_entry(Int, Hash),
+  type_entry(Int, AsLong),
+  type_entry(Int, AsDouble),
+  type_entry(Int, Num),
+  type_entry(Int, Serialize),
+  type_entry(Int, Show),
+  type_end(Int)
 };
 
-var Int_New(var self, va_list* args) {
+var Int_New(var self, var_list vl) {
   IntData* intdata = cast(self, Int);
-  intdata->value = va_arg(*args, int);
+  intdata->value = as_long(var_list_get(vl));
   return self;
 }
 
 var Int_Delete(var self) {
   return self;
+}
+
+size_t Int_Size(void) {
+  return sizeof(IntData);
 }
 
 void Int_Assign(var self, var obj) {
@@ -63,14 +67,13 @@ void Int_Assign(var self, var obj) {
 }
 
 var Int_Copy(var self) {
-  IntData* intdata = cast(self, Int);
-  return new(Int, intdata->value);
+  return new(Int, self);
 }
 
 var Int_Eq(var self, var other) {
   IntData* io = cast(self, Int);
   if (type_implements(type_of(other), AsLong)) {
-    return (var)(intptr_t)(io->value == as_long(other));
+    return bool_var(io->value == as_long(other));
   } else {
     return False;
   }
@@ -78,11 +81,11 @@ var Int_Eq(var self, var other) {
 
 var Int_Gt(var self, var other) {
   IntData* io = cast(self, Int);
-  return (var)(intptr_t)(io->value > as_long(other));
+  return bool_var(io->value > as_long(other));
 }
 var Int_Lt(var self, var other) {
   IntData* io = cast(self, Int);
-  return (var)(intptr_t)(io->value < as_long(other));
+  return bool_var(io->value < as_long(other));
 }
 
 long Int_Hash(var self) {
@@ -154,30 +157,34 @@ int Int_Look(var self, var input, int pos) {
   return pos;
 }
 
-var Real = methods {
-  methods_begin(Real),
-  method(Real, New),
-  method(Real, Assign),
-  method(Real, Copy),
-  method(Real, Eq),
-  method(Real, Ord),
-  method(Real, Hash),
-  method(Real, AsDouble),
-  method(Real, AsLong), 
-  method(Real, Num),
-  method(Real, Serialize),
-  method(Real, Show), 
-  methods_end(Real)
+var Real = type_data {
+  type_begin(Real),
+  type_entry(Real, New),
+  type_entry(Real, Assign),
+  type_entry(Real, Copy),
+  type_entry(Real, Eq),
+  type_entry(Real, Ord),
+  type_entry(Real, Hash),
+  type_entry(Real, AsDouble),
+  type_entry(Real, AsLong), 
+  type_entry(Real, Num),
+  type_entry(Real, Serialize),
+  type_entry(Real, Show), 
+  type_end(Real)
 };
 
-var Real_New(var self, va_list* args) {
+var Real_New(var self, var_list vl) {
   RealData* ro = cast(self, Real);
-  ro->value = va_arg(*args, double);
+  ro->value = as_double(var_list_get(vl));
   return self;
 }
 
 var Real_Delete(var self) {
   return self;
+}
+
+size_t Real_Size(void) {
+  return sizeof(RealData);
 }
 
 void Real_Assign(var self, var obj) {
@@ -186,14 +193,13 @@ void Real_Assign(var self, var obj) {
 }
 
 var Real_Copy(var self) {
-  RealData* ro = cast(self, Real);
-  return new(Real, ro->value);
+  return new(Real, self);
 }
 
 var Real_Eq(var self, var other) {
   RealData* ro = cast(self, Real);
   if (type_implements(type_of(other), AsDouble)) {
-    return (var)(intptr_t)(ro->value == as_double(other));
+    return bool_var(ro->value == as_double(other));
   } else {
     return False;
   }
@@ -201,12 +207,12 @@ var Real_Eq(var self, var other) {
 
 var Real_Gt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return (var)(intptr_t)(ro->value > as_double(other));
+  return bool_var(ro->value > as_double(other));
 }
 
 var Real_Lt(var self, var other) {
   RealData* ro = cast(self, Real);
-  return (var)(intptr_t)(ro->value < as_double(other));
+  return bool_var(ro->value < as_double(other));
 }
 
 union interp_cast {

@@ -8,17 +8,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-var Table = methods {
-  methods_begin(Table),
-  method(Table, New),
-  method(Table, Assign),
-  method(Table, Copy),
-  method(Table, Eq),
-  method(Table, Collection),
-  method(Table, Dict),
-  method(Table, Iter),
-  method(Table, Show),
-  methods_end(Table)
+var Table = type_data {
+  type_begin(Table),
+  type_entry(Table, New),
+  type_entry(Table, Assign),
+  type_entry(Table, Copy),
+  type_entry(Table, Eq),
+  type_entry(Table, Collection),
+  type_entry(Table, Dict),
+  type_entry(Table, Iter),
+  type_entry(Table, Show),
+  type_end(Table)
 };
 
 data {
@@ -30,13 +30,13 @@ data {
 var Table_Find_Bucket(TableData* tab, var key, var creation, int *index);
 void TableBucket_Delete(TableData* tab, TableBucket *bucket);
 void Table_Rehash(TableData* tab);
-
-var Table_New(var self, va_list* args) {
+// TODO: var Table_New(var self, var_list vl)
+var Table_New(var self, var_list vl) {
   TableData* tab = cast(self, Table);
 
-  tab->key_type = cast(va_arg(*args, var), Type);
-  tab->val_type = cast(va_arg(*args, var), Type);
-  
+  tab->key_type = cast(var_list_get(vl), Type);
+  tab->val_type = cast(var_list_get(vl), Type);
+
   tab->size = Hashing_Primes[0];
   tab->keys = new(Array, tab->key_type, 0);
   
@@ -61,6 +61,10 @@ var Table_Delete(var self) {
   free(tab->buckets);
   
   return self;
+}
+
+size_t Table_Size(void) {
+  return sizeof(TableData);
 }
 
 void Table_Assign(var self, var obj) {

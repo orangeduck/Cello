@@ -17,17 +17,9 @@
 
 global var List;
 
-data {
-  var type;
-  int num_items;
-  int num_slots;
-  var* items;
-  int cursor;
-} ListData;
-
-/** List_New(var self, int count, ... items) */
-var List_New(var self, va_list* args);
+var List_New(var self, var_list vl);
 var List_Delete(var self);
+size_t List_Size(void);
 void List_Assign(var self, var obj);
 var List_Copy(var self);
 
@@ -58,7 +50,7 @@ void List_Sort(var self);
 
 int List_Show(var self, var output, int pos);
 
-instance(List, New) = { sizeof(ListData), List_New, List_Delete };
+instance(List, New) = { List_New, List_Delete, List_Size };
 instance(List, Assign) = { List_Assign };
 instance(List, Copy) = { List_Copy };
 instance(List, Eq) = { List_Eq };

@@ -14,14 +14,18 @@ data {
   int hello_val;
 } HelloData;
 
-local var Hello_New(var self, va_list* args) {
+local var Hello_New(var self, var_list vl) {
   HelloData* hd = cast(self, Hello);
-  hd->hello_val = va_arg(*args, int);
+  hd->hello_val = as_long(var_list_get(vl));
   return self;
 }
 
 local var Hello_Delete(var self) {
   return self;
+}
+
+local size_t Hello_Size(void) {
+  return sizeof(HelloData);
 }
 
 local var Hello_Eq(var self, var obj) {
@@ -36,17 +40,17 @@ local var Hello_Eq(var self, var obj) {
 
 int main(int argc, char** argv) {
   
-  New hello_new_instance = { sizeof(HelloData), Hello_New, Hello_Delete };
+  New hello_new_instance = { Hello_New, Hello_Delete, Hello_Size };
   Eq hello_eq_instance = { Hello_Eq };
   
-  Hello = new(Type, "Hello", 2, 
+  Hello = new(Type, $(String, "Hello"), $(Int, 2), 
     (var[]){ &hello_new_instance, &hello_eq_instance }, 
     (const char*[]){ "New", "Eq" } );
   
   print("%s is a %s!\n", Hello, type_of(Hello));
 
-  var hello_obj1 = new(Hello, 1);
-  var hello_obj2 = new(Hello, 2);
+  var hello_obj1 = new(Hello, $(Int, 1));
+  var hello_obj2 = new(Hello, $(Int, 2));
 
   print("Equal? %d\n", eq(hello_obj1, hello_obj2));
   

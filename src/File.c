@@ -4,20 +4,20 @@
 #include "Cello/Number.h"
 #include "Cello/String.h"
 
-var File = methods {
-  methods_begin(File),
-  method(File, New),
-  method(File, With),
-  method(File, Stream),
-  method(File, Dict),
-  method(File, Format),
-  methods_end(File),
+var File = type_data {
+  type_begin(File),
+  type_entry(File, New),
+  type_entry(File, With),
+  type_entry(File, Stream),
+  type_entry(File, Dict),
+  type_entry(File, Format),
+  type_end(File),
 };
 
-var File_New(var self, va_list* args) {
+var File_New(var self, var_list vl) {
   FileData* fd = cast(self, File);
-  const char* filename = va_arg(*args, const char*);
-  const char* access = va_arg(*args, const char*);
+  const char* filename = as_str(var_list_get(vl));
+  const char* access = as_str(var_list_get(vl));
   stream_open(self, filename, access);
   return self;
 }
@@ -26,6 +26,10 @@ var File_Delete(var self) {
   FileData* fd = cast(self, File);
   if (fd->f != NULL) { stream_close(self); }
   return self;
+}
+
+size_t File_Size(void) {
+  return sizeof(FileData);
 }
 
 var File_Open(var self, const char* filename, const char* access) {

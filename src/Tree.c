@@ -7,24 +7,39 @@
 
 #include <string.h>
 
-var Tree = methods {
-  methods_begin(Tree),
-  method(Tree, New),
-  method(Tree, Assign),
-  method(Tree, Copy),
-  method(Tree, Eq),
-  method(Tree, Collection),
-  method(Tree, Dict),
-  method(Tree, Iter),
-  method(Tree, Show),
-  methods_end(Tree),
+struct TreeNode {
+  var leaf_key;
+  var leaf_val;
+  struct TreeNode* left;
+  struct TreeNode* right;
 };
 
-var Tree_New(var self, va_list* args) {
+data {
+  var type;
+  var key_type;
+  var val_type;
+  var keys;
+  struct TreeNode* root;
+} TreeData;
+
+var Tree = type_data {
+  type_begin(Tree),
+  type_entry(Tree, New),
+  type_entry(Tree, Assign),
+  type_entry(Tree, Copy),
+  type_entry(Tree, Eq),
+  type_entry(Tree, Collection),
+  type_entry(Tree, Dict),
+  type_entry(Tree, Iter),
+  type_entry(Tree, Show),
+  type_end(Tree),
+};
+
+var Tree_New(var self, var_list vl) {
   TreeData* td = cast(self, Tree);
-  td->key_type = cast(va_arg(*args, var), Type);
-  td->val_type = cast(va_arg(*args, var), Type);
-  td->keys = new(Array, td->key_type, 0);
+  td->key_type = cast(var_list_get(vl), Type);
+  td->val_type = cast(var_list_get(vl), Type);
+  td->keys = new(Array, td->key_type);
   td->root = NULL;
   return self;
 }
@@ -34,6 +49,10 @@ var Tree_Delete(var self) {
   clear(self);
   delete(td->keys);
   return self;
+}
+
+size_t Tree_Size(void) {
+  return sizeof(TreeData);
 }
 
 void Tree_Assign(var self, var obj) {
@@ -62,16 +81,16 @@ var Tree_Eq(var self, var obj) {
   if_neq(type_of(obj), Tree) { return False; }
   
   foreach(key in obj) {
-		if (not contains(self, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(self, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
   foreach(key in self) {
-		if (not contains(obj, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(obj, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
-	return True;
+  return True;
 	
 }
 
@@ -121,8 +140,8 @@ local var Tree_Next_Inorder(struct TreeNode* node) {
 }
 
 local void Tree_Node_Delete(struct TreeNode* node) {
-  destruct(node->leaf_key);
-  destruct(node->leaf_val);
+  delete(node->leaf_key);
+  delete(node->leaf_val);
   free(node);
 }
 
@@ -207,7 +226,7 @@ var Tree_Get(var self, var key) {
     else node = node->right;
   }
   
-  return throw(KeyError, "Key not in Tree!");
+  return throw(KeyError, "Key '%$' not in Tree!", key);
 }
 
 local struct TreeNode* Tree_Node_New(var self, var key, var val) {

@@ -136,10 +136,10 @@ local void Exception_Error(void)  {
 
 local var main_exc_msg = NULL;
 local void main_exc_msg_free(void) {
-  free(main_exc_msg);
+  delete(main_exc_msg);
 }
 
-var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, ...) {
+var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, var_list vl) {
 
   ThreadData* td = current(Thread);
 #if defined(__unix__) || defined(__APPLE__)
@@ -151,15 +151,12 @@ var Exception_Throw(var obj, const char* fmt, const char* file, const char* func
   td->exc_lineno = lineno;
   
   if ((td->is_main) and (main_exc_msg == NULL)) {
-    main_exc_msg = new(String, "");
+    main_exc_msg = new(String, $(String, ""));
     td->exc_msg = main_exc_msg;
     atexit(main_exc_msg_free);
   }
   
-  va_list va;
-  va_start(va, lineno);
-  print_to_va(td->exc_msg, 0, fmt, va);
-  va_end(va);
+  print_to_vl(td->exc_msg, 0, fmt, vl);
   
   if (Exception_Depth() >= 1) {
     longjmp(Exception_Buffer(), 1);
@@ -171,30 +168,21 @@ var Exception_Throw(var obj, const char* fmt, const char* file, const char* func
   
 }
 
-var Exception_Catch(void* unused, ...) {
+var Exception_Catch(var_list vl) {
   
   if (not Exception_Active()) { return Undefined; }
   
-  va_list va;
-  va_start(va, unused);
-  var e = va_arg(va, var);
-  
   /* If no Arguments catch all */
-  if (e is Undefined) {
-    va_end(va);
+  if (var_list_end(vl)) {
     return Exception_Object();
   }
   
   /* Check Exception against Arguments */
-  while (e isnt Undefined) {
-    if_eq(e, Exception_Object()) {
-      va_end(va);
+  while (not var_list_end(vl)) {
+    if_eq(var_list_get(vl), Exception_Object()) {
       return Exception_Object();
     }
-    e = va_arg(va, var);
   }
-  
-  va_end(va);
   
   /* No matches found. Propagate to outward block */
   if (Exception_Depth() >= 1) {

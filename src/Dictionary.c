@@ -19,20 +19,20 @@ data {
     var value;
 } DictionaryBucket;
 
-var Dictionary = methods {
-  methods_begin(Dictionary),
-  method(Dictionary, New),
-  method(Dictionary, Assign),
-  method(Dictionary, Copy),
-  method(Dictionary, Eq),
-  method(Dictionary, Collection),
-  method(Dictionary, Dict),
-  method(Dictionary, Iter),
-  method(Dictionary, Show),
-  methods_end(Dictionary)
+var Dictionary = type_data {
+  type_begin(Dictionary),
+  type_entry(Dictionary, New),
+  type_entry(Dictionary, Assign),
+  type_entry(Dictionary, Copy),
+  type_entry(Dictionary, Eq),
+  type_entry(Dictionary, Collection),
+  type_entry(Dictionary, Dict),
+  type_entry(Dictionary, Iter),
+  type_entry(Dictionary, Show),
+  type_end(Dictionary)
 };
 
-var Dictionary_New(var self, va_list* args) {
+var Dictionary_New(var self, var_list vl) {
   DictionaryData* dict = cast(self, Dictionary);
   dict->size = Hashing_Primes[0];
   dict->keys = new(List, 0);
@@ -53,6 +53,10 @@ var Dictionary_Delete(var self) {
   
   free(dict->buckets);
   return self;
+}
+
+size_t Dictionary_Size(void) {
+  return sizeof(DictionaryData);
 }
 
 void Dictionary_Assign(var self, var obj) {

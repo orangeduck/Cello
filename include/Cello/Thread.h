@@ -29,14 +29,14 @@ class {
   void (*terminate)(var);
 } Process;
 
-var  current(var);
+var  current(var type);
 void join(var self);
 void terminate(var self);
 
 /* Thread Type */
 
 global var Thread;
- 
+
 enum {
   EXC_MAX_DEPTH = 2048,
 };
@@ -75,9 +75,9 @@ data {
   
 } ThreadData;
 
-/** Thread_New(var self, var function) */
-var Thread_New(var self, va_list* args);
+var Thread_New(var self, var_list vl);
 var Thread_Delete(var self);
+size_t Thread_Size(void);
 void Thread_Assign(var self, var obj);
 var Thread_Copy(var self);
 
@@ -94,7 +94,7 @@ var  Thread_Current(void);
 void Thread_Join(var self);
 void Thread_Terminate(var self);
 
-instance(Thread, New) = { sizeof(ThreadData), Thread_New, Thread_Delete };
+instance(Thread, New) = { Thread_New, Thread_Delete, Thread_Size };
 instance(Thread, Assign) = { Thread_Assign };
 instance(Thread, Copy) = { Thread_Copy };
 instance(Thread, Call) = { Thread_Call };
@@ -116,20 +116,10 @@ var lock_try(var self);
 /* Mutex Type */
 
 global var Mutex;
- 
-data {
-  var type;
-#if defined(__unix__) || defined(__APPLE__)
-  pthread_mutex_t mutex;
-#elif defined(_WIN32)
-  HANDLE mutex;
-#endif
 
-} MutexData;
-
-/** Mutex_New(var self) */
-var Mutex_New(var self, va_list* args);
+var Mutex_New(var self, var_list vl);
 var Mutex_Delete(var self);
+size_t Mutex_Size(void);
 void Mutex_Assign(var self, var obj);
 var Mutex_Copy(var self);
 
@@ -137,7 +127,7 @@ void Mutex_Lock(var self);
 var Mutex_Lock_Try(var self);
 void Mutex_Unlock(var self);
 
-instance(Mutex, New) = { sizeof(MutexData), Mutex_New, Mutex_Delete };
+instance(Mutex, New) = { Mutex_New, Mutex_Delete, Mutex_Size };
 instance(Mutex, Assign) = { Mutex_Assign };
 instance(Mutex, Copy) = { Mutex_Copy };
 instance(Mutex, Lock) = { Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try };

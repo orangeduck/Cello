@@ -8,46 +8,59 @@
 #include <math.h>
 #include <string.h>
 
-var Array = methods {
-  methods_begin(Array),
-  method(Array, New),
-  method(Array, Assign),
-  method(Array, Copy),
-  method(Array, Eq),
-  method(Array, Collection),
-  method(Array, Push),
-  method(Array, At),
-  method(Array, Iter),
-  method(Array, Reverse),
-  method(Array, Append),
-  method(Array, Sort),
-  method(Array, Show),
-  methods_end(Array)
+data {
+  var type;
+  var item_type;
+  int num_items;
+  int num_slots;
+  var items;
+} ArrayData;
+
+var Array = type_data {
+  type_begin(Array),
+  type_entry(Array, New),
+  type_entry(Array, Assign),
+  type_entry(Array, Copy),
+  type_entry(Array, Eq),
+  type_entry(Array, Collection),
+  type_entry(Array, Push),
+  type_entry(Array, At),
+  type_entry(Array, Iter),
+  type_entry(Array, Reverse),
+  type_entry(Array, Append),
+  type_entry(Array, Sort),
+  type_entry(Array, Show),
+  type_end(Array)
 };
 
-var Array_New(var self, va_list* args) {
+var Array_New(var self, var_list vl) {
   
   ArrayData* ad = cast(self, Array);
-  ad->item_type = cast(va_arg(*args, var), Type);
+  ad->item_type = cast(var_list_get(vl), Type);
   ad->num_items = 0;
   ad->num_slots = 0;
   ad->items = NULL;
   
-  int count = va_arg(*args, int);
-  for(int i = 0; i < count; i++) {
-    push(self, va_arg(*args, var));
+  while(not var_list_end(vl)) {
+    push(self, var_list_get(vl));
   }
   
   return self;
 }
 
 var Array_Delete(var self) {
-  
+  ArrayData* ad = cast(self, Array);
+
   foreach(item in self) {
     destruct(item);
   }
+  free(ad->items);
   
   return self;
+}
+
+size_t Array_Size(void) {
+  return sizeof(ArrayData);
 }
 
 void Array_Assign(var self, var obj) {
@@ -61,7 +74,7 @@ void Array_Assign(var self, var obj) {
 var Array_Copy(var self) {
   ArrayData* ad = cast(self, Array);
   
-  var newarray = new(Array, ad->item_type, 0);
+  var newarray = new(Array, ad->item_type);
 
   foreach(obj in self) {
     push(newarray, obj);
@@ -125,8 +138,7 @@ local void Array_Reserve_More(ArrayData* ad) {
   if (ad->num_items > ad->num_slots) {
     int old_size = ad->num_slots;
     ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
-    New* inew = type_class(ad->item_type, New);
-    ad->items = realloc(ad->items, inew->size * ad->num_slots);
+    ad->items = realloc(ad->items, size(ad->item_type) * ad->num_slots);
     if (ad->items == NULL) { throw(OutOfMemoryError, "Cannot grow Array, out of memory!"); }
   }
 
@@ -134,10 +146,8 @@ local void Array_Reserve_More(ArrayData* ad) {
 
 local void Array_Set_Type_At(ArrayData* ad, int i) {
   
-  New* inew = type_class(ad->item_type, New);
-  
-  memset(ad->items + (inew->size * i), 0, inew->size);
-  ObjectData* template = ad->items + (inew->size * i);
+  memset(ad->items + (size(ad->item_type) * i), 0, size(ad->item_type));
+  ObjectData* template = ad->items + (size(ad->item_type) * i);
   template->type = ad->item_type;
   
 }
@@ -161,10 +171,9 @@ void Array_Push_At(var self, var obj, int index) {
   ad->num_items++;
   Array_Reserve_More(ad);
   
-  New* inew = type_class(ad->item_type, New);
-  memmove(ad->items + inew->size * (index+1), 
-          ad->items + inew->size * index, 
-          inew->size * ((ad->num_items-1) - index));
+  memmove(ad->items + size(ad->item_type) * (index+1), 
+          ad->items + size(ad->item_type) * index, 
+          size(ad->item_type) * ((ad->num_items-1) - index));
   
   Array_Set_Type_At(self, index);
   set(self, index, obj);
@@ -174,8 +183,7 @@ local void Array_Reserve_Less(ArrayData* ad) {
   
   if ( ad->num_slots > pow(ad->num_items+1, 1.5)) {
     ad->num_slots = floor((ad->num_slots-1) * (1.0/1.5));
-    New* inew = type_class(ad->item_type, New);
-    ad->items = realloc(ad->items, inew->size * ad->num_slots);
+    ad->items = realloc(ad->items, size(ad->item_type) * ad->num_slots);
   }
   
 }
@@ -208,10 +216,9 @@ var Array_Pop_At(var self, int index) {
   
   destruct(at(self, index));
   
-  New* inew = type_class(ad->item_type, New);
-  memmove(ad->items + inew->size * index, 
-          ad->items + inew->size * (index+1), 
-          inew->size * ((ad->num_items-1) - index));
+  memmove(ad->items + size(ad->item_type) * index, 
+          ad->items + size(ad->item_type) * (index+1), 
+          size(ad->item_type) * ((ad->num_items-1) - index));
   
   ad->num_items--;
   Array_Reserve_Less(ad);
@@ -227,8 +234,7 @@ var Array_At(var self, int i) {
   }
   
   ArrayData* ad = cast(self, Array);
-  New* inew = type_class(ad->item_type, New);
-  return ad->items + inew->size * i;
+  return ad->items + size(ad->item_type) * i;
 }
 
 void Array_Set(var self, int i, var obj) {
@@ -239,10 +245,8 @@ void Array_Set(var self, int i, var obj) {
     return;
   }
   
-  ArrayData* ad = cast(self, Array);
-  New* inew = type_class(ad->item_type, New);
-  
-  assign(ad->items + inew->size * i, obj);
+  ArrayData* ad = cast(self, Array);  
+  assign(ad->items + size(ad->item_type) * i, obj);
 }
 
 local const var ARRAY_ITER_END = (var)-1;
@@ -261,12 +265,11 @@ var Array_Iter_End(var self) {
 
 var Array_Iter_Next(var self, var curr) {
   ArrayData* ad = cast(self, Array);
-  New* inew = type_class(ad->item_type, New);
   
-  if (curr >= ad->items + inew->size * (ad->num_items-1)) {
+  if (curr >= ad->items + size(ad->item_type) * (ad->num_items-1)) {
     return ARRAY_ITER_END;
   } else {
-    return curr + inew->size;
+    return curr + size(ad->item_type);
   }
 }
 
@@ -285,7 +288,7 @@ void Array_Reverse(var self) {
     Array_Swap_Items(self, temp, i, len(self)-1-i);
   }
   
-  destruct(temp);
+  delete(temp);
 }
 
 local int Array_Sort_Partition(var self, int left, int right, int pivot) {
@@ -317,8 +320,8 @@ local int Array_Sort_Partition(var self, int left, int right, int pivot) {
     Array_Swap_Items(self, temp, storei, right);
   }
 
-  destruct(temp);
-  destruct(pival);
+  deallocate(temp);
+  deallocate(pival);
   
   return storei;
 }

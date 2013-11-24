@@ -5,27 +5,30 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
 
-var String = methods {
-  methods_begin(String),
-  method(String, New),
-  method(String, Assign),
-  method(String, Copy),
-  method(String, Eq),
-  method(String, Ord),
-  method(String, Collection),
-  method(String, Hash),
-  method(String, Reverse),
-  method(String, AsStr), 
-  method(String, Append), 
-  method(String, Format),
-  method(String, Show),
-  methods_end(String)
+var String = type_data {
+  type_begin(String),
+  type_entry(String, New),
+  type_entry(String, Assign),
+  type_entry(String, Copy),
+  type_entry(String, Eq),
+  type_entry(String, Ord),
+  type_entry(String, Collection),
+  type_entry(String, Hash),
+  type_entry(String, Reverse),
+  type_entry(String, AsStr), 
+  type_entry(String, Append), 
+  type_entry(String, Format),
+  type_entry(String, Show),
+  type_end(String)
 };
 
-var String_New(var self, va_list* args) {
+var String_New(var self, var_list vl) {
   StringData* s = cast(self, String);
-  const char* init = va_arg(*args, const char*);
+  const char* init = as_str(var_list_get(vl));
   s->value = malloc(strlen(init) + 1);
   if (s->value == NULL) { throw(OutOfMemoryError, "Cannot allocate string, out of memory!"); }
   strcpy(s->value, init);
@@ -38,6 +41,10 @@ var String_Delete(var self) {
   return self;
 }
 
+size_t String_Size(void) {
+  return sizeof(StringData);
+}
+
 void String_Assign(var self, var obj) {
   StringData* s = cast(self, String);
   const char* value = as_str(obj);
@@ -47,14 +54,13 @@ void String_Assign(var self, var obj) {
 }
 
 var String_Copy(var self) {
-  StringData* s = cast(self, String);
-  return new(String, s->value);
+  return new(String, self);
 }
 
 var String_Eq(var self, var other) {
   StringData* fst = cast(self, String);
   if (type_implements(type_of(other), AsStr)) {
-    return (var)(intptr_t)(strcmp(fst->value, as_str(other)) == 0);
+    return bool_var(strcmp(fst->value, as_str(other)) == 0);
   } else {
     return False;
   }
@@ -237,7 +243,7 @@ int String_Format_To(var self, int pos, const char* fmt, va_list va) {
 
   va_list va_tmp;
   va_copy(va_tmp, va);
-  int size = snprintf(NULL, 0, fmt, va_tmp);
+  int size = vsnprintf(NULL, 0, fmt, va_tmp);
   va_end(va_tmp);
   
   s->value = realloc(s->value, pos + size + 1);

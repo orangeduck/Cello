@@ -12,7 +12,7 @@ void map(var self, var func) {
 }
 
 var new_map(var self, var func) {
-  var ret = new(List, 0);
+  var ret = new(List);
   foreach(item in self) {
     var val = call(func, item);
     push(ret, val);
@@ -21,7 +21,7 @@ var new_map(var self, var func) {
 }
 
 var new_filter(var self, var eq_func) {
-  var ret = new(List, 0);
+  var ret = new(List);
   foreach(item in self) {
     if (call(eq_func, item)) {
       push(ret, item);
@@ -47,7 +47,7 @@ var new_foldr(var self, var func, var base) {
 }
 
 var new_sum(var self) {
-  var total = new(Real, 0.0);
+  var total = new(Real, $(Real, 0.0));
   foreach(item in self) {
     add(total, item);
   }
@@ -55,7 +55,7 @@ var new_sum(var self) {
 }
 
 var new_product(var self) {
-  var total = new(Real, 1.0);
+  var total = new(Real, $(Real, 1.0));
   foreach(item in self) {
     mul(total, item);
   }

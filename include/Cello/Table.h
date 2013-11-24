@@ -26,8 +26,9 @@ data {
 } TableData;
 
 /** Table_New(var self, var key_type, var item_type); */
-var Table_New(var self, va_list* args);
+var Table_New(var self, var_list vl);
 var Table_Delete(var self);
+size_t Table_Size(void);
 void Table_Assign(var self, var obj);
 var Table_Copy(var self);
 
@@ -47,7 +48,7 @@ var Table_Iter_Next(var self, var curr);
 
 int Table_Show(var self, var output, int pos);
 
-instance(Table, New) = { sizeof(TableData), Table_New, Table_Delete };
+instance(Table, New) = { Table_New, Table_Delete, Table_Size };
 instance(Table, Assign) = { Table_Assign };
 instance(Table, Copy) = { Table_Copy };
 instance(Table, Eq) = { Table_Eq };

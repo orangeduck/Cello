@@ -5,29 +5,33 @@
 
 #include <string.h>
 
-var Bool = methods {
-  methods_begin(Bool),
-  method(Bool, Eq),
-  method(Bool, Ord),
-  method(Bool, Hash),
-  method(Bool, AsChar),
-  method(Bool, AsLong),
-  method(Bool, AsDouble),
-  method(Bool, AsStr),
-  method(Bool, Show),
-  methods_end(Bool)
+var bool_var(bool x) {
+  return (var)(intptr_t)(x);
+}
+
+var Bool = type_data {
+  type_begin(Bool),
+  type_entry(Bool, Eq),
+  type_entry(Bool, Ord),
+  type_entry(Bool, Hash),
+  type_entry(Bool, AsChar),
+  type_entry(Bool, AsLong),
+  type_entry(Bool, AsDouble),
+  type_entry(Bool, AsStr),
+  type_entry(Bool, Show),
+  type_end(Bool)
 };
 
 var Bool_Eq(var self, var obj) {
-  return (var)(intptr_t)(self == obj);
+  return bool_var(self == obj);
 }
 
 var Bool_Gt(var self, var obj) {
-  return (var)(intptr_t)(self > obj);
+  return bool_var(self > obj);
 }
 
 var Bool_Lt(var self, var obj) {
-  return (var)(intptr_t)(self < obj);
+  return bool_var(self < obj);
 }
 
 long Bool_Hash(var self) {

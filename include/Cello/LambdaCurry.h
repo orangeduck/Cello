@@ -63,7 +63,7 @@
   lambda(name, args) { func_ptr(at(args,0), at(args,1), at(args,2), at(args,3), at(args,4), at(args,5), at(args,6), at(args,7)); return None; }
   
 #define lambda_void_uncurry9(name, func_ptr) \
-  lambda(name, args) { return func_ptr(at(args,0), at(args,1), at(args,2), at(args,3), at(args,4), at(args,5), at(args,6), at(args,7), at(args,8)); return None; }
+  lambda(name, args) { func_ptr(at(args,0), at(args,1), at(args,2), at(args,3), at(args,4), at(args,5), at(args,6), at(args,7), at(args,8)); return None; }
   
 
 #endif

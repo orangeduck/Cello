@@ -20,17 +20,13 @@ class {
 var retain(var p, var x);
 void release(var p, var x);
 
+/* Pool Type */
 
 global var Pool;
 
-data {
-  var type;
-  var tab;
-} PoolData;
-
-/** Pool_New(var self); */
-var Pool_New(var self, va_list* args);
+var Pool_New(var self, var_list vl);
 var Pool_Delete(var self);
+size_t Pool_Size(void);
 
 var Pool_Retain(var self, var x);
 void Pool_Release(var self, var x);
@@ -43,7 +39,7 @@ void Pool_Discard(var self, var x);
 var Pool_Get(var self, var k);
 void Pool_Put(var self, var k, var v);
 
-instance(Pool, New) = { sizeof(PoolData), Pool_New, Pool_Delete };
+instance(Pool, New) = { Pool_New, Pool_Delete, Pool_Size };
 instance(Pool, Retain) = { Pool_Retain, Pool_Release };
 instance(Pool, Collection) = { Pool_Len, Pool_Clear, Pool_Contains, Pool_Discard };
 instance(Pool, Dict) = { Pool_Get, Pool_Put };

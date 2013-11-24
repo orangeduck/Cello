@@ -24,8 +24,9 @@ data {
 } DictionaryData;
 
 /** Dictionary_New(var self); */
-var Dictionary_New(var self, va_list* args);
+var Dictionary_New(var self, var_list vl);
 var Dictionary_Delete(var self);
+size_t Dictionary_Size(void);
 void Dictionary_Assign(var self, var obj);
 var Dictionary_Copy(var self);
 
@@ -45,7 +46,7 @@ var Dictionary_Iter_Next(var self, var curr);
 
 int Dictionary_Show(var self, var output, int pos);
 
-instance(Dictionary, New) = { sizeof(DictionaryData), Dictionary_New, Dictionary_Delete };
+instance(Dictionary, New) = { Dictionary_New, Dictionary_Delete, Dictionary_Size };
 instance(Dictionary, Assign) = { Dictionary_Assign };
 instance(Dictionary, Copy) = { Dictionary_Copy };
 instance(Dictionary, Eq) = { Dictionary_Eq };

@@ -10,8 +10,8 @@ class {
   var (*call_with)(var,var);
 } Call;
 
-#define call(x, ...) call_with_ptr(x, (var[]){ __VA_ARGS__, (var)-1 })
-var call_with_ptr(var self, var* args);
+#define call(x, ...) call_vl(x, var_list_new(__VA_ARGS__))
+var call_vl(var self, var_list vl);
 var call_with(var self, var args);
 
 /*
@@ -36,7 +36,7 @@ var call_with(var self, var args);
 
 global var Function;
 
-#if defined(__APPLE__)
+#if defined(__clang__)
 
   data {
     var type;
@@ -61,16 +61,16 @@ global var Function;
 
 #endif
   
-/** Function_New(var self, var(*func)(var) ); */
-var Function_New(var self, va_list* args);
+var Function_New(var self, var_list vl);
 var Function_Delete(var self);
+size_t Function_Size(void);
 
 var Function_Copy(var self);
 void Function_Assign(var self, var obj);
 
 var Function_Call(var self, var args);
 
-instance(Function, New) = { sizeof(FunctionData), Function_New, Function_Delete };
+instance(Function, New) = { Function_New, Function_Delete, Function_Size };
 instance(Function, Copy) = { Function_Copy };
 instance(Function, Assign) = { Function_Assign };
 instance(Function, Call) = { Function_Call };

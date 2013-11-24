@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
   var string_item = $(String, "Hello");
 
   /* Heap objects are created using "new" */
-  var items = new(List, 3, int_item, float_item, string_item);
+  var items = new(List, int_item, float_item, string_item);
 	
   /* Collections can be looped over */
   foreach(item in items) {
