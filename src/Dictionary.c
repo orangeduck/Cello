@@ -225,7 +225,7 @@ var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *ind
 
   // bucket is null if we reach here
   if (creation is True) {
-    bucket = malloc(sizeof(DictionaryBucket));
+    bucket = calloc(1, sizeof(DictionaryBucket));
     dict->buckets[new_i] = bucket;
   }
   return bucket;

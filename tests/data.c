@@ -635,6 +635,32 @@ PT_SUITE(suite_data) {
     
   }
 
+  PT_TEST(test_table_rehash) {
+
+      int max = 50000;
+
+      var d0 = new(Table, Int, Int);
+      var value = $(Int, 23);
+      var test_key;
+
+      int r = random() % max;
+
+      for (int i = 0; i< max; i++) {
+        var key = new(Int, i); // differnet keys
+        if (i==r){
+          test_key = key;
+        }
+        put(d0, key, value);
+      }
+
+
+      PT_ASSERT(eq(get(d0, test_key), value));
+
+      PT_ASSERT(len(d0) is (max));
+
+      delete(d0);
+    }
+
   PT_TEST(test_table_iter) {
     
     var t0 = new(Table, String, Int);

@@ -21,16 +21,15 @@ var Table = methods {
   methods_end(Table)
 };
 
-
 data {
     uint32_t hash;
     var key;
     var value;
 } TableBucket;
+
 var Table_Find_Bucket(TableData* tab, var key, var creation, int *index);
 void TableBucket_Delete(TableData* tab, TableBucket *bucket);
 void Table_Rehash(TableData* tab);
-
 
 var Table_New(var self, va_list* args) {
   TableData* tab = cast(self, Table);
@@ -41,7 +40,7 @@ var Table_New(var self, va_list* args) {
   tab->size = Hashing_Primes[0];
   tab->keys = new(Array, tab->key_type, 0);
   
-  tab->buckets = malloc(tab->size * sizeof(var));
+  tab->buckets = calloc(tab->size, sizeof(var));
   
   if (tab->buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
   
@@ -54,7 +53,7 @@ var Table_Delete(var self) {
   delete(tab->keys);
   
   for (int i = 0; i < tab->size; i++) {
-    if(tab->buckets[i] != NULL){
+    if(tab->buckets[i] != NULL && tab->buckets[i] != Hashing_DELETED){
       TableBucket_Delete(tab, tab->buckets[i]);
     }
   }
@@ -113,10 +112,12 @@ void Table_Clear(var self) {
   
   clear(tab->keys);
 
-  for(int i = 0; i < tab->size; i++) {
-    clear(tab->buckets[i]);
+  for (int i = 0; i < tab->size; i++) {
+    if(tab->buckets[i] != NULL && tab->buckets[i] != Hashing_DELETED){
+      TableBucket_Delete(tab, tab->buckets[i]);
+      tab->buckets[i] = NULL;
+    }
   }
-  
 }
 
 var Table_Contains(var self, var key) {
@@ -151,7 +152,6 @@ var Table_Get(var self, var key) {
   TableBucket *bucket = Table_Find_Bucket(tab, key, False, NULL);
   if (bucket)
     return bucket->value;
-
   
   return throw(KeyError, "Key not in Table!");
 }
@@ -171,8 +171,6 @@ void Table_Put(var self, var key, var val) {
    if (bucket != NULL) {
 
      // discard previous value
-     print("\n--- bucket has %$ %$ in %p\n", bucket->key, bucket->value, tab);
-     print("--- putting %$ %$ \n", key, val);
      if(bucket->key != NULL) {
        delete(bucket->key);
      } else {
@@ -191,13 +189,12 @@ var Table_Find_Bucket(TableData* tab, var key, var creation, int *index)
 
   int i = abs(hash(key) % tab->size);
   TableBucket *bucket = tab->buckets[i];
-
   int probe_seq = 2;
   int new_i = i;
+
   if (index != NULL) *index = new_i;
 
   while(bucket != NULL) {
-    print("%$ %$\n", key, bucket->key);
     if ((var)bucket == Hashing_DELETED && creation) {
       break;
     } else if ( (var)bucket != Hashing_DELETED && eq(key, bucket->key) ) {
@@ -219,7 +216,7 @@ var Table_Find_Bucket(TableData* tab, var key, var creation, int *index)
 
   // bucket is null if we reach here
   if (creation is True) {
-    bucket = malloc(sizeof(TableBucket));
+    bucket = calloc(1, sizeof(TableBucket));
     tab->buckets[new_i] = bucket;
   }
   return bucket;
@@ -229,8 +226,8 @@ void TableBucket_Delete(TableData* tab, TableBucket *bucket)
 {
     var key = cast(bucket->key, tab->key_type);
     var val = cast(bucket->value, tab->val_type);
-    delete(key);
-    delete(val);
+    if(key) delete(key);
+    if(val) delete(val);
     free(bucket);
 }
 

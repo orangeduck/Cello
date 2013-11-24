@@ -382,11 +382,10 @@ PT_SUITE(suite_core) {
   }
 
   PT_TEST(test_dict) {
-    /*
+
     var prices = new(Table, String, Int);
-    print("asd\n");
-    put(prices, $(String, "apple"),  $(Int, 12));
-    print("asd\n");
+    put(prices, $(String, "Apple"),  $(Int, 12));
+
     put(prices, $(String, "Banana"), $(Int,  6)); 
     put(prices, $(String, "Pear"),   $(Int, 55)); 
     
@@ -399,19 +398,19 @@ PT_SUITE(suite_core) {
     PT_ASSERT(as_long(apple_price) is 12);
     
     char name[5];
-    
+
     for(int i = 0; i < 1000; i++) {
       sprintf(name, "%i", i);
       put(prices, $(String, name), $(Int, i));
     }
     
+
     for(int i = 0; i < 1000; i++) {
       sprintf(name, "%i", i);
       discard(prices, $(String, name));
     }
-    
     delete(prices);
-    */
+
   }
 
   PT_TEST(test_as_ctype) {
