@@ -22,8 +22,7 @@ data {
   var val_type;
   int size;
   var keys;
-  var* key_buckets;
-  var* val_buckets;
+  var* buckets;
 } TableData;
 
 /** Table_New(var self, var key_type, var item_type); */

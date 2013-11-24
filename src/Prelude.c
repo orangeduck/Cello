@@ -14,6 +14,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+const uint32_t Hashing_Primes[Hashing_Primes_Count] =
+{
+    23,      53,      101,     197,
+    389,     683,     1259,    2417,
+    4733,    9371,    18617,   37097,
+    74093,   148073,  296099,  592019,
+    1100009, 2200013, 4400021, 8800019
+};
+
 var Undefined = Singleton(Undefined);
 
 /*

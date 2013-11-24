@@ -9,19 +9,6 @@
 #include <string.h>
 #include <math.h>
 
-#define Dictionary_Primes_Count 20
-static uint32_t const Dictionary_Primes[Dictionary_Primes_Count] =
-{
-    23,      53,      101,     197,
-    389,     683,     1259,    2417,
-    4733,    9371,    18617,   37097,
-    74093,   148073,  296099,  592019,
-    1100009, 2200013, 4400021, 8800019
-};
-
-static int __DELETED_BUCKET;
-#define DELETED_BUCKET (var)&__DELETED_BUCKET
-#define Dictionary_Threshold 0.7f
 
 var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *index);
 void Dictionary_Rehash(DictionaryData* dict);
@@ -31,7 +18,6 @@ data {
     var key;
     var value;
 } DictionaryBucket;
-
 
 var Dictionary = methods {
   methods_begin(Dictionary),
@@ -48,7 +34,7 @@ var Dictionary = methods {
 
 var Dictionary_New(var self, va_list* args) {
   DictionaryData* dict = cast(self, Dictionary);
-  dict->size = Dictionary_Primes[0];
+  dict->size = Hashing_Primes[0];
   dict->keys = new(List, 0);
   
   dict->buckets = calloc(dict->size, sizeof(DictionaryBucket));
@@ -117,7 +103,7 @@ void Dictionary_Clear(var self) {
   DictionaryData* dict = cast(self, Dictionary);
 
   for(int i = 0; i < dict->size; i++) {
-    if(dict->buckets[i] != DELETED_BUCKET){
+    if(dict->buckets[i] != Hashing_DELETED){
       free(dict->buckets[i]);
     }
     dict->buckets[i] = NULL;
@@ -137,7 +123,7 @@ void Dictionary_Discard(var self, var key) {
   DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, False, &index);
   if(bucket != NULL){
     free(bucket);
-    dict->buckets[index] = DELETED_BUCKET;
+    dict->buckets[index] = Hashing_DELETED;
   }
   discard(dict->keys, key);
 }
@@ -158,7 +144,7 @@ void Dictionary_Put(var self, var key, var val) {
   DictionaryData* dict = cast(self, Dictionary);
 
   float dict_load = (float)len(dict) / (float)dict->size;
-  if (dict_load >=  (float)Dictionary_Threshold) {
+  if (dict_load >=  (float)Hashing_Threshold) {
     /* Exceeded threshold we have to rehash. doh' */
     Dictionary_Rehash(dict);
   }
@@ -177,8 +163,8 @@ void Dictionary_Rehash(DictionaryData* dict)
   int old_size = dict->size;
 
   var has_prime = False;
-  for (int j = 0; j < Dictionary_Primes_Count; j++) {
-    int new_size = Dictionary_Primes[j];
+  for (int j = 0; j < Hashing_Primes_Count; j++) {
+    int new_size = Hashing_Primes[j];
     if(new_size > dict->size){
       dict->size = new_size;
       has_prime = True;
@@ -196,7 +182,7 @@ void Dictionary_Rehash(DictionaryData* dict)
 
   for (int i = 0; i < old_size; i++) {
     DictionaryBucket *bucket = old_buckets[i];
-    if(bucket != NULL && bucket != DELETED_BUCKET){
+    if(bucket != NULL && bucket != Hashing_DELETED){
       put(dict, bucket->key, bucket->value);
     }
     free(bucket);
@@ -218,9 +204,9 @@ var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *ind
 
   while(bucket != NULL) {
 
-    if ((var)bucket == DELETED_BUCKET && creation) {
+    if ((var)bucket == Hashing_DELETED && creation) {
       break;
-    } else if ( (var)bucket != DELETED_BUCKET && eq(key, bucket->key) ) {
+    } else if ( (var)bucket != Hashing_DELETED && eq(key, bucket->key) ) {
       // it's our Bucket yay o/
       return bucket;
     } else {
