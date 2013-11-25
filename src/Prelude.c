@@ -207,6 +207,8 @@ var iter_next(var self, var curr) {
   return type_class_method(type_of(self), Iter, iter_next, self, curr);
 }
 
+var Iter_End = Singleton(Iter_End);
+
 var at(var self, int index) {
   return type_class_method(type_of(self), At, at, self, index);
 }
@@ -255,6 +257,18 @@ long hash(var self) {
     return type_class_method(type_of(self), Hash, hash, self);
   }
 }
+
+const uint32_t Hashing_Primes[Hashing_Primes_Count] = {
+  23,      53,      101,     197,
+  389,     683,     1259,    2417,
+  4733,    9371,    18617,   37097,
+  74093,   148073,  296099,  592019,
+  1100009, 2200013, 4400021, 8800019
+};
+
+const float Hashing_Threshold = 0.7f;
+
+var Hashing_Deleted = Singleton(Hashing_Deleted);
 
 var get(var self, var key) {
   return type_class_method(type_of(self), Dict, get, self, key);

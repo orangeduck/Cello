@@ -249,25 +249,23 @@ void Array_Set(var self, int i, var obj) {
   assign(ad->items + size(ad->item_type) * i, obj);
 }
 
-local const var ARRAY_ITER_END = (var)-1;
-
 var Array_Iter_Start(var self) {
 
-  if (len(self) == 0) { return ARRAY_ITER_END; }
+  if (len(self) == 0) { return Iter_End; }
 
   ArrayData* ad = cast(self, Array);
   return ad->items;
 }
 
 var Array_Iter_End(var self) {
-  return ARRAY_ITER_END;
+  return Iter_End;
 }
 
 var Array_Iter_Next(var self, var curr) {
   ArrayData* ad = cast(self, Array);
   
   if (curr >= ad->items + size(ad->item_type) * (ad->num_items-1)) {
-    return ARRAY_ITER_END;
+    return Iter_End;
   } else {
     return curr + size(ad->item_type);
   }

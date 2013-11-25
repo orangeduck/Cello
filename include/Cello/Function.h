@@ -36,7 +36,7 @@ var call_with(var self, var args);
 
 global var Function;
 
-#if defined(__APPLE__)
+#if defined(__clang__)
 
   data {
     var type;

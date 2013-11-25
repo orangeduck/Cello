@@ -244,11 +244,9 @@ void List_Set(var self, int index, var val) {
   lo->items[index] = val;
 }
 
-local const var LIST_ITER_END = (var)-1;
-
 var List_Iter_Start(var self) {
   
-  if (len(self) == 0) { return LIST_ITER_END; } 
+  if (len(self) == 0) { return Iter_End; } 
 
   ListData* lo = cast(self, List);
   lo->cursor = 0;
@@ -256,7 +254,7 @@ var List_Iter_Start(var self) {
 }
 
 var List_Iter_End(var self) {
-  return LIST_ITER_END;
+  return Iter_End;
 }
 
 var List_Iter_Next(var self, var curr) {
@@ -265,7 +263,7 @@ var List_Iter_Next(var self, var curr) {
   if (lo->items[lo->cursor] is curr) {
     lo->cursor++;
     if (lo->cursor == lo->num_items) {
-      return LIST_ITER_END;
+      return Iter_End;
     } else {
       return lo->items[lo->cursor];
     }
@@ -280,7 +278,7 @@ var List_Iter_Next(var self, var curr) {
     }
   }
   
-  return LIST_ITER_END;
+  return Iter_End;
   
 }
 

@@ -1,5 +1,5 @@
-
 #include "ptest.h"
+
 #include "Cello.h"
 
 #include <math.h>
@@ -637,6 +637,30 @@ PT_FUNC(test_table_dict) {
   
 }
 
+PT_FUNC(test_table_rehash) {
+  
+  var d0 = new(Table, Int, Int);
+  var value = $(Int, 23);
+  var test_key = Undefined;
+
+  int max = 10000;
+  int r = rand() % max;
+
+  for (int i = 0; i < max; i++) {
+    var key = $(Int, i);
+    if (i == r) {
+      test_key = key;
+    }
+    put(d0, key, value);
+  }
+
+  PT_ASSERT(test_key isnt Undefined);
+  PT_ASSERT(eq(get(d0, test_key), value));
+  PT_ASSERT(len(d0) is max);
+
+  delete(d0);
+}
+
 PT_FUNC(test_table_iter) {
   
   var t0 = new(Table, String, Int);
@@ -1174,6 +1198,30 @@ PT_FUNC(test_dictionary_dict) {
   
 }
 
+PT_FUNC(test_dictionary_rehash) {
+
+  var d0 = new(Dictionary);
+  var value = $(String, "There");
+  var test_key = Undefined;
+
+  int max = 10000;
+  int r = rand() % max;
+
+  for (int i = 0; i < max; i++) {
+
+    var key = new(Int, $(Int, i));
+    if (i == r) {
+      test_key = key;
+    }
+    put(d0, key, value);
+  }
+
+  PT_ASSERT(test_key isnt Undefined);
+  PT_ASSERT(get(d0, test_key) is value);
+  PT_ASSERT(len(d0) is max);
+  delete(d0);
+}
+
 PT_FUNC(test_map_create) {
   
   TEST_VALUES();
@@ -1401,6 +1449,7 @@ PT_SUITE(suite_data) {
   PT_REG(test_table_create);
   PT_REG(test_table_collection);
   PT_REG(test_table_dict);
+  PT_REG(test_table_rehash);
   PT_REG(test_table_iter);
   PT_REG(test_tree_create);
   PT_REG(test_tree_collection);
@@ -1417,6 +1466,7 @@ PT_SUITE(suite_data) {
   PT_REG(test_dictionary_collection);
   PT_REG(test_dictionary_iter);
   PT_REG(test_dictionary_dict);
+  PT_REG(test_dictionary_rehash);
   PT_REG(test_map_create);
   PT_REG(test_map_collection);
   PT_REG(test_map_iter);

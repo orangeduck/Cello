@@ -1,5 +1,4 @@
 #include "Cello/Table.h"
-
 #include "Cello/Array.h"
 #include "Cello/List.h"
 #include "Cello/Bool.h"
@@ -15,9 +14,9 @@ data {
   var val_type;
   int size;
   var keys;
-  var* key_buckets;
-  var* val_buckets;
+  var* buckets;
 } TableData;
+
 
 var Table = type_data {
   type_begin(Table),
@@ -32,25 +31,28 @@ var Table = type_data {
   type_end(Table)
 };
 
+data {
+    uint32_t hash;
+    var key;
+    var value;
+} TableBucket;
+
+var Table_Find_Bucket(TableData* tab, var key, var creation, int *index);
+void TableBucket_Delete(TableData* tab, TableBucket *bucket);
+void Table_Rehash(TableData* tab);
+
 var Table_New(var self, var_list vl) {
   TableData* tab = cast(self, Table);
-  
+
   tab->key_type = cast(var_list_get(vl), Type);
   tab->val_type = cast(var_list_get(vl), Type);
-  
-  tab->size = 1024;
+
+  tab->size = Hashing_Primes[0];
   tab->keys = new(Array, tab->key_type);
   
-  tab->key_buckets = malloc(tab->size * sizeof(var));
-  tab->val_buckets = malloc(tab->size * sizeof(var));
+  tab->buckets = calloc(tab->size, sizeof(var));
   
-  if (tab->key_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
-  if (tab->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
-  
-  for (int i = 0; i < tab->size; i++) {
-    tab->key_buckets[i] = new(Array, tab->key_type);
-    tab->val_buckets[i] = new(Array, tab->val_type);
-  }
+  if (tab->buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
   
   return self;
 }
@@ -61,12 +63,12 @@ var Table_Delete(var self) {
   delete(tab->keys);
   
   for (int i = 0; i < tab->size; i++) {
-    delete(tab->key_buckets[i]);
-    delete(tab->val_buckets[i]);
+    if(tab->buckets[i] != NULL && tab->buckets[i] != Hashing_Deleted){
+      TableBucket_Delete(tab, tab->buckets[i]);
+    }
   }
   
-  free(tab->key_buckets);
-  free(tab->val_buckets);
+  free(tab->buckets);
   
   return self;
 }
@@ -124,11 +126,12 @@ void Table_Clear(var self) {
   
   clear(tab->keys);
 
-  for(int i = 0; i < tab->size; i++) {
-    clear(tab->key_buckets[i]);
-    clear(tab->val_buckets[i]);
+  for (int i = 0; i < tab->size; i++) {
+    if(tab->buckets[i] != NULL && tab->buckets[i] != Hashing_Deleted){
+      TableBucket_Delete(tab, tab->buckets[i]);
+      tab->buckets[i] = NULL;
+    }
   }
-  
 }
 
 var Table_Contains(var self, var key) {
@@ -142,57 +145,138 @@ void Table_Discard(var self, var key) {
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
   
-  long i = abs(hash(key) % tab->size);
-  
-  var keys = tab->key_buckets[i];
-  var vals = tab->val_buckets[i];
-  
-  for(int j = 0; j < len(keys); j++) {
-    if_eq(at(keys, j), key) {
-      discard(tab->keys, key);
-      pop_at(keys, j);
-      pop_at(vals, j);      
-      return;
-    }
+  int index;
+  TableBucket *bucket = Table_Find_Bucket(tab, key, False, &index);
+  if(bucket != NULL) {
+    // delete bucket;
+    TableBucket_Delete(tab, bucket);
+    tab->buckets[index] = Hashing_Deleted;
   }
-  
+
+  discard(tab->keys, key);
 }
 
 var Table_Get(var self, var key) {
 
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
+
+  TableBucket *bucket = Table_Find_Bucket(tab, key, False, NULL);
+  if (bucket)
+    return bucket->value;
   
-  long i = abs(hash(key) % tab->size);
-  
-  var keys = tab->key_buckets[i];
-  var vals = tab->val_buckets[i];
-  
-  for (int j = 0; j < len(keys); j++) {
-    if_eq(at(keys, j), key) { return at(vals, j); }
-  }
-  
-  return throw(KeyError, "Key '%$' not in Table!", key);
+  return throw(KeyError, "Key not in Table!");
 }
 
 void Table_Put(var self, var key, var val) {
   TableData* tab = cast(self, Table);
-  key = cast(key, tab->key_type);
-  val = cast(val, tab->val_type);
-  
-  long i = abs(hash(key) % tab->size);
-  
-  var keys = tab->key_buckets[i];
-  var vals = tab->val_buckets[i];
+   key = cast(key, tab->key_type);
+   val = cast(val, tab->val_type);
 
-  discard(self, key);
-  
-  push(keys, key);
-  push(vals, val);
-  push(tab->keys, key);
-  
+   float dict_load = (float)len(tab) / (float)tab->size;
+   if (dict_load >=  (float)Hashing_Threshold) {
+     /* Exceeded threshold we have to rehash. doh' */
+     Table_Rehash(tab);
+   }
+
+   TableBucket *bucket = Table_Find_Bucket(tab, key, True, NULL);
+   if (bucket != NULL) {
+
+     // discard previous value
+     if(bucket->key != NULL) {
+       delete(bucket->key);
+     } else {
+       push(tab->keys, key);
+     }
+     if(bucket->value != NULL) delete(bucket->value);
+
+     bucket->key = copy(key);
+     bucket->value = copy(val);
+
+   }
 }
 
+var Table_Find_Bucket(TableData* tab, var key, var creation, int *index)
+{
+
+  int i = abs(hash(key) % tab->size);
+  TableBucket *bucket = tab->buckets[i];
+  int probe_seq = 2;
+  int new_i = i;
+
+  if (index != NULL) *index = new_i;
+
+  while(bucket != NULL) {
+    if ((var)bucket == Hashing_Deleted && creation) {
+      break;
+    } else if ( (var)bucket != Hashing_Deleted && eq(key, bucket->key) ) {
+      // it's our Bucket yay o/
+      return bucket;
+    } else {
+      // linear probing could be improved
+      new_i = (int)(new_i + 3*probe_seq)  % tab->size;
+      bucket = tab->buckets[new_i];
+    }
+
+    probe_seq++;
+    if (index != NULL) *index = new_i;
+
+    if (probe_seq > tab->size) {
+      return NULL;
+    }
+  }
+
+  // bucket is null if we reach here
+  if (creation is True) {
+    bucket = calloc(1, sizeof(TableBucket));
+    tab->buckets[new_i] = bucket;
+  }
+  return bucket;
+}
+
+void TableBucket_Delete(TableData* tab, TableBucket *bucket)
+{
+    var key = cast(bucket->key, tab->key_type);
+    var val = cast(bucket->value, tab->val_type);
+    if(key) delete(key);
+    if(val) delete(val);
+    free(bucket);
+}
+
+void Table_Rehash(TableData* tab)
+{
+  var * old_buckets = tab->buckets;
+  int old_size = tab->size;
+
+  var has_prime = False;
+  for (int j = 0; j < Hashing_Primes_Count; j++) {
+    int new_size = Hashing_Primes[j];
+    if(new_size > tab->size){
+      tab->size = new_size;
+      has_prime = True;
+      break;
+    }
+  }
+  if (has_prime is False) {
+    // primes are ended
+    tab->size *= 2;
+  }
+
+  clear(tab->keys);
+
+  tab->buckets = calloc(tab->size, sizeof(TableBucket));
+
+  for (int i = 0; i < old_size; i++) {
+    TableBucket *bucket = old_buckets[i];
+    if(bucket != NULL && bucket != Hashing_Deleted){
+      put(tab, bucket->key, bucket->value);
+    }
+    free(bucket);
+    bucket = NULL;
+  }
+
+  free(old_buckets);
+}
 var Table_Iter_Start(var self) {
   TableData* tab = cast(self, Table);
   return iter_start(tab->keys);
