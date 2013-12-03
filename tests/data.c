@@ -1215,10 +1215,15 @@ PT_FUNC(test_dictionary_rehash) {
     }
     put(d0, key, value);
   }
-
+  
   PT_ASSERT(test_key isnt Undefined);
   PT_ASSERT(get(d0, test_key) is value);
   PT_ASSERT(len(d0) is max);
+  
+  foreach(key in d0) {
+    delete(key);
+  }
+  
   delete(d0);
 }
 
