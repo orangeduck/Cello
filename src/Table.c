@@ -102,14 +102,14 @@ var Table_Eq(var self, var obj) {
   if_neq(type_of(obj), Table) { return False; }
   
   foreach(key in obj) {
-		if (not contains(self, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(self, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
   foreach(key in self) {
-		if (not contains(obj, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(obj, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
   return True;
 }
@@ -158,8 +158,6 @@ static void Table_Rehash(TableData* tab) {
     tab->val_buckets[i] = new(Array, tab->val_type);
   }
   
-  clear(tab->keys);
-  
   for (int i = 0; i < old_size; i++) {
     var keys = old_keys[i];
     var vals = old_vals[i];
@@ -168,7 +166,6 @@ static void Table_Rehash(TableData* tab) {
       long ni = abs(hash(at(keys, j)) % tab->size);
       push(tab->key_buckets[ni], at(keys, j));
       push(tab->val_buckets[ni], at(vals, j));
-      push(tab->keys, at(keys, j));
     }
     
     delete(keys);

@@ -96,16 +96,16 @@ var Dictionary_Eq(var self, var obj) {
   if_neq(type_of(obj), Dictionary) { return False; }
   
   foreach(key in obj) {
-		if (not contains(self, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(self, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
   foreach(key in self) {
-		if (not contains(obj, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
-		
-	return True;
+    if (not contains(obj, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
+  	
+  return True;
 }
 
 int Dictionary_Len(var self) {
@@ -150,8 +150,6 @@ static void Dictionary_Rehash(DictionaryData* dict) {
     dict->val_buckets[i] = new(List);
   }
   
-  clear(dict->keys);
-  
   for (int i = 0; i < old_size; i++) {
     var keys = old_keys[i];
     var vals = old_vals[i];
@@ -159,8 +157,7 @@ static void Dictionary_Rehash(DictionaryData* dict) {
     for (int j = 0; j < len(keys); j++) {
       long ni = abs(hash(at(keys, j)) % dict->size);
       push(dict->key_buckets[ni], at(keys, j));
-      push(dict->val_buckets[ni], at(vals, j));
-      push(dict->keys, at(keys, j));
+      push(dict->val_buckets[ni], at(vals, j));;
     }
     
     delete(keys);
