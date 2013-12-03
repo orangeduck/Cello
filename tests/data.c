@@ -643,7 +643,7 @@ PT_FUNC(test_table_rehash) {
   var value = $(Int, 23);
   var test_key = Undefined;
 
-  int max = 10000;
+  int max = 1000;
   int r = rand() % max;
 
   for (int i = 0; i < max; i++) {
@@ -1204,7 +1204,7 @@ PT_FUNC(test_dictionary_rehash) {
   var value = $(String, "There");
   var test_key = Undefined;
 
-  int max = 10000;
+  int max = 1000;
   int r = rand() % max;
 
   for (int i = 0; i < max; i++) {

@@ -7,23 +7,14 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 data {
   var type;
   int size;
   var keys;
-  var* buckets;
+  var* key_buckets;
+  var* val_buckets;
 } DictionaryData;
-
-var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *index);
-void Dictionary_Rehash(DictionaryData* dict);
-
-data {
-    uint32_t hash;
-    var key;
-    var value;
-} DictionaryBucket;
 
 var Dictionary = type_data {
   type_begin(Dictionary),
@@ -40,10 +31,20 @@ var Dictionary = type_data {
 
 var Dictionary_New(var self, var_list vl) {
   DictionaryData* dict = cast(self, Dictionary);
-  dict->size = Hashing_Primes[0];
+  
+  dict->size = Hash_Table_Size(0);
   dict->keys = new(List);
   
-  dict->buckets = calloc(dict->size, sizeof(DictionaryBucket));
+  dict->key_buckets = malloc(dict->size * sizeof(var));
+  dict->val_buckets = malloc(dict->size * sizeof(var));
+  
+  if (dict->key_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Dictionary. Out of memory!"); }
+  if (dict->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Dictionary. Out of memory!"); }
+  
+  for (int i = 0; i < dict->size; i++) {
+    dict->key_buckets[i] = new(List);
+    dict->val_buckets[i] = new(List);
+  }
   
   return self;
 }
@@ -54,10 +55,13 @@ var Dictionary_Delete(var self) {
   delete(dict->keys);
   
   for (int i = 0; i < dict->size; i++) {
-    free(dict->buckets[i]);
+    delete(dict->key_buckets[i]);
+    delete(dict->val_buckets[i]);
   }
   
-  free(dict->buckets);
+  free(dict->key_buckets);
+  free(dict->val_buckets);
+  
   return self;
 }
 
@@ -111,12 +115,10 @@ int Dictionary_Len(var self) {
 
 void Dictionary_Clear(var self) {
   DictionaryData* dict = cast(self, Dictionary);
-
+  
   for(int i = 0; i < dict->size; i++) {
-    if(dict->buckets[i] != Hashing_Deleted){
-      free(dict->buckets[i]);
-    }
-    dict->buckets[i] = NULL;
+    clear(dict->key_buckets[i]);
+    clear(dict->val_buckets[i]);
   }
   
   clear(dict->keys);
@@ -127,118 +129,108 @@ var Dictionary_Contains(var self, var key) {
   return contains(dict->keys, key);
 }
 
+static void Dictionary_Rehash(DictionaryData* dict) {
+
+  int new_size = Hash_Table_Size(len(dict)/2);
+  int old_size = dict->size;
+  if (old_size == new_size) { return; }
+
+  var* old_keys = dict->key_buckets;
+  var* old_vals = dict->val_buckets;  
+  
+  dict->size = new_size;
+  dict->key_buckets = malloc(dict->size * sizeof(var));
+  dict->val_buckets = malloc(dict->size * sizeof(var));
+  
+  if (dict->key_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Dictionary. Out of memory!"); }
+  if (dict->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Dictionary. Out of memory!"); }
+  
+  for (int i = 0; i < dict->size; i++) {
+    dict->key_buckets[i] = new(List);
+    dict->val_buckets[i] = new(List);
+  }
+  
+  clear(dict->keys);
+  
+  for (int i = 0; i < old_size; i++) {
+    var keys = old_keys[i];
+    var vals = old_vals[i];
+    
+    for (int j = 0; j < len(keys); j++) {
+      long ni = abs(hash(at(keys, j)) % dict->size);
+      push(dict->key_buckets[ni], at(keys, j));
+      push(dict->val_buckets[ni], at(vals, j));
+      push(dict->keys, at(keys, j));
+    }
+    
+    delete(keys);
+    delete(vals);
+  }
+  
+  free(old_keys);
+  free(old_vals);
+}
+
 void Dictionary_Discard(var self, var key) {
   DictionaryData* dict = cast(self, Dictionary);
-  int index;
-  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, False, &index);
-  if(bucket != NULL){
-    free(bucket);
-    dict->buckets[index] = Hashing_Deleted;
+  
+  long i = abs(hash(key) % dict->size);
+  
+  var keys = dict->key_buckets[i];
+  var vals = dict->val_buckets[i];
+  
+  for(int j = 0; j < len(keys); j++) {
+    if_eq(at(keys, j), key) {
+      discard(dict->keys, key);
+      pop_at(keys, j);
+      pop_at(vals, j);
+      Dictionary_Rehash(dict);
+      return;
+    }
   }
-  discard(dict->keys, key);
+  
+  throw(KeyError, "Key %$ not in Dictionary!", key);
 }
 
 var Dictionary_Get(var self, var key) {
 
   DictionaryData* dict = cast(self, Dictionary);
-  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, False, NULL);
-
-  if (bucket)
-    return bucket->value;
-
-  return throw(KeyError, "Key '%$' not in Dictionary!", key);
+  
+  long i = abs(hash(key) % dict->size);
+  
+  var keys = dict->key_buckets[i];
+  var vals = dict->val_buckets[i];
+  
+  for(int i = 0; i < len(keys); i++) {
+    var k = at(keys, i);
+    var v = at(vals, i);
+    if_eq(k, key) { return v; }
+  }
+  
+  return throw(KeyError, "Key %$ not in Dictionary!", key);
 }
 
 void Dictionary_Put(var self, var key, var val) {
 
   DictionaryData* dict = cast(self, Dictionary);
-
-  float dict_load = (float)len(dict) / (float)dict->size;
-  if (dict_load >=  (float)Hashing_Threshold) {
-    /* Exceeded threshold we have to rehash. doh' */
-    Dictionary_Rehash(dict);
-  }
-
-  DictionaryBucket *bucket = Dictionary_Find_Bucket(dict, key, True, NULL);
-  if (bucket != NULL) {
-    bucket->key = key;
-    bucket->value = val;
-    push(dict->keys, key);
-  }
-}
-
-void Dictionary_Rehash(DictionaryData* dict)
-{
-  var * old_buckets = dict->buckets;
-  int old_size = dict->size;
-
-  var has_prime = False;
-  for (int j = 0; j < Hashing_Primes_Count; j++) {
-    int new_size = Hashing_Primes[j];
-    if(new_size > dict->size){
-      dict->size = new_size;
-      has_prime = True;
-      break;
+  Dictionary_Rehash(dict);
+  
+  long i = abs(hash(key) % dict->size);
+  
+  var keys = dict->key_buckets[i];
+  var vals = dict->val_buckets[i];
+  
+  for(int j = 0; j < len(keys); j++) {
+    if_eq(at(keys, j), key) {
+      discard(dict->keys, key);
+      pop_at(keys, j);
+      pop_at(vals, j);
     }
   }
-  if (has_prime is False) {
-    // primes are ended
-    dict->size *= 2;
-  }
-
-  clear(dict->keys);
-
-  dict->buckets = calloc(dict->size, sizeof(DictionaryBucket));
-
-  for (int i = 0; i < old_size; i++) {
-    DictionaryBucket *bucket = old_buckets[i];
-    if(bucket != NULL && bucket != Hashing_Deleted){
-      put(dict, bucket->key, bucket->value);
-    }
-    free(bucket);
-    bucket = NULL;
-  }
-
-  free(old_buckets);
-}
-
-var Dictionary_Find_Bucket(DictionaryData* dict, var key, var creation, int *index)
-{
-
-  int i = abs(hash(key) % dict->size);
-  DictionaryBucket *bucket = dict->buckets[i];
-
-  int probe_seq = 2;
-  int new_i = i;
-  if (index != NULL) *index = new_i;
-
-  while(bucket != NULL) {
-
-    if ((var)bucket == Hashing_Deleted && creation) {
-      break;
-    } else if ( (var)bucket != Hashing_Deleted && eq(key, bucket->key) ) {
-      // it's our Bucket yay o/
-      return bucket;
-    } else {
-      // linear probing could be improved
-      new_i = (int)(new_i + 3*probe_seq)  % dict->size;
-      bucket = dict->buckets[new_i];
-    }
-
-    probe_seq++;
-    if (index != NULL) *index = new_i;
-
-    if (probe_seq > dict->size) {
-      return NULL;
-    }
-  }
-
-  // bucket is null if we reach here
-  if (creation is True) {
-    bucket = calloc(1, sizeof(DictionaryBucket));
-    dict->buckets[new_i] = bucket;
-  }
-  return bucket;
+  
+  push(keys, key);
+  push(vals, val);
+  push(dict->keys, key);  
 }
 
 var Dictionary_Iter_Start(var self) {

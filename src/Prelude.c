@@ -258,7 +258,18 @@ long hash(var self) {
   }
 }
 
-const uint32_t Hashing_Primes[Hashing_Primes_Count] = {
+/*
+** Given some number, `Hash_Table_Size` 
+** returns a new number greater than 
+** the old one, suitable for using 
+** as the size for a hash table.
+**
+** To do this it picks from a table
+** of primes or when exhausted multiplies
+** the input by two.
+*/
+
+local const long Hash_Primes[20] = {
   23,      53,      101,     197,
   389,     683,     1259,    2417,
   4733,    9371,    18617,   37097,
@@ -266,9 +277,12 @@ const uint32_t Hashing_Primes[Hashing_Primes_Count] = {
   1100009, 2200013, 4400021, 8800019
 };
 
-const float Hashing_Threshold = 0.7f;
-
-var Hashing_Deleted = Singleton(Hashing_Deleted);
+long Hash_Table_Size(long size) {
+  for (int i = 0; i < 20; i++) {
+    if (Hash_Primes[i] > size) { return Hash_Primes[i]; }
+  }
+  return size * 2;
+}
 
 var get(var self, var key) {
   return type_class_method(type_of(self), Dict, get, self, key);

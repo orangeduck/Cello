@@ -208,10 +208,7 @@ class {
 
 long hash(var obj);
 
-enum { Hashing_Primes_Count = 20 };
-global const uint32_t Hashing_Primes[Hashing_Primes_Count];
-global const float Hashing_Threshold;
-global var Hashing_Deleted;
+long Hash_Table_Size(long size);
 
 /** Collection - contains objects */
 
