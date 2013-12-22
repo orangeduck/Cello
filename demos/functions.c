@@ -44,16 +44,27 @@ int main(int argc, char** argv) {
   lambda_partial(add_partial, add_print, $(Int, 5));
   
   call(add_partial, $(Int, 1));
-  
+
   /*
   ** We can use normal c-functions too.
   ** If they have all argument types as "var".
   ** Then they can be uncurried.
   */
+#ifndef __clang__
+
   var Welcome_Pair(var fst, var snd) {
     print("Hello %s and %s!\n", fst, snd);
     return None;
   }
+  
+#else
+
+  var (^Welcome_Pair)(var, var) = ^ var (var fst, var snd) {
+    print("Hello %s and %s!\n", fst, snd);
+    return None;
+  };
+
+#endif
   
   lambda_uncurry(welcome_uncurried, Welcome_Pair, 2);
   
