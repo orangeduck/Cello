@@ -25,24 +25,8 @@ CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
 LFLAGS = -shared -g -ggdb
 
 PLATFORM = $(shell uname)
+COMPILER = $(shell $(CC) -v 2>&1 )
 
-ifeq ($(findstring Linux,$(PLATFORM)),Linux)
-	DYNAMIC = libCello.so
-	STATIC = libCello.a
-	CFLAGS += -fPIC
-	LIBS = -lpthread -ldl -lm
-	INSTALL_LIB = mkdir -p ${L} && cp -f ${STATIC} ${L}/$(STATIC)
-	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
-endif
-
-ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
-	DYNAMIC = libCello.so
-	STATIC = libCello.a
-	CFLAGS += -fPIC -fblocks
-	LIBS = -lpthread -ldl -lm -lBlocksRuntime
-	INSTALL_LIB = mkdir -p ${L} && cp -f $(STATIC) ${L}/$(STATIC)
-	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
-endif
 
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	DYNAMIC = libCello.dll
@@ -50,7 +34,21 @@ ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	LIBS = 
 	INSTALL_LIB = cp $(STATIC) C:/MinGW64/x86_64-w64-mingw32/lib/$(STATIC); cp $(DYNAMIC) C:/MinGW64/x86_64-w64-mingw32/bin/$(DYNAMIC)
 	INSTALL_INC = cp -r include/* C:/MinGW64/x86_64-w64-mingw32/include/
+else
+	# Linux and Darwin
+	DYNAMIC = libCello.so
+	STATIC = libCello.a
+	CFLAGS += -fPIC
+	LIBS = -lpthread -ldl -lm
+	INSTALL_LIB = mkdir -p ${L} && cp -f $(STATIC) ${L}/$(STATIC)
+	INSTALL_INC = mkdir -p ${I} && cp -r include/* ${I}
 endif
+
+ifeq ($(findstring clang,$(COMPILER)),clang)
+	CFLAGS += -fblocks
+	LIBS += -lBlocksRuntime
+endif
+
 
 # Libraries
 
