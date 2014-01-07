@@ -1,7 +1,7 @@
 libCello
 ========
 
-Cello is a GNU99 C library which brings higher level programming to C.
+Cello is a _library_ for higher level programming in C.
 
 * __Interfaces__ allow for structured design
 * __Duck Typing__ allows for generic functions
