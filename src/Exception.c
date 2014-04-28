@@ -136,7 +136,7 @@ local void Exception_Error(void)  {
 
 local var main_exc_msg = NULL;
 local void main_exc_msg_free(void) {
-  free(main_exc_msg);
+  delete(main_exc_msg);
 }
 
 var Exception_Throw(var obj, const char* fmt, const char* file, const char* func, int lineno, var_list vl) {

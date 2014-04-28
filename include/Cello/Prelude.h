@@ -42,7 +42,7 @@ typedef void* var;
 **  of Types statically much easier
 */
 
-#define type_data (TypeData*)(const TypeData[])
+#define type_data (TypeData*)(TypeData[])
 #define type_begin(T) {NULL, "__Type"}, {#T, "__Name"}, {NULL, "__Parent"}
 #define type_entry(T,C) {&T##C, #C}
 #define type_end(T) {NULL, NULL}
@@ -208,6 +208,8 @@ class {
 
 long hash(var obj);
 
+long Hash_Table_Size(long size);
+
 /** Collection - contains objects */
 
 class {
@@ -265,6 +267,8 @@ var iter_next(var self, var curr);
 
 #define foreach(x) foreach_scanned(x)
 #define foreach_scanned(x, xs) for(var x = iter_start(xs); x != iter_end(xs); x = iter_next(xs, x))
+
+global var Iter_End;
 
 /** Push - insertion and removal abilities */
 
@@ -391,5 +395,6 @@ class {
 
 void serial_read(var self, var input);
 void serial_write(var self, var output);
+
 
 #endif

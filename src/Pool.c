@@ -33,6 +33,11 @@ var Pool_New(var self, var_list vl) {
 
 var Pool_Delete(var self) {
   PoolData* pd = cast(self, Pool);
+
+  foreach(k in pd->tab) {
+    delete(at(k,0));
+  }  
+
   delete(pd->tab);
   return self;
 }

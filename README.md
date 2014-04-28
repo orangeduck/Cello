@@ -1,7 +1,7 @@
 libCello
 ========
 
-Cello is a GNU99 C library which brings higher level programming to C.
+Cello is a _library_ for higher level programming in C.
 
 * __Interfaces__ allow for structured design
 * __Duck Typing__ allows for generic functions
@@ -235,14 +235,14 @@ instance(Vec2, Vector) = { Vec2_Dot, Vec2_Length };
 And in the source file...
 
 ```c
-var Vec2 = methods {
-  methods_begin(Vec2),
-  method(Vec2, New),
-  method(Vec2, Assign),
-  method(Vec2, Copy),
-  method(Vec2, Eq),
-  method(Vec2, Vector),
-  methods_end(Vec2)
+var Vec2 = type_data {
+  type_begin(Vec2),
+  type_entry(Vec2, New),
+  type_entry(Vec2, Assign),
+  type_entry(Vec2, Copy),
+  type_entry(Vec2, Eq),
+  type_entry(Vec2, Vector),
+  type_end(Vec2)
 };
 
 var Vec2_New(var self, var_list vl) {
@@ -413,7 +413,7 @@ try {
 }
 ```
 
-Throwing an exception will jump the program control to the innermost `catch` block. If it is not handled here it is passed on to an outer block. To catch an exception one must put a reference to the thrown object. Any object can be thrown and caught as an Exception in libCello so users can create their own Exception types or find other applications for the semantics. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location.
+Throwing an exception will jump the program control to the innermost `catch` block. If it is not handled here it is passed on to an outer block. To catch an exception one must put a reference to the thrown object. Any object can be thrown and caught as an Exception in libCello so users can create their own Exception types or find other applications for the semantics. The thrown message will be preserved internally, but be careful of throwing stack memory which may become invalidated when jumping to the new location. The `catch` part of a exception block must always be evaluated at risk of breaking the exception stack. This means it must always be included and one should never return from inside a `try` block. To retrieve the exception message thrown one can use `Exception_Message`.
 
 More More More More More Examples
 ---------------------------------

@@ -38,7 +38,7 @@ var Table_New(var self, var_list vl) {
   tab->key_type = cast(var_list_get(vl), Type);
   tab->val_type = cast(var_list_get(vl), Type);
   
-  tab->size = 1024;
+  tab->size = Hash_Table_Size(0);
   tab->keys = new(Array, tab->key_type);
   
   tab->key_buckets = malloc(tab->size * sizeof(var));
@@ -102,14 +102,14 @@ var Table_Eq(var self, var obj) {
   if_neq(type_of(obj), Table) { return False; }
   
   foreach(key in obj) {
-		if (not contains(self, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(self, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
   foreach(key in self) {
-		if (not contains(obj, key)) { return False; }
-		if_neq(get(obj, key), get(self, key)) { return False; }
-	}
+    if (not contains(obj, key)) { return False; }
+    if_neq(get(obj, key), get(self, key)) { return False; }
+  }
 	
   return True;
 }
@@ -137,8 +137,46 @@ var Table_Contains(var self, var key) {
   return contains(tab->keys, key);
 }
 
-void Table_Discard(var self, var key) {
+static void Table_Rehash(TableData* tab) {
   
+  int new_size = Hash_Table_Size(len(tab)/2);
+  int old_size = tab->size;
+  if (old_size == new_size) { return; }
+    
+  var* old_keys = tab->key_buckets;
+  var* old_vals = tab->val_buckets;
+  
+  tab->size = new_size;
+  tab->key_buckets = malloc(tab->size * sizeof(var));
+  tab->val_buckets = malloc(tab->size * sizeof(var));
+
+  if (tab->key_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
+  if (tab->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
+  
+  for (int i = 0; i < tab->size; i++) {
+    tab->key_buckets[i] = new(Array, tab->key_type);
+    tab->val_buckets[i] = new(Array, tab->val_type);
+  }
+  
+  for (int i = 0; i < old_size; i++) {
+    var keys = old_keys[i];
+    var vals = old_vals[i];
+    
+    for (int j = 0; j < len(keys); j++) {
+      long ni = abs(hash(at(keys, j)) % tab->size);
+      push(tab->key_buckets[ni], at(keys, j));
+      push(tab->val_buckets[ni], at(vals, j));
+    }
+    
+    delete(keys);
+    delete(vals);
+  }
+  
+  free(old_keys);
+  free(old_vals);
+}
+
+void Table_Discard(var self, var key) {
   TableData* tab = cast(self, Table);
   key = cast(key, tab->key_type);
   
@@ -151,11 +189,13 @@ void Table_Discard(var self, var key) {
     if_eq(at(keys, j), key) {
       discard(tab->keys, key);
       pop_at(keys, j);
-      pop_at(vals, j);      
+      pop_at(vals, j);
+      Table_Rehash(self);
       return;
     }
   }
   
+  throw(KeyError, "Key %$ not in Table!", key);
 }
 
 var Table_Get(var self, var key) {
@@ -172,11 +212,14 @@ var Table_Get(var self, var key) {
     if_eq(at(keys, j), key) { return at(vals, j); }
   }
   
-  return throw(KeyError, "Key '%$' not in Table!", key);
+  return throw(KeyError, "Key %$ not in Table!", key);
 }
 
 void Table_Put(var self, var key, var val) {
+  
   TableData* tab = cast(self, Table);
+  Table_Rehash(self);
+  
   key = cast(key, tab->key_type);
   val = cast(val, tab->val_type);
   
@@ -184,8 +227,14 @@ void Table_Put(var self, var key, var val) {
   
   var keys = tab->key_buckets[i];
   var vals = tab->val_buckets[i];
-
-  discard(self, key);
+  
+  for(int j = 0; j < len(keys); j++) {
+    if_eq(at(keys, j), key) {
+      discard(tab->keys, key);
+      pop_at(keys, j);
+      pop_at(vals, j);
+    }
+  }
   
   push(keys, key);
   push(vals, val);
