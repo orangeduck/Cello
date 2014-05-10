@@ -72,7 +72,7 @@ int Vec2_Look(var self, var input, int pos) {
 float Vec2_Dot(var self, var obj) {
   Vec2Data* v1 = cast(self, Vec2);
   Vec2Data* v2 = cast(obj, Vec2);
-  return (v1->x * v2->x + v2->y * v2->y);
+  return (v1->x * v2->x + v1->y * v2->y);
 }
 
 float Vec2_Length(var self) {
