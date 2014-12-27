@@ -40,7 +40,7 @@ int show(var self) {
 int show_to(var self, var out, int pos) {
   
   if (not type_implements(type_of(self), Show)) {
-    return print_to(out, 0, "<'%s' At 0x%p>", type_of(self), self);
+    return print_to(out, 0, "<'%s' At 0x%p\n>", type_of(self), self);
   } else {
     Show* ishow = type_class(type_of(self), Show);
     return ishow->show(self, out, pos);
