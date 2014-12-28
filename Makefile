@@ -33,6 +33,17 @@ ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 
 	INSTALL_LIB = cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
 	INSTALL_INC = cp -r include/* $(INCDIR)
+else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
+	PREFIX ?= /usr/local
+
+	DYNAMIC = libCello.so
+	STATIC = libCello.a
+	LIBS = -lpthread -lexecinfo -lm
+
+	CFLAGS += -fPIC
+
+	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
+	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/* ${INCDIR}
 else
 	PREFIX ?= /usr/local
 
