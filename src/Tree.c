@@ -23,16 +23,14 @@ data {
 } TreeData;
 
 var Tree = type_data {
-  type_begin(Tree),
-  type_entry(Tree, New),
-  type_entry(Tree, Assign),
-  type_entry(Tree, Copy),
-  type_entry(Tree, Eq),
-  type_entry(Tree, Collection),
-  type_entry(Tree, Dict),
-  type_entry(Tree, Iter),
-  type_entry(Tree, Show),
-  type_end(Tree),
+  instance(Tree, New) = { Tree_New, Tree_Delete, Tree_Size };
+  instance(Tree, Assign) = { Tree_Assign };
+  instance(Tree, Copy) = { Tree_Copy };
+  instance(Tree, Eq) = { Tree_Eq };
+  instance(Tree, Collection) = { Tree_Len, Tree_Clear, Tree_Contains, Tree_Discard };
+  instance(Tree, Dict) = { Tree_Get, Tree_Put };
+  instance(Tree, Iter) = { Tree_Iter_Start, Tree_Iter_End, Tree_Iter_Next };
+  instance(Tree, Show) = { Tree_Show, NULL };
 };
 
 var Tree_New(var self, var_list vl) {

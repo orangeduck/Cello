@@ -1,94 +1,244 @@
-#include "Cello/Array.h"
+#include "Cello.h"
 
-#include "Cello/Bool.h"
-#include "Cello/None.h"
-#include "Cello/Exception.h"
-#include "Cello/Number.h"
+static const char* Array_Name(void) {
+  return "Array";
+}
 
-#include <math.h>
-#include <string.h>
+static const char* Array_Brief(void) {
+  return "Sequential Container";
+}
 
-data {
-  var type;
-  var item_type;
-  int num_items;
-  int num_slots;
-  var items;
-} ArrayData;
+static const char* Array_Description(void) {
+  return ""
+    "Array is data structure containing a sequence of a single type of object. "
+    "It can dynamically grow and shrink in size depending on how many elements "
+    "it contains. It allocates storage for the type specified. It also "
+    "deallocates and destroys the objects inside upon destruction."
+    "\n\n"
+    "Elements are copied in an Array using `assign` which means the type must "
+    "implement the [Assign](documentation/assign) class."
+    "\n\n"
+    "Elements are ordered linearly. Elements are accessed by their position in "
+    "this sequence directly. Addition and removal of elements at the end of "
+    "the sequence is fast, with memory movement required for elements in the "
+    "middle of the sequence." 
+    "\n\n"
+    "The equivalent C++ construct to this type is "
+    "[std::vector](http://www.cplusplus.com/reference/vector/vector/)";
+}
 
-var Array = type_data {
-  type_begin(Array),
-  type_entry(Array, New),
-  type_entry(Array, Assign),
-  type_entry(Array, Copy),
-  type_entry(Array, Eq),
-  type_entry(Array, Collection),
-  type_entry(Array, Push),
-  type_entry(Array, At),
-  type_entry(Array, Iter),
-  type_entry(Array, Reverse),
-  type_entry(Array, Append),
-  type_entry(Array, Sort),
-  type_entry(Array, Show),
-  type_end(Array)
+static const char* Array_Examples(void) {
+  return ""
+    "__Construction & Deletion__\n"
+    "    \n"
+    "    var x = new(Array, Int);\n"
+    "    push(x, $(Int, 32));\n"
+    "    push(x, $(Int, 6));\n"
+    "    \n"
+    "    /* <'Array' At 0x0000000000414603 [32, 6]> */\n"
+    "    show(x);\n"
+    "    del(x);\n"
+    "    \n"
+    "__Element Access__\n"
+    "    \n"
+    "    var x = new(Array, Real, $(Real, 0.01), $(Real, 5.12));\n"
+    "    \n"
+    "    show(get(x, $(Int, 0))); /* 0.01 */\n"
+    "    show(get(x, $(Int, 1))); /* 5.12 */\n"
+    "    \n"
+    "    set(x, $(Int, 0), $(Real, 500.1));\n"
+    "    show(get(x, $(Int, 0))); /* 500.1 */\n"
+    "    \n"
+    "    del(x);\n"
+    "    \n"
+    "__Collection Queries__\n"
+    "    \n"
+    "    var x = new(Array, Char,\n" 
+    "        $(Char, 'a'), $(Char, 'b'), $(Char, 'c'), $(Char, 'd'));\n"
+    "    \n"
+    "    show(contains(x, $(Char, 'a'))); /* True */\n"
+    "    show($(Int, len(x)));            /* 4 */\n"
+    "    \n"
+    "    discard(x, $(Char, 'c'));\n"
+    "    \n"
+    "    show(contains(x, $(Char, 'c'))); /* False */\n"
+    "    show($(Int, len(x)));            /* 3 */\n"
+    "    show(empty(x));               /* False */\n"
+    "    \n"
+    "    clear(x);\n"
+    "    \n"
+    "    show(empty(x));               /* True */\n"
+    "    \n"
+    "    del(x);\n"
+    "    \n"
+    "__Iteration__\n"
+    "    \n"
+    "    var greetings = new(Array, String, \n"
+    "        $(String, \"Hello\"), \n"
+    "        $(String, \"Bonjour\"), \n"
+    "        $(String, \"Hej\")); \n"
+    "    \n"
+    "    foreach(greet in greetings) {\n"
+    "      show(greet);\n"
+    "    }\n"
+    "    \n"
+    "    del(x);\n";
+}
+
+/* TODO */
+static const char* Array_Methods(void) {
+  return "";
 };
 
-var Array_New(var self, var_list vl) {
+struct Array {
+  var type;
+  var data;
+  size_t nitems;
+  size_t nslots;
+};
+
+static size_t Array_Step(struct Array* a) {
+  return size(a->type) + sizeof(struct CelloHeader);
+}
+
+static var Array_Item(struct Array* a, size_t i) {
+  return a->data + Array_Step(a) * i + sizeof(struct CelloHeader);
+}
+
+static void Array_Alloc(struct Array* a, size_t i) {
+  memset(a->data + Array_Step(a) * i, 0, Array_Step(a));
+  struct CelloHeader* head = a->data + Array_Step(a) * i;
+  head->type  = a->type;
+  head->flags = (var)CelloDataAlloc;
+}
+
+static var Array_New(var self, var args) {
   
-  ArrayData* ad = cast(self, Array);
-  ad->item_type = cast(var_list_get(vl), Type);
-  ad->num_items = 0;
-  ad->num_slots = 0;
-  ad->items = NULL;
+  struct Array* a = self;
+  a->type   = cast(get(args, $(Int, 0)), Type);
+  a->nitems = len(args)-1;
+  a->nslots = a->nitems;
   
-  while(not var_list_end(vl)) {
-    push(self, var_list_get(vl));
+  if (a->nslots is 0) {
+    a->data = None;
+    return self;
+  }
+  
+  a->data = malloc(a->nslots * Array_Step(a));
+  
+  if (a->data is None) {
+    throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
+  }
+  
+  for(size_t i = 0; i < a->nitems; i++) {
+    Array_Alloc(a, i);
+    assign(Array_Item(a, i), get(args, $(Int, i+1)));  
   }
   
   return self;
 }
 
-var Array_Delete(var self) {
-  ArrayData* ad = cast(self, Array);
-
-  foreach(item in self) {
-    destruct(item);
+static var Array_Del(var self) {
+  
+  struct Array* a = self;
+  for(size_t i = 0; i < a->nitems; i++) {
+    destruct(Array_Item(a, i));
   }
-  free(ad->items);
+  
+  free(a->data);
+  return self;
+  
+}
+
+static size_t Array_Size(void) {
+  return sizeof(struct Array);
+}
+
+static void Array_Clear(var self) {
+  struct Array* a = self;
+  
+  for(size_t i = 0; i < a->nitems; i++) {
+    destruct(Array_Item(a, i));
+  }
+  
+  free(a->data);
+  a->data  = None;
+  a->nitems = 0;
+  a->nslots = 0;
+}
+
+static var Array_Assign(var self, var obj) {
+  struct Array* a = self;
+
+  Array_Clear(self);
+  
+  a->nitems = len(obj);
+  a->nslots = a->nitems;
+  
+  if (a->nslots is 0) {
+    a->data = None;
+    return self;
+  }
+  
+  a->data = malloc(a->nslots * Array_Step(a));
+  
+  if (a->data is None) {
+    throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
+  }
+  
+  for(size_t i = 0; i < a->nitems; i++) {
+    Array_Alloc(a, i);
+    assign(Array_Item(a, i), get(obj, $(Int, i)));  
+  }
   
   return self;
-}
-
-size_t Array_Size(void) {
-  return sizeof(ArrayData);
-}
-
-void Array_Assign(var self, var obj) {
-  clear(self);
   
-  foreach(item in obj) {
-    push(self, item);
+}
+
+static void Array_Reserve_More(struct Array* a) {
+  
+  if (a->nitems > a->nslots) {
+    a->nslots = a->nitems + a->nitems / 2;
+    a->data = realloc(a->data, Array_Step(a) * a->nslots);
+    if (a->data is None) {
+      throw(OutOfMemoryError, "Cannot grow Array, out of memory!");
+    }
   }
+
 }
 
-var Array_Copy(var self) {
-  ArrayData* ad = cast(self, Array);
+static void Array_Concat(var self, var obj) {
   
-  var newarray = new(Array, ad->item_type);
-
-  foreach(obj in self) {
-    push(newarray, obj);
+  struct Array* a = self;
+  
+  size_t i = 0;
+  size_t olen = len(obj);
+  
+  a->nitems = a->nitems + olen;
+  Array_Reserve_More(a);
+  
+  foreach (item in obj) {
+    Array_Alloc(a, a->nitems-1-olen+i);
+    assign(Array_Item(a, a->nitems-1-olen+i), obj);
+    i++;
   }
   
-  return newarray;
 }
 
-var Array_Eq(var self, var obj) {
+static var Array_Copy(var self) { 
+  struct Array* a = self;
+  var b = new(Array, a->type);
+  Array_Concat(b, self);
+  return b;
+}
+
+static var Array_Eq(var self, var obj) {
   
-  if (len(self) != len(obj)) { return False; }
+  struct Array* a = self;
+  if (a->nitems isnt len(obj)) { return False; }
   
-  for(int i = 0; i < len(self); i++) {
-    if_neq( at(self,i) , at(obj,i) ) {
+  for(size_t i = 0; i < a->nitems; i++) {
+    if_neq(Array_Item(a, i), get(obj, $(Int, i))) {
       return False;
     }
   }
@@ -96,254 +246,236 @@ var Array_Eq(var self, var obj) {
   return True;
 }
 
-int Array_Len(var self) {
-  ArrayData* ad = cast(self, Array);
-  return ad->num_items;
+static size_t Array_Len(var self) {
+  struct Array* a = self;
+  return a->nitems;
 }
 
-void Array_Clear(var self) {
-  ArrayData* ad = cast(self, Array);
-  
-  foreach(item in self) {
-    destruct(item);
-  }
-  
-  ad->items = realloc(ad->items, 0);
-  ad->num_items = 0;
-  ad->num_slots = 0;
-  
-}
-
-var Array_Contains(var self, var obj) {
-  foreach(item in self) {
-    if_eq(item, obj) {
+static var Array_Mem(var self, var obj) {
+  struct Array* a = self;
+  for(size_t i = 0; i < a->nitems; i++) {
+    if_eq(Array_Item(a, i), obj) {
       return True;
     }
   }
-  
   return False;
 }
 
-void Array_Discard(var self, var obj) {
-  for(int i = 0; i < len(self); i++) {
-    if_eq(at(self, i), obj) {
-      pop_at(self, i);
+static void Array_Reserve_Less(struct Array* a) {
+  if (a->nslots > a->nitems + a->nitems / 2) {
+    a->nslots = a->nitems;
+    a->data = realloc(a->data, Array_Step(a) * a->nslots);
+  }
+}
+
+static void Array_Pop_At(var self, var key) {
+
+  struct Array* a = self;
+  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  
+#if CELLO_BOUNDS_CHECK == 1
+  if (i < 0 or i >= a->nitems) {
+    throw(IndexOutOfBoundsError,
+      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+    return;
+  }
+#endif
+  
+  destruct(Array_Item(a, i));
+  
+  memmove(a->data + Array_Step(a) * (i+0), 
+          a->data + Array_Step(a) * (i+1), 
+          Array_Step(a) * ((a->nitems-1) - i));
+  
+  a->nitems--;
+  Array_Reserve_Less(a);
+}
+
+static void Array_Rem(var self, var obj) {
+  struct Array* a = self;
+  for(size_t i = 0; i < a->nitems; i++) {
+    if_eq(Array_Item(a, i), obj) {
+      Array_Pop_At(a, $(Int, i));
       return;
     }
   }
 }
 
-local void Array_Reserve_More(ArrayData* ad) {
-  
-  if (ad->num_items > ad->num_slots) {
-    int old_size = ad->num_slots;
-    ad->num_slots = ceil((ad->num_slots + 1) * 1.5);
-    ad->items = realloc(ad->items, size(ad->item_type) * ad->num_slots);
-    if (ad->items == NULL) { throw(OutOfMemoryError, "Cannot grow Array, out of memory!"); }
-  }
-
+static void Array_Push(var self, var obj) {
+  struct Array* a = self;
+  a->nitems++;
+  Array_Reserve_More(a);
+  Array_Alloc(a, a->nitems-1);
+  assign(Array_Item(a, a->nitems-1), obj);
 }
 
-local void Array_Set_Type_At(ArrayData* ad, int i) {
+static void Array_Push_At(var self, var obj, var key) {
+  struct Array* a = self;
+  a->nitems++;
+  Array_Reserve_More(a);
   
-  memset(ad->items + (size(ad->item_type) * i), 0, size(ad->item_type));
-  ObjectData* template = ad->items + (size(ad->item_type) * i);
-  template->type = ad->item_type;
+  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  memmove(a->data + Array_Step(a) * (i+1), 
+          a->data + Array_Step(a) * (i+0), 
+          Array_Step(a) * ((a->nitems-1) - i));
   
+  Array_Alloc(self, i);
+  assign(Array_Item(a, i), obj);
 }
 
-void Array_Push_Back(var self, var obj) {
-  ArrayData* ad = cast(self, Array);
-  ad->num_items++;
-  Array_Reserve_More(ad);
-  
-  Array_Set_Type_At(self, ad->num_items-1);
-  set(self, ad->num_items-1, obj);
-  
-}
+static void Array_Pop(var self) {
 
-void Array_Push_Front(var self, var obj) {
-  Array_Push_At(self, obj, 0);
-}
-
-void Array_Push_At(var self, var obj, int index) {
-  ArrayData* ad = cast(self, Array);
-  ad->num_items++;
-  Array_Reserve_More(ad);
+  struct Array* a = self;
   
-  memmove(ad->items + size(ad->item_type) * (index+1), 
-          ad->items + size(ad->item_type) * index, 
-          size(ad->item_type) * ((ad->num_items-1) - index));
-  
-  Array_Set_Type_At(self, index);
-  set(self, index, obj);
-}
-
-local void Array_Reserve_Less(ArrayData* ad) {
-  
-  if ( ad->num_slots > pow(ad->num_items+1, 1.5)) {
-    ad->num_slots = floor((ad->num_slots-1) * (1.0/1.5));
-    ad->items = realloc(ad->items, size(ad->item_type) * ad->num_slots);
-  }
-  
-}
-
-var Array_Pop_Back(var self) {
-  ArrayData* ad = cast(self, Array);
-
-  if (is_empty(self)) {
-    return throw(IndexOutOfBoundsError, "Cannot pop back. Array is empty!");
-  }
-  
-  destruct(at(self, len(self)-1));
-  
-  ad->num_items--;
-  Array_Reserve_Less(ad);
-  
-  return Undefined;
-}
-
-var Array_Pop_Front(var self) {
-  return Array_Pop_At(self, 0);
-}
-
-var Array_Pop_At(var self, int index) {
-  ArrayData* ad = cast(self, Array);
-  
-  if (is_empty(self)) {
-    return throw(IndexOutOfBoundsError, "Cannot pop at %i. Array is empty!", $(Int, index));
-  }
-  
-  destruct(at(self, index));
-  
-  memmove(ad->items + size(ad->item_type) * index, 
-          ad->items + size(ad->item_type) * (index+1), 
-          size(ad->item_type) * ((ad->num_items-1) - index));
-  
-  ad->num_items--;
-  Array_Reserve_Less(ad);
-  
-  return Undefined;
-}
-
-var Array_At(var self, int i) {
-  if (i < 0 or i >= len(self)) {
-    return throw(IndexOutOfBoundsError,
-      "Index %i out of bounds [%i-%i]", 
-      $(Int, i), $(Int, 0), $(Int, len(self)));
-  }
-  
-  ArrayData* ad = cast(self, Array);
-  return ad->items + size(ad->item_type) * i;
-}
-
-void Array_Set(var self, int i, var obj) {
-  if (i < 0 or i >= len(self)) {
-    throw(IndexOutOfBoundsError, 
-      "Index %i out of bounds [%i-%i]", 
-      $(Int, i), $(Int, 0), $(Int, len(self)));
+#if CELLO_BOUNDS_CHECK == 1
+  if (a->nitems is 0) {
+    throw(IndexOutOfBoundsError, "Cannot pop. Array is empty!");
     return;
   }
+#endif
   
-  ArrayData* ad = cast(self, Array);  
-  assign(ad->items + size(ad->item_type) * i, obj);
-}
-
-var Array_Iter_Start(var self) {
-
-  if (len(self) == 0) { return Iter_End; }
-
-  ArrayData* ad = cast(self, Array);
-  return ad->items;
-}
-
-var Array_Iter_End(var self) {
-  return Iter_End;
-}
-
-var Array_Iter_Next(var self, var curr) {
-  ArrayData* ad = cast(self, Array);
+  destruct(Array_Item(a, a->nitems-1));
   
-  if (curr >= ad->items + size(ad->item_type) * (ad->num_items-1)) {
-    return Iter_End;
+  a->nitems--;
+  Array_Reserve_Less(a);
+}
+
+static var Array_Get(var self, var key) {
+
+  struct Array* a = self;
+  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  
+#if CELLO_BOUNDS_CHECK == 1
+  if (i < 0 or i >= a->nitems) {
+    return throw(IndexOutOfBoundsError,
+      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+  }
+#endif
+  
+  return Array_Item(a, i);
+}
+
+static void Array_Set(var self, var key, var val) {
+
+  struct Array* a = self;
+  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  
+#if CELLO_BOUNDS_CHECK == 1
+  if (i < 0 or i >= a->nitems) {
+    throw(IndexOutOfBoundsError, 
+      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+    return;
+  }
+#endif
+  
+  assign(Array_Item(a, i), val);
+}
+
+static var Array_Iter_Init(var self) {
+  struct Array* a = self;
+  if (a->nitems is 0) { return Terminal; }
+  return Array_Item(a, 0);
+}
+
+static var Array_Iter_Next(var self, var curr) {
+  struct Array* a = self;
+  if (curr > Array_Item(a, a->nitems-1)) {
+    return Terminal;
   } else {
-    return curr + size(ad->item_type);
+    return curr + Array_Step(a);
   }
 }
 
-local void Array_Swap_Items(var self, var temp, int i0, int i1) {
-  assign(temp, at(self, i0));
-  set(self, i0, at(self, i1));
+/*
+static void Array_Swap_Items(var self, var temp, var i0, var i1) {
+  assign(temp, get(self, i0));
+  set(self, i0, get(self, i1));
   set(self, i1, temp);
 }
 
-void Array_Reverse(var self) {
-  ArrayData* ad = cast(self, Array);
+static void Array_Reverse(var self) {
+  struct Array* a = self;
   
-  var temp = allocate(ad->item_type);
+  var temp = alloc(a->type);
   
-  for(int i = 0; i < len(self) / 2; i++) {
-    Array_Swap_Items(self, temp, i, len(self)-1-i);
+  for(size_t i = 0; i < len(self) / 2; i++) {
+    Array_Swap_Items(self, temp, $(Int, i), $(Int, len(self)-1-i));
   }
   
-  delete(temp);
+  del(temp);
 }
 
-local int Array_Sort_Partition(var self, int left, int right, int pivot) {
+static size_t Array_Sort_Partition(
+  var self, size_t left, size_t right, size_t pivot) {
   
-  ArrayData* ad = cast(self, Array); 
+  struct Array* a = self; 
+  var pivt = alloc(a->type);
+  var temp = alloc(a->type);
   
-  var pival = allocate(ad->item_type);
-  var temp = allocate(ad->item_type);
-  
-  assign(pival, at(self, pivot));
+  assign(pivt, get(self, $(Int, pivot)));
 
-  Array_Swap_Items(self, temp, pivot, right);
+  Array_Swap_Items(self, temp, $(Int, pivot), $(Int, right));
   
-  int storei = left;
-  bool fix = false;
+  var fix = False;
+  size_t storei = left;
   
-  for (int i = left; i < right; i++) {
-    if_lt ( at(self, i) , pival ) {
-      if (fix) {
-        Array_Swap_Items(self, temp, i, storei);
-      }
+  for (size_t i = left; i < right; i++) {
+    if_lt (get(self, $(Int, i)), pivt) {
+      if (fix) { Array_Swap_Items(self, temp, $(Int, i), $(Int, storei)); }
       storei++;
     } else {
-      fix = true;
+      fix = True;
     }
   }
   
-  if (fix) {
-    Array_Swap_Items(self, temp, storei, right);
-  }
+  if (fix) { Array_Swap_Items(self, temp, $(Int, storei), $(Int, right)); }
 
-  deallocate(temp);
-  deallocate(pival);
+  dealloc(temp);
+  dealloc(pivt);
   
   return storei;
 }
 
-local void Array_Sort_Part(var self, int left, int right) {
+static void Array_Sort_Part(var self, size_t left, size_t right) {
   if (left < right) {
-    int pivot = left + (right - left) / 2;
-    int newpivot = Array_Sort_Partition(self, left, right, pivot);
+    size_t pivot = left + (right - left) / 2;
+    size_t newpivot = Array_Sort_Partition(self, left, right, pivot);
     Array_Sort_Part(self, left, newpivot-1);
     Array_Sort_Part(self, newpivot+1, right);
   }
 }
 
-void Array_Sort(var self) {
+static void Array_Sort(var self) {
   Array_Sort_Part(self, 0, len(self)-1);
 }
+*/
 
-int Array_Show(var self, var output, int pos) {
+static int Array_Show(var self, var output, int pos) {
+  struct Array* a = self;
   pos = print_to(output, pos, "<'Array' At 0x%p [", self);
-  for(int i = 0; i < len(self); i++) {
-    pos = print_to(output, pos, "%$", at(self, i));
-    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
+  for(int i = 0; i < a->nitems; i++) {
+    pos = print_to(output, pos, "%$", Array_Item(a, i));
+    if (i < a->nitems-1) { pos = print_to(output, pos, ", "); }
   }
   pos = print_to(output, pos, "]>");
   return pos;
 }
 
+var Array = typedecl(Array,
+  typeclass(Doc,
+    Array_Name,        Array_Brief,
+    Array_Description, Array_Examples,
+    Array_Methods),
+  typeclass(New,      Array_New, Array_Del, Array_Size),
+  typeclass(Assign,   Array_Assign),
+  typeclass(Copy,     Array_Copy),
+  typeclass(Eq,       Array_Eq),
+  typeclass(Push,
+    Array_Push,       Array_Pop,
+    Array_Push_At,    Array_Pop_At),
+  typeclass(Len,      Array_Len),
+  typeclass(Get,      Array_Get, Array_Set, Array_Mem, Array_Rem),
+  typeclass(Iter,     Array_Iter_Init, Array_Iter_Next),
+  typeclass(Show,     Array_Show, NULL));
+
+  

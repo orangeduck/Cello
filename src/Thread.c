@@ -1,222 +1,335 @@
-#include "Cello/Thread.h"
-#include "Cello/List.h"
-#include "Cello/String.h"
-#include "Cello/None.h"
-#include "Cello/Exception.h"
-#include "Cello/Bool.h"
+#include "Cello.h"
 
-#include <signal.h>
-#include <string.h>
-#include <errno.h>
+static const char* Current_Name(void) {
+  return "Current";
+}
+
+/* TODO */
+static const char* Current_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Current_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Current_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Current_Methods(void) {
+  return "";
+}
+
+var Current = typedecl(Current,
+  typeclass(Doc,
+    Current_Name, Current_Brief, Current_Description,
+    Current_Examples, Current_Methods));
 
 var current(var type) {
-  return type_class_method(type, Process, current);
+  return type_method(type, Current, current);
 }
+
+static const char* Join_Name(void) {
+  return "Join";
+}
+
+/* TODO */
+static const char* Join_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Join_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Join_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Join_Methods(void) {
+  return "";
+}
+
+var Join = typedecl(Join,
+  typeclass(Doc,
+    Join_Name, Join_Brief, Join_Description,
+    Join_Examples, Join_Methods));
 
 void join(var self) {
-  type_class_method(type_of(self), Process, join, self);
+  method(self, Join, join);
 }
 
-void terminate(var self) {
-  type_class_method(type_of(self), Process, terminate, self);
-}
-
-var Thread = type_data {
-  type_begin(Thread),
-  type_entry(Thread, New),
-  type_entry(Thread, Assign),
-  type_entry(Thread, Copy),
-  type_entry(Thread, Call),
-  type_entry(Thread, Process),
-  type_entry(Thread, AsLong),
-  type_end(Thread),
+enum {
+  CELLO_EXC_MAX_DEPTH  = 2048,
+  CELLO_EXC_MAX_STRACE = 25
 };
 
-var Thread_New(var self, var_list vl) {
+struct Thread {
   
-  ThreadData* td = cast(self, Thread);
-  td->func = cast(var_list_get(vl), Function);
-  td->args = new(List);
-  td->is_main = false;
-  td->running = false;
+  var func;
+  var args;
   
-  td->exc_active = false;
-  td->exc_depth = 0;
-  memset(td->exc_buffers, 0, sizeof(jmp_buf) * EXC_MAX_DEPTH);
+#if defined(__unix__) || defined(__APPLE__)
+  pthread_t thread;
+#elif defined(_WIN32)
+  DWORD id;
+  HANDLE thread;
+#endif
+
+  var is_main;
+  var is_running;
   
-  td->exc_obj = Undefined;
-  td->exc_msg = new(String, $(String, ""));
-  td->exc_func = NULL;
-  td->exc_file = NULL;
-  td->exc_lineno = 0;
-  memset(td->exc_backtrace, 0, sizeof(void*) * 25);
-  td->exc_backtrace_count = 0;
+  var     exc_obj;
+  var     exc_msg;
+  var     exc_active;
+  size_t  exc_depth;
+  jmp_buf exc_buffers[CELLO_EXC_MAX_DEPTH];
+  void*   exc_backtrace[CELLO_EXC_MAX_STRACE];
+  size_t  exc_backtrace_count;
   
-  return td;
+};
+
+static const char* Thread_Name(void) {
+  return "Thread";
 }
 
-var Thread_Delete(var self) {
-  ThreadData* td = cast(self, Thread);
+/* TODO */
+static const char* Thread_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Thread_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Thread_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Thread_Methods(void) {
+  return "";
+}
+
+static var Thread_New(var self, var args) {
+  
+  struct Thread* t = self;
+  t->func = get(args, $(Int, 0));
+  t->args = new(Array, Ref);
+  t->is_main = false;
+  t->is_running = false;
+  
+  t->exc_active = false;
+  t->exc_depth = 0;
+  memset(t->exc_buffers, 0, sizeof(jmp_buf) * CELLO_EXC_MAX_DEPTH);
+  
+  t->exc_obj = Undefined;
+  t->exc_msg = new(String, $(String, ""));
+  memset(t->exc_backtrace, 0, sizeof(void*) * CELLO_EXC_MAX_STRACE);
+  t->exc_backtrace_count = 0;
+  
+  return t;
+}
+
+static var Thread_Del(var self) {
+  struct Thread* t = self;
   
 #ifdef _WIN32
-  CloseHandle(td->thread);
+  CloseHandle(t->thread);
 #endif
   
-  delete(td->args);
-  delete(td->exc_msg);
-  return td;
+  del(t->args);
+  del(t->exc_msg);
+  return t;
 }
 
-size_t Thread_Size(void) {
-  return sizeof(ThreadData);
+static size_t Thread_Size(void) {
+  return sizeof(struct Thread);
 }
 
-void Thread_Assign(var self, var obj) {
+static var Thread_Assign(var self, var obj) {
   
-  ThreadData* td = cast(self, Thread);
-  ThreadData* to = cast(obj,  Thread);
+  struct Thread* t0 = self;
+  struct Thread* t1 = obj;
   
-  assign(td->func, to->func);
-  assign(td->args, to->args);
-  td->thread = to->thread;
-  td->is_main = to->is_main;
-  td->running = to->running;
+  assign(t0->func, t1->func);
+  assign(t0->args, t1->args);
   
-  td->exc_active = to->exc_active;
-  td->exc_depth = to->exc_depth;
-  memmove(td->exc_buffers, to->exc_buffers, sizeof(jmp_buf) * EXC_MAX_DEPTH);
+  t0->thread = t1->thread;
+  t0->is_main = t1->is_main;
+  t0->is_running = t1->is_running;
   
-  assign(td->exc_obj, to->exc_obj);
-  assign(td->exc_msg, to->exc_msg);
+  t0->exc_active = t1->exc_active;
+  t0->exc_depth = t1->exc_depth;
+  memmove(t0->exc_buffers, t1->exc_buffers,
+    sizeof(jmp_buf) * CELLO_EXC_MAX_DEPTH);
   
-  td->exc_func = to->exc_func;
-  td->exc_file = to->exc_file;
-  td->exc_lineno = to->exc_lineno;
-  memmove(td->exc_backtrace, to->exc_backtrace, sizeof(void*) * 25);
-  td->exc_backtrace_count = to->exc_backtrace_count;
+  assign(t0->exc_obj, t1->exc_obj);
+  assign(t0->exc_msg, t1->exc_msg);
   
+  memmove(t0->exc_backtrace, t1->exc_backtrace,
+    sizeof(void*) * CELLO_EXC_MAX_STRACE);
+  t0->exc_backtrace_count = t1->exc_backtrace_count;
+  
+  return self;
 }
 
-var Thread_Copy(var self) {
+static var Thread_Copy(var self) {
   var obj = new(Thread, None);
   assign(obj, self);
   return obj;
 }
 
-long Thread_Hash(var self) {
-  return as_long(self);
+static uint64_t Thread_Hash(var self) {
+  return c_int(self);
 }
 
-long Thread_AsLong(var self) {
-  ThreadData* td = cast(self, Thread);
-  if (not td->running) { throw(ValueError, "Cannot get thread ID, thread not running!"); }
+static int64_t Thread_C_Int(var self) {
+  struct Thread* t = self;
+  
+  if (not t->is_running) {
+    throw(ValueError, "Cannot get thread ID, thread not running!");
+  }
+  
 #if defined(__unix__) || defined(__APPLE__)
-  return (long)td->thread;
+  return t->thread;
 #elif defined(_WIN32)
-  return (long)td->id;
-#endif  
+  return t->id;
+#endif
   
 }
 
-var Thread_Eq(var self, var obj) {
-  return bool_var(as_long(self) == as_long(obj));
+static var Thread_Eq(var self, var obj) {
+  return bool_var(c_int(self) == c_int(obj));
 }
 
-var Thread_Gt(var self, var obj) {
-  return bool_var(as_long(self) > as_long(obj));
+static var Thread_Gt(var self, var obj) {
+  return bool_var(c_int(self) > c_int(obj));
 }
 
-var Thread_Lt(var self, var obj) {
-  return bool_var(as_long(self) < as_long(obj));
+static var Thread_Lt(var self, var obj) {
+  return bool_var(c_int(self) < c_int(obj));
 }
 
-local bool tls_key_created = false;
+static bool Thread_TLS_Key_Created = false;
 
 #if defined(__unix__) || defined(__APPLE__)
 
-local pthread_key_t key_thread_wrapper;
-local void tls_key_create(void) {
-  pthread_key_create(&key_thread_wrapper, NULL);
+static pthread_key_t Thread_Key_Wrapper;
+
+static void Thread_TLS_Key_Create(void) {
+  pthread_key_create(&Thread_Key_Wrapper, NULL);
 }
-local void tls_key_delete(void) {
-  pthread_key_delete(key_thread_wrapper);
+static void Thread_TLS_Key_Delete(void) {
+  pthread_key_delete(Thread_Key_Wrapper);
 }
 
-local var Thread_Init_Run(var args) {
+static var Thread_Init_Run(var args) {
   
-  var self = pop_front(args);
-  pthread_setspecific(key_thread_wrapper, self);
+  var self = deref(get(args, $(Int, 0)));
+  pop_at(args, $(Int, 0));
+  pthread_setspecific(Thread_Key_Wrapper, self);
   
-  ThreadData* td = cast(self, Thread);
-  td->running = true;
-  return call_with(td->func, td->args);  
+  struct Thread* t = self;
+  t->is_running = True;
+  return call_with(t->func, t->args);  
 }
 
 #elif defined(_WIN32)
 
-local DWORD key_thread_wrapper;
-local void tls_key_create(void) {
-  key_thread_wrapper = TlsAlloc();
+static DWORD Thread_Key_Wrapper;
+
+static void Thread_TLS_Key_Create(void) {
+  Thread_Key_Wrapper = TlsAlloc();
 }
-local void tls_key_delete(void) {
-  TlsFree(key_thread_wrapper);
+static void Thread_TLS_Key_Delete(void) {
+  TlsFree(Thread_Key_Wrapper);
 }
 
-local DWORD Thread_Init_Run(var args) {
-    
-  var self = pop_front(args);
-  TlsSetValue(key_thread_wrapper, self);
+static DWORD Thread_Init_Run(var args) {
   
-  ThreadData* td = cast(self, Thread);
-  td->running = true;
-  call_with(td->func, td->args);
+  var self = deref(get(args, $(Int, 0)));
+  pop_at(args, $(Int, 0));
+  TlsSetValue(Thread_Key_Wrapper, self);
+  
+  struct Thread* t = self;
+  t->is_running = True;
+  call_with(t->func, t->args);
   return 0;
 }
 
 #endif
 
-var Thread_Call(var self, var args) {
+static var Thread_Call(var self, var args) {
   
   /* Setup Thread Local Storage */
   
-  if (not tls_key_created) {
-    tls_key_create();
-    tls_key_created = true;
-    atexit(tls_key_delete);
+  if (not Thread_TLS_Key_Created) {
+    Thread_TLS_Key_Create();
+    Thread_TLS_Key_Created = true;
+    atexit(Thread_TLS_Key_Delete);
   }
   
   /* Copy Arguments & Push Thread Object */  
   
-  ThreadData* td = cast(self, Thread);
-  assign(td->args, args);
-  push_front(td->args, self);
+  struct Thread* t = self;
+  assign(t->args, args);
+  push_at(t->args, self, $(Int, 0));
   
   /* Call Init Thread & Run */
   
 #if defined(__unix__) || defined(__APPLE__)
-  int err = pthread_create(&td->thread, NULL, Thread_Init_Run, td->args);
-  if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Creation"); }
-  if (err is EAGAIN) { throw(OutOfMemoryError, "Not enough resources to create another Thread"); }
-  if (err is EBUSY)  { throw(BusyError, "System is too busy to create thread"); }
+  
+  int err = pthread_create(&t->thread, NULL, Thread_Init_Run, t->args);
+  
+  if (err is EINVAL) {
+    throw(ValueError, "Invalid Argument to Thread Creation");
+  }
+  
+  if (err is EAGAIN) {
+    throw(OutOfMemoryError, "Not enough resources to create another Thread");
+  }
+  
+  if (err is EBUSY)  {
+    throw(BusyError, "System is too busy to create thread");
+  }
+  
 #elif defined(_WIN32)
-  td->thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Thread_Init_Run, td->args, 0, &td->id);
-  if (td->thread == NULL) {
+  
+  t->thread = CreateThread(NULL, 0,
+    (LPTHREAD_START_ROUTINE)Thread_Init_Run, t->args, 0, &t->id);
+  
+  if (t->thread is NULL) {
     throw(ValueError, "Unable to Create WinThread");
   }
+  
 #endif
   
   return self;
   
 }
 
-local ThreadData main_thread_wrapper;
+static var Thread_Main = NULL;
+
+static void Thread_Main_Del(void) {
+  del(Thread_Main);
+}
 
 var Thread_Current(void) {
   
 #if defined(__unix__) || defined(__APPLE__)
-  var wrapper = pthread_getspecific(key_thread_wrapper);
+  var wrapper = pthread_getspecific(Thread_Key_Wrapper);
 #elif defined(_WIN32)
-  var wrapper = TlsGetValue(key_thread_wrapper);
+  var wrapper = TlsGetValue(Thread_Key_Wrapper);
 #endif
   
   /*
@@ -232,145 +345,486 @@ var Thread_Current(void) {
   if (pthread_main_np()) { wrapper = NULL; }
 #endif
   
-  if (wrapper) {
-    return wrapper;
-  } else {
-    main_thread_wrapper.is_main = true;
+  if (wrapper is NULL) {
+  
+    if (Thread_Main is NULL) {
+      Thread_Main = new(Thread, None);
+      atexit(Thread_Main_Del);
+    }
+    
+    struct Thread* t = Thread_Main;
+    t->is_main = True;
+    t->is_running = True;
+    
 #if defined(__unix__) || defined(__APPLE__)
-    main_thread_wrapper.thread = pthread_self();
+    t->thread = pthread_self();
 #elif defined(_WIN32)
-    main_thread_wrapper.thread = GetCurrentThread();
+    t->thread = GetCurrentThread();
 #endif
-    return &main_thread_wrapper;
+
+    return Thread_Main;
   }
+  
+  return wrapper;
   
 }
 
-void Thread_Join(var self) {
-  ThreadData* td = cast(self, Thread);
-  if (not td->thread) { return; }
+static void Thread_Join(var self) {
+  struct Thread* t = self;
+  if (not t->thread) { return; }
   
 #if defined(__unix__) || defined(__APPLE__)
-  int err = pthread_join(td->thread, NULL);
+  int err = pthread_join(t->thread, NULL);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Join"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
 #elif defined(_WIN32)
-  WaitForSingleObject(td->thread, INFINITE);
+  WaitForSingleObject(t->thread, INFINITE);
 #endif
   
 }
 
-void Thread_Terminate(var self) {
-  ThreadData* td = cast(self, Thread);
-  if (not td->thread) { return; }
+static void Thread_Start(var self) {
+  call(self);
+}
+
+static void Thread_Stop(var self) {
+  struct Thread* t = self;
+  if (not t->thread) { return; }
   
 #if defined(__unix__) || defined(__APPLE__)
-  int err = pthread_kill(td->thread, SIGINT);
+  int err = pthread_kill(t->thread, SIGINT);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Kill"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
 #elif defined(_WIN32)
-  TerminateThread(td->thread, FALSE);
+  TerminateThread(t->thread, FALSE);
 #endif  
   
 }
 
+static var Thread_Running(var self) {
+  struct Thread* t = self;
+  return t->is_running;
+}
+
+var Thread = typedecl(Thread,
+  typeclass(Doc,
+    Thread_Name, Thread_Brief, Thread_Description, 
+    Thread_Examples, Thread_Methods),
+  typeclass(New, Thread_New, Thread_Del, Thread_Size),
+  typeclass(Assign,  Thread_Assign),
+  typeclass(Copy,    Thread_Copy),
+  typeclass(Call,    Thread_Call),
+  typeclass(Current, Thread_Current),
+  typeclass(Join,    Thread_Join),
+  typeclass(Start,   Thread_Start, Thread_Stop, Thread_Running),
+  typeclass(C_Int,   Thread_C_Int));
+
+static const char* Lock_Name(void) {
+  return "Lock";
+}
+
+/* TODO */
+static const char* Lock_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Lock_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Lock_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Lock_Methods(void) {
+  return "";
+}
+
+var Lock = typedecl(Lock,
+  typeclass(Doc,
+    Lock_Name, Lock_Brief, Lock_Description,
+    Lock_Examples, Lock_Methods));
+
 void lock(var self) {
-  type_class_method(type_of(self), Lock, lock, self);
+  method(self, Lock, lock);
 }
 
 void unlock(var self) {
-  type_class_method(type_of(self), Lock, unlock, self);
+  method(self, Lock, unlock);
 }
 
-data {
-  var type;
+var lock_try(var self) {
+  return method(self, Lock, lock_try);
+}
+
+struct Mutex {
 #if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_t mutex;
 #elif defined(_WIN32)
   HANDLE mutex;
 #endif
-
-} MutexData;
-
-var Mutex = type_data {
-  type_begin(Mutex),
-  type_entry(Mutex, New),
-  type_entry(Mutex, Assign),
-  type_entry(Mutex, Copy),
-  type_entry(Mutex, With),
-  type_entry(Mutex, Lock),
-  type_end(Mutex)
 };
 
-var Mutex_New(var self, var_list vl) {
-  MutexData* md = cast(self, Mutex);
+static const char* Mutex_Name(void) {
+  return "Mutex";
+}
+
+/* TODO */
+static const char* Mutex_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Mutex_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Mutex_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Mutex_Methods(void) {
+  return "";
+}
+
+static var Mutex_New(var self, var args) {
+  struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
-  pthread_mutex_init(&md->mutex, NULL);
+  pthread_mutex_init(&m->mutex, NULL);
 #elif defined(_WIN32)
-  md->mutex = CreateMutex(NULL, false, NULL);
+  m->mutex = CreateMutex(NULL, false, NULL);
 #endif
-  return md;
+  return m;
 }
 
-var Mutex_Delete(var self) {
-  MutexData* md = cast(self, Mutex);
+static var Mutex_Del(var self) {
+  struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
-  pthread_mutex_destroy(&md->mutex);
+  pthread_mutex_destroy(&m->mutex);
 #elif defined(_WIN32)
-  CloseHandle(md->mutex);
+  CloseHandle(m->mutex);
 #endif
-  return md;
+  return m;
 }
 
-size_t Mutex_Size(void) {
-  return sizeof(MutexData);
+static size_t Mutex_Size(void) {
+  return sizeof(struct Mutex);
 }
 
-void Mutex_Assign(var self, var obj) {
-  MutexData* md = cast(self, Mutex);
-  MutexData* mo = cast(self, Mutex);
-  md->mutex = mo->mutex;
+static var Mutex_Assign(var self, var obj) {
+  struct Mutex* m0 = cast(self, Mutex);
+  struct Mutex* m1 = cast(self, Mutex);
+  m0->mutex = m1->mutex;
+  return self;
 }
 
-var Mutex_Copy(var self) {
+static var Mutex_Copy(var self) {
   var obj = new(Mutex);
   assign(obj, self);
   return obj;
 }
 
-void Mutex_Lock(var self) {
-  MutexData* md = cast(self, Mutex);
+static void Mutex_Lock(var self) {
+  struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
-  int err = pthread_mutex_lock(&md->mutex);
-  if (err is EINVAL)     { throw(ValueError, "Invalid Argument to Mutex Lock"); }
-  if (err is EDEADLK)    { throw(ResourceError, "Attempt to relock already held mutex"); }
+  int err = pthread_mutex_lock(&m->mutex);
+  
+  if (err is EINVAL)  {
+    throw(ValueError, "Invalid Argument to Mutex Lock");
+  }
+  
+  if (err is EDEADLK) {
+    throw(ResourceError, "Attempt to relock already held mutex");
+  }
 #elif defined(_WIN32)
-  WaitForSingleObject(md->mutex, INFINITE);
+  WaitForSingleObject(m->mutex, INFINITE);
 #endif
   
 }
 
-var Mutex_Lock_Try(var self) {
-  MutexData* md = cast(self, Mutex);
+static var Mutex_Lock_Try(var self) {
+  struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
-  int err = pthread_mutex_trylock(&md->mutex);
+  int err = pthread_mutex_trylock(&m->mutex);
   if (err == EBUSY) { return False; }
-  if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Lock Try"); }
+  if (err is EINVAL) {
+    throw(ValueError, "Invalid Argument to Mutex Lock Try");
+  }
   return True;
 #elif defined(_WIN32)
-  return bool_var(not (WaitForSingleObject(md->mutex, 0) is WAIT_TIMEOUT));
+  return bool_var(not (WaitForSingleObject(m->mutex, 0) is WAIT_TIMEOUT));
 #endif
   
 }
 
-void Mutex_Unlock(var self) {
-  MutexData* md = cast(self, Mutex);
+static void Mutex_Unlock(var self) {
+  struct Mutex* m = cast(self, Mutex);
 #if defined(__unix__) || defined(__APPLE__)
-  int err = pthread_mutex_unlock(&md->mutex);
+  int err = pthread_mutex_unlock(&m->mutex);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Unlock"); }
   if (err is EPERM)  { throw(ResourceError, "Mutex cannot be held by caller"); }
 #elif defined(_WIN32)
-  ReleaseMutex(md->mutex);
+  ReleaseMutex(m->mutex);
 #endif
+  
+}
+
+var Mutex = typedecl(Mutex,
+  typeclass(Doc, 
+    Mutex_Name, Mutex_Brief, Mutex_Description, Mutex_Examples, Mutex_Methods),
+  typeclass(New,    Mutex_New, Mutex_Del, Mutex_Size),
+  typeclass(Assign, Mutex_Assign),
+  typeclass(Copy,   Mutex_Copy),
+  typeclass(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
+  typeclass(Begin,  Mutex_Lock, Mutex_Unlock));
+
+var TypeError = typedecl(TypeError);
+var ValueError = typedecl(ValueError);
+var ClassError = typedecl(ClassError);
+var IndexOutOfBoundsError = typedecl(IndexOutOfBoundsError);
+var KeyError = typedecl(KeyError);
+var OutOfMemoryError = typedecl(OutOfMemoryError);
+var IOError = typedecl(IOError);
+var FormatError = typedecl(FormatError);
+var BusyError = typedecl(BusyError);
+var ResourceError = typedecl(ResourceError);
+
+var ProgramAbortedError = typedecl(ProgramAbortedError);
+var DivisionByZeroError = typedecl(DivisionByZeroError);
+var IllegalInstructionError = typedecl(IllegalInstructionError);
+var ProgramInterruptedError = typedecl(ProgramInterruptedError);
+var SegmentationError = typedecl(SegmentationError);
+var ProgramTerminationError = typedecl(ProgramTerminationError);
+
+static void Exception_Signal(int sig) {
+  switch(sig) {
+    case SIGABRT: throw(ProgramAbortedError, "Program Aborted");
+    case SIGFPE:  throw(DivisionByZeroError, "Division by Zero");
+    case SIGILL:  throw(IllegalInstructionError, "Illegal Instruction");
+    case SIGINT:  throw(ProgramInterruptedError, "Program Interrupted");
+    case SIGSEGV: throw(SegmentationError, "Segmentation fault");
+    case SIGTERM: throw(ProgramTerminationError, "Program Terminated");
+  }
+}
+
+void exception_register_signals(void) {
+  signal(SIGABRT, Exception_Signal);
+  signal(SIGFPE,  Exception_Signal);
+  signal(SIGILL,  Exception_Signal);
+  signal(SIGINT,  Exception_Signal);
+  signal(SIGSEGV, Exception_Signal);
+  signal(SIGTERM, Exception_Signal);
+}
+
+void exception_inc(void) {
+  struct Thread* t = current(Thread);
+  if (t->exc_depth is CELLO_EXC_MAX_DEPTH) {
+    fprintf(stderr, "Cello Fatal Error: Exception Buffer Overflow!\n");
+    abort();
+  }
+  t->exc_depth++;
+}
+
+void exception_dec(void) {
+  struct Thread* t = current(Thread);
+  if (t->exc_depth == 0) {
+    fprintf(stderr, "Cello Fatal Error: Exception Buffer Underflow!\n");
+    abort();
+  }
+  t->exc_depth--;
+}
+
+var exception_active(void) {
+  struct Thread* t = current(Thread);
+  return t->exc_active;
+}
+
+void exception_activate(void) {
+  struct Thread* t = current(Thread);
+  t->exc_active = True;
+}
+
+void exception_deactivate(void) {
+  struct Thread* t = current(Thread);
+  t->exc_active = False;  
+}
+
+var exception_object(void) {
+  struct Thread* t = current(Thread);
+  return t->exc_obj;  
+}
+
+var exception_message(void) {
+  struct Thread* t = current(Thread);
+  return t->exc_msg;
+}
+
+var exception_buffer(void) {
+  struct Thread* t = current(Thread);
+  if (t->exc_depth == 0) {
+    fprintf(stderr, "Cello Fatal Error: Exception Buffer Out of Bounds!\n");
+    abort();
+  }
+  return t->exc_buffers[t->exc_depth-1];
+}
+
+size_t exception_depth(void) {
+  struct Thread* t = current(Thread);
+  return t->exc_depth;
+}
+
+#if defined(__unix__) || defined(__APPLE__)
+
+static void Exception_Backtrace(void) {
+  
+  struct Thread* t = current(Thread);
+  
+  t->exc_backtrace_count = backtrace(t->exc_backtrace, CELLO_EXC_MAX_STRACE);
+  char** symbols = backtrace_symbols(t->exc_backtrace, t->exc_backtrace_count);  
+  
+  for (int i = 0; i < t->exc_backtrace_count; i++) {
+    print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", 
+      $(Int, i), $(String, symbols[i]));
+  }
+  print_to($(File, stderr), 0, "!!\t\n");
+  
+  free(symbols);
+  
+}
+
+#elif defined(_WIN32)
+
+static void Exception_Backtrace(void) {
+  
+  /*
+  HANDLE process = GetCurrentProcess();
+  HANDLE thread = GetCurrentThread();
+
+  CONTEXT context;
+  context.ContextFlags = CONTEXT_CONTROL;
+  GetThreadContext(thread, &context);
+
+  DWORD image = IMAGE_FILE_MACHINE_AMD64;
+  
+  STACKFRAME64 stackframe;
+  ZeroMemory(&stackframe, sizeof(STACKFRAME64));
+  stackframe.AddrPC.Offset = context.Rip;
+  stackframe.AddrPC.Mode = AddrModeFlat;
+  stackframe.AddrFrame.Offset = context.Rsp;
+  stackframe.AddrFrame.Mode = AddrModeFlat;
+  stackframe.AddrStack.Offset = context.Rbp;
+  stackframe.AddrStack.Mode = AddrModeFlat;
+
+  SymInitialize(process, NULL, TRUE);
+
+  for (size_t i = 0; i < 10; i++) {
+    BOOL result = StackWalk64(
+      image, process, thread,
+      &stackframe, &context,
+      NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL);
+    
+    if (!result) { break; }
+    
+    // SymFromAddr 
+    
+    unsigned char buffer[sizeof(IMAGEHLP_SYMBOL64) + 256];
+    PIMAGEHLP_SYMBOL64 symbol = (PIMAGEHLP_SYMBOL64)&buffer;
+    ZeroMemory(symbol, sizeof(IMAGEHLP_SYMBOL64) + 256);
+    symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
+    symbol->MaxNameLength = 256;
+    
+    //IMAGEHLP_LINE64 line;
+    //line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+    
+    if (SymGetSymFromAddr64(process, stackframe.AddrPC.Offset, NULL, symbol)) {
+      print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", 
+        $(Int, i), $(String, symbol->Name));
+    } else {
+      printf("Error from SymGetSymFromAddr64: %lu.\n", GetLastError());
+      print_to($(File, stderr), 0, "!!\t\t[%i] ???\n", $(Int, i));
+    }
+    
+    i++;
+  }
+  
+  print_to($(File, stderr), 0, "!!\t\n");
+  
+  SymCleanup(process);
+  */
+  
+}
+
+#else
+
+static void Exception_Backtrace(void) {}
+
+#endif
+
+static void Exception_Error(void)  {
+  
+  struct Thread* t = current(Thread);
+  
+  print_to($(File, stderr), 0, "\n");
+  print_to($(File, stderr), 0, "!!\t\n");
+  print_to($(File, stderr), 0, "!!\tUncaught %$\n", exception_object());
+  print_to($(File, stderr), 0, "!!\t\n");
+  print_to($(File, stderr), 0, "!!\t\t %s\n", exception_message());
+  print_to($(File, stderr), 0, "!!\t\n");
+  
+  print_to($(File, stderr), 0, "!!\tStack Trace: \n");
+  print_to($(File, stderr), 0, "!!\t\n");
+  
+  Exception_Backtrace();
+  
+  exit(EXIT_FAILURE);
+  
+}
+
+var exception_throw(var obj, const char* fmt, var args) {
+
+  struct Thread* t = current(Thread);
+  
+  t->exc_obj = obj;
+  print_to_with(t->exc_msg, 0, fmt, args);
+  
+  if (exception_depth() >= 1) {
+    longjmp(exception_buffer(), 1);
+  } else {
+    Exception_Error();
+  }
+  
+  return Undefined;
+  
+}
+
+var exception_catch(var args) {
+  
+  if (not exception_active()) { return Undefined; }
+  
+  /* If no Arguments catch all */
+  if (len(args) is 0) {
+    return exception_object();
+  }
+  
+  /* Check Exception against Arguments */
+  foreach(arg in args) {
+    if_eq(arg, exception_object()) {
+      return exception_object();
+    }
+  }
+  
+  /* No matches found. Propagate to outward block */
+  if (exception_depth() >= 1) {
+    longjmp(exception_buffer(), 1);
+  } else {  
+    Exception_Error();
+  }
+  
+  return Undefined;
   
 }

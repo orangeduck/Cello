@@ -1,276 +1,503 @@
-#include "Cello/Table.h"
+#include "Cello.h"
 
-#include "Cello/Array.h"
-#include "Cello/List.h"
-#include "Cello/Bool.h"
-#include "Cello/None.h"
-#include "Cello/Exception.h"
+static const char* Table_Name(void) {
+  return "Table";
+}
 
-#include <stdlib.h>
-#include <string.h>
+/* TODO */
+static const char* Table_Brief(void) {
+  return "";
+}
 
-data {
-  var type;
-  var key_type;
-  var val_type;
-  int size;
-  var keys;
-  var* key_buckets;
-  var* val_buckets;
-} TableData;
+/* TODO */
+static const char* Table_Description(void) {
+  return "";
+}
 
-var Table = type_data {
-  type_begin(Table),
-  type_entry(Table, New),
-  type_entry(Table, Assign),
-  type_entry(Table, Copy),
-  type_entry(Table, Eq),
-  type_entry(Table, Collection),
-  type_entry(Table, Dict),
-  type_entry(Table, Iter),
-  type_entry(Table, Show),
-  type_end(Table)
+/* TODO */
+static const char* Table_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Table_Methods(void) {
+  return "";
+}
+
+struct Table {
+  var data;
+  var ktype;
+  var vtype;
+  size_t nslots;
+  size_t nitems;
 };
 
-var Table_New(var self, var_list vl) {
-  TableData* tab = cast(self, Table);
+enum {
+  TABLE_PRIMES_COUNT = 24
+};
+
+static const size_t Table_Primes[TABLE_PRIMES_COUNT] = {
+  0,       1,       5,       11,
+  23,      53,      101,     197,
+  389,     683,     1259,    2417,
+  4733,    9371,    18617,   37097,
+  74093,   148073,  296099,  592019,
+  1100009, 2200013, 4400021, 8800019
+};
+
+static const float Table_Load_Factor = 0.9;
+
+static size_t Table_Ideal_Size(size_t size) {
+  size = size / Table_Load_Factor;
+  for (size_t i = 0; i < TABLE_PRIMES_COUNT; i++) {
+    if (Table_Primes[i] >= size) { return Table_Primes[i]; }
+  }
+  size_t last = Table_Primes[TABLE_PRIMES_COUNT-1];
+  for (size_t i = 0;; i++) {
+    if (last * i >= size) { return last * i; }
+  }
+}
+
+static size_t Table_Step(struct Table* t) {
+  return
+    sizeof(uint64_t) + 
+    sizeof(struct CelloHeader) + size(t->ktype) + 
+    sizeof(struct CelloHeader) + size(t->vtype);
+}
+
+static uint64_t Table_Key_Hash(struct Table* t, size_t i) {
+  return *(uint64_t*)(t->data + (i * Table_Step(t)));
+}
+
+static uint64_t Table_Key_Hash_Set(struct Table* t, size_t i, uint64_t h) {
+  *(uint64_t*)(t->data + i * Table_Step(t)) = h+1;
+}
+
+static var Table_Key(struct Table* t, size_t i) {
+  return t->data + (i * Table_Step(t)) + 
+    sizeof(uint64_t) + 
+    sizeof(struct CelloHeader);  
+}
+
+static var Table_Val(struct Table* t, size_t i) {
+  return t->data + (i * Table_Step(t)) + 
+    sizeof(uint64_t) + 
+    sizeof(struct CelloHeader) + 
+    size(t->ktype) + 
+    sizeof(struct CelloHeader);  
+}
+
+static uint64_t Table_Probe(struct Table* t, uint64_t h, uint64_t i) {
+  uint64_t v = i - (h-1);
+  if (v < 0) {
+    v = t->nslots + v;
+  }
+  return v;
+}
+
+static void Table_Set(var self, var key, var val);
+
+static var Table_New(var self, var args) {
+  struct Table* t = self;
+  t->ktype  = cast(get(args, $(Int, 0)), Type);
+  t->vtype  = cast(get(args, $(Int, 1)), Type);
   
-  tab->key_type = cast(var_list_get(vl), Type);
-  tab->val_type = cast(var_list_get(vl), Type);
+  size_t nargs = len(args);
+  if (nargs % 2 isnt 0) {
+    return throw(FormatError, 
+      "Received non multiple of two argument count to Table constructor.");
+  }
   
-  tab->size = Hash_Table_Size(0);
-  tab->keys = new(Array, tab->key_type);
+  t->nitems = (nargs-2)/2;
+  t->nslots = Table_Ideal_Size(t->nitems);
   
-  tab->key_buckets = malloc(tab->size * sizeof(var));
-  tab->val_buckets = malloc(tab->size * sizeof(var));
+  if (t->nslots is 0) {
+    t->data = None;
+    return self;
+  }
   
-  if (tab->key_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
-  if (tab->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
+  t->data = calloc(t->nslots, Table_Step(t));
   
-  for (int i = 0; i < tab->size; i++) {
-    tab->key_buckets[i] = new(Array, tab->key_type);
-    tab->val_buckets[i] = new(Array, tab->val_type);
+  if (t->data is None) {
+    throw(OutOfMemoryError, "Cannot allocate Table, out of memory!");
+  }
+  
+  for(size_t i = 0; i < t->nitems; i++) {
+    var key = get(args, $(Int, 2+(i*2)+0));
+    var val = get(args, $(Int, 2+(i*2)+1));
+    Table_Set(t, key, val);
   }
   
   return self;
 }
 
-var Table_Delete(var self) {
-  TableData* tab = cast(self, Table);
+static var Table_Del(var self) {
+  struct Table* t = self;  
   
-  delete(tab->keys);
-  
-  for (int i = 0; i < tab->size; i++) {
-    delete(tab->key_buckets[i]);
-    delete(tab->val_buckets[i]);
+  for (size_t i = 0; i < t->nslots; i++) {
+    if (Table_Key_Hash(t, i) isnt 0) {
+      destruct(Table_Key(t, i));
+      destruct(Table_Val(t, i));
+    }
   }
   
-  free(tab->key_buckets);
-  free(tab->val_buckets);
-  
+  free(t->data);
   return self;
 }
 
-size_t Table_Size(void) {
-  return sizeof(TableData);
+static size_t Table_Size(void) {
+  return sizeof(struct Table);
 }
 
-void Table_Assign(var self, var obj) {
-
-  clear(self);
+static void Table_Clear(var self) {
+  struct Table* t = self;
   
-  foreach(key in obj) {
-    put(self, key, get(obj, key));
-  }
-}
-
-var Table_Copy(var self) {
-  TableData* tab = cast(self, Table);
-  
-  var cop = new(Table, tab->key_type, tab->val_type);
-  
-  foreach(key in self) {
-    put(cop, key, get(self, key));
+  for (size_t i = 0; i < t->nslots; i++) {
+    if (Table_Key_Hash(t, i) isnt 0) {
+      destruct(Table_Key(t, i));
+      destruct(Table_Val(t, i));
+    }
   }
   
-  return cop;
+  free(t->data);
+  
+  t->nslots = 0;
+  t->nitems = 0;
+  t->data = None;
+  
 }
 
-var Table_Eq(var self, var obj) {
-  TableData* tab = cast(self, Table);
+static var Table_Assign(var self, var obj) {
+  struct Table* t = self;  
+  Table_Clear(t);
   
-  if_neq(type_of(obj), Table) { return False; }
+  t->nitems = len(obj);
+  t->nslots = Table_Ideal_Size(t->nitems);
+  
+  if (t->nslots is 0) {
+    t->data = None;
+    return self;
+  }
+  
+  t->data = calloc(t->nslots, Table_Step(t));
+  
+  if (t->data is None) {
+    throw(OutOfMemoryError, "Cannot allocate Table, out of memory!");
+  }
   
   foreach(key in obj) {
-    if (not contains(self, key)) { return False; }
+    Table_Set(t, key, get(obj, key));
+  }
+  
+  return self;
+  
+}
+
+static var Table_Copy(var self) {
+  struct Table* t = self;
+  
+  var r = new(Table, t->ktype, t->vtype);
+  
+  for (size_t i = 0; i < t->nslots; i++) {
+    if (Table_Key_Hash(t, i) isnt 0) {
+      Table_Set(r, Table_Key(t, i), Table_Val(t, i));
+    }
+  }
+  
+  return r;
+}
+
+static var Table_Eq(var self, var obj) {
+  
+  foreach (key in obj) {
+    if (not mem(self, key)) { return False; }
     if_neq(get(obj, key), get(self, key)) { return False; }
   }
 	
-  foreach(key in self) {
-    if (not contains(obj, key)) { return False; }
+  foreach (key in self) {
+    if (not mem(obj, key)) { return False; }
     if_neq(get(obj, key), get(self, key)) { return False; }
   }
 	
   return True;
 }
 
-int Table_Len(var self) {
-  TableData* tab = cast(self, Table);
-  return len(tab->keys);
+static size_t Table_Len(var self) {
+  struct Table* t = self;
+  return t->nitems;
 }
 
-void Table_Clear(var self) {
-  TableData* tab = cast(self, Table);
-  
-  clear(tab->keys);
+static uint64_t Table_Swapspace_Hash(struct Table* t, var space) {
+  return *((uint64_t*)space);
+}
 
-  for(int i = 0; i < tab->size; i++) {
-    clear(tab->key_buckets[i]);
-    clear(tab->val_buckets[i]);
+static var Table_Swapspace_Key(struct Table* t, var space) {
+  return space + sizeof(uint64_t) + sizeof(struct CelloHeader);
+}
+
+static var Table_Swapspace_Val(struct Table* t, var space) {
+  return space + sizeof(uint64_t) + sizeof(struct CelloHeader) +
+    size(t->ktype) + sizeof(struct CelloHeader); 
+}
+
+static var Table_Set_Move(var self, var key, var val, var move) {
+  
+  struct Table* t = self;
+  key = cast(key, t->ktype);
+  val = cast(val, t->vtype);
+  
+  uint64_t i = hash(key) % t->nslots;  
+  uint64_t j = 0;
+
+  char sspace0[Table_Step(t)];
+  char sspace1[Table_Step(t)];
+  
+  if (move) {
+  
+    *((uint64_t*)sspace0) = i;
+    
+    memcpy(sspace0 + sizeof(uint64_t), 
+      key - sizeof(struct CelloHeader), 
+      size(t->ktype) + sizeof(struct CelloHeader));
+      
+    memcpy(sspace0 + sizeof(uint64_t) + 
+      sizeof(struct CelloHeader) + size(t->ktype), 
+      val - sizeof(struct CelloHeader), 
+      size(t->ktype) + sizeof(struct CelloHeader));
+  
+  } else {
+    
+    memset(sspace0, 0, sizeof(Table_Step(t)));
+    memset(sspace1, 0, sizeof(Table_Step(t)));
+    
+    struct CelloHeader* khead = (struct CelloHeader*)
+      (sspace0 + sizeof(uint64_t));
+    struct CelloHeader* vhead = (struct CelloHeader*)
+      (sspace0 + sizeof(uint64_t) 
+      + sizeof(struct CelloHeader) + size(t->ktype));
+      
+    khead->type = t->ktype;
+    vhead->type = t->vtype;
+    khead->flags = (var)CelloDataAlloc;
+    vhead->flags = (var)CelloDataAlloc;
+    
+    *((uint64_t*)sspace0) = i; 
+    assign(sspace0 + sizeof(uint64_t) + sizeof(struct CelloHeader), key);
+    assign(sspace0 + sizeof(uint64_t) + sizeof(struct CelloHeader)
+      + size(t->ktype) + sizeof(struct CelloHeader), val);
   }
   
-}
-
-var Table_Contains(var self, var key) {
-  TableData* tab = cast(self, Table);
-  key = cast(key, tab->key_type);
-  return contains(tab->keys, key);
-}
-
-static void Table_Rehash(TableData* tab) {
-  
-  int new_size = Hash_Table_Size(len(tab)/2);
-  int old_size = tab->size;
-  if (old_size == new_size) { return; }
+  while (True) {
     
-  var* old_keys = tab->key_buckets;
-  var* old_vals = tab->val_buckets;
-  
-  tab->size = new_size;
-  tab->key_buckets = malloc(tab->size * sizeof(var));
-  tab->val_buckets = malloc(tab->size * sizeof(var));
-
-  if (tab->key_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
-  if (tab->val_buckets == NULL) { throw(OutOfMemoryError, "Cannot create Table. Out of memory!"); }
-  
-  for (int i = 0; i < tab->size; i++) {
-    tab->key_buckets[i] = new(Array, tab->key_type);
-    tab->val_buckets[i] = new(Array, tab->val_type);
-  }
-  
-  for (int i = 0; i < old_size; i++) {
-    var keys = old_keys[i];
-    var vals = old_vals[i];
-    
-    for (int j = 0; j < len(keys); j++) {
-      long ni = abs(hash(at(keys, j)) % tab->size);
-      push(tab->key_buckets[ni], at(keys, j));
-      push(tab->val_buckets[ni], at(vals, j));
+    uint64_t h = Table_Key_Hash(t, i);
+    if (h is 0) {
+      memcpy(t->data + i * Table_Step(t), sspace0, Table_Step(t));
+      return True;
     }
     
-    delete(keys);
-    delete(vals);
+    if_eq(Table_Key(t, i), Table_Swapspace_Key(t, sspace0)) {
+      destruct(Table_Key(t, i));
+      destruct(Table_Val(t, i));
+      memcpy(t->data + i * Table_Step(t), sspace0, Table_Step(t));
+      return False;
+    }
+    
+    if (j >= Table_Probe(t, i, h)) {
+      memcpy(sspace1, t->data + i * Table_Step(t), Table_Step(t));
+      memcpy(t->data + i * Table_Step(t), sspace0, Table_Step(t));
+      memcpy(sspace0, sspace1, Table_Step(t));
+      j = Table_Probe(t, i, h);
+    }
+    
+    i = (i+1) % t->nslots;
+    j++;
   }
   
-  free(old_keys);
-  free(old_vals);
 }
 
-void Table_Discard(var self, var key) {
-  TableData* tab = cast(self, Table);
-  key = cast(key, tab->key_type);
+static void Table_Rehash(struct Table* t) {
   
-  long i = abs(hash(key) % tab->size);
+  size_t new_size = Table_Ideal_Size(t->nitems);  
+  size_t old_size = t->nslots;
+  var    old_data = t->data;
   
-  var keys = tab->key_buckets[i];
-  var vals = tab->val_buckets[i];
+  if (new_size == old_size) { return; }
   
-  for(int j = 0; j < len(keys); j++) {
-    if_eq(at(keys, j), key) {
-      discard(tab->keys, key);
-      pop_at(keys, j);
-      pop_at(vals, j);
-      Table_Rehash(self);
+  t->nslots = new_size;
+  t->data = calloc(t->nslots, Table_Step(t));
+  
+  for (size_t i = 0; i < old_size; i++) {
+    
+    uint64_t h = *(uint64_t*)(old_data + i * Table_Step(t));
+    var key = old_data + i * Table_Step(t) + sizeof(struct CelloHeader);
+    var val = old_data + i * Table_Step(t) + sizeof(struct CelloHeader) + 
+      size(t->ktype) + sizeof(struct CelloHeader);
+    
+    if (h isnt 0) {
+      Table_Set_Move(t, key, val, True);
+    }
+    
+  }
+  
+  free(old_data);
+}
+
+static var Table_Mem(var self, var key) {
+  struct Table* t = self;
+  
+  uint64_t i = hash(key) % t->nslots;
+  uint64_t j = 0;
+  
+  while (True) {
+    
+    uint64_t h = Table_Key_Hash(t, i);
+    if (h is 0 or j > Table_Probe(t, i, h)) {
+      return False;
+    }
+    
+    if_eq(Table_Key(t, i), key) {
+      return True;
+    }
+    
+    i = (i+1) % t->nslots; j++;
+  }
+  
+}
+
+static void Table_Rem(var self, var key) {
+  struct Table* t = self;
+  key = cast(key, t->ktype);
+  
+  uint64_t i = hash(key) % t->nslots;
+  uint64_t j = 0;
+  
+  while (True) {
+    
+    uint64_t h = Table_Key_Hash(t, i);
+    if (h is 0 or j > Table_Probe(t, i, h)) {
+      throw(KeyError, "Key %$ not in Table!", key);
+    }
+    
+    if_eq(Table_Key(t, i), key) {
+      
+      destruct(Table_Key(t, i));
+      destruct(Table_Val(t, i));
+      memset(t->data + i * Table_Step(t), 0, Table_Step(t));
+      
+      while (True) {
+        
+        uint64_t ni = (i+1) % t->nslots;
+        uint64_t nh = Table_Key_Hash(t, ni);
+        if (nh isnt 0 and Table_Probe(t, ni, nh) > 0) {
+          memcpy(
+            t->data +  i * Table_Step(t),
+            t->data + ni * Table_Step(t),
+            Table_Step(t));
+          memset(t->data + ni * Table_Step(t), 0, Table_Step(t));
+          i = ni;
+        } else {
+          break;
+        }
+        
+      }
+      
+      t->nitems--;
+      Table_Rehash(t);
       return;
     }
+    
+    i = (i+1) % t->nslots; j++;
   }
   
-  throw(KeyError, "Key %$ not in Table!", key);
 }
 
-var Table_Get(var self, var key) {
-
-  TableData* tab = cast(self, Table);
-  key = cast(key, tab->key_type);
+static var Table_Get(var self, var key) {
+  struct Table* t = self;
+  key = cast(key, t->ktype);
   
-  long i = abs(hash(key) % tab->size);
+  uint64_t i = hash(key) % t->nslots;
+  uint64_t j = 0;
   
-  var keys = tab->key_buckets[i];
-  var vals = tab->val_buckets[i];
-  
-  for (int j = 0; j < len(keys); j++) {
-    if_eq(at(keys, j), key) { return at(vals, j); }
+  while (True) {
+    
+    uint64_t h = Table_Key_Hash(t, i);
+    if (h is 0 or j > Table_Probe(t, i, h)) {
+      throw(KeyError, "Key %$ not in Table!", key);
+    }
+    
+    if_eq(Table_Key(t, i), key) {
+      return Table_Val(t, i);
+    }
+    
+    i = (i+1) % t->nslots; j++;
   }
-  
-  return throw(KeyError, "Key %$ not in Table!", key);
 }
 
-void Table_Put(var self, var key, var val) {
+static void Table_Set(var self, var key, var val) {
+  if (Table_Set_Move(self, key, val, False)) {
+    t->nitems++;
+    Table_Rehash(t);
+  }
+}
+
+static var Table_Iter_Init(var self) {
+  struct Table* t = self;
+  if (t->nitems is 0) { return Terminal; }
   
-  TableData* tab = cast(self, Table);
-  Table_Rehash(self);
-  
-  key = cast(key, tab->key_type);
-  val = cast(val, tab->val_type);
-  
-  long i = abs(hash(key) % tab->size);
-  
-  var keys = tab->key_buckets[i];
-  var vals = tab->val_buckets[i];
-  
-  for(int j = 0; j < len(keys); j++) {
-    if_eq(at(keys, j), key) {
-      discard(tab->keys, key);
-      pop_at(keys, j);
-      pop_at(vals, j);
+  for (size_t i = 0; i < t->nslots; i++) {
+    if (Table_Key_Hash(t, i) isnt 0) {
+      return Table_Key(t, i);
     }
   }
   
-  push(keys, key);
-  push(vals, val);
-  push(tab->keys, key);
+}
+
+static var Table_Iter_Next(var self, var curr) {
+  struct Table* t = self;
   
+  curr += Table_Step(t);
+  
+  while (True) {
+
+    if (curr > Table_Key(t, t->nslots-1)) {
+      return Terminal;
+    }
+
+    uint64_t h = *(uint64_t*)(curr - sizeof(struct CelloHeader) - sizeof(uint64_t));
+    if (h isnt 0) { return curr; }
+    
+    curr += Table_Step(t);
+  }
 }
 
-var Table_Iter_Start(var self) {
-  TableData* tab = cast(self, Table);
-  return iter_start(tab->keys);
-}
-
-var Table_Iter_End(var self) {
-  TableData* tab = cast(self, Table);
-  return iter_end(tab->keys);
-}
-
-var Table_Iter_Next(var self, var curr) {
-  TableData* tab = cast(self, Table);
-  return iter_next(tab->keys, curr);
-}
-
-int Table_Show(var self, var output, int pos) {
-  TableData* td = cast(self, Table);
+static int Table_Show(var self, var output, int pos) {
+  struct Table* t = self;
   
   pos = print_to(output, pos, "<'Table' At 0x%p {", self);
   
-  for(int i = 0; i < len(self); i++) {
-    var key = at(td->keys, i);
-    var val = get(self, key);
-    pos = print_to(output, pos, "%$:%$", key, get(self, key));
-    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
+  for(size_t i = 0; i < t->nslots; i++) {
+    if (Table_Key_Hash(t, i) isnt 0) {
+      pos = print_to(output, pos, "%$:%$",
+        Table_Key(t, i), Table_Val(t, i));
+      if (i < Table_Len(t)-1) { pos = print_to(output, pos, ", "); }
+    }
   }
   
   pos = print_to(output, pos, "}>");
   
   return pos;
 }
+
+var Table = typedecl(Table,
+  typeclass(Doc,
+    Table_Name, Table_Brief, Table_Description,
+    Table_Examples, Table_Methods),
+  typeclass(New, Table_New, Table_Del, Table_Size),
+  typeclass(Assign, Table_Assign),
+  typeclass(Copy, Table_Copy),
+  typeclass(Eq, Table_Eq),
+  typeclass(Len, Table_Len),
+  typeclass(Get, Table_Get, Table_Set, Table_Mem, Table_Rem),
+  typeclass(Iter, Table_Iter_Init, Table_Iter_Next),
+  typeclass(Show, Table_Show, NULL));
 

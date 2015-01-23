@@ -1,20 +1,40 @@
-#include "Cello/Format.h"
+#include "Cello.h"
 
-#include "Cello/Type.h"
-#include "Cello/Exception.h"
-#include "Cello/File.h"
-#include "Cello/Number.h"
-#include "Cello/Char.h"
-#include "Cello/Reference.h"
+static const char* Format_Name(void) {
+  return "Format";
+}
 
-#include <string.h>
+/* TODO */
+static const char* Format_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Format_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Format_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Format_Methods(void) {
+  return "";
+}
+
+var Format = typedecl(Format,
+  typeclass(Doc, 
+    Format_Name, Format_Brief, Format_Description,
+    Format_Examples, Format_Methods));
 
 int format_to_va(var self, int pos, const char* fmt, va_list va) {
-  return type_class_method(type_of(self), Format, format_to, self, pos, fmt, va);
+  return method(self, Format, format_to, pos, fmt, va);
 }
 
 int format_from_va(var self, int pos, const char* fmt, va_list va) {
-  return type_class_method(type_of(self), Format, format_from, self, pos, fmt, va);
+  return method(self, Format, format_from, pos, fmt, va);
 }
 
 int format_to(var self, int pos, const char* fmt, ...) {
@@ -33,35 +53,64 @@ int format_from(var self, int pos, const char* fmt, ...) {
   return ret;
 }
 
+static const char* Show_Name(void) {
+  return "Show";
+}
+
+/* TODO */
+static const char* Show_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Show_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Show_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Show_Methods(void) {
+  return "";
+}
+
+var Show = typedecl(Show,
+  typeclass(Doc, 
+    Show_Name, Show_Brief, Show_Description,
+    Show_Examples, Show_Methods));
+
 int show(var self) {
   return show_to(self, $(File, stdout), 0);
 }
 
 int show_to(var self, var out, int pos) {
   
-  if (not type_implements(type_of(self), Show)) {
+  if (not implements(self, Show)) {
     return print_to(out, 0, "<'%s' At 0x%p>", type_of(self), self);
   } else {
-    Show* ishow = type_class(type_of(self), Show);
-    return ishow->show(self, out, pos);
+    return method(self, Show, show, out, pos);
   }
   
 }
 
-int print_vl(const char* fmt, var_list vl) {
-  return print_to_vl($(File, stdout), 0, fmt, vl);
+int print_with(const char* fmt, var args) {
+  return print_to_with($(File, stdout), 0, fmt, args);
 }
 
-int println_vl(const char* fmt, var_list vl) {
+int println_with(const char* fmt, var args) {
   int ret = 0;
-  ret = print_to_vl($(File, stdout), ret, fmt, vl);
+  ret = print_to_with($(File, stdout), ret, fmt, args);
   ret = print_to($(File, stdout), ret, "\n");
   return ret;
 }
 
-int print_to_vl(var out, int pos, const char* fmt, var_list vl) {
+int print_to_with(var out, int pos, const char* fmt, var args) {
 
   char fmt_buf[strlen(fmt)+1]; 
+  var index = $(Int, 0);
   
   while(true) {
     
@@ -98,34 +147,34 @@ int print_to_vl(var out, int pos, const char* fmt, var_list vl) {
       strncpy(fmt_buf, start, (fmt - start)+1);
       fmt_buf[(fmt - start)+1] = '\0';
       
-      if (var_list_end(vl)) {
+      if_ge(index, $(Int, len(args))) {
         throw(FormatError, "Not enough arguments to Format String!");
       }
       
-      var a = var_list_get(vl);
+      var a = get(args, index); minc(index);
       
       if (*fmt == '$') { pos = show_to(a, out, pos); }
       
       if (*fmt == 's') {      
-        int off = format_to(out, pos, fmt_buf, as_str(a));
+        int off = format_to(out, pos, fmt_buf, c_str(a));
         if (off < 0) { throw(FormatError, "Unable to output String!"); }
         pos += off;
       }
       
       if (strchr("diouxX", *fmt)) {
-        int off = format_to(out, pos, fmt_buf, as_long(a));
+        int off = format_to(out, pos, fmt_buf, c_int(a));
         if (off < 0) { throw(FormatError, "Unable to output Int!"); }
         pos += off;
       }
       
       if (strchr("fFeEgGaA", *fmt)) { 
-        int off = format_to(out, pos, fmt_buf, as_double(a));
+        int off = format_to(out, pos, fmt_buf, c_float(a));
         if (off < 0) { throw(FormatError, "Unable to output Real!"); }
         pos += off;
       }
       
       if (*fmt == 'c') {
-        int off = format_to(out, pos, fmt_buf, as_char(a));
+        int off = format_to(out, pos, fmt_buf, c_char(a));
         if (off < 0) { throw(FormatError, "Unable to output Char!"); }
         pos += off;
       }
@@ -152,23 +201,24 @@ int look(var self) {
 }
 
 int look_from(var self, var input, int pos) {
-  return type_class_method(type_of(self), Show, look, self, input, pos);
+  return method(self, Show, look, input, pos);
 }
 
-int scan_vl(const char* fmt, var_list vl) {
-  return scan_from_vl($(File, stdin), 0, fmt, vl);
+int scan_with(const char* fmt, var args) {
+  return scan_from_with($(File, stdin), 0, fmt, args);
 }
 
-int scanln_vl(const char* fmt, var_list vl) {
+int scanln_with(const char* fmt, var args) {
   int ret = 0;
-  ret = scan_from_vl($(File, stdin), ret, fmt, vl);
+  ret = scan_from_with($(File, stdin), ret, fmt, args);
   ret = scan_from($(File, stdin), ret, "\n");
   return ret;
 }
 
-int scan_from_vl(var input, int pos, const char* fmt, var_list vl) {
+int scan_from_with(var input, int pos, const char* fmt, var args) {
 
   char fmt_buf[strlen(fmt)+1];
+  var index = $(Int, 0);
   
   while(true) {
     
@@ -213,11 +263,11 @@ int scan_from_vl(var input, int pos, const char* fmt, var_list vl) {
       strncpy(fmt_buf, start, (fmt - start)+1);
       fmt_buf[(fmt - start)+1] = '\0';
       
-      if (var_list_end(vl)) {
+      if_ge(index, $(Int, len(args))) {
         throw(FormatError, "Not enough arguments to Format String!");
       }
       
-      var a = var_list_get(vl);
+      var a = get(args, index); minc(index);
       
       if (*fmt == '$') { pos = look_from(a, input, pos); }
       
@@ -228,7 +278,7 @@ int scan_from_vl(var input, int pos, const char* fmt, var_list vl) {
       int off = 0;
       
       if (*fmt == 's') {      
-        int err = format_from(input, pos, fmt_buf, as_str(a), &off);
+        int err = format_from(input, pos, fmt_buf, c_str(a), &off);
         if (err < 1) { throw(FormatError, "Unable to input String!"); }
         pos += off;
       }
@@ -245,15 +295,15 @@ int scan_from_vl(var input, int pos, const char* fmt, var_list vl) {
         if (strchr(fmt_buf, 'l')) {
           double tmp = 0;
           int err = format_from(input, pos, fmt_buf, &tmp, &off);
-          if (err < 1) { throw(FormatError, "Unable to input Real!"); }
+          if (err < 1) { throw(FormatError, "Unable to input Float!"); }
           pos += off;
-          assign(a, $(Real, tmp));
+          assign(a, $(Float, tmp));
         } else {
           float tmp = 0;
           int err = format_from(input, pos, fmt_buf, &tmp, &off);
-          if (err < 1) { throw(FormatError, "Unable to input Real!"); }
+          if (err < 1) { throw(FormatError, "Unable to input Float!"); }
           pos += off;
-          assign(a, $(Real, tmp));
+          assign(a, $(Float, tmp));
         }
       }
       
@@ -268,9 +318,9 @@ int scan_from_vl(var input, int pos, const char* fmt, var_list vl) {
       if (*fmt == 'p') {
         void* tmp = NULL;
         int err = format_from(input, pos, fmt_buf, &tmp, &off);
-        if (err < 1) { throw(FormatError, "Unable to input Reference!"); }
+        if (err < 1) { throw(FormatError, "Unable to input Ref!"); }
         pos += off;
-        assign(a, $(Reference, tmp));
+        assign(a, $(Ref, tmp));
       }
 
       fmt++;

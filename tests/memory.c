@@ -4,59 +4,60 @@
 
 PT_FUNC(test_new) {
   
-  var x = new(Int, $(Int, 0));
+  var x = new$(Int, 0);
   delete(x);
   
 }
 
-PT_FUNC(test_reference) {
+PT_FUNC(test_box) {
   
-  var x = new(Int, $(Int, 1));
-  var y = new(Int, $(Int, 2));
+  var x = new$(Int, 1);
+  var y = new$(Int, 2);
   
-  var rx = $(Reference, x);
+  var rx = $(Box, x);
   
   PT_ASSERT(rx isnt x);
   PT_ASSERT(x isnt y);
   PT_ASSERT(neq(x, y));
-  PT_ASSERT(x is at(rx,0));
-  PT_ASSERT(eq(x, at(rx,0)));
+  PT_ASSERT(x is unbox(rx));
+  PT_ASSERT(eq(x, unbox(rx)));
   
-  set(rx, 0, y);
+  box(rx, y);
 
-  PT_ASSERT(y is at(rx,0));
-  PT_ASSERT(eq(y, at(rx,0)));
+  PT_ASSERT(y is unbox(rx));
+  PT_ASSERT(eq(y, unbox(rx)));
 
   delete(x);
   delete(y);
   
 }
 
-PT_FUNC(test_reference_with) {
+PT_FUNC(test_box_with) {
   
-  with(r in $(Reference, new(String, $(String, "Almost like an Auto Ptr")))) {
+  with(r in $(Box, new$(String, "Almost like an Auto Ptr"))) {
     
-    PT_ASSERT(eq(at(r,0), $(String, "Almost like an Auto Ptr")));
-    PT_ASSERT(neq(at(r,0), $(String, "Blah")));
+    PT_ASSERT(eq(unbox(r), $(String, "Almost like an Auto Ptr")));
+    PT_ASSERT(neq(unbox(r), $(String, "Blah")));
     
   }
   
 }
 
-PT_FUNC(test_reference_with_many) {
+PT_FUNC(test_box_with_many) {
   
-  with(liferef0 in $(Reference, new(String, $(String, "Life is Long"))))
-  with(liferef1 in $(Reference, new(String, $(String, "Life is Beautiful"))))
-  with(liferef2 in $(Reference, new(String, $(String, "Life is Grand")))) {
+  with(liferef0 in $(Box, new$(String, "Life is Long")))
+  with(liferef1 in $(Box, new$(String, "Life is Beautiful")))
+  with(liferef2 in $(Box, new$(String, "Life is Grand"))) {
     
-    PT_ASSERT(eq(at(liferef0,0), $(String, "Life is Long")));
-    PT_ASSERT(eq(at(liferef1,0), $(String, "Life is Beautiful")));
-    PT_ASSERT(eq(at(liferef2,0), $(String, "Life is Grand")));
+    PT_ASSERT(eq(unbox(liferef0), $(String, "Life is Long")));
+    PT_ASSERT(eq(unbox(liferef1), $(String, "Life is Beautiful")));
+    PT_ASSERT(eq(unbox(liferef2), $(String, "Life is Grand")));
   
   }
 
 }
 
+/*
 PT_FUNC(test_pool) {
   
   var p = new(Pool);
@@ -82,13 +83,14 @@ PT_FUNC(test_pool) {
   delete(p);
   
 }
+*/
 
 PT_SUITE(suite_memory) {
   
   PT_REG(test_new);
-  PT_REG(test_reference);
-  PT_REG(test_reference_with);
-  PT_REG(test_reference_with_many);
-  PT_REG(test_pool);
+  PT_REG(test_box);
+  PT_REG(test_box_with);
+  PT_REG(test_box_with_many);
+  //PT_REG(test_pool);
 
 }

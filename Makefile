@@ -14,9 +14,9 @@ OBJ := $(addprefix obj/,$(notdir $(SRC:.c=.o)))
 TESTS := $(wildcard tests/*.c)
 TESTS_OBJ := $(addprefix obj/,$(notdir $(TESTS:.c=.o)))
 
-DEMOS := $(wildcard demos/*.c)
-DEMOS_OBJ := $(addprefix obj/,$(notdir $(DEMOS:.c=.o)))
-DEMOS_EXE := $(DEMOS:.c=)
+EXAMPLES := $(wildcard examples/*.c)
+EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
+EXAMPLES_EXE := $(EXAMPLES:.c=)
 
 CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
 LFLAGS = -shared -g -ggdb
@@ -90,17 +90,17 @@ check: $(TESTS_OBJ) $(STATIC)
 obj/%.o: tests/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
 
-# Demos
+# Examples
 
-demos: $(DEMOS_EXE)
+examples: $(EXAMPLES_EXE)
 
-demos/%: demos/%.c $(STATIC) | obj
+examples/%: examples/%.c $(STATIC) | obj
 	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) -o $@
 
 # Dist
 
 dist: all | $(PACKAGE)
-	cp -R demos include src tests INSTALL.md LICENSE.md Makefile README.md $(PACKAGE)
+	cp -R examples include src tests INSTALL.md LICENSE.md Makefile README.md $(PACKAGE)
 	tar -czf $(PACKAGE).tar.gz $(PACKAGE)
 
 $(PACKAGE):
