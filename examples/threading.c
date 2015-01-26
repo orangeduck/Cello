@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     return Undefined;
   };
   
-  var threads = new(List,
+  var threads = new(Array, Box,
     new(Thread, thread_function),
     new(Thread, thread_function),
     new(Thread, thread_function),
@@ -26,11 +26,10 @@ int main(int argc, char** argv) {
   
   foreach(t in threads) {
     join(t);
-    delete(t);
   }
   
-  delete(threads);
-  delete(mut);
+  del(threads);
+  del(mut);
   
   return 0;
 

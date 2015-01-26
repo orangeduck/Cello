@@ -124,7 +124,7 @@ static var Thread_New(var self, var args) {
   
   struct Thread* t = self;
   t->func = get(args, $(Int, 0));
-  t->args = new(Array, Ref);
+  t->args = None;
   t->is_main = false;
   t->is_running = false;
   
@@ -146,7 +146,7 @@ static var Thread_Del(var self) {
 #ifdef _WIN32
   CloseHandle(t->thread);
 #endif
-  
+
   del(t->args);
   del(t->exc_msg);
   return t;
@@ -161,8 +161,8 @@ static var Thread_Assign(var self, var obj) {
   struct Thread* t0 = self;
   struct Thread* t1 = obj;
   
-  assign(t0->func, t1->func);
-  assign(t0->args, t1->args);
+  t0->func = t1->func;
+  t0->args = t1->args;
   
   t0->thread = t1->thread;
   t0->is_main = t1->is_main;
@@ -170,13 +170,13 @@ static var Thread_Assign(var self, var obj) {
   
   t0->exc_active = t1->exc_active;
   t0->exc_depth = t1->exc_depth;
-  memmove(t0->exc_buffers, t1->exc_buffers,
+  memcpy(t0->exc_buffers, t1->exc_buffers,
     sizeof(jmp_buf) * CELLO_EXC_MAX_DEPTH);
   
   assign(t0->exc_obj, t1->exc_obj);
   assign(t0->exc_msg, t1->exc_msg);
   
-  memmove(t0->exc_backtrace, t1->exc_backtrace,
+  memcpy(t0->exc_backtrace, t1->exc_backtrace,
     sizeof(void*) * CELLO_EXC_MAX_STRACE);
   t0->exc_backtrace_count = t1->exc_backtrace_count;
   
@@ -184,9 +184,7 @@ static var Thread_Assign(var self, var obj) {
 }
 
 static var Thread_Copy(var self) {
-  var obj = new(Thread, None);
-  assign(obj, self);
-  return obj;
+  return assign(new(Thread, None), self);
 }
 
 static uint64_t Thread_Hash(var self) {
@@ -233,15 +231,15 @@ static void Thread_TLS_Key_Delete(void) {
   pthread_key_delete(Thread_Key_Wrapper);
 }
 
-static var Thread_Init_Run(var args) {
-  
-  var self = deref(get(args, $(Int, 0)));
-  pop_at(args, $(Int, 0));
-  pthread_setspecific(Thread_Key_Wrapper, self);
-  
-  struct Thread* t = self;
+static var Thread_Init_Run(var self) {
+
+  struct Thread* t = self;  
+  pthread_setspecific(Thread_Key_Wrapper, t);
   t->is_running = True;
-  return call_with(t->func, t->args);  
+  var x = call_with(t->func, t->args);
+  del(t->args);
+  t->args = None;
+  return x;
 }
 
 #elif defined(_WIN32)
@@ -255,21 +253,21 @@ static void Thread_TLS_Key_Delete(void) {
   TlsFree(Thread_Key_Wrapper);
 }
 
-static DWORD Thread_Init_Run(var args) {
-  
-  var self = deref(get(args, $(Int, 0)));
-  pop_at(args, $(Int, 0));
-  TlsSetValue(Thread_Key_Wrapper, self);
-  
+static DWORD Thread_Init_Run(var self) {
   struct Thread* t = self;
+  TlsSetValue(Thread_Key_Wrapper, t);
   t->is_running = True;
   call_with(t->func, t->args);
+  del(t->args);
+  t->args = None;
   return 0;
 }
 
 #endif
 
 static var Thread_Call(var self, var args) {
+  
+  struct Thread* t = self;
   
   /* Setup Thread Local Storage */
   
@@ -279,17 +277,13 @@ static var Thread_Call(var self, var args) {
     atexit(Thread_TLS_Key_Delete);
   }
   
-  /* Copy Arguments & Push Thread Object */  
-  
-  struct Thread* t = self;
-  assign(t->args, args);
-  push_at(t->args, self, $(Int, 0));
+  t->args = copy(args);
   
   /* Call Init Thread & Run */
   
 #if defined(__unix__) || defined(__APPLE__)
   
-  int err = pthread_create(&t->thread, NULL, Thread_Init_Run, t->args);
+  int err = pthread_create(&t->thread, NULL, Thread_Init_Run, t);
   
   if (err is EINVAL) {
     throw(ValueError, "Invalid Argument to Thread Creation");
@@ -306,7 +300,7 @@ static var Thread_Call(var self, var args) {
 #elif defined(_WIN32)
   
   t->thread = CreateThread(NULL, 0,
-    (LPTHREAD_START_ROUTINE)Thread_Init_Run, t->args, 0, &t->id);
+    (LPTHREAD_START_ROUTINE)Thread_Init_Run, t, 0, &t->id);
   
   if (t->thread is NULL) {
     throw(ValueError, "Unable to Create WinThread");
@@ -342,12 +336,12 @@ var Thread_Current(void) {
   ** thread on OSX using this non-portable method
   */
 #if defined(__APPLE__)
-  if (pthread_main_np()) { wrapper = NULL; }
+  if (pthread_main_np()) { wrapper = None; }
 #endif
   
-  if (wrapper is NULL) {
+  if (wrapper is None) {
   
-    if (Thread_Main is NULL) {
+    if (Thread_Main is None) {
       Thread_Main = new(Thread, None);
       atexit(Thread_Main_Del);
     }
@@ -804,7 +798,7 @@ var exception_throw(var obj, const char* fmt, var args) {
 
 var exception_catch(var args) {
   
-  if (not exception_active()) { return Undefined; }
+  if (not exception_active()) { return Terminal; }
   
   /* If no Arguments catch all */
   if (len(args) is 0) {
@@ -821,10 +815,10 @@ var exception_catch(var args) {
   /* No matches found. Propagate to outward block */
   if (exception_depth() >= 1) {
     longjmp(exception_buffer(), 1);
-  } else {  
+  } else {
     Exception_Error();
   }
   
-  return Undefined;
+  return Terminal;
   
 }

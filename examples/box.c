@@ -17,7 +17,7 @@ local void table_process(var x) {
 }
 */
 
-local void object_lifetime_example(void) {
+static void object_lifetime_example(void) {
   
   with(lifebox in $(Box, new_$(String, "Life is long"))) {
   
@@ -30,7 +30,7 @@ local void object_lifetime_example(void) {
   
 }
 
-local void many_object_lifetimes(void) {
+static void many_object_lifetimes(void) {
   
   with(lifebox0 in $(Box, new_$(String, "Life is long")))
   with(lifebox1 in $(Box, new_$(String, "Life is Beautiful")))

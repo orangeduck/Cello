@@ -9,5 +9,5 @@ void stop(var self) {
 }
 
 var running(var self) {
-  method(self, Start, running);
+  return method(self, Start, running);
 }

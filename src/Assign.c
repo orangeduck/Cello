@@ -34,7 +34,7 @@ var assign(var self, var obj) {
   if (implements(self, Assign)) {
     return method(self, Assign, assign, obj);
   } else {
-    memcpy(self, obj, size(self));
+    memcpy(self, obj, size(type_of(self)));
     return self;
   }
 }

@@ -104,16 +104,9 @@ var new_with(var type, var args) {
 }
 
 void del(var self) {
-  
   if (self is      True) { return; }
   if (self is     False) { return; }
-  if (self is Undefined) { return; }
-  
-  if (type_implements_method(type_of(self), New, destruct)) {
-    self = method(self, New, destruct);
-  }
-  
-  dealloc(self);
+  dealloc(destruct(self));
 }
 
 var construct_with(var self, var args) {
@@ -121,5 +114,8 @@ var construct_with(var self, var args) {
 }
 
 var destruct(var self) {
-  return method(self, New, destruct);
+  if (implements_method(self, New, destruct)) {
+    return method(self, New, destruct);
+  }
+  return self;
 }

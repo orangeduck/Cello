@@ -26,16 +26,23 @@ static const char* Range_Methods(void) {
 
 static var Range_Iter_Init(var self) {
   struct Range* r = self;
-  return r->start;
+  struct Int* i = r->iter;
+  if (r->step == 0) { return Terminal; }
+  if (r->step  > 0) { i->val = r->start; }
+  if (r->step  < 0) { i->val = r->stop-1; }
+  if (r->step  > 0 and i->val >= r->stop) { return Terminal; }
+  if (r->step  < 0 and i->val <  r->stop) { return Terminal; }
+  return i;
 }
 
 static var Range_Iter_Next(var self, var curr) {
   struct Range* r = self;
-  madd(r->start, r->step);
-  if (eq(r->step, $(Int, 0))) { return Terminal; }
-  if (gt(r->step, $(Int, 0)) and ge(r->start, r->stop)) { return Terminal; }
-  if (lt(r->step, $(Int, 0)) and le(r->start, r->stop)) { return Terminal; }
-  return r->start;
+  struct Int* i = r->iter;
+  i->val += r->step;
+  if (r->step == 0) { return Terminal; }
+  if (r->step  > 0 and i->val >= r->stop) { return Terminal; }
+  if (r->step  < 0 and i->val < r->start) { return Terminal; }
+  return i;
 }
 
 /* TODO: Add extra methods */

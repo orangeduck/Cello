@@ -18,6 +18,10 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
+BENCHMARKS := $(wildcard benchmarks/*.c)
+BENCHMARKS_OBJ := $(addprefix obj/,$(notdir $(BENCHMARKS:.c=.o)))
+BENCHMARKS_EXE := $(BENCHMARKS:.c=)
+
 CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
 LFLAGS = -shared -g -ggdb
 
@@ -97,6 +101,13 @@ examples: $(EXAMPLES_EXE)
 examples/%: examples/%.c $(STATIC) | obj
 	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) -o $@
 
+# Benchmarks
+
+benchmarks: $(BENCHMARKS_EXE)
+
+benchmarks/%: benchmarks/%.c $(STATIC) | obj
+	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) -o $@
+
 # Dist
 
 dist: all | $(PACKAGE)
@@ -109,7 +120,7 @@ $(PACKAGE):
 # Clean
 
 clean:
-	rm -f $(OBJ) $(TESTS_OBJ) $(DEMOS_OBJ) $(STATIC) $(DYNAMIC)
+	rm -f $(OBJ) $(TESTS_OBJ) $(EXAMPLES_OBJ) $(BENCHMARKS_OBJ) $(STATIC) $(DYNAMIC)
 	rm -f test
 
 # Install
@@ -117,3 +128,4 @@ clean:
 install: all
 	$(INSTALL_LIB)
 	$(INSTALL_INC)
+	

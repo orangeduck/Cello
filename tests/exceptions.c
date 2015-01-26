@@ -1,10 +1,10 @@
-#include "ptest.h"
 #include "Cello.h"
+#include "ptest.h"
 
-local var DivideByZeroError = Singleton(DivideByZeroError);
-local var OtherError = Singleton(OtherError);
+static var DivideByZeroError = typedecl(DivideByZeroError);
+static var OtherError = typedecl(OtherError);
 
-local int exception_divide(int x, int y) {
+static int exception_divide(int x, int y) {
   if (y == 0) {
     throw(DivideByZeroError, "%i / %i", $(Int, x), $(Int, y));
     return 0;
@@ -23,7 +23,7 @@ PT_FUNC(test_throw) {
   PT_ASSERT(r1 == 2);
   PT_ASSERT(r2 == 3);
   
-  PT_ASSERT(Exception_Depth() is 0);
+  PT_ASSERT(exception_depth() is 0);
   
 }
 
@@ -55,7 +55,7 @@ PT_FUNC(test_catch) {
   PT_ASSERT(not reached1);
   PT_ASSERT(not reached2);
   
-  PT_ASSERT(Exception_Depth() is 0);
+  PT_ASSERT(exception_depth() is 0);
   
 }
 
@@ -78,7 +78,7 @@ PT_FUNC(test_catch_all) {
   
   PT_ASSERT(reached0);
   PT_ASSERT(reached1);
-  PT_ASSERT(Exception_Depth() is 0);
+  PT_ASSERT(exception_depth() is 0);
   
 }
 
@@ -89,16 +89,16 @@ PT_FUNC(test_catch_outer) {
   
   try {
 
-  PT_ASSERT(Exception_Depth() is 1);
+  PT_ASSERT(exception_depth() is 1);
 
     try {
-      PT_ASSERT(Exception_Depth() is 2);
+      PT_ASSERT(exception_depth() is 2);
       exception_divide(2, 0);
     } catch (e in TypeError) {
       reached0 = true;
     }    
 
-    PT_ASSERT(Exception_Depth() is 1);
+    PT_ASSERT(exception_depth() is 1);
   
   } catch (e) {
     reached1  = true;
@@ -107,7 +107,7 @@ PT_FUNC(test_catch_outer) {
   PT_ASSERT(not reached0);
   PT_ASSERT(reached1);
   
-  PT_ASSERT(Exception_Depth() is 0);
+  PT_ASSERT(exception_depth() is 0);
   
 }
 

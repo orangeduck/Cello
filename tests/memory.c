@@ -1,43 +1,42 @@
-
-#include "ptest.h"
 #include "Cello.h"
+#include "ptest.h"
 
 PT_FUNC(test_new) {
   
-  var x = new$(Int, 0);
-  delete(x);
+  var x = new_$(Int, 0);
+  del(x);
   
 }
 
 PT_FUNC(test_box) {
   
-  var x = new$(Int, 1);
-  var y = new$(Int, 2);
+  var x = new_$(Int, 1);
+  var y = new_$(Int, 2);
   
   var rx = $(Box, x);
   
   PT_ASSERT(rx isnt x);
   PT_ASSERT(x isnt y);
   PT_ASSERT(neq(x, y));
-  PT_ASSERT(x is unbox(rx));
-  PT_ASSERT(eq(x, unbox(rx)));
+  PT_ASSERT(x is deref(rx));
+  PT_ASSERT(eq(x, deref(rx)));
   
-  box(rx, y);
+  ref(rx, y);
 
-  PT_ASSERT(y is unbox(rx));
-  PT_ASSERT(eq(y, unbox(rx)));
+  PT_ASSERT(y is deref(rx));
+  PT_ASSERT(eq(y, deref(rx)));
 
-  delete(x);
-  delete(y);
+  del(x);
+  del(y);
   
 }
 
 PT_FUNC(test_box_with) {
   
-  with(r in $(Box, new$(String, "Almost like an Auto Ptr"))) {
+  with(r in $(Box, new_$(String, "Almost like an Auto Ptr"))) {
     
-    PT_ASSERT(eq(unbox(r), $(String, "Almost like an Auto Ptr")));
-    PT_ASSERT(neq(unbox(r), $(String, "Blah")));
+    PT_ASSERT(eq(deref(r), $(String, "Almost like an Auto Ptr")));
+    PT_ASSERT(neq(deref(r), $(String, "Blah")));
     
   }
   
@@ -45,13 +44,13 @@ PT_FUNC(test_box_with) {
 
 PT_FUNC(test_box_with_many) {
   
-  with(liferef0 in $(Box, new$(String, "Life is Long")))
-  with(liferef1 in $(Box, new$(String, "Life is Beautiful")))
-  with(liferef2 in $(Box, new$(String, "Life is Grand"))) {
+  with(liferef0 in $(Box, new_$(String, "Life is Long")))
+  with(liferef1 in $(Box, new_$(String, "Life is Beautiful")))
+  with(liferef2 in $(Box, new_$(String, "Life is Grand"))) {
     
-    PT_ASSERT(eq(unbox(liferef0), $(String, "Life is Long")));
-    PT_ASSERT(eq(unbox(liferef1), $(String, "Life is Beautiful")));
-    PT_ASSERT(eq(unbox(liferef2), $(String, "Life is Grand")));
+    PT_ASSERT(eq(deref(liferef0), $(String, "Life is Long")));
+    PT_ASSERT(eq(deref(liferef1), $(String, "Life is Beautiful")));
+    PT_ASSERT(eq(deref(liferef2), $(String, "Life is Grand")));
   
   }
 

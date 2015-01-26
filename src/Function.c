@@ -71,7 +71,8 @@ static size_t Function_Size(void) {
 }
 
 static var Function_Copy(var self) {
-  return new(Function, self);
+  struct Function* f = self;
+  return new(Function, f->func);
 }
 
 static var Function_Assign(var self, var obj) {

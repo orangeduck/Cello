@@ -78,11 +78,10 @@ static const char* Type_Methods(void) {
 static var Type_New(var self, var args) {
   
   var name = get(args, $(Int, 0));
-  var inst = get(args, $(Int, 1));
   
   struct CelloHeader* head = malloc(
     sizeof(struct CelloHeader) + 
-    sizeof(struct Type) * (2 + len(inst)));
+    sizeof(struct Type) * (2 + len(args) - 1));
   
   head->type  = Type;
   head->flags = (var)CelloHeapAlloc;
@@ -92,9 +91,12 @@ static var Type_New(var self, var args) {
   body[0] = (struct Type){ __Name, "__Name", (var)c_str(name) };
   body[1] = (struct Type){ __Parent, "__Parent", None };
   
-  for(size_t i = 0; i < len(inst); i++) {
-    var ins = get(inst, $(Int, i));
-    body[2+i] = (struct Type){ type_of(ins), (var)c_str(type_of(ins)), ins };
+  for(size_t i = 1; i < len(args); i++) {
+    var ins = get(args, $I(i));
+    body[1+i] = (struct Type){
+      type_of(ins), 
+      (var)c_str(type_of(ins)), 
+      ins };
   }
   
   return body;

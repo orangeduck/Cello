@@ -48,5 +48,5 @@ var begin_with(var self) {
 
 var end_with(var self) {
   end(self);
-  return Undefined;
+  return Terminal;
 }

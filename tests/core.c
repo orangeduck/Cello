@@ -1,31 +1,29 @@
-
-#include "ptest.h"
 #include "Cello.h"
+#include "ptest.h"
 
-local var TestType;
+extern var TestType;
 
-data {
-  var type;
+struct TestType {
   int test_data;
-} TestTypeData;
+};
 
-local var TestType_New(var self, var_list vl) {
-  TestTypeData* ttd = cast(self, TestType);
-  ttd->test_data = as_long(var_list_get(vl));
+static var TestType_New(var self, var args) {
+  struct TestType* tt = self;
+  tt->test_data = c_int(get(args, $(Int, 0)));
   return self;
 }
 
-local var TestType_Delete(var self) {
+static var TestType_Del(var self) {
   return self;
 }
 
-local size_t TestType_Size(void) {
-  return sizeof(TestTypeData);
+static size_t TestType_Size(void) {
+  return sizeof(struct TestType);
 }
 
-local var TestType_Eq(var self, var obj) {
-  TestTypeData* lhs = cast(self, TestType);
-  TestTypeData* rhs = cast(obj, TestType);
+static var TestType_Eq(var self, var obj) {
+  struct TestType* lhs = cast(self, TestType);
+  struct TestType* rhs = cast(obj, TestType);
   if (lhs->test_data == rhs->test_data) {
     return True;
   } else {
@@ -33,46 +31,45 @@ local var TestType_Eq(var self, var obj) {
   }
 }
 
-instance(TestType, New) = { TestType_New, TestType_Delete, TestType_Size };
-instance(TestType, Eq) = { TestType_Eq };
+var TestType = typedecl(TestType,
+  typeclass(New, TestType_New, TestType_Del, TestType_Size),
+  typeclass(Eq, TestType_Eq));
 
-class {
+
+struct ReturnTrue {
   var (*return_true)(var);
-} ReturnTrue;
+};
 
-local var return_true(var self) {
-  return type_class_method(self, ReturnTrue, return_true, self);
+var ReturnTrue = typedecl(ReturnTrue);
+
+static var return_true(var self) {
+  return method(self, ReturnTrue, return_true);
 }
 
-local var IntParent_ReturnTrue(var self) {
+static var IntParent_ReturnTrue(var self) {
   return True;
 }
 
-instance(IntParent, ReturnTrue) = { IntParent_ReturnTrue };
-
-var IntParent = type_data {
-  type_begin(IntParent),
-  type_entry(IntParent, ReturnTrue),
-  type_end(IntParent),
-};
+var IntParent = typedecl(IntParent,
+  typeclass(ReturnTrue, IntParent_ReturnTrue));
 
 PT_FUNC(test_type) {
   PT_ASSERT(type_of($(Int, 1)) is Int);
-  PT_ASSERT(type_of($(Real, 1.0)) is Real);
+  PT_ASSERT(type_of($(Float, 1.0)) is Float);
   PT_ASSERT(type_of(True) is Bool);
   PT_ASSERT(type_of(False) is Bool);
   PT_ASSERT(type_of(Int) is Type);
-  PT_ASSERT(type_of(Real) is Type);
+  PT_ASSERT(type_of(Float) is Type);
   PT_ASSERT(type_of(Type) is Type);
 }
 
 PT_FUNC(test_cast) {
   
   var x = $(Int, 1);
-  var y = $(Real, 2.0);
+  var y = $(Float, 2.0);
 
   x = cast(x, Int);  
-  y = cast(y, Real);
+  y = cast(y, Float);
   
   PT_ASSERT(x);
   PT_ASSERT(y);
@@ -85,20 +82,20 @@ PT_FUNC(test_new) {
   
   PT_ASSERT(x);
   PT_ASSERT(type_of(x) is Int);
-  PT_ASSERT(as_long(x) is 1);
+  PT_ASSERT(c_int(x) is 1);
   
-  delete(x);
+  del(x);
   
-  var y = $(Real, 0.0);  
-  construct(y, $(Real, 1.0));
-  PT_ASSERT(as_double(y) is 1.0);
+  var y = $(Float, 0.0);  
+  construct(y, $(Float, 1.0));
+  PT_ASSERT(c_float(y) is 1.0);
   
-  var z = allocate(String);
+  var z = alloc(String);
   PT_ASSERT(z);
   construct(z, $(String, "Hello"));
-  PT_ASSERT_STR_EQ(as_str(z), "Hello");
+  PT_ASSERT_STR_EQ(c_str(z), "Hello");
   z = destruct(z);
-  deallocate(z);
+  dealloc(z);
   
 }
 
@@ -109,38 +106,38 @@ PT_FUNC(test_assign) {
   var x = new(Int, $(Int, 10));
   var y = new(Int, $(Int, 20));
 
-  PT_ASSERT(as_long(x) is 10);
-  PT_ASSERT(as_long(y) is 20);
+  PT_ASSERT(c_int(x) is 10);
+  PT_ASSERT(c_int(y) is 20);
   PT_ASSERT(x isnt y);
 
   assign(x, y);
   
-  PT_ASSERT(as_long(x) is 20);
-  PT_ASSERT(as_long(y) is 20);
+  PT_ASSERT(c_int(x) is 20);
+  PT_ASSERT(c_int(y) is 20);
   PT_ASSERT(x isnt y);
   
-  delete(x);
-  delete(y);
+  del(x);
+  del(y);
   
   /* Strings */
   
   var xs = new(String, $(String, "Hello"));
   var ys = new(String, $(String, "There"));
   
-  PT_ASSERT_STR_EQ(as_str(xs), "Hello");
-  PT_ASSERT_STR_EQ(as_str(ys), "There");
-  PT_ASSERT(as_str(xs) isnt as_str(ys));
+  PT_ASSERT_STR_EQ(c_str(xs), "Hello");
+  PT_ASSERT_STR_EQ(c_str(ys), "There");
+  PT_ASSERT(c_str(xs) isnt c_str(ys));
   PT_ASSERT(xs isnt ys);
 
   assign(xs, ys);
   
-  PT_ASSERT_STR_EQ(as_str(xs), "There");
-  PT_ASSERT_STR_EQ(as_str(ys), "There");
-  PT_ASSERT(as_str(xs) isnt as_str(ys));
+  PT_ASSERT_STR_EQ(c_str(xs), "There");
+  PT_ASSERT_STR_EQ(c_str(ys), "There");
+  PT_ASSERT(c_str(xs) isnt c_str(ys));
   PT_ASSERT(xs isnt ys);
   
-  delete(xs);
-  delete(ys);
+  del(xs);
+  del(ys);
 }
 
 PT_FUNC(test_copy) {
@@ -148,12 +145,12 @@ PT_FUNC(test_copy) {
   var x = new(String, $(String, "Hello"));
   var y = copy(x);
   
-  PT_ASSERT_STR_EQ(as_str(x), as_str(y));
-  PT_ASSERT(as_str(x) isnt as_str(y));
+  PT_ASSERT_STR_EQ(c_str(x), c_str(y));
+  PT_ASSERT(c_str(x) isnt c_str(y));
   PT_ASSERT(x isnt y);
   
-  delete(x);
-  delete(y);
+  del(x);
+  del(y);
   
 }
 
@@ -167,58 +164,41 @@ PT_FUNC(test_eq) {
   var tab2 = new(Table, String, Int);
   
   PT_ASSERT(eq(tab1, tab2));
-  put(tab1, $(String, "apple"), $(Int, 10));
+  set(tab1, $(String, "apple"), $(Int, 10));
   PT_ASSERT(neq(tab1, tab2));
-  put(tab2, $(String, "apple"), $(Int, 10));
+  set(tab2, $(String, "apple"), $(Int, 10));
   PT_ASSERT(eq(tab1, tab2));
-  put(tab1, $(String, "pear"), $(Int, 20));
-  put(tab2, $(String, "pear"), $(Int, 30));
+  set(tab1, $(String, "pear"), $(Int, 20));
+  set(tab2, $(String, "pear"), $(Int, 30));
   PT_ASSERT(neq(tab1, tab2));
-  put(tab1, $(String, "pear"), $(Int, 30));
+  set(tab1, $(String, "pear"), $(Int, 30));
   PT_ASSERT(eq(tab1, tab2));
-  put(tab2, $(String, "banana"), $(Int, 10));
+  set(tab2, $(String, "banana"), $(Int, 10));
   PT_ASSERT(neq(tab1, tab2));
   
-  delete(tab1);
-  delete(tab2);
-
-  var dict1 = new(Dictionary, 0);
-  var dict2 = new(Dictionary, 0);
+  del(tab1);
+  del(tab2);
   
-  PT_ASSERT(eq(dict1, dict2));
-  put(dict1, $(String, "apple"), $(Int, 10));
-  PT_ASSERT(neq(dict1, dict2));
-  put(dict2, $(String, "apple"), $(Int, 10));
-  PT_ASSERT(eq(dict1, dict2));
-  put(dict1, $(String, "pear"), $(Int, 20));
-  put(dict2, $(String, "pear"), $(Int, 30));
-  PT_ASSERT(neq(dict1, dict2));
-  put(dict1, $(String, "pear"), $(Int, 30));
-  PT_ASSERT(eq(dict1, dict2));
-  put(dict2, $(String, "banana"), $(Int, 10));
-  PT_ASSERT(neq(dict1, dict2));
+  /*
+  var map1 = new(Map, String, String);
+  var map2 = new(Map, String, String);
   
-  delete(dict1);
-  delete(dict2);
+  PT_ASSERT(eq(map1, map2));
+  set(map1, $(String, "name"), $(String, "Alex"));
+  PT_ASSERT(neq(map1, map2));
+  set(map2, $(String, "name"), $(String, "Alex"));
+  PT_ASSERT(eq(map1, map2));
+  set(map1, $(String, "age"), $(String, "28"));
+  set(map2, $(String, "age"), $(String, "30"));
+  PT_ASSERT(neq(map1, map2));
+  set(map1, $(String, "age"), $(String, "30"));
+  PT_ASSERT(eq(map1, map2));
+  set(map2, $(String, "nickname"), $(String, "The Wing Man"));
+  PT_ASSERT(neq(map1, map2));
   
-  var tree1 = new(Tree, String, String);
-  var tree2 = new(Tree, String, String);
-  
-  PT_ASSERT(eq(tree1, tree2));
-  put(tree1, $(String, "name"), $(String, "Alex"));
-  PT_ASSERT(neq(tree1, tree2));
-  put(tree2, $(String, "name"), $(String, "Alex"));
-  PT_ASSERT(eq(tree1, tree2));
-  put(tree1, $(String, "age"), $(String, "28"));
-  put(tree2, $(String, "age"), $(String, "30"));
-  PT_ASSERT(neq(tree1, tree2));
-  put(tree1, $(String, "age"), $(String, "30"));
-  PT_ASSERT(eq(tree1, tree2));
-  put(tree2, $(String, "nickname"), $(String, "The Wing Man"));
-  PT_ASSERT(neq(tree1, tree2));
-  
-  delete(tree1);
-  delete(tree2);
+  del(map1);
+  del(map2);
+  */
   
 }
 
@@ -232,8 +212,8 @@ PT_FUNC(test_ord) {
 }
 
 PT_FUNC(test_hash) {
-  long x = hash($(Int, 1  ));
-  long y = hash($(Int, 123));
+  uint64_t x = hash($(Int, 1  ));
+  uint64_t y = hash($(Int, 123));
   
   PT_ASSERT(x is 1);
   PT_ASSERT(y is 123);
@@ -241,119 +221,127 @@ PT_FUNC(test_hash) {
 
 PT_FUNC(test_collection) {
   
-  var x = new(List, $(Int, 1), $(Real, 2.0), $(String, "Hello"));
+  var x = new(Array, Int, $(Int, 1), $(Int, 2), $(Int, 3));
   
   PT_ASSERT(x);
   PT_ASSERT(len(x) is 3);
-  PT_ASSERT(contains(x, $(Int, 1)));
-  PT_ASSERT(contains(x, $(Real, 2.0)));
-  PT_ASSERT(contains(x, $(String, "Hello")));
+  PT_ASSERT(mem(x, $(Int, 1)));
+  PT_ASSERT(mem(x, $(Int, 2)));
+  PT_ASSERT(mem(x, $(Int, 3)));
   
-  discard(x, $(Real, 2.0));
+  rem(x, $(Int, 2));
   
   PT_ASSERT(x);
   PT_ASSERT(len(x) is 2);
-  PT_ASSERT(contains(x, $(Int, 1)));
-  PT_ASSERT(contains(x, $(String, "Hello")));
+  PT_ASSERT(mem(x, $(Int, 1)));
+  PT_ASSERT(mem(x, $(Int, 3)));
   
   clear(x);
   
   PT_ASSERT(x);
   PT_ASSERT(len(x) is 0);
-  PT_ASSERT(is_empty(x));
+  PT_ASSERT(empty(x));
   
-  delete(x);
+  del(x);
   
-  var y = new(Array, Real, $(Real, 5.2), $(Real, 7.1), $(Real, 2.2), $(Real, 1.1));
+  var y = new(Array, Float, 
+    $(Float, 5.2), $(Float, 7.1), $(Float, 2.2), $(Float, 1.1));
   
   PT_ASSERT(y);
   PT_ASSERT(len(y) is 4);
-  PT_ASSERT(contains(y, $(Real, 5.2)));
-  PT_ASSERT(contains(y, $(Real, 7.1)));
-  PT_ASSERT(contains(y, $(Real, 2.2)));
-  PT_ASSERT(contains(y, $(Real, 1.1)));
+  PT_ASSERT(mem(y, $(Float, 5.2)));
+  PT_ASSERT(mem(y, $(Float, 7.1)));
+  PT_ASSERT(mem(y, $(Float, 2.2)));
+  PT_ASSERT(mem(y, $(Float, 1.1)));
   
   sort(y);
   
-  PT_ASSERT(eq(at(y, 0), $(Real, 1.1)));
-  PT_ASSERT(eq(at(y, 1), $(Real, 2.2)));
-  PT_ASSERT(eq(at(y, 2), $(Real, 5.2)));
-  PT_ASSERT(eq(at(y, 3), $(Real, 7.1)));
+  PT_ASSERT(eq(get(y, $(Int, 0)), $(Float, 1.1)));
+  PT_ASSERT(eq(get(y, $(Int, 1)), $(Float, 2.2)));
+  PT_ASSERT(eq(get(y, $(Int, 2)), $(Float, 5.2)));
+  PT_ASSERT(eq(get(y, $(Int, 3)), $(Float, 7.1)));
   
+  /*
   var maxval = maximum(y);
   var minval = minimum(y);
   
-  PT_ASSERT(eq(maxval, $(Real, 7.1)));
-  PT_ASSERT(eq(minval, $(Real, 1.1)));
+  PT_ASSERT(eq(maxval, $(Float, 7.1)));
+  PT_ASSERT(eq(minval, $(Float, 1.1)));
+  */
   
-  delete(y);
+  del(y);
   
-  var z = new(List, $(Real, 5.2), $(Real, 7.1), $(Real, 2.2), $(Real, 1.1));
+  var z = new(Array, Float, 
+    $(Float, 5.2), $(Float, 7.1), $(Float, 2.2), $(Float, 1.1));
   
   sort(z);
   
-  PT_ASSERT(eq(at(z, 0), $(Real, 1.1)));
-  PT_ASSERT(eq(at(z, 1), $(Real, 2.2)));
-  PT_ASSERT(eq(at(z, 2), $(Real, 5.2)));
-  PT_ASSERT(eq(at(z, 3), $(Real, 7.1)));
+  PT_ASSERT(eq(get(z, $(Int, 0)), $(Float, 1.1)));
+  PT_ASSERT(eq(get(z, $(Int, 1)), $(Float, 2.2)));
+  PT_ASSERT(eq(get(z, $(Int, 2)), $(Float, 5.2)));
+  PT_ASSERT(eq(get(z, $(Int, 3)), $(Float, 7.1)));
   
-  delete(z);
+  del(z);
   
-  var w = new(List, $(Int, 135), $(Int, 11), $(Int, 254), $(Int, 123213), $(Int, 22), $(Int, 1));
+  var w = new(Array, Int, 
+    $(Int, 135), $(Int, 11), $(Int, 254), 
+    $(Int, 123213), $(Int, 22), $(Int, 1));
   
   sort(w);
   
-  PT_ASSERT(eq(at(w, 0), $(Int, 1)));
-  PT_ASSERT(eq(at(w, 1), $(Int, 11)));
-  PT_ASSERT(eq(at(w, 2), $(Int, 22)));
-  PT_ASSERT(eq(at(w, 3), $(Int, 135)));
-  PT_ASSERT(eq(at(w, 4), $(Int, 254)));
-  PT_ASSERT(eq(at(w, 5), $(Int, 123213)));
+  PT_ASSERT(eq(get(w, $(Int, 0)), $(Int, 1)));
+  PT_ASSERT(eq(get(w, $(Int, 1)), $(Int, 11)));
+  PT_ASSERT(eq(get(w, $(Int, 2)), $(Int, 22)));
+  PT_ASSERT(eq(get(w, $(Int, 3)), $(Int, 135)));
+  PT_ASSERT(eq(get(w, $(Int, 4)), $(Int, 254)));
+  PT_ASSERT(eq(get(w, $(Int, 5)), $(Int, 123213)));
   
-  delete(w);
+  del(w);
   
-  var map1 = new(Map);
-  var map2 = new(Map);
+  /*
+  var map1 = new(Map, String, String);
+  var map2 = new(Map, String, String);
   
   PT_ASSERT(eq(map1, map2));
   
-  put(map1, $(String, "key"), $(String, "val"));
+  set(map1, $(String, "key"), $(String, "val"));
   PT_ASSERT(neq(map1, map2));
   
-  put(map2, $(String, "key"), $(String, "val"));
+  set(map2, $(String, "key"), $(String, "val"));
   PT_ASSERT(eq(map1, map2));
   
-  put(map1, $(String, "newkey"), $(Int, 10));
-  put(map2, $(String, "newkey"), $(String, "newval"));
+  set(map1, $(String, "newkey"), $(Int, 10));
+  set(map2, $(String, "newkey"), $(String, "newval"));
   PT_ASSERT(neq(map1, map2));
   
-  put(map1, $(String, "newkey"), $(String, "newval"));
+  set(map1, $(String, "newkey"), $(String, "newval"));
   PT_ASSERT(eq(map1, map2));
   
-  put(map2, $(String, "difkey"), $(Int, 5));
+  set(map2, $(String, "difkey"), $(Int, 5));
   PT_ASSERT(neq(map1, map2));
   
-  delete(map1);
-  delete(map2);
+  del(map1);
+  del(map2);
+  */
   
 }
 
 PT_FUNC(test_iter) {
 
-  var x = new(List, $(Int, 1), $(Real, 2.0), $(String, "Hello"));
+  var x = new(Array, Ref, $(Int, 1), $(Float, 2.0), $(String, "Hello"));
   
   foreach(y in x) {
     PT_ASSERT(y);
     PT_ASSERT(type_of(y));
   }
   
-  delete(x);
+  del(x);
 }
 
 PT_FUNC(test_push) {
   
   var x = new(Array, Int);
-  var y = new(List);
+  var y = new(Array, Ref);
   
   for(int i = 0; i < 1000; i++) {
     push(x, $(Int, 1));
@@ -369,132 +357,133 @@ PT_FUNC(test_push) {
   push(x, $(Int, 5));
   push(x, $(Int, 10));
   
-  PT_ASSERT(eq(at(x, 0), $(Int, 0)));
-  PT_ASSERT(eq(at(x, 1), $(Int, 5)));
-  PT_ASSERT(eq(at(x, 2), $(Int, 10)));
+  PT_ASSERT(eq(get(x, $(Int, 0)), $(Int, 0)));
+  PT_ASSERT(eq(get(x, $(Int, 1)), $(Int, 5)));
+  PT_ASSERT(eq(get(x, $(Int, 2)), $(Int, 10)));
   
-  pop_at(x, 1);
+  pop_at(x, $(Int, 1));
   
-  PT_ASSERT(eq(at(x, 0), $(Int, 0)));
-  PT_ASSERT(eq(at(x, 1), $(Int, 10)));
+  PT_ASSERT(eq(get(x, $(Int, 0)), $(Int, 0)));
+  PT_ASSERT(eq(get(x, $(Int, 1)), $(Int, 10)));
   
-  delete(x);
-  delete(y);
+  del(x);
+  del(y);
 }
 
 PT_FUNC(test_at) {
 
   var fst = $(Int, 1);
-  var snd = $(Real, 2.0);
+  var snd = $(Float, 2.0);
   var trd = $(String, "Hello");
 
-  var x = new(List, fst, snd, trd);
+  var x = new(Array, Ref, fst, snd, trd);
 
-  PT_ASSERT(at(x, 0) is fst);
-  PT_ASSERT(at(x, 1) is snd);
-  PT_ASSERT(at(x, 2) is trd);
+  PT_ASSERT(deref(get(x, $(Int, 0))) is fst);
+  PT_ASSERT(deref(get(x, $(Int, 1))) is snd);
+  PT_ASSERT(deref(get(x, $(Int, 2))) is trd);
   
-  set(x, 1, trd);
+  set(x, $(Int, 1), trd);
   
-  PT_ASSERT(at(x, 1) is trd);
+  PT_ASSERT(deref(get(x, $(Int, 1))) is trd);
   
-  delete(x);
+  del(x);
   
 }
 
 PT_FUNC(test_dict) {
 
   var prices = new(Table, String, Int);
-  put(prices, $(String, "Apple"),  $(Int, 12)); 
-  put(prices, $(String, "Banana"), $(Int,  6)); 
-  put(prices, $(String, "Pear"),   $(Int, 55)); 
+  set(prices, $(String, "Apple"),  $(Int, 12)); 
+  set(prices, $(String, "Banana"), $(Int,  6)); 
+  set(prices, $(String, "Pear"),   $(Int, 55)); 
   
   var pear_price = get(prices, $(String, "Pear"));
   var banana_price = get(prices, $(String, "Banana"));
   var apple_price = get(prices, $(String, "Apple"));
   
-  PT_ASSERT(as_long(pear_price) is 55);
-  PT_ASSERT(as_long(banana_price) is 6);
-  PT_ASSERT(as_long(apple_price) is 12);
+  PT_ASSERT(c_int(pear_price) is 55);
+  PT_ASSERT(c_int(banana_price) is 6);
+  PT_ASSERT(c_int(apple_price) is 12);
   
   char name[5];
   
-  for(int i = 0; i < 1000; i++) {
+  for(int i = 0; i < 10; i++) {
     sprintf(name, "%i", i);
-    put(prices, $(String, name), $(Int, i));
+    set(prices, $(String, name), $(Int, i));
   }
   
-  for(int i = 0; i < 1000; i++) {
+  for(int i = 0; i < 10; i++) {
     sprintf(name, "%i", i);
-    discard(prices, $(String, name));
+    rem(prices, $(String, name));
   }
   
-  delete(prices);
+  del(prices);
   
 }
 
 PT_FUNC(test_as_ctype) {
   
-  PT_ASSERT(as_char($(Char, 'a')) is 'a');
-  PT_ASSERT(as_char($(Char, 'b')) is 'b');
+  PT_ASSERT(c_char($(Char, 'a')) is 'a');
+  PT_ASSERT(c_char($(Char, 'b')) is 'b');
   
-  PT_ASSERT_STR_EQ(as_str($(String, "Hello")), "Hello");
-  PT_ASSERT_STR_EQ(as_str($(String, "There")), "There");
+  PT_ASSERT_STR_EQ(c_str($(String, "Hello")), "Hello");
+  PT_ASSERT_STR_EQ(c_str($(String, "There")), "There");
   
-  PT_ASSERT(as_long($(Int, 5)) is 5);
-  PT_ASSERT(as_long($(Real, 5.6)) is 5);
-  PT_ASSERT(as_long($(Real, 5.5)) is 5);
-  PT_ASSERT(as_long($(Real, 5.4)) is 5);
+  PT_ASSERT(c_int($(Int, 5)) is 5);
+  PT_ASSERT(c_int($(Float, 5.6)) is 5);
+  PT_ASSERT(c_int($(Float, 5.5)) is 5);
+  PT_ASSERT(c_int($(Float, 5.4)) is 5);
   
-  PT_ASSERT(as_double($(Real, 5.1)) is 5.1);
-  PT_ASSERT(as_double($(Real, 5.2)) is 5.2);
-  PT_ASSERT(as_double($(Real, 9.8)) is 9.8);
-  PT_ASSERT(as_double($(Int, 5)) is 5.0);
-  PT_ASSERT(as_double($(Int, 7)) is 7.0);
+  PT_ASSERT(c_float($(Float, 5.1)) is 5.1);
+  PT_ASSERT(c_float($(Float, 5.2)) is 5.2);
+  PT_ASSERT(c_float($(Float, 9.8)) is 9.8);
+  PT_ASSERT(c_float($(Int, 5)) is 5.0);
+  PT_ASSERT(c_float($(Int, 7)) is 7.0);
  
 }
 
 PT_FUNC(test_stream) {
 
-  var f = $(File, NULL);
+  var f = $(File, None);
   
   PT_ASSERT(f);
   
-  stream_open(f, "test.bin", "w");
+  sopen(f, $S("test.bin"), $S("w"));
     
     PT_ASSERT(f);
     
-    put(f, Int, $(Int, 1));
-    put(f, Int, $(Int, 22));
+    //set(f, Int, $I(1));
+    //set(f, Int, $I(22));
   
-  stream_close(f);
+  sclose(f);
   
-  stream_open(f, "test.bin", "r");
+  sopen(f, $S("test.bin"), $S("r"));
     
     PT_ASSERT(f);
     
-    var first = get(f, Int);
-    var second = get(f, Int);
+    //var first = get(f, Int);
+    //var second = get(f, Int);
     
-    PT_ASSERT(as_long(first) is 1);
-    PT_ASSERT(as_long(second) is 22);
+    //PT_ASSERT(c_int(first) is 1);
+    //PT_ASSERT(c_int(second) is 22);
     
-    delete(first);
-    delete(second);
+    //del(first);
+    //del(second);
     
-  stream_close(f);
+  sclose(f);
   
   PT_ASSERT(f);
 }
 
 PT_FUNC(test_type_new) {
  
-  TestType = new(Type, $(String, "TestType"), $(Int, 2), 
-    (var[]){ &TestTypeNew, &TestTypeEq }, 
-    (const char*[]){ "New", "Eq" } );
+  TestType = new(Type,
+    $(String, "TestType"),
+    $(New, TestType_New, TestType_Del, TestType_Size),
+    $(Eq, TestType_Eq));
   
   PT_ASSERT(TestType);
-  PT_ASSERT_STR_EQ(as_str(TestType), "TestType");
+  PT_ASSERT_STR_EQ(c_str(TestType), "TestType");
 
   var test_obj1 = new(TestType, $(Int, 1));
   var test_obj2 = new(TestType, $(Int, 1));
@@ -507,41 +496,43 @@ PT_FUNC(test_type_new) {
   PT_ASSERT(eq(test_obj1, test_obj2));
   PT_ASSERT(neq(test_obj1, test_obj3));
   
-  delete(test_obj1);
-  delete(test_obj2);
-  delete(test_obj3);
+  del(test_obj1);
+  del(test_obj2);
+  del(test_obj3);
   
-  delete(TestType);
+  del(TestType);
   
 }
 
 PT_FUNC(test_type_implements) {
   
   PT_ASSERT(type_implements(Int, New));
-  PT_ASSERT(type_implements(Real, Num));
+  PT_ASSERT(type_implements(Float, Math));
   PT_ASSERT(type_implements(String, Eq));
   
-  PT_ASSERT(type_class(Int, Ord));
-  PT_ASSERT(type_class(List, At));
-  PT_ASSERT(type_class(Type, AsStr));
+  PT_ASSERT(type_instance(Int, Ord));
+  PT_ASSERT(type_instance(Array, Get));
+  PT_ASSERT(type_instance(Type, C_Str));
   
 }
 
 PT_FUNC(test_type_parent) {
   
+  /*
   PT_ASSERT(not type_implements(Int, ReturnTrue));
-  PT_ASSERT(not type_implements(Real, ReturnTrue));
+  PT_ASSERT(not type_implements(Float, ReturnTrue));
   PT_ASSERT(type_implements(IntParent, ReturnTrue));
   
   PT_ASSERT(return_true(IntParent));
   
-  Type_Inherit(Int, IntParent);
+  //Type_Inherit(Int, IntParent);
   
   PT_ASSERT(type_implements(Int, ReturnTrue));
-  PT_ASSERT(not type_implements(Real, ReturnTrue));
+  PT_ASSERT(not type_implements(Float, ReturnTrue));
   PT_ASSERT(type_implements(IntParent, ReturnTrue));
   
   PT_ASSERT(return_true(Int));
+  */
   
 }
 
@@ -552,9 +543,9 @@ PT_FUNC(test_show) {
   print_to(out, 0, "This is an %s %i %i",
     $(String, "example"), $(Int, 10), $(Int, 1));
   
-  PT_ASSERT_STR_EQ(as_str(out), "This is an example 10 1");
+  PT_ASSERT_STR_EQ(c_str(out), "This is an example 10 1");
   
-  delete(out);
+  del(out);
   
 }
 
@@ -571,37 +562,6 @@ PT_FUNC(test_look) {
   PT_ASSERT(eq(y, $(Int, 10)));
   PT_ASSERT(eq(z, $(Int, 1)));
   PT_ASSERT(eq(w, $(Int, 0)));
-  
-}
-
-PT_FUNC(test_module) {  
-      
-#ifdef _WIN32
-  with(python in module("python27.dll")) {
-  
-    const char* (*Py_GetVersion)(void) = get(python, $(String, "Py_GetVersion"));
-    const char* (*Py_GetPlatform)(void) = get(python, $(String, "Py_GetPlatform"));
-    const char* (*Py_GetCopyright)(void) = get(python, $(String, "Py_GetCopyright"));
-  
-    //println("");
-    //println("Python Version is '%s'", $(String, (char*)Py_GetVersion()));
-    //println("Python Platform is '%s'", $(String, (char*)Py_GetPlatform()));
-    //println("Python Copyright is '%s'", $(String, (char*)Py_GetCopyright()));
-    
-    PT_ASSERT(Py_GetVersion());
-    PT_ASSERT(Py_GetPlatform());
-    PT_ASSERT(Py_GetCopyright());
-    
-  }
-#else
-  //with(math in module("libm.so")) {
-    
-    //double (*cosine)(double) = get(math, $(String, "cos"));
-    
-    //PT_ASSERT(cosine);
-    
-  //}
-#endif
   
 }
 
@@ -627,6 +587,5 @@ PT_SUITE(suite_core) {
   PT_REG(test_type_parent);
   PT_REG(test_show);
   PT_REG(test_look);
-  PT_REG(test_module);
 
 }

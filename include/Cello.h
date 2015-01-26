@@ -31,6 +31,32 @@
 #ifndef Cello_h
 #define Cello_h
 
+/* Settings */
+
+#ifndef CELLO_BOUNDS_CHECK
+#define CELLO_BOUNDS_CHECK 1
+#endif
+
+#if defined(_WIN32)
+#define CELLO_WINDOWS
+#endif
+
+#if defined(__unix__)
+#define CELLO_UNIX
+#define CELLO_LINUX
+#endif
+
+#if defined(__APPLE__)
+#define CELLO_UNIX
+#define CELLO_MAC
+#endif
+
+#if defined(__clang__)
+#define CELLO_CLANG
+#endif
+
+/* Includes */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -44,20 +70,14 @@
 #include <math.h>
 #include <time.h>
 
-#ifdef _WIN32
+#ifdef CELLO_WINDOWS
 #include <windows.h>
 #include <DbgHelp.h>
 #endif
 
-#if defined(__unix__) || defined(__APPLE__)
+#ifdef CELLO_UNIX
 #include <pthread.h>
 #include <execinfo.h>
-#endif
-
-/* Settings */
-
-#ifndef CELLO_BOUNDS_CHECK
-#define CELLO_BOUNDS_CHECK 1
 #endif
 
 /* Syntax */
@@ -71,45 +91,17 @@ typedef void* var;
 #define or ||
 #define in ,
 
+/* Types */
+
 #define typedecl(T, ...) (var)((var[]){ \
   NULL, (var)CelloStaticAlloc, \
   NULL, "__Name",     #T, \
   NULL, "__Parent", NULL, \
   ##__VA_ARGS__, \
-  NULL, NULL, NULL}) + sizeof(struct CelloHeader) + sizeof(T) - sizeof(T)
+  NULL, NULL, NULL}) + \
+  sizeof(struct CelloHeader) + (sizeof(T) - sizeof(T))
 
 #define typeclass(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
-
-#define $(T, ...) new_stk(T, \
-  ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){}), \
-  &((struct T){__VA_ARGS__}), sizeof(struct T))
-
-#define try \
-  exception_inc(); exception_deactivate(); if (!setjmp(exception_buffer()))   
-
-#define catch_in(X, ...) else { exception_activate(); } exception_dec(); \
-  for (var X = exception_catch(tuple(__VA_ARGS__)); \
-    X isnt Terminal; X = Terminal)
-
-#define catch(...) catch_in(__VA_ARGS__)
-    
-#define throw(E, F, ...) \
-  exception_throw(E, F, tuple(__VA_ARGS__))
-  
-#if defined(__clang__)
-
-#define function(N, A) \
-  struct Function* N = $(Function, None); \
-  N->func = ^ var (var A)
-  
-#else
-
-#define function(N, A) \
-  auto var __CelloFunction_##N(var); \
-  var N = $(Function, __CelloFunction_##N); \
-  var __CelloFunction_##N(var A)
-  
-#endif
   
 /* Types */
 
@@ -175,10 +167,10 @@ struct Type {
   var inst;
 };
 
-static var True  = (var)1;
-static var False = (var)0;
-static var Okay  = (var)1;
-static var None  = (var)0;
+static const var True  = (var)1;
+static const var False = (var)0;
+static const var Okay  = (var)1;
+static const var None  = (var)0;
 
 struct Ref { var val; };
 struct Box { var val; };
@@ -187,11 +179,11 @@ struct Char { char val; };
 struct Float { double val; };
 struct String { char* val; };
 struct Tuple { var* items; };
-struct Range { var start; var stop; var step; };
+struct Range { var iter; int64_t start; int64_t stop; int64_t step; };
 struct Slice { var iter; var range; };
 struct File { FILE* file; };
 
-#if defined(__clang__)
+#ifdef CELLO_CLANG
 struct Function { var (^func)(var); };
 #else
 struct Function { var (*func)(var); };
@@ -440,11 +432,26 @@ var type_method_at_offset(var self, var cls, size_t offset, const char* method);
 var type_implements_method_at_offset(
   var self, var cls, size_t offset, const char* method);
 
+#define $(T, ...) new_stk(T, \
+  ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){}), \
+  &((struct T){__VA_ARGS__}), sizeof(struct T))
+
+#define $I(X) $(Int, X)
+#define $F(X) $(Float, X)
+#define $C(X) $(Char, X)
+#define $S(X) $(String, X)
+#define $R(X) $(Ref, X)
+#define $B(X) $(Box, X)
+#define $T(...) tuple(__VA_ARGS__)
+
 #define new(T, ...) new_with(T, tuple(__VA_ARGS__))
 #define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
 var new_with(var type, var args);
 void del(var self);
 var new_stk(var type, var mem, var data, size_t size);
+
+#define tuple_new(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
+#define tuple(...) tuple_new(_, ##__VA_ARGS__, Terminal)
 
 var alloc(var type);
 void dealloc(var self);
@@ -453,9 +460,6 @@ size_t size(var type);
 #define construct(self, ...) construct_with(self, tuple(__VA_ARGS__))
 var construct_with(var self, var args);
 var destruct(var self);
-
-#define tuple_new(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
-#define tuple(...) tuple_new(_, ##__VA_ARGS__, Terminal)
 
 var assign(var self, var obj);
 var copy(var obj);
@@ -488,8 +492,10 @@ var iter_init(var self);
 var iter_next(var self, var curr);
 
 #define foreach(X) foreach_in(X)
-#define foreach_in(X, S) \
-  for(var X = iter_init(S); X isnt Terminal; X = iter_next(S, X))
+#define foreach_in(X, S) for(var __##X = (S), \
+    X = iter_init(__##X); \
+    X isnt Terminal; \
+    X = iter_next(__##X, X))
 
 void push(var self, var obj);
 void pop(var self);
@@ -510,9 +516,6 @@ void clear(var self);
 size_t len(var self);
 var empty(var self);
 
-var maximum(var self);
-var minimum(var self);
-
 char c_char(var self);
 char* c_str(var self);
 int64_t c_int(var self);
@@ -524,16 +527,14 @@ void end(var self);
 var begin_with(var self);
 var end_with(var self);
 
-#define range(X) $(Range, $(Int, 0), $(Int, X), $(Int, 1))
-#define range_from(X, Y) $(Range, $(Int, X), $(Int, Y), $(Int, 1))
-#define range_step(X, Y, Z) $(Range, $(Int, X), $(Int, Y), $(Int, Z))
+#define range(X) $(Range, $(Int, 0), 0, X, 1)
+#define range_from(X, Y) $(Range, $(Int, 0), X, Y, 1)
+#define range_step(X, Y, Z) $(Range, $(Int, 0), X, Y, Z)
 
 #define with(X) with_in(X)
 #define with_in(X, S) \
   for(var X = begin_with(S); X isnt Terminal; X = end_with(X))
 
-#define file() $(File, None)
-  
 var sopen(var self, var filename, var access);
 void sclose(var self);
 void sseek(var self, var pos, var origin);
@@ -562,6 +563,21 @@ void mmod(var self, var obj);
 void minc(var self);
 void mdec(var self);
 
+#ifdef CELLO_CLANG
+
+#define function(N, A) \
+  struct Function* N = $(Function, None); \
+  N->func = ^ var (var A)
+  
+#else
+
+#define function(N, A) \
+  auto var __CelloFunction_##N(var); \
+  var N = $(Function, __CelloFunction_##N); \
+  var __CelloFunction_##N(var A)
+  
+#endif
+
 #define call(x, ...) call_with(x, tuple(__VA_ARGS__))
 var call_with(var self, var args);
 
@@ -578,7 +594,8 @@ int show_to(var self, var out, int pos);
 
 #define print(fmt, ...) print_with(fmt, tuple(__VA_ARGS__))
 #define println(fmt, ...) println_with(fmt, tuple(__VA_ARGS__))
-#define print_to(out, pos, fmt, ...) print_to_with(out, pos, fmt, tuple(__VA_ARGS__))
+#define print_to(out, pos, fmt, ...) \
+  print_to_with(out, pos, fmt, tuple(__VA_ARGS__))
 
 int print_with(const char* fmt, var args);
 int println_with(const char* fmt, var args);
@@ -607,6 +624,18 @@ void join(var self);
 void lock(var self);
 void unlock(var self);
 var lock_try(var self);
+
+#define try \
+  exception_inc(); exception_deactivate(); if (!setjmp(exception_buffer()))   
+
+#define catch_in(X, ...) else { exception_activate(); } exception_dec(); \
+  for (var X = exception_catch(tuple(__VA_ARGS__)); \
+    X isnt Terminal; X = Terminal)
+
+#define catch(...) catch_in(__VA_ARGS__)
+    
+#define throw(E, F, ...) \
+  exception_throw(E, F, tuple(__VA_ARGS__))
 
 void exception_register_signals(void);
 void exception_inc(void);

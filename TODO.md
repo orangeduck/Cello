@@ -1,19 +1,17 @@
 Cello 2.0
 =========
 
-* Generator/Range/Sequence class
-* Just put instances in type object declaration
-* Wrap libuv in Cello like layer
-* Garbage collection
-	- cleanup extension gcc/clang
-* Disable features not available such as threads/exceptions/functions/gc
+* Slice Class
+* Garbage Collection
+* Unit Type for empty container
+* Disable features based on avaliability (threads/exceptions/closures/gc)
 * REPL
-	- Don't want to do anything by hand. Just interface strings.
-	- Switch modes between top level and execution
-	- `nm` tool to list symbols for autocomplete
-* Unit Type for empty type
-* Append Concat class
-* Ref and Box Eq and Hash
-
-
+  - Python prototype
+  - Parse CPP and extract defines.
+  - Parse Syntax tree and extract type/variable declarations
+  - Record those in perminant storage which is added to every file
+* More Benchmarks
+* Optimise type info lookup
+* Improve website
 * JIT compilation of methods. Keep most recently called methods in cache?
+* Swap entries in type list such that called ones get moved up higher?

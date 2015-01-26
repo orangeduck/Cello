@@ -102,10 +102,6 @@ static var Ref_Deref(var self) {
   return r->val;
 }
 
-static var Ref_Forward(var self) {
-  return deref(self);
-}
-
 var Ref = typedecl(Ref,
   typeclass(Doc,
     Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, Ref_Methods),
@@ -181,10 +177,6 @@ static void Box_Ref(var self, var val) {
 static var Box_Deref(var self) {
   struct Box* b = self;
   return b->val;
-}
-
-static var Box_Forward(var self) {
-  return deref(self);
 }
 
 var Box = typedecl(Box,

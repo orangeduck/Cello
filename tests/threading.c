@@ -3,12 +3,6 @@
 
 #if defined(__unix__)
 #include <unistd.h>
-#elif defined(_WIN32)
-#undef in
-#undef data
-#include <windows.h>
-#define in ,
-#define data typedef struct
 #endif
 
 void cello_sleep(int ms) {
@@ -21,34 +15,34 @@ void cello_sleep(int ms) {
 
 PT_FUNC(test_new) {
   
-  var in_func = $(Reference, False);
+  var in_func = $(Ref, False);
   
-  lambda(f, args) {
-    set(in_func, 0, True);
+  function(f, args) {
+    ref(in_func, True);
     return None;
   };
   
   var t = new(Thread, f);
   
-  PT_ASSERT(not at(in_func, 0));
+  PT_ASSERT(not deref(in_func));
   call(t);
   join(t);
-  PT_ASSERT(at(in_func, 0));
+  PT_ASSERT(deref(in_func));
   
-  delete(t);
+  del(t);
 
 }
 
 PT_FUNC(test_multiple) {
   
-  var inside = new(List, False, False, False, False, False);
+  var inside = new(Array, Ref, False, False, False, False, False);
   
-  lambda(f, args) {
-    set(inside, as_long(at(args, 0)), True);
+  function(f, a) {
+    set(inside, get(a, $I(0)), True);
     return None;
   };
   
-  var threads = new(List,
+  var threads = new(Array, Box,
     new(Thread, f), new(Thread, f),
     new(Thread, f), new(Thread, f),
     new(Thread, f));
@@ -57,22 +51,21 @@ PT_FUNC(test_multiple) {
     $(Int, 0), $(Int, 1), $(Int, 2),
     $(Int, 3), $(Int, 4));
   
-  for(int i = 0; i < len(threads); i++) {
-    call(at(threads, i), at(args, i));
+  foreach(i in range(len(threads))) {
+    call(deref(get(threads, i)), get(args, i));
   }
   
   foreach(t in threads) {
-    join(t);
-    delete(t);
+    join(deref(t));
   }
   
   foreach(i in inside) {
-    PT_ASSERT(i);
+    PT_ASSERT(deref(i));
   }
   
-  delete(args);
-  delete(threads);
-  delete(inside);
+  del(args);
+  del(threads);
+  del(inside);
   
 }
 
@@ -81,14 +74,14 @@ PT_FUNC(test_mutex) {
   var mutex = new(Mutex);
   var total = $(Int, 0);
   
-  lambda(f, args) {
+  function(f, args) {
     with(m in mutex) {
-      add(total, $(Int, 1));
+      minc(total);
     }
     return None;
   };
   
-  var threads = new(List,
+  var threads = new(Array, Box,
     new(Thread, f), new(Thread, f),
     new(Thread, f), new(Thread, f),
     new(Thread, f));
@@ -96,27 +89,26 @@ PT_FUNC(test_mutex) {
   PT_ASSERT(eq(total, $(Int, 0)));
   
   foreach(t in threads) {
-    call(t);
+    call(deref(t));
   }
   
   foreach(t in threads) {
-    join(t);
-    delete(t);
+    join(deref(t));
   }
   
   PT_ASSERT(eq(total, $(Int, 5)));
   
-  delete(threads);
-  delete(mutex);
+  del(threads);
+  del(mutex);
   
 }
 
 PT_FUNC(test_exception) {
   
-  lambda(f, args) {
+  function(f, args) {
     try {
       cello_sleep(20);
-      PT_ASSERT(Exception_Depth() is 1);
+      PT_ASSERT(exception_depth() is 1);
     } catch(e) { }
     return None;
   };
@@ -125,10 +117,10 @@ PT_FUNC(test_exception) {
   
   call(t);
   cello_sleep(10);
-  PT_ASSERT(Exception_Depth() is 0);
+  PT_ASSERT(exception_depth() is 0);
   join(t);
   
-  delete(t);
+  del(t);
   
 }
 

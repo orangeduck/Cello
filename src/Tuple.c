@@ -24,6 +24,44 @@ static const char* Tuple_Methods(void) {
   return "";
 }
 
+static var Tuple_New(var self, var args) {
+  struct Tuple* t = self;
+  size_t nargs = len(args);
+  
+  t->items = malloc(sizeof(var) * (nargs+1));
+  foreach(i in range(nargs)) {
+    t->items[c_int(i)] = get(args, i);
+  }
+  t->items[nargs] = Terminal;
+  
+  return t;
+}
+
+static var Tuple_Del(var self) {
+  struct Tuple* t = self;
+  free(t->items);
+  return self;
+}
+
+static size_t Tuple_Size(void) {
+  return sizeof(struct Tuple);
+}
+
+static var Tuple_Assign(var self, var obj) {
+  struct Tuple* t = self;
+  size_t nargs = len(obj);
+  t->items = realloc(t->items, sizeof(var) * (nargs+1));
+  foreach(i in range(nargs)) {
+    t->items[c_int(i)] = get(obj, i);
+  }
+  t->items[nargs-1] = Terminal;
+  return t;
+}
+
+static var Tuple_Copy(var self) {
+  return new_with(Tuple, self);
+}
+
 static size_t Tuple_Len(var self) {
   struct Tuple* t = self;
   size_t x = 0;
@@ -38,7 +76,13 @@ static var Tuple_Iter_Init(var self) {
 }
 
 static var Tuple_Iter_Next(var self, var curr) {
-  return ++curr;
+  struct Tuple* t = self;
+  size_t i = 0;
+  while (t->items[i] isnt Terminal) {
+    if (t->items[i] is curr) { return t->items[i+1]; }
+    i++;
+  }
+  return Terminal;
 }
 
 static var Tuple_Get(var self, var key) {
@@ -49,8 +93,8 @@ static var Tuple_Get(var self, var key) {
 #if CELLO_BOUNDS_CHECK == 1
   if (i < 0 or i >= len(self)) {
     return throw(IndexOutOfBoundsError, 
-      "Index %i out of bounds [%i-%i]", 
-      $(Int, i), $(Int, 0), $(Int, len(self)));
+      "Index '%i' out of bounds for Tuple of size %i.", 
+      key, $(Int, Tuple_Len(t)));
   }
 #endif
   
@@ -65,8 +109,8 @@ static void Tuple_Set(var self, var key, var val) {
 #if CELLO_BOUNDS_CHECK == 1
   if (i < 0 or i >= len(self)) {
     throw(IndexOutOfBoundsError, 
-      "Index %i out of bounds [%i-%i]", 
-      $(Int, i), $(Int, 0), $(Int, len(self)));
+      "Index '%i' out of bounds for Tuple of size %i.", 
+      key, $(Int, Tuple_Len(t)));
     return;
   }
 #endif
@@ -76,25 +120,29 @@ static void Tuple_Set(var self, var key, var val) {
 
 static var Tuple_Mem(var self, var item) {
   foreach (obj in self) {
-    if_neq(obj, item) { return False; }
+    if_neq (obj, item) { return False; }
   }
   return True;  
 }
 
 static int Tuple_Show(var self, var output, int pos) {
-  pos = print_to(output, pos, "<'Tuple' At 0x%p [", self);
+  pos = print_to(output, pos, "<'Tuple' At 0x%p (", self);
   for(int i = 0; i < len(self); i++) {
     pos = print_to(output, pos, "%$", get(self, $(Int, i)));
     if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
   }
-  pos = print_to(output, pos, "]>");
+  pos = print_to(output, pos, ")>");
   return pos;
 }
 
 var Tuple = typedecl(Tuple,
   typeclass(Doc,
     Tuple_Name, Tuple_Brief, Tuple_Description, Tuple_Examples, Tuple_Methods),
-  typeclass(Len,   Tuple_Len),
-  typeclass(Get,   Tuple_Get, Tuple_Set, Tuple_Mem, NULL),
-  typeclass(Show,  Tuple_Show, NULL));
+  typeclass(New,    Tuple_New, Tuple_Del, Tuple_Size),
+  typeclass(Assign, Tuple_Assign),
+  typeclass(Copy,   Tuple_Copy),
+  typeclass(Len,    Tuple_Len),
+  typeclass(Get,    Tuple_Get, Tuple_Set, Tuple_Mem, NULL),
+  typeclass(Iter,   Tuple_Iter_Init, Tuple_Iter_Next),
+  typeclass(Show,   Tuple_Show, NULL));
 

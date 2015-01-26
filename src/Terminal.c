@@ -20,7 +20,13 @@ static const char* Terminal_Examples(void) {
   return "";
 }
 
-var Terminal  = type(Terminal
-  type_class(Document,
+/* TODO */
+static const char* Terminal_Methods(void) {
+  return "";
+}
+
+var Terminal  = typedecl(Terminal,
+  typeclass(Doc,
     Terminal_Name,        Terminal_Brief,
-    Terminal_Description, Terminal_Examples));
+    Terminal_Description, Terminal_Examples,
+    Terminal_Methods));

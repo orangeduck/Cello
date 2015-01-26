@@ -141,7 +141,7 @@ static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
   return vfscanf(f->file, fmt, va);
 }
 
-var File = typedecl(
+var File = typedecl(File,
   typeclass(Doc,
     File_Name, File_Brief, File_Description, File_Examples, File_Methods),
   typeclass(New, File_New, File_Del, File_Size),

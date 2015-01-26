@@ -20,8 +20,13 @@ static const char* Copy_Examples(void) {
   return "";
 }
 
-var Copy = type(Copy,
-  type_class(Document, Copy_Name, Copy_Brief, Copy_Description, Copy_Examples));
+/* TODO */
+static const char* Copy_Methods(void) {
+  return "";
+}
+
+var Copy = typedecl(Copy,
+  typeclass(Doc, Copy_Name, Copy_Brief, Copy_Description, Copy_Examples, Copy_Methods));
 
 
 var copy(var self) {

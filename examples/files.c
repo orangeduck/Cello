@@ -3,10 +3,11 @@
 
 int main(int arc, char** argv) {
   
+  /*
   with(file in sopen(file(), "test.bin", "w")) {
     
-    put(file, Int, $(Int, 1));
-    put(file, Int, $(Int, 22));
+    set(file, Int, $(Int, 1));
+    set(file, Int, $(Int, 22));
   
   }
   
@@ -18,9 +19,10 @@ int main(int arc, char** argv) {
     
     print("Got Numbers: '%i' and '%i'\n", first, second);
     
-    delete(first);
-    delete(second);
+    del(first);
+    del(second);
     
   sclose(f);
+  */
   
 }

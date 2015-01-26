@@ -7,27 +7,27 @@
 ** but with creative thinking could become a powerful tool.
 */
 
-local var Hello;
+static var Hello;
 
 struct Hello {
   int hello_val;
 };
 
-local var Hello_New(var self, var args) {
-  struct Hello* hd = cast(self, Hello);
-  hd->hello_val = cint(get(args, $(Int, 0)));
+static var Hello_New(var self, var args) {
+  struct Hello* hd = self;
+  hd->hello_val = c_int(get(args, $(Int, 0)));
   return self;
 }
 
-local var Hello_Delete(var self) {
+static var Hello_Delete(var self) {
   return self;
 }
 
-local size_t Hello_Size(void) {
+static size_t Hello_Size(void) {
   return sizeof(struct Hello);
 }
 
-local var Hello_Eq(var self, var obj) {
+static var Hello_Eq(var self, var obj) {
   struct Hello* lhs = cast(self, Hello);
   struct Hello* rhs = cast(obj, Hello);
   if (lhs->hello_val == rhs->hello_val) {
@@ -40,7 +40,7 @@ local var Hello_Eq(var self, var obj) {
 int main(int argc, char** argv) {
   
   Hello = new(Type, $(String, "Hello"),
-    $(New, Hello_New, Hello_Delete, Hello_Size)
+    $(New, Hello_New, Hello_Delete, Hello_Size),
     $(Eq, Hello_Eq));
   
   print("%s is a %s!\n", Hello, type_of(Hello));
@@ -50,10 +50,10 @@ int main(int argc, char** argv) {
 
   print("Equal? %d\n", eq(hello_obj1, hello_obj2));
   
-  delete(hello_obj1);
-  delete(hello_obj2);
+  del(hello_obj1);
+  del(hello_obj2);
   
-  delete(Hello);
+  del(Hello);
   
   return 0;
 }

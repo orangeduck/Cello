@@ -93,12 +93,13 @@ static const char* Array_Methods(void) {
 struct Array {
   var type;
   var data;
+  size_t tsize;
   size_t nitems;
   size_t nslots;
 };
 
 static size_t Array_Step(struct Array* a) {
-  return size(a->type) + sizeof(struct CelloHeader);
+  return a->tsize + sizeof(struct CelloHeader);
 }
 
 static var Array_Item(struct Array* a, size_t i) {
@@ -116,6 +117,7 @@ static var Array_New(var self, var args) {
   
   struct Array* a = self;
   a->type   = cast(get(args, $(Int, 0)), Type);
+  a->tsize  = size(a->type);
   a->nitems = len(args)-1;
   a->nslots = a->nitems;
   
@@ -214,12 +216,12 @@ static void Array_Concat(var self, var obj) {
   size_t i = 0;
   size_t olen = len(obj);
   
-  a->nitems = a->nitems + olen;
+  a->nitems += olen;
   Array_Reserve_More(a);
   
   foreach (item in obj) {
-    Array_Alloc(a, a->nitems-1-olen+i);
-    assign(Array_Item(a, a->nitems-1-olen+i), obj);
+    Array_Alloc(a, a->nitems-olen+i);
+    assign(Array_Item(a, a->nitems-olen+i), item);
     i++;
   }
   
@@ -299,6 +301,7 @@ static void Array_Rem(var self, var obj) {
       return;
     }
   }
+  throw(ValueError, "Object %$ not in Array!", obj);
 }
 
 static void Array_Push(var self, var obj) {
@@ -379,76 +382,63 @@ static var Array_Iter_Init(var self) {
 
 static var Array_Iter_Next(var self, var curr) {
   struct Array* a = self;
-  if (curr > Array_Item(a, a->nitems-1)) {
+  if (curr >= Array_Item(a, a->nitems-1)) {
     return Terminal;
   } else {
     return curr + Array_Step(a);
   }
 }
 
-/*
-static void Array_Swap_Items(var self, var temp, var i0, var i1) {
-  assign(temp, get(self, i0));
-  set(self, i0, get(self, i1));
-  set(self, i1, temp);
+static void Array_Swap(struct Array* a, size_t i, size_t j) {
+  if (i == j) { return; }
+  char swapspace[sizeof(struct CelloHeader) + a->tsize];
+  memcpy(swapspace, a->data + i * Array_Step(a), Array_Step(a));
+  memcpy(a->data + i * Array_Step(a), 
+         a->data + j * Array_Step(a), Array_Step(a));
+  memcpy(a->data + j * Array_Step(a), swapspace, Array_Step(a));
 }
 
 static void Array_Reverse(var self) {
   struct Array* a = self;
   
-  var temp = alloc(a->type);
-  
-  for(size_t i = 0; i < len(self) / 2; i++) {
-    Array_Swap_Items(self, temp, $(Int, i), $(Int, len(self)-1-i));
+  size_t l = Array_Len(a);
+  for(size_t i = 0; i < l / 2; i++) {
+    Array_Swap(a, i, l-1-i);
   }
-  
-  del(temp);
 }
 
-static size_t Array_Sort_Partition(
-  var self, size_t left, size_t right, size_t pivot) {
+static size_t Array_Sort_Partition(struct Array* a, int64_t l, int64_t r) {
   
-  struct Array* a = self; 
-  var pivt = alloc(a->type);
-  var temp = alloc(a->type);
+  int64_t p = l + (r - l) / 2;
+  char swapspace[sizeof(struct CelloHeader) + a->tsize];
+  memcpy(swapspace, a->data + p * Array_Step(a), Array_Step(a));
   
-  assign(pivt, get(self, $(Int, pivot)));
-
-  Array_Swap_Items(self, temp, $(Int, pivot), $(Int, right));
+  Array_Swap(a, p, r);
   
-  var fix = False;
-  size_t storei = left;
-  
-  for (size_t i = left; i < right; i++) {
-    if_lt (get(self, $(Int, i)), pivt) {
-      if (fix) { Array_Swap_Items(self, temp, $(Int, i), $(Int, storei)); }
-      storei++;
-    } else {
-      fix = True;
+  int64_t s = l;
+  for (int64_t i = l; i < r; i++) {
+    if_lt (Array_Get(a, $(Int, i)), swapspace + sizeof(struct CelloHeader)) {
+      Array_Swap(a, i, s);
+      s++;
     }
   }
   
-  if (fix) { Array_Swap_Items(self, temp, $(Int, storei), $(Int, right)); }
-
-  dealloc(temp);
-  dealloc(pivt);
+  Array_Swap(a, s, r);
   
-  return storei;
+  return s;
 }
 
-static void Array_Sort_Part(var self, size_t left, size_t right) {
-  if (left < right) {
-    size_t pivot = left + (right - left) / 2;
-    size_t newpivot = Array_Sort_Partition(self, left, right, pivot);
-    Array_Sort_Part(self, left, newpivot-1);
-    Array_Sort_Part(self, newpivot+1, right);
+static void Array_Sort_Part(struct Array* a, int64_t l, int64_t r) {
+  if (l < r) {
+    int64_t s = Array_Sort_Partition(a, l, r);
+    Array_Sort_Part(a, l, s-1);
+    Array_Sort_Part(a, s+1, r);
   }
 }
 
 static void Array_Sort(var self) {
-  Array_Sort_Part(self, 0, len(self)-1);
+  Array_Sort_Part(self, 0, Array_Len(self)-1);
 }
-*/
 
 static int Array_Show(var self, var output, int pos) {
   struct Array* a = self;
@@ -470,12 +460,15 @@ var Array = typedecl(Array,
   typeclass(Assign,   Array_Assign),
   typeclass(Copy,     Array_Copy),
   typeclass(Eq,       Array_Eq),
+  typeclass(Clear,    Array_Clear),
   typeclass(Push,
     Array_Push,       Array_Pop,
     Array_Push_At,    Array_Pop_At),
   typeclass(Len,      Array_Len),
   typeclass(Get,      Array_Get, Array_Set, Array_Mem, Array_Rem),
   typeclass(Iter,     Array_Iter_Init, Array_Iter_Next),
+  typeclass(Reverse,  Array_Reverse),
+  typeclass(Sort,     Array_Sort),
   typeclass(Show,     Array_Show, NULL));
 
   

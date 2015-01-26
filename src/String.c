@@ -210,7 +210,7 @@ static void String_Clear(var self) {
   s->val[0] = '\0';
 }
 
-static var String_Contains(var self, var obj) {
+static var String_Mem(var self, var obj) {
   
   if (implements(obj, C_Str)) {
     return bool_var(strstr(c_str(self), c_str(obj)) isnt None);
@@ -223,7 +223,7 @@ static var String_Contains(var self, var obj) {
   return False;
 }
 
-static void String_Discard(var self, var obj) {
+static void String_Rem(var self, var obj) {
   
   if (implements(obj, C_Str)) {
     char* pos = strstr(c_str(self), c_str(obj));
@@ -374,6 +374,9 @@ var String = typedecl(String,
   typeclass(Eq, String_Eq),
   typeclass(Ord, String_Gt, String_Lt),
   typeclass(Len, String_Len),
+  typeclass(Get, NULL, NULL, String_Mem, String_Rem),
+  typeclass(Clear, String_Clear),
+  typeclass(Reverse, String_Reverse),
   typeclass(Hash, String_Hash),
   typeclass(C_Str, String_C_Str),
   typeclass(Format, String_Format_To, String_Format_From),

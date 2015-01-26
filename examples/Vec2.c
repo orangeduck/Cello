@@ -1,7 +1,6 @@
-#include "Vec2.h"
+#include "Cello.h"
 
-#include <math.h>
-
+/*
 extern var Vector;
 
 struct Vector {
@@ -92,6 +91,8 @@ var Vec2 = typedecl(Vec2,
   typeclass(Eq, Vec2_Eq),
   typeclass(Show, Vec2_Show, Vec2_Look),
   typeclass(Vector, Vec2_Dot, Vec2_Length));
+
+*/
 
 int main(int argc, char** argv) {
   return 0;

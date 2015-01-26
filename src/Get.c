@@ -43,3 +43,4 @@ var mem(var self, var key) {
 void rem(var self, var key) {
   method(self, Get, rem, key);
 }
+
