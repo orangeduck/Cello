@@ -58,7 +58,7 @@ else
 endif
 
 ifeq ($(findstring clang,$(COMPILER)),clang)
-	CFLAGS += -fblocks
+	CFLAGS += -fblocks -Wno-parentheses-equality
 
 	ifneq ($(findstring Darwin,$(PLATFORM)),Darwin)
 		LIBS += -lBlocksRuntime
