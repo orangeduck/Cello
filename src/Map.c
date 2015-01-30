@@ -178,6 +178,7 @@ void Map_Discard(var self, var key) {
         node->leaf_val = inorder_val;
         
         discard(md->keys, key);
+        push_back(md->keys, inorder_key);
         return;
       }
           
