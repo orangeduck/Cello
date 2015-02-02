@@ -291,17 +291,17 @@ PT_FUNC(test_string_create) {
 
 PT_FUNC(test_string_ord) {
   
-  PT_ASSERT( gt($(String, "Apple"),    $(String, "Ball")) );
-  PT_ASSERT( gt($(String, "cat"), $(String, "dog")) );
-  PT_ASSERT( lt($(String, "great"), $(String, "hello")) );
-  PT_ASSERT( lt($(String, "Yellow"),   $(String, "Zoo")) );
-  PT_ASSERT( eq($(String, "Hello"),  $(String, "Hello")) );
+  PT_ASSERT( gt($(String, "Ball"),    $(String, "Apple")) );
+  PT_ASSERT( gt($(String, "dog"),     $(String, "cat")) );
+  PT_ASSERT( lt($(String, "great"),   $(String, "hello")) );
+  PT_ASSERT( lt($(String, "Yellow"),  $(String, "Zoo")) );
+  PT_ASSERT( eq($(String, "Hello"),   $(String, "Hello")) );
   PT_ASSERT( eq($(String, "there"),   $(String, "there")) );
-  PT_ASSERT( ge($(String, "Hello"),  $(String, "Hello")) );
+  PT_ASSERT( ge($(String, "Hello"),   $(String, "Hello")) );
   PT_ASSERT( ge($(String, "tooting"), $(String, "Red")) );
-  PT_ASSERT( le($(String, "guard"),  $(String, "guardian")) );
-  PT_ASSERT( le($(String, "keep"),   $(String, "keep")) );
-  PT_ASSERT( neq($(String, "Hello"), $(String, "hello")) );
+  PT_ASSERT( le($(String, "guard"),   $(String, "guardian")) );
+  PT_ASSERT( le($(String, "keep"),    $(String, "keep")) );
+  PT_ASSERT( neq($(String, "Hello"),  $(String, "hello")) );
   PT_ASSERT( neq($(String, "group"),  $(String, "GROUP")) );
   
 }
