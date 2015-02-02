@@ -66,46 +66,23 @@ var String_Eq(var self, var other) {
   }
 }
 
-var String_Gt(var self, var obj) {
-  StringData* s = cast(self, String);
-  if (not type_implements(type_of(obj), AsStr)) return false;
-  
-  const char* fst = s->value;
-  const char* snd = as_str(obj);
-  
-  int fstlen = strlen(fst);
-  int sndlen = strlen(snd);
-  int minlen = fstlen > sndlen ? sndlen : fstlen; 
-  
-  for(int i = 0; i < minlen; i++) {
-    if (fst[i] > snd[i]) return True;
+var String_Gt(var self, var other) {
+  StringData* fst = cast(self, String);
+  if (type_implements(type_of(other), AsStr)) {
+    return bool_var(strcmp(fst->value, as_str(other)) > 0);
+  } else {
+    return False;
   }
-  
-  if (fstlen > sndlen) return True;
-  
-  return False;
 }
 
-var String_Lt(var self, var obj) {
-  StringData* s = cast(self, String);
-  if (not type_implements(type_of(obj), AsStr)) return false;
-  
-  const char* fst = s->value;
-  const char* snd = as_str(obj);
-  
-  int fstlen = strlen(fst);
-  int sndlen = strlen(snd);
-  int minlen = fstlen > sndlen ? sndlen : fstlen; 
-  
-  for(int i = 0; i < minlen; i++) {
-    if (fst[i] < snd[i]) return True;
+var String_Lt(var self, var other) {
+  StringData* fst = cast(self, String);
+  if (type_implements(type_of(other), AsStr)) {
+    return bool_var(strcmp(fst->value, as_str(other)) < 0);
+  } else {
+    return False;
   }
-  
-  if (fstlen < sndlen) return True;
-  
-  return False;
 }
-
 
 int String_Len(var self) {
   StringData* s = cast(self, String);
