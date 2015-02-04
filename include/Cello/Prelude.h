@@ -31,14 +31,14 @@ typedef void* var;
 
 #define local static
 #define global extern
-#define class typedef struct 
-#define data typedef struct 
+#define class typedef struct
+#define data typedef struct
 #define instance(T,C) local C T##C
 
 /*
 ** == Methods ==
 **
-**  These macros make the declaration 
+**  These macros make the declaration
 **  of Types statically much easier
 */
 
@@ -78,7 +78,7 @@ var type_of(var obj);
 global var Undefined;
 
 
-/* 
+/*
 ** == Lit ==
 **
 **  Declare data objects on the stack.
@@ -106,7 +106,7 @@ global var Undefined;
 **  behaviour.
 **
 **  There are two main differences to the C
-**  like variable arguments. First all arguments 
+**  like variable arguments. First all arguments
 **  must be of type `var`.
 **
 **  Secondly this mechanism provides a method
@@ -358,9 +358,11 @@ void exit_with(var self);
 
 var enter_for(var self);
 var exit_for(var self);
+var enter_for_setup();
+void exit_for_cleanup();
 
 #define with(x) with_scanned(x)
-#define with_scanned(x, ...) for(var x = enter_for(__VA_ARGS__); not (x is Undefined); x = exit_for(x))
+#define with_scanned(x, ...) for(var __withCello_##x = enter_for_setup(), x = Undefined; not (__withCello_##x is Undefined); __withCello_##x = Undefined) if (setjmp(Exception_Buffer())) { if(not (__withCello_##x is Some)) {exit_for(__withCello_##x);} else {exit_for_cleanup();} } else for(__withCello_##x = enter_for(__VA_ARGS__), x = __withCello_##x; not (x is Undefined); x = exit_for(x))
 
 /** Stream - File like object */
 

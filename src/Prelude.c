@@ -16,6 +16,7 @@
 #include <string.h>
 
 var Undefined = Singleton(Undefined);
+var InvalidExitForError = Singleton(InvalidExitForError);
 
 /*
 ** The type_of a Type object is just "Type" again.
@@ -27,7 +28,7 @@ var Undefined = Singleton(Undefined);
 */
 
 var type_of(var self) {
-  
+
   /* Test against Builtins */
   if (self is Undefined) return throw(ValueError, "Received 'Undefined' as value to 'type_of'");
   if (self is True) return Bool;
@@ -51,7 +52,7 @@ var allocate(var type) {
 
   /* Allocate space for type, set type entry */
   type = cast(type, Type);
-  
+
   var self;
   if (size(type) <= sizeof(ObjectData)) {
     self = NULL;
@@ -60,7 +61,7 @@ var allocate(var type) {
     if (self == NULL) { throw(OutOfMemoryError, "Cannot create new '%s', out of memory!", type); }
     ((ObjectData*)self)->type = type;
   }
-  
+
   return self;
 }
 
@@ -68,23 +69,23 @@ void deallocate(var obj) {
   free(obj);
 }
 
-var new_vl(var type, var_list vl) { 
-  
+var new_vl(var type, var_list vl) {
+
   var self = allocate(type);
-  
+
   if (type_implements_method(type, New, construct_vl)) {
     self = type_class_method(type, New, construct_vl, self, vl);
   }
-  
+
   return self;
 }
 
 void delete(var self) {
-  
+
   if (type_implements_method(type_of(self), New, destruct)) {
     self = type_class_method(type_of(self), New, destruct, self);
   }
-  
+
   deallocate(self);
 }
 
@@ -105,13 +106,13 @@ var copy(var self) {
 }
 
 var eq(var lhs, var rhs) {
-  
+
   if (not type_implements(type_of(lhs), Eq)) {
     return bool_var(lhs == rhs);
   } else {
     return type_class_method(type_of(lhs), Eq, eq, lhs, rhs);
   }
-  
+
 }
 
 var neq(var lhs, var rhs) {
@@ -156,7 +157,7 @@ void discard(var self, var obj) {
 }
 
 var maximum(var self) {
-  
+
   if (len(self) == 0) return None;
 
   var best = at(self, 0);
@@ -165,21 +166,21 @@ var maximum(var self) {
       best = item;
     }
   }
-  
+
   return best;
 }
 
 var minimum(var self) {
-  
+
   if (len(self) == 0) return None;
-  
+
   var best = at(self, 0);
   foreach(item in self) {
     if_lt(item, best) {
       best = item;
     }
   }
-  
+
   return best;
 }
 
@@ -365,7 +366,22 @@ var enter_for(var self) {
   return self;
 }
 
+var enter_for_setup() {
+  Exception_Inc();
+  Exception_Deactivate();
+  return Some;
+}
+
+void exit_for_cleanup() {
+  if(Exception_Depth() >= 1) {
+    Exception_Dec();
+  } else {
+    throw(InvalidExitForError, "exit_for called without try/catch block");
+  }
+}
+
 var exit_for(var self) {
+  exit_for_cleanup();
   exit_with(self);
   return Undefined;
 }

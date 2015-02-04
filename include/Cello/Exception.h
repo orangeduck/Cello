@@ -52,7 +52,7 @@ var Exception_Catch(var_list vl);
 
 /* Exception Macros */
 
-#define try Exception_Inc(); Exception_Deactivate(); if (!setjmp(Exception_Buffer()))   
+#define try Exception_Inc(); Exception_Deactivate(); if (!setjmp(Exception_Buffer()))
 
 #define catch(...) catch_scanned(__VA_ARGS__)
 #define catch_scanned(x, ...) else { Exception_Activate(); } Exception_Dec(); for (var x = Exception_Catch(var_list_new(__VA_ARGS__)); x != Undefined; x = Undefined)
