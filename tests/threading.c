@@ -6,9 +6,9 @@
 #endif
 
 void cello_sleep(int ms) {
-#ifdef CELLO_UNIX
+#if defined(CELLO_UNIX)
   usleep(ms * 1000);
-#elif CELLO_WINDOWS
+#elif defined(CELLO_WINDOWS)
   Sleep(ms);
 #endif
 }

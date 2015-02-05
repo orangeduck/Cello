@@ -611,8 +611,6 @@ int swrite(var self, var input, var size);
 void ref(var self, var item);
 var deref(var self);
 
-var forward(var self);
-
 void minc(var self);
 void mdec(var self);
 void mneg(var self);

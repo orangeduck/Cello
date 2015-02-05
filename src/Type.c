@@ -119,10 +119,10 @@ static var __Parent = Cello(__Parent);
 
 static var Type_New(var self, var args) {
   
-  var name = get(args, $(Int, 0));
+  var name = get(args, $I(0));
   var head = malloc(
     sizeof(struct CelloHeader) + 
-    sizeof(struct Type) * (2 + len(args) - 1));
+    sizeof(struct Type) * (2 + len(args) - 1 + 1));
   
   struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
   
@@ -136,6 +136,8 @@ static var Type_New(var self, var args) {
       (var)c_str(type_of(ins)), 
       ins };
   }
+  
+  body[2+len(args)-1] = (struct Type){ None, None, None };
   
   return body;
 }

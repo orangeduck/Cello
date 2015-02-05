@@ -480,8 +480,7 @@ var TestType = Cello(TestType,
 
 PT_FUNC(test_type_new) {
  
-  TestType = new(Type,
-    $(String, "TestType"),
+  TestType = new(Type, $S("TestType"),
     $(New, TestType_New, TestType_Del, TestType_Size),
     $(Eq, TestType_Eq));
   

@@ -561,6 +561,233 @@ PT_FUNC(test_array_reverse) {
 
 }
 
+PT_FUNC(test_list_new) {
+  
+  var a0 = new(List, Int, $(Int, 1), $(Int, 5), $(Int, 10));
+  var a1 = new(List, Float, $(Float, 1.1), $(Float, 2.2));
+  var a2 = copy(a0);
+  
+  
+  PT_ASSERT(a0);
+  PT_ASSERT(a1);
+  PT_ASSERT(a2);
+  
+  PT_ASSERT(a0 isnt a1);
+  PT_ASSERT(a0 isnt a2);
+  PT_ASSERT(a1 isnt a2);
+  
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 1)) );
+  PT_ASSERT( eq(get(a1, $(Int, 0)), $(Float, 1.1)) );
+  PT_ASSERT( eq(get(a2, $(Int, 0)), $(Int, 1)) );
+  
+  assign(a2, a1);
+  
+  PT_ASSERT(a2 isnt a1);
+  PT_ASSERT( eq(get(a2, $(Int, 0)), $(Float, 1.1)) );
+  
+  del(a0);
+  
+  del(a1);
+  del(a2);
+  
+}
+
+PT_FUNC(test_list_eq) {
+  
+  var a0 = new(List, Int, $(Int, 1), $(Int, 5), $(Int, 10));
+  var a1 = new(List, Int, $(Int, 1), $(Int, 5), $(Int, 10));
+  var a2 = new(List, Int, $(Int, 2), $(Int, 5), $(Int, 10));
+  
+  PT_ASSERT(a0 isnt a1);
+  PT_ASSERT(a0 isnt a2);
+  
+  PT_ASSERT( eq(a0, a1) );
+  PT_ASSERT( neq(a0, a2) );
+  
+  del(a0);
+  del(a1);
+  del(a2);
+  
+}
+
+PT_FUNC(test_list_len) {
+  /* TODO */
+}
+
+PT_FUNC(test_list_get) {
+  
+  var a0 = new(List, Int, $(Int, 1), $(Int, 5), $(Int, 10));
+  
+  PT_ASSERT(len(a0) is 3);
+  PT_ASSERT(mem(a0, $(Int, 1)));
+  PT_ASSERT(mem(a0, $(Int, 5)));
+  
+  rem(a0, $(Int, 5));
+  
+  PT_ASSERT(len(a0) is 2);
+  PT_ASSERT(mem(a0, $(Int, 1)));
+  PT_ASSERT(not mem(a0, $(Int, 5)));
+  
+  clear(a0);
+  
+  PT_ASSERT(len(a0) is 0);
+  PT_ASSERT(not mem(a0, $(Int, 1)));
+  
+  del(a0);
+
+  var a1 = new(List, String, 
+    $(String, "Hello"), $(String, "There"), $(String, "People"));
+  
+  PT_ASSERT( eq(get(a1, $(Int, 0)), $(String, "Hello")) );
+  PT_ASSERT( eq(get(a1, $(Int, 1)), $(String, "There")) );
+  PT_ASSERT( eq(get(a1, $(Int, 2)), $(String, "People")) );
+  
+  set(a1, $(Int, 1), $(String, "Blah"));
+  
+  PT_ASSERT( eq(get(a1, $(Int, 0)), $(String, "Hello")) );
+  PT_ASSERT( eq(get(a1, $(Int, 1)), $(String, "Blah")) );
+  PT_ASSERT( eq(get(a1, $(Int, 2)), $(String, "People")) );
+  
+  set(a1, $(Int, 0), $(String, "Foo"));
+  set(a1, $(Int, 2), $(String, "Bar"));
+  
+  PT_ASSERT( eq(get(a1, $(Int, 0)), $(String, "Foo")) );
+  PT_ASSERT( eq(get(a1, $(Int, 1)), $(String, "Blah")) );
+  PT_ASSERT( eq(get(a1, $(Int, 2)), $(String, "Bar")) );
+  
+  del(a1);
+  
+}
+
+PT_FUNC(test_list_push) {
+  
+  var a0 = new(List, Int);
+  
+  PT_ASSERT(len(a0) is 0);
+  
+  push(a0, $(Int, 1));
+  
+  PT_ASSERT(len(a0) is 1);
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 1)) );
+  
+  push(a0, $(Int, 3));
+  
+  PT_ASSERT(len(a0) is 2);
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 1)) );
+  PT_ASSERT( eq(get(a0, $(Int, 1)), $(Int, 3)) );
+  
+  show(a0);
+
+  push_at(a0, $(Int, 10), $(Int, 0));
+  
+  show(a0);
+  
+  PT_ASSERT(len(a0) is 3);
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 10)) );
+  PT_ASSERT( eq(get(a0, $(Int, 1)), $(Int, 1)) );
+  PT_ASSERT( eq(get(a0, $(Int, 2)), $(Int, 3)) );
+  
+  /*
+  
+  push_at(a0, $(Int, 20), $(Int, 1));
+  
+  PT_ASSERT(len(a0) is 4);
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 10)) );
+  PT_ASSERT( eq(get(a0, $(Int, 1)), $(Int, 20)) );
+  PT_ASSERT( eq(get(a0, $(Int, 2)), $(Int, 1)) );
+  PT_ASSERT( eq(get(a0, $(Int, 3)), $(Int, 3)) );
+  
+  pop_at(a0, $(Int, 2));
+  
+  PT_ASSERT(len(a0) is 3);
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 10)) );
+  PT_ASSERT( eq(get(a0, $(Int, 1)), $(Int, 20)) );
+  PT_ASSERT( eq(get(a0, $(Int, 2)), $(Int, 3)) );
+  
+  pop_at(a0, $(Int, 0));
+  
+  PT_ASSERT(len(a0) is 2);
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 20)) );
+  PT_ASSERT( eq(get(a0, $(Int, 1)), $(Int, 3)) );
+  
+  pop(a0);
+  
+  PT_ASSERT(len(a0) is 1);
+  PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 20)) );
+  
+  pop(a0);
+  
+  PT_ASSERT(len(a0) is 0);
+  */
+  
+  del(a0);
+  
+}
+
+PT_FUNC(test_list_concat) {
+  /* TODO */
+}
+
+PT_FUNC(test_list_clear) {
+  /* TODO */
+}
+
+PT_FUNC(test_list_sort) {
+  /* TODO */
+}
+
+PT_FUNC(test_list_reserve) {
+  /* TODO */
+}
+
+PT_FUNC(test_list_iter) {
+  
+  var a0 = new(List, String, $S("Hello"), $S("There"), $S("People"));
+  
+  int counter = 0;
+  
+  foreach(item in a0) {
+    
+    switch(counter) {
+      case 0: PT_ASSERT( eq(item, $(String, "Hello")) ); break;
+      case 1: PT_ASSERT( eq(item, $(String, "There")) ); break;
+      case 2: PT_ASSERT( eq(item, $(String, "People")) ); break;
+    }
+    
+    counter++;
+  }
+  
+  PT_ASSERT(counter is 3);
+  
+  counter = 0;
+  
+  foreach(item0 in a0) {
+    foreach(item1 in a0) {
+      counter++;
+    }
+  }
+  
+  PT_ASSERT(counter is 9);
+  del(a0);
+  
+}
+
+PT_FUNC(test_list_reverse) {
+  
+  var a0 = new(List, String, $S("Hello"), $S("There"), $S("People"));
+  var a1 = new(List, String, $S("People"), $S("There"), $S("Hello"));
+  
+  PT_ASSERT( not eq(a0, a1) );
+  
+  reverse(a0);
+  
+  PT_ASSERT( eq(a0, a1) );
+  
+  del(a0);
+  del(a1);
+
+}
+
 PT_FUNC(test_table_new) {
   
   var t0 = new(Table, String, Int);
@@ -780,7 +1007,6 @@ PT_SUITE(suite_data) {
   PT_REG(test_array_reserve);
   PT_REG(test_array_sort);
   
-  /*
   PT_REG(test_list_new);
   PT_REG(test_list_eq);
   PT_REG(test_list_clear);
@@ -792,7 +1018,6 @@ PT_SUITE(suite_data) {
   PT_REG(test_list_reverse);
   PT_REG(test_list_reserve);
   PT_REG(test_list_sort);
-  */
   
   PT_REG(test_table_new);
   PT_REG(test_table_len);

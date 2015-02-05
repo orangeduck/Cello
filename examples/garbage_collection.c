@@ -5,7 +5,7 @@ static void test(void* x) {
 }
 
 void* foo(void) {
-  return 1;
+  return NULL;
 }
 
 int main( int argc, char** argv) {

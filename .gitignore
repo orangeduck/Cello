@@ -10,12 +10,16 @@
 *.dll
 *.exe
 *.gz
+*.class
 
 # Tests
 test.bin
 test.txt
 test.exe
 test
+
+# Benchmarking
+profile.txt
 
 # Dist
 libCello*

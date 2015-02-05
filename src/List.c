@@ -34,24 +34,28 @@ struct List {
 
 static var List_Alloc(struct List* l) {
   var item = calloc(1, 2 * sizeof(var) + sizeof(struct CelloHeader) + l->tsize);
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (item is None) {
+    throw(OutOfMemoryError, "Cannot allocate List entry, out of memory!");
+  }
+#endif
+  
   ((var*)item)[0] = Terminal;
   ((var*)item)[1] = Terminal;
-  CelloHeader_Init(item + 2 * sizeof(var), l->type, CelloDataAlloc);
-  return item + 2 * sizeof(var) + sizeof(struct CelloHeader);
+  return CelloHeader_Init(item + 2 * sizeof(var), l->type, CelloDataAlloc);
 }
 
 static void List_Free(struct List* l, var self) {
-  free(self - l->tsize - sizeof(struct CelloHeader) - 2 * sizeof(var));
+  free(self - sizeof(struct CelloHeader) - 2 * sizeof(var));
 }
 
 static var* List_Next(struct List* l, var self) {
-  return (var*)(self - l->tsize - 
-    sizeof(struct CelloHeader) - 1 * sizeof(var));
+  return (var*)(self - sizeof(struct CelloHeader) - 1 * sizeof(var));
 }
 
 static var* List_Prev(struct List* l, var self) {
-  return (var*)(self - l->tsize - 
-    sizeof(struct CelloHeader) - 2 * sizeof(var));
+  return (var*)(self - sizeof(struct CelloHeader) - 2 * sizeof(var));
 }
 
 static var List_At(struct List* l, int64_t i) {
@@ -66,7 +70,7 @@ static var List_At(struct List* l, int64_t i) {
   
   var item;
   
-  if (i < l->nitems/2) {
+  if (i <= l->nitems/2) {
     item = l->head;
     while (i) { item = *List_Next(l, item); i--; }
   } else {
@@ -100,7 +104,16 @@ static var List_New(var self, var args) {
 
 static void List_Clear(var self) {
   struct List* l = self;
-  while (l->nitems) { List_Rem(l, l->head); }
+  var item = l->head;
+  while (item isnt Terminal) {
+    var next = *List_Next(l, item);
+	destruct(item);
+    List_Free(l, item);
+    item = next;
+  }
+  l->head = Terminal;
+  l->tail = Terminal;
+  l->nitems = 0;
 }
 
 static var List_Del(var self) {
@@ -190,10 +203,11 @@ static void List_Rem(var self, var obj) {
     if_eq(item, obj) {
       var prev = *List_Prev(l, item);
       var next = *List_Next(l, item);
-      *List_Next(l, prev) = next;
-      *List_Prev(l, next) = prev;
+      if (prev isnt Terminal) { *List_Next(l, prev) = next; }
+      if (next isnt Terminal) { *List_Prev(l, next) = prev; }
       destruct(item);
       List_Free(l, item);
+      l->nitems--;
       return;
     }
     item = *List_Next(l, item);
@@ -206,25 +220,37 @@ static void List_Push(var self, var obj) {
   struct List* l = self;
   var item = List_Alloc(l);
   assign(item, obj);
-  *List_Next(l, l->tail) = item;
-  *List_Prev(l, item) = l->tail;
-  *List_Next(l, item) = Terminal;
-  l->tail = l;
+  
+  if (l->tail is Terminal) {
+    l->tail = item;
+    l->head = item;
+    *List_Next(l, item) = Terminal;
+    *List_Prev(l, item) = Terminal;
+  } else {
+    *List_Next(l, l->tail) = item;
+    *List_Prev(l, item) = l->tail;
+    *List_Next(l, item) = Terminal;
+    l->tail = item;
+  }
+  
   l->nitems++;
+  
 }
 
 static void List_Push_At(var self, var obj, var key) {
   struct List* l = self;
-  l->nitems++;
   
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
-  
-  var prev = List_At(l, i);
-  var next = *List_Next(l, prev);
   var item = List_Alloc(l);
   assign(item, obj);
-  *List_Next(l, prev) = item;
-  *List_Prev(l, next) = item;
+  
+  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  var next = List_At(l, i);
+  var prev = *List_Prev(l, next);
+  
+  printf("%i", (int)i); show(next); show(prev);
+  
+  if (next isnt Terminal) { *List_Prev(l, next) = item; }
+  if (prev isnt Terminal) { *List_Next(l, prev) = item; }
   *List_Next(l, item) = next;
   *List_Prev(l, item) = prev;
   l->nitems++;

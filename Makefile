@@ -18,7 +18,7 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
+CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -g
 LFLAGS = -shared -g -ggdb
 
 PLATFORM := $(shell uname)
@@ -90,9 +90,9 @@ check: $(TESTS_OBJ) $(STATIC)
 obj/%.o: tests/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
 
-# Benchmark
+# Benchmarks
 
-benchmark:
+bench:
 	cd benchmarks; ./benchmark; cd ../
 
 # Examples
@@ -114,7 +114,7 @@ $(PACKAGE):
 # Clean
 
 clean:
-	rm -f $(OBJ) $(TESTS_OBJ) $(EXAMPLES_OBJ) $(BENCHMARKS_OBJ) $(STATIC) $(DYNAMIC)
+	rm -f $(OBJ) $(TESTS_OBJ) $(EXAMPLES_OBJ) $(STATIC) $(DYNAMIC)
 	rm -f test
 
 # Install

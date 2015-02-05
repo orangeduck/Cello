@@ -80,7 +80,7 @@ static void Cello_Static_Push(var self) {
 
 var CelloHeader_Init(struct CelloHeader* head, var type, int flags) {
   
-  var self = (var)head + sizeof(struct CelloHeader);
+  var self = ((var)head) + sizeof(struct CelloHeader);
   head->type = type;
   head->flags = (var)(intptr_t)flags;
   
@@ -95,7 +95,7 @@ var CelloHeader_Init(struct CelloHeader* head, var type, int flags) {
   head->magic = (var)0xCe110;
 #endif
 
-  return ((var)head) + sizeof(struct CelloHeader);
+  return self;
 }
 
 static const char* New_Name(void) {
