@@ -24,8 +24,8 @@ static const char* Current_Methods(void) {
   return "";
 }
 
-var Current = typedecl(Current,
-  typeclass(Doc,
+var Current = Cello(Current,
+  Member(Doc,
     Current_Name, Current_Brief, Current_Description,
     Current_Examples, Current_Methods));
 
@@ -57,8 +57,8 @@ static const char* Join_Methods(void) {
   return "";
 }
 
-var Join = typedecl(Join,
-  typeclass(Doc,
+var Join = Cello(Join,
+  Member(Doc,
     Join_Name, Join_Brief, Join_Description,
     Join_Examples, Join_Methods));
 
@@ -146,9 +146,9 @@ static var Thread_Del(var self) {
 #ifdef _WIN32
   CloseHandle(t->thread);
 #endif
-
-  del(t->args);
-  del(t->exc_msg);
+  
+  if (t->args isnt None) { del(t->args); }
+  if (t->exc_msg isnt None) { del(t->exc_msg); }
   return t;
 }
 
@@ -400,18 +400,18 @@ static var Thread_Running(var self) {
   return t->is_running;
 }
 
-var Thread = typedecl(Thread,
-  typeclass(Doc,
+var Thread = Cello(Thread,
+  Member(Doc,
     Thread_Name, Thread_Brief, Thread_Description, 
     Thread_Examples, Thread_Methods),
-  typeclass(New, Thread_New, Thread_Del, Thread_Size),
-  typeclass(Assign,  Thread_Assign),
-  typeclass(Copy,    Thread_Copy),
-  typeclass(Call,    Thread_Call),
-  typeclass(Current, Thread_Current),
-  typeclass(Join,    Thread_Join),
-  typeclass(Start,   Thread_Start, Thread_Stop, Thread_Running),
-  typeclass(C_Int,   Thread_C_Int));
+  Member(New, Thread_New, Thread_Del, Thread_Size),
+  Member(Assign,  Thread_Assign),
+  Member(Copy,    Thread_Copy),
+  Member(Call,    Thread_Call),
+  Member(Current, Thread_Current),
+  Member(Join,    Thread_Join),
+  Member(Start,   Thread_Start, Thread_Stop, Thread_Running),
+  Member(C_Int,   Thread_C_Int));
 
 static const char* Lock_Name(void) {
   return "Lock";
@@ -437,8 +437,8 @@ static const char* Lock_Methods(void) {
   return "";
 }
 
-var Lock = typedecl(Lock,
-  typeclass(Doc,
+var Lock = Cello(Lock,
+  Member(Doc,
     Lock_Name, Lock_Brief, Lock_Description,
     Lock_Examples, Lock_Methods));
 
@@ -568,32 +568,32 @@ static void Mutex_Unlock(var self) {
   
 }
 
-var Mutex = typedecl(Mutex,
-  typeclass(Doc, 
+var Mutex = Cello(Mutex,
+  Member(Doc, 
     Mutex_Name, Mutex_Brief, Mutex_Description, Mutex_Examples, Mutex_Methods),
-  typeclass(New,    Mutex_New, Mutex_Del, Mutex_Size),
-  typeclass(Assign, Mutex_Assign),
-  typeclass(Copy,   Mutex_Copy),
-  typeclass(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
-  typeclass(Begin,  Mutex_Lock, Mutex_Unlock));
+  Member(New,    Mutex_New, Mutex_Del, Mutex_Size),
+  Member(Assign, Mutex_Assign),
+  Member(Copy,   Mutex_Copy),
+  Member(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
+  Member(Begin,  Mutex_Lock, Mutex_Unlock));
 
-var TypeError = typedecl(TypeError);
-var ValueError = typedecl(ValueError);
-var ClassError = typedecl(ClassError);
-var IndexOutOfBoundsError = typedecl(IndexOutOfBoundsError);
-var KeyError = typedecl(KeyError);
-var OutOfMemoryError = typedecl(OutOfMemoryError);
-var IOError = typedecl(IOError);
-var FormatError = typedecl(FormatError);
-var BusyError = typedecl(BusyError);
-var ResourceError = typedecl(ResourceError);
+var TypeError = Cello(TypeError);
+var ValueError = Cello(ValueError);
+var ClassError = Cello(ClassError);
+var IndexOutOfBoundsError = Cello(IndexOutOfBoundsError);
+var KeyError = Cello(KeyError);
+var OutOfMemoryError = Cello(OutOfMemoryError);
+var IOError = Cello(IOError);
+var FormatError = Cello(FormatError);
+var BusyError = Cello(BusyError);
+var ResourceError = Cello(ResourceError);
 
-var ProgramAbortedError = typedecl(ProgramAbortedError);
-var DivisionByZeroError = typedecl(DivisionByZeroError);
-var IllegalInstructionError = typedecl(IllegalInstructionError);
-var ProgramInterruptedError = typedecl(ProgramInterruptedError);
-var SegmentationError = typedecl(SegmentationError);
-var ProgramTerminationError = typedecl(ProgramTerminationError);
+var ProgramAbortedError = Cello(ProgramAbortedError);
+var DivisionByZeroError = Cello(DivisionByZeroError);
+var IllegalInstructionError = Cello(IllegalInstructionError);
+var ProgramInterruptedError = Cello(ProgramInterruptedError);
+var SegmentationError = Cello(SegmentationError);
+var ProgramTerminationError = Cello(ProgramTerminationError);
 
 static void Exception_Signal(int sig) {
   switch(sig) {

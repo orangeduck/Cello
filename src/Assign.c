@@ -25,8 +25,8 @@ static const char* Assign_Methods(void) {
   return "";
 }
 
-var Assign = typedecl(Assign,
-  typeclass(Doc,
+var Assign = Cello(Assign,
+  Member(Doc,
     Assign_Name, Assign_Brief, Assign_Description,
     Assign_Examples, Assign_Methods));
 

@@ -46,8 +46,8 @@ static var Range_Iter_Next(var self, var curr) {
 }
 
 /* TODO: Add extra methods */
-var Range = typedecl(Range,
-  typeclass(Doc,
+var Range = Cello(Range,
+  Member(Doc,
     Range_Name, Range_Brief, Range_Description, Range_Examples, Range_Methods),
-  typeclass(Iter, Range_Iter_Init, Range_Iter_Next));
+  Member(Iter, Range_Iter_Init, Range_Iter_Next));
   

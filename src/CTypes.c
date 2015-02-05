@@ -24,8 +24,8 @@ static const char* C_Char_Methods(void) {
   return "";
 }
 
-var C_Char = typedecl(C_Char,
-  typeclass(Doc,
+var C_Char = Cello(C_Char,
+  Member(Doc,
     C_Char_Name, C_Char_Brief, C_Char_Description, 
     C_Char_Examples, C_Char_Methods));
 
@@ -53,8 +53,8 @@ static const char* C_Str_Methods(void) {
   return "";
 }
 
-var C_Str = typedecl(C_Str,
-  typeclass(Doc,
+var C_Str = Cello(C_Str,
+  Member(Doc,
     C_Str_Name, C_Str_Brief, C_Str_Description, 
     C_Str_Examples, C_Str_Methods));
 
@@ -82,8 +82,8 @@ static const char* C_Int_Methods(void) {
   return "";
 }
 
-var C_Int = typedecl(C_Int,
-  typeclass(Doc,
+var C_Int = Cello(C_Int,
+  Member(Doc,
     C_Int_Name, C_Int_Brief, C_Int_Description, 
     C_Int_Examples, C_Int_Methods));
     
@@ -111,8 +111,8 @@ static const char* C_Float_Methods(void) {
   return "";
 }
 
-var C_Float = typedecl(C_Float,
-  typeclass(Doc,
+var C_Float = Cello(C_Float,
+  Member(Doc,
     C_Float_Name, C_Float_Brief, C_Float_Description, 
     C_Float_Examples, C_Float_Methods));
     
@@ -131,3 +131,4 @@ int64_t c_int(var self) {
 double c_float(var self) {
   return method(self, C_Float, c_float);
 }
+

@@ -24,8 +24,8 @@ static const char* Begin_Methods(void) {
   return "";
 }
 
-var Begin = typedecl(Begin,
-  typeclass(Doc,
+var Begin = Cello(Begin,
+  Member(Doc,
     Begin_Name, Begin_Brief, Begin_Description, 
     Begin_Examples, Begin_Methods));
 

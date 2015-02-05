@@ -1,0 +1,44 @@
+#include "Cello.h"
+
+static var Hello;
+
+struct Hello {
+  int hello_val;
+};
+
+static var Hello_New(var self, var args) {
+  struct Hello* h = self;
+  h->hello_val = c_int(get(args, $(Int, 0)));
+  return self;
+}
+
+static size_t Hello_Size(void) {
+  return sizeof(struct Hello);
+}
+
+static var Hello_Eq(var self, var obj) {
+  struct Hello* lhs = self;
+  struct Hello* rhs = cast(obj, Hello);
+  return bool_var(lhs->hello_val is rhs->hello_val);
+}
+
+int main(int argc, char** argv) {
+  
+  Hello = new(Type, $S("Hello"),
+    $(New, Hello_New, NULL, Hello_Size),
+    $(Eq, Hello_Eq));
+  
+  print("%$ is a %$!\n", Hello, type_of(Hello));
+
+  var hello_obj1 = new(Hello, $I(1));
+  var hello_obj2 = new(Hello, $I(2));
+
+  print("Equal? %d\n", eq(hello_obj1, hello_obj2));
+  
+  del(hello_obj1);
+  del(hello_obj2);
+  del(Hello);
+  
+  return 0;
+}
+

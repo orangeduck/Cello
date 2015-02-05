@@ -1,0 +1,122 @@
+gcc ./ext/genint.c -o ./ext/genint
+
+gcc Nbodies/nbodies_c.c -std=c99 -O3 -lm -o Nbodies/nbodies_c
+g++ Nbodies/nbodies_cpp.cpp -std=c++11 -O3 -lm -o Nbodies/nbodies_cpp
+gcc Nbodies/nbodies_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -std=gnu99 -O3 -pg -lm -lpthread -o Nbodies/nbodies_cello
+javac Nbodies/nbodies_java.java
+
+gcc Dict/dict_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Dict/dict_c
+g++ Dict/dict_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Dict/dict_cpp
+gcc Dict/dict_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -O3 -pg -lm -lpthread -o Dict/dict_cello
+javac Dict/dict_java.java
+
+gcc Sudoku/sudoku_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Sudoku/sudoku_c
+#g++ Sudoku/sudoku_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Sudoku/sudoku_cpp
+gcc Sudoku/sudoku_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o Sudoku/sudoku_cello
+javac Sudoku/sudoku_java.java
+
+gcc Matmul/matmul_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Matmul/matmul_c
+#g++ Matmul/matmul_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Matmul/matmul_cpp
+gcc Matmul/matmul_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o Matmul/matmul_cello
+javac Matmul/matmul_java.java
+
+echo 
+echo "## NBodies"
+echo
+echo -n "* C: "
+time -f "%e" ./Nbodies/nbodies_c 
+echo -n "* C++: "
+time -f "%e" ./Nbodies/nbodies_cpp
+echo -n "* Cello: "
+time -f "%e" ./Nbodies/nbodies_cello
+echo -n "* Java: "
+time -f "%e" java -cp ./Nbodies nbodies_java
+echo -n "* Javascript: "
+time -f "%e" nodejs Nbodies/nbodies_javascript.js
+echo -n "* Python: "
+time -f "%e" python Nbodies/nbodies_python.py
+echo -n "* Ruby: "
+time -f "%e" ruby Nbodies/nbodies_ruby.rb
+echo -n "* Lua: "
+time -f "%e" lua Nbodies/nbodies_lua.lua
+echo -n "* Lua JIT: "
+time -f "%e" luajit Nbodies/nbodies_lua.lua
+
+gprof Nbodies/nbodies_cello > Nbodies/profile.txt
+rm gmon.out
+
+echo 
+echo "## Dict"
+echo
+echo -n "* C: "
+time -f "%e" sh -c './ext/genint | ./Dict/dict_c'
+echo -n "* C++: "
+time -f "%e" sh -c './ext/genint | ./Dict/dict_cpp'
+echo -n "* Cello: "
+time -f "%e" sh -c './ext/genint | ./Dict/dict_cello'
+echo -n "* Java: "
+time -f "%e" sh -c './ext/genint | java -cp ./Dict dict_java'
+echo -n "* Javascript: "
+time -f "%e" sh -c './ext/genint | nodejs Dict/dict_javascript.js'
+echo -n "* Python: "
+time -f "%e" sh -c './ext/genint | python Dict/dict_python.py'
+echo -n "* Ruby: "
+time -f "%e" sh -c './ext/genint | ruby Dict/dict_ruby.rb'
+echo -n "* Lua: "
+time -f "%e" sh -c './ext/genint | lua Dict/dict_lua.lua'
+echo -n "* Lua JIT: "
+time -f "%e" sh -c './ext/genint | luajit Dict/dict_lua.lua'
+
+gprof Dict/dict_cello > Dict/profile.txt
+rm gmon.out
+
+echo 
+echo "## Sudoku"
+echo
+echo -n "* C: "
+time -f "%e" sh -c './ext/sudoku | ./Sudoku/sudoku_c'
+#echo -n "* C++: "
+#time -f "%e" sh -c './ext/sudoku | ./Sudoku/sudoku_cpp'
+echo -n "* Cello: "
+time -f "%e" sh -c './ext/sudoku | ./Sudoku/sudoku_cello'
+echo -n "* Java: "
+time -f "%e" sh -c './ext/sudoku | java -cp ./Sudoku sudoku_java'
+echo -n "* Javascript: "
+time -f "%e" sh -c './ext/sudoku | nodejs Sudoku/sudoku_javascript.js'
+echo -n "* Python: "
+time -f "%e" sh -c './ext/sudoku | python Sudoku/sudoku_python.py'
+echo -n "* Ruby: "
+time -f "%e" sh -c './ext/sudoku | ruby Sudoku/sudoku_ruby.rb'
+echo -n "* Lua: "
+time -f "%e" sh -c './ext/sudoku | lua Sudoku/sudoku_lua.lua'
+echo -n "* Lua JIT: "
+time -f "%e" sh -c './ext/sudoku | luajit Sudoku/sudoku_lua.lua'
+
+gprof Sudoku/sudoku_cello > Sudoku/profile.txt
+rm gmon.out
+
+echo 
+echo "## Matmul"
+echo
+echo -n "* C: "
+time -f "%e" ./Matmul/matmul_c
+#echo -n "* C++: "
+#time -f "%e" ./Matmul/matmul_cpp
+echo -n "* Cello: "
+time -f "%e" ./Matmul/matmul_cello
+echo -n "* Java: "
+time -f "%e" java -cp ./Matmul matmul_java
+echo -n "* Javascript: "
+time -f "%e" nodejs Matmul/matmul_javascript.js
+echo -n "* Python: "
+time -f "%e" python Matmul/matmul_python.py
+echo -n "* Ruby: "
+time -f "%e" ruby Matmul/matmul_ruby.rb
+echo -n "* Lua: "
+time -f "%e" lua Matmul/matmul_lua.lua
+echo -n "* Lua JIT: "
+time -f "%e" luajit Matmul/matmul_lua.lua
+
+gprof Matmul/matmul_cello > Matmul/profile.txt
+rm gmon.out
+

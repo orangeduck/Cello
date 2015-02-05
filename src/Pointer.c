@@ -24,8 +24,8 @@ static const char* Pointer_Methods(void) {
   return "";
 }
 
-var Pointer = typedecl(Pointer,
-  typeclass(Doc,
+var Pointer = Cello(Pointer,
+  Member(Doc,
     Pointer_Name, Pointer_Brief, Pointer_Description, 
     Pointer_Examples, Pointer_Methods));
 
@@ -102,14 +102,14 @@ static var Ref_Deref(var self) {
   return r->val;
 }
 
-var Ref = typedecl(Ref,
-  typeclass(Doc,
+var Ref = Cello(Ref,
+  Member(Doc,
     Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, Ref_Methods),
-  typeclass(New, Ref_New, Ref_Del, Ref_Size),
-  typeclass(Assign, Ref_Assign),
-  typeclass(Copy, Ref_Copy),
-  typeclass(Show, Ref_Show, NULL),
-  typeclass(Pointer, Ref_Ref, Ref_Deref));
+  Member(New, Ref_New, Ref_Del, Ref_Size),
+  Member(Assign, Ref_Assign),
+  Member(Copy, Ref_Copy),
+  Member(Show, Ref_Show, NULL),
+  Member(Pointer, Ref_Ref, Ref_Deref));
 
   
 static const char* Box_Name(void) {
@@ -179,12 +179,12 @@ static var Box_Deref(var self) {
   return b->val;
 }
 
-var Box = typedecl(Box,
-  typeclass(Doc,
+var Box = Cello(Box,
+  Member(Doc,
     Box_Name, Box_Brief, Box_Description, Box_Examples, Box_Methods),
-  typeclass(New, Box_New, Box_Del, Box_Size),
-  typeclass(Assign, Box_Assign),
-  typeclass(Copy, Box_Copy),
-  typeclass(Show, Box_Show, NULL),
-  typeclass(Pointer, Box_Ref, Box_Deref));
+  Member(New, Box_New, Box_Del, Box_Size),
+  Member(Assign, Box_Assign),
+  Member(Copy, Box_Copy),
+  Member(Show, Box_Show, NULL),
+  Member(Pointer, Box_Ref, Box_Deref));
   

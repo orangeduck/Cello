@@ -24,8 +24,8 @@ static const char* Stream_Methods(void) {
   return "";
 }
 
-var Stream = typedecl(Stream,
-  typeclass(Doc, 
+var Stream = Cello(Stream,
+  Member(Doc, 
     Stream_Name, Stream_Brief, Stream_Description,
     Stream_Examples, Stream_Methods));
 

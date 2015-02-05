@@ -28,13 +28,41 @@
 **         $$===================================================$$
 */
 
-#ifndef Cello_h
-#define Cello_h
+#ifndef CELLO_H
+#define CELLO_H
 
 /* Settings */
 
-#ifndef CELLO_BOUNDS_CHECK
-#define CELLO_BOUNDS_CHECK 1
+#ifdef  CELLO_NDEBUG
+#define CELLO_BOUND_CHECK  0
+#define CELLO_MAGIC_CHECK  0
+#define CELLO_ALLOC_CHECK  0
+#define CELLO_UNDEF_CHECK  0
+#define CELLO_METHOD_CHECK 0
+#define CELLO_MEMORY_CHECK 0
+#else
+#define CELLO_BOUND_CHECK  1
+#define CELLO_MAGIC_CHECK  1
+#define CELLO_ALLOC_CHECK  1
+#define CELLO_UNDEF_CHECK  1
+#define CELLO_METHOD_CHECK 1
+#define CELLO_MEMORY_CHECK 1
+#endif
+
+#ifndef CELLO_GC
+#define CELLO_GC 1
+#define CELLO_GC_HEADER NULL, NULL, NULL,
+#else
+#define CELLO_GC 0
+#define CELLO_GC_HEADER
+#endif
+
+#ifndef CELLO_MAGIC
+#define CELLO_MAGIC 1
+#define CELLO_MAGIC_HEADER ((var)0xCe110),
+#else
+#define CELLO_MAGIC 0
+#define CELLO_MAGIC_HEADER
 #endif
 
 #if defined(_WIN32)
@@ -53,6 +81,10 @@
 
 #if defined(__clang__)
 #define CELLO_CLANG
+#endif
+
+#if defined(__GNUC__)
+#define CELLO_GCC
 #endif
 
 /* Includes */
@@ -91,17 +123,19 @@ typedef void* var;
 #define or ||
 #define in ,
 
-/* Types */
+/* Declaration */
 
-#define typedecl(T, ...) (var)((var[]){ \
+#define Cello(T, ...) (var)((var[]){ \
   NULL, (var)CelloStaticAlloc, \
+  CELLO_GC_HEADER \
+  CELLO_MAGIC_HEADER \
   NULL, "__Name",     #T, \
   NULL, "__Parent", NULL, \
   ##__VA_ARGS__, \
   NULL, NULL, NULL}) + \
   sizeof(struct CelloHeader) + (sizeof(T) - sizeof(T))
 
-#define typeclass(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
+#define Member(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
   
 /* Types */
 
@@ -119,6 +153,7 @@ extern var Float;
 extern var String;
 
 extern var Map;
+extern var List;
 extern var Array;
 extern var Table;
 extern var Range;
@@ -153,12 +188,20 @@ enum {
   CelloStaticAlloc = 0x01,
   CelloStackAlloc  = 0x02,
   CelloHeapAlloc   = 0x04,
-  CelloDataAlloc   = 0x08
+  CelloDataAlloc   = 0x08,
+  CelloMarked      = 0x10,
 };
 
 struct CelloHeader {
   var type;
   var flags;
+#if CELLO_GC == 1
+  var prev, next;
+  var gcnext;
+#endif
+#if CELLO_MAGIC == 1
+  var magic;
+#endif
 };
 
 struct Type {
@@ -193,6 +236,7 @@ struct Function { var (*func)(var); };
 
 extern var Doc;
 extern var Help;
+extern var Cast;
 extern var New;
 extern var Assign;
 extern var Copy;
@@ -208,7 +252,7 @@ extern var Get;
 extern var Reverse;
 extern var Sort;
 extern var Clear;
-extern var Find;
+extern var Reserve;
 extern var C_Char;
 extern var C_Str;
 extern var C_Int;
@@ -216,10 +260,10 @@ extern var C_Float;
 extern var Begin;
 extern var Stream;
 extern var Pointer;
-extern var Math;
 extern var Call;
 extern var Format;
 extern var Show;
+extern var Math;
 extern var Current;
 extern var Start;
 extern var Join;
@@ -237,6 +281,10 @@ struct Doc {
 
 struct Help {
   void (*help)(var);
+};
+
+struct Cast {
+  var (*cast)(var, var);
 };
 
 struct New {
@@ -304,15 +352,15 @@ struct Reverse {
 };
 
 struct Sort {
-  void (*sort)(var);
+  void (*sort_with)(var,var);
 };
 
 struct Clear {
   void (*clear)(var);  
 };
 
-struct Find {
-  var (*find)(var, var);
+struct Reserve {
+  void (*reserve)(var, var);
 };
 
 struct C_Char {
@@ -352,18 +400,6 @@ struct Pointer {
   var (*deref)(var);
 };
 
-struct Math {
-  void (*madd)(var, var);
-  void (*msub)(var, var);
-  void (*mmul)(var, var);
-  void (*mdiv)(var, var);
-  void (*mpow)(var, var);
-  void (*mmod)(var, var);
-  void (*mneg)(var);
-  void (*mabs)(var);
-  void (*mexp)(var);
-};
-
 struct Call {
   var (*call_with)(var, var);
 };
@@ -376,6 +412,18 @@ struct Format {
 struct Show {
   int (*show)(var, var, int);
   int (*look)(var, var, int);
+};
+
+struct Math {
+  void (*madd)(var, var);
+  void (*msub)(var, var);
+  void (*mmul)(var, var);
+  void (*mdiv)(var, var);
+  void (*mpow)(var, var);
+  void (*mmod)(var, var);
+  void (*mneg)(var);
+  void (*mabs)(var);
+  void (*mexp)(var);
 };
 
 struct Current {
@@ -400,11 +448,16 @@ struct Lock {
 
 /* Functions */
 
+const char* name(var type);
+const char* brief(var type);
+const char* description(var type);
+const char* examples(var type);
+const char* methods(var type);
+
 void help(var self);
 
 var type_of(var obj);
 var cast(var self, var type);
-var cast_exact(var self, var type);
 var instance(var self, var cls);
 var implements(var self, var cls);
 var type_instance(var self, var cls);
@@ -415,24 +468,24 @@ var type_implements(var self, var cls);
   offsetof(struct C, M), #M))->M(X, ##__VA_ARGS__)
 
 #define implements_method(X, C, M) \
-  implements_method_at_offset(X, C, offsetof(struct C, M), #M)
+  implements_method_at_offset(X, C, offsetof(struct C, M))
   
 #define type_method(T, C, M, ...) \
   ((struct C*)type_method_at_offset(T, C, \
   offsetof(struct C, M), #M))->M(__VA_ARGS__)
   
 #define type_implements_method(T, C, M) \
-  type_implements_method_at_offset(T, C, offsetof(struct C, M), #M)
+  type_implements_method_at_offset(T, C, offsetof(struct C, M))
   
 var method_at_offset(var self, var cls, size_t offset, const char* method);
-var implements_method_at_offset(
-  var self, var cls, size_t offset, const char* method);
+var implements_method_at_offset(var self, var cls, size_t offset);
 
 var type_method_at_offset(var self, var cls, size_t offset, const char* method);
-var type_implements_method_at_offset(
-  var self, var cls, size_t offset, const char* method);
+var type_implements_method_at_offset(var self, var cls, size_t offset);
 
-#define $(T, ...) new_stk(T, \
+var CelloHeader_Init(struct CelloHeader* head, var type, int flags);
+
+#define $(T, ...) alloc_stk(T, \
   ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){}), \
   &((struct T){__VA_ARGS__}), sizeof(struct T))
 
@@ -448,12 +501,20 @@ var type_implements_method_at_offset(
 #define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
 var new_with(var type, var args);
 void del(var self);
-var new_stk(var type, var mem, var data, size_t size);
+
+#define new_$I(X) new_$(Int, X)
+#define new_$F(X) new_$(Float, X)
+#define new_$C(X) new_$(Char, X)
+#define new_$S(X) new_$(String, X)
+#define new_$R(X) new_$(Ref, X)
+#define new_$B(X) new_$(Box, X)
+#define new_$T(...) new_with(Tuple, tuple(__VA_ARGS__))
 
 #define tuple_new(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
 #define tuple(...) tuple_new(_, ##__VA_ARGS__, Terminal)
 
 var alloc(var type);
+var alloc_stk(var type, var mem, var data, size_t size);
 void dealloc(var self);
 size_t size(var type);
 
@@ -492,10 +553,12 @@ var iter_init(var self);
 var iter_next(var self, var curr);
 
 #define foreach(X) foreach_in(X)
-#define foreach_in(X, S) for(var __##X = (S), \
-    X = iter_init(__##X); \
-    X isnt Terminal; \
-    X = iter_next(__##X, X))
+#define foreach_in(X, S) for( var \
+  __##X = (S), \
+  __Iter##X = instance(__##X, Iter), \
+  X = ((struct Iter*)(__Iter##X))->iter_init(__##X); \
+  X isnt Terminal; \
+  X = ((struct Iter*)(__Iter##X))->iter_next(__##X, X))
 
 void push(var self, var obj);
 void pop(var self);
@@ -504,13 +567,14 @@ void pop_at(var self, var key);
 
 void reverse(var self);
 void sort(var self);
+void sort_with(var self, var func);
 
 var get(var self, var key);
 void set(var self, var key, var val);
 var mem(var self, var key);
 void rem(var self, var key);
 
-var find(var self, var val);
+void reserve(var self, var amount);
 void clear(var self);
 
 size_t len(var self);
@@ -565,16 +629,16 @@ void mdec(var self);
 
 #ifdef CELLO_CLANG
 
-#define function(N, A) \
-  struct Function* N = $(Function, None); \
-  N->func = ^ var (var A)
+#define fun(X, A) \
+  struct Function* X = $(Function, None); \
+  X->func = ^ var (var A)
   
 #else
 
-#define function(N, A) \
-  auto var __CelloFunction_##N(var); \
-  var N = $(Function, __CelloFunction_##N); \
-  var __CelloFunction_##N(var A)
+#define fun(X, A) \
+  auto var __CelloFunction_##X(var); \
+  var X = $(Function, __CelloFunction_##X); \
+  var __CelloFunction_##X(var A)
   
 #endif
 

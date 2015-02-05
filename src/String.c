@@ -77,17 +77,17 @@ static int Char_Look(var self, var input, int pos) {
   return scan_from(input, pos, "%c", self);
 }
 
-var Char = typedecl(Char,
-  typeclass(Doc,
+var Char = Cello(Char,
+  Member(Doc,
     Char_Name, Char_Brief, Char_Description, Char_Examples, Char_Methods),
-  typeclass(New, Char_New, Char_Del, Char_Size),
-  typeclass(Assign, Char_Assign),
-  typeclass(Copy, Char_Copy),
-  typeclass(Eq, Char_Eq),
-  typeclass(Ord, Char_Gt, Char_Lt),
-  typeclass(Hash, Char_Hash),
-  typeclass(C_Char, Char_C_Char),
-  typeclass(Show, Char_Show, Char_Look));
+  Member(New, Char_New, Char_Del, Char_Size),
+  Member(Assign, Char_Assign),
+  Member(Copy, Char_Copy),
+  Member(Eq, Char_Eq),
+  Member(Ord, Char_Gt, Char_Lt),
+  Member(Hash, Char_Hash),
+  Member(C_Char, Char_C_Char),
+  Member(Show, Char_Show, Char_Look));
 
 static const char* String_Name(void) {
   return "String";
@@ -117,9 +117,11 @@ static var String_New(var self, var args) {
   struct String* s = self;
   char* init = c_str(get(args, $(Int, 0)));
   s->val = malloc(strlen(init) + 1);
-  if (s->val == NULL) {
-    throw(OutOfMemoryError, "Cannot allocate string, out of memory!");
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is None) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
+#endif
   strcpy(s->val, init);
   return self;
 }
@@ -138,9 +140,11 @@ static var String_Assign(var self, var obj) {
   struct String* s = self;
   char* val = c_str(obj);
   s->val = realloc(s->val, strlen(val) + 1);
-  if (s->val == NULL) {
-    throw(OutOfMemoryError, "Cannot allocate string, out of memory!");
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is None) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
+#endif
   strcpy(s->val, val);
   return self;
 }
@@ -149,52 +153,22 @@ static var String_Copy(var self) {
   return new(String, self);
 }
 
+static char* String_C_Str(var self) {
+  struct String* s = self;
+  return s->val;
+}
+
 static var String_Eq(var self, var obj) {
-  if (implements(obj, C_Str)) {
-    return bool_var(strcmp(c_str(self), c_str(obj)) == 0);
-  } else {
-    return False;
-  }
+  return bool_var(strcmp(String_C_Str(self), c_str(obj)) == 0);
 }
 
 static var String_Gt(var self, var obj) {
-  if (not implements(obj, C_Str)) return false;
-  
-  const char* fst = c_str(self);
-  const char* snd = c_str(obj);
-  
-  int fstlen = strlen(fst);
-  int sndlen = strlen(snd);
-  int minlen = fstlen > sndlen ? sndlen : fstlen; 
-  
-  for(int i = 0; i < minlen; i++) {
-    if (fst[i] > snd[i]) { return True; }
-  }
-  
-  if (fstlen > sndlen) { return True; }
-  
-  return False;
+  return bool_var(strcmp(String_C_Str(self), c_str(obj)) > 0);
 }
 
 static var String_Lt(var self, var obj) {
-  if (not implements(obj, C_Str)) return false;
-  
-  const char* fst = c_str(self);
-  const char* snd = c_str(obj);
-  
-  int fstlen = strlen(fst);
-  int sndlen = strlen(snd);
-  int minlen = fstlen > sndlen ? sndlen : fstlen; 
-  
-  for(int i = 0; i < minlen; i++) {
-    if (fst[i] < snd[i]) { return True; }
-  }
-  
-  if (fstlen < sndlen) { return True; }
-  
-  return False;
+  return bool_var(strcmp(String_C_Str(self), c_str(obj)) < 0);
 }
-
 
 static size_t String_Len(var self) {
   struct String* s = self;
@@ -204,9 +178,11 @@ static size_t String_Len(var self) {
 static void String_Clear(var self) {
   struct String* s = self;
   s->val = realloc(s->val, 1);
-  if (s->val == NULL) {
-    throw(OutOfMemoryError, "Cannot allocate string, out of memory!");
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is None) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
+#endif
   s->val[0] = '\0';
 }
 
@@ -233,7 +209,7 @@ static void String_Rem(var self, var obj) {
   
   if (implements(type_of(obj), C_Char)) {
     char* pos = strchr(c_str(self), c_char(obj));
-    while (pos isnt NULL) { *pos = (*pos+1); pos++; }
+    while (pos isnt None) { *pos = (*pos+1); pos++; }
   }
   
 }
@@ -282,11 +258,6 @@ static uint64_t String_Hash(var self) {
   return String_MurmurHash64(s->val, strlen(s->val), hash_seed());
 }
 
-static char* String_C_Str(var self) {
-  struct String* s = self;
-  return s->val;
-}
-
 static void String_Reverse(var self) {
   struct String* s = self;
   for(size_t i = 0; i < strlen(s->val) / 2; i++) {
@@ -308,9 +279,12 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
   s->val = realloc(s->val, pos + size + 1);
-  if (s->val == NULL) {
-    throw(OutOfMemoryError, "Cannot allocate string, out of memory!");  
+
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is None) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");  
   }
+#endif
   
   return vsprintf(s->val + pos, fmt, va); 
   
@@ -323,9 +297,12 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
   s->val = realloc(s->val, pos + size + 1);
-  if (s->val == NULL) {
-    throw(OutOfMemoryError, "Cannot allocate string, out of memory!");
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is None) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
+#endif
   
   s->val[pos] = '\0';
   strcat(s->val, tmp);
@@ -341,9 +318,12 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
   s->val = realloc(s->val, pos + size + 1);
-  if (s->val == NULL) {
-    throw(OutOfMemoryError, "Cannot allocate string, out of memory!");
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is None) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
+#endif
   
   return vsprintf(s->val + pos, fmt, va); 
   
@@ -364,21 +344,21 @@ static int String_Look(var self, var input, int pos) {
   return scan_from(input, pos, "\"%[^\"]\"", self);
 }
 
-var String = typedecl(String,
-  typeclass(Doc,
+var String = Cello(String,
+  Member(Doc,
     String_Name, String_Brief, String_Description,
     String_Examples, String_Methods),
-  typeclass(New, String_New, String_Del, String_Size),
-  typeclass(Assign, String_Assign),
-  typeclass(Copy, String_Copy),
-  typeclass(Eq, String_Eq),
-  typeclass(Ord, String_Gt, String_Lt),
-  typeclass(Len, String_Len),
-  typeclass(Get, NULL, NULL, String_Mem, String_Rem),
-  typeclass(Clear, String_Clear),
-  typeclass(Reverse, String_Reverse),
-  typeclass(Hash, String_Hash),
-  typeclass(C_Str, String_C_Str),
-  typeclass(Format, String_Format_To, String_Format_From),
-  typeclass(Show, String_Show, String_Look));
+  Member(New, String_New, String_Del, String_Size),
+  Member(Assign, String_Assign),
+  Member(Copy, String_Copy),
+  Member(Eq, String_Eq),
+  Member(Ord, String_Gt, String_Lt),
+  Member(Len, String_Len),
+  Member(Get, NULL, NULL, String_Mem, String_Rem),
+  Member(Clear, String_Clear),
+  Member(Reverse, String_Reverse),
+  Member(Hash, String_Hash),
+  Member(C_Str, String_C_Str),
+  Member(Format, String_Format_To, String_Format_From),
+  Member(Show, String_Show, String_Look));
 

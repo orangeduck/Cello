@@ -1,14 +1,14 @@
-#include "ptest.h"
 #include "Cello.h"
+#include "ptest.h"
 
-#if defined(__unix__)
+#ifdef CELLO_UNIX
 #include <unistd.h>
 #endif
 
 void cello_sleep(int ms) {
-#if defined(__unix__)
+#ifdef CELLO_UNIX
   usleep(ms * 1000);
-#elif defined(_WIN32)
+#elif CELLO_WINDOWS
   Sleep(ms);
 #endif
 }
@@ -17,7 +17,7 @@ PT_FUNC(test_new) {
   
   var in_func = $(Ref, False);
   
-  function(f, args) {
+  fun (f, args) {
     ref(in_func, True);
     return None;
   };
@@ -37,7 +37,7 @@ PT_FUNC(test_multiple) {
   
   var inside = new(Array, Ref, False, False, False, False, False);
   
-  function(f, a) {
+  fun (f, a) {
     set(inside, get(a, $I(0)), True);
     return None;
   };
@@ -74,7 +74,7 @@ PT_FUNC(test_mutex) {
   var mutex = new(Mutex);
   var total = $(Int, 0);
   
-  function(f, args) {
+  fun (f, args) {
     with(m in mutex) {
       minc(total);
     }
@@ -105,7 +105,7 @@ PT_FUNC(test_mutex) {
 
 PT_FUNC(test_exception) {
   
-  function(f, args) {
+  fun (f, args) {
     try {
       cello_sleep(20);
       PT_ASSERT(exception_depth() is 1);

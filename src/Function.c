@@ -24,8 +24,8 @@ static const char* Call_Methods(void) {
   return "";
 }
 
-var Call = typedecl(Call,
-  typeclass(Doc,
+var Call = Cello(Call,
+  Member(Doc,
     Call_Name, Call_Brief, Call_Description, Call_Examples, Call_Methods));
 
 var call_with(var self, var args) {
@@ -87,14 +87,14 @@ static var Function_Call(var self, var args) {
   return f->func(args);
 }
 
-var Function = typedecl(Function,
-  typeclass(Doc,
+var Function = Cello(Function,
+  Member(Doc,
     Function_Name, Function_Brief, Function_Description,
     Function_Examples, Function_Methods),
-  typeclass(New, Function_New, Function_Del, Function_Size),
-  typeclass(Copy, Function_Copy),
-  typeclass(Assign, Function_Assign),
-  typeclass(Call, Function_Call));
+  Member(New, Function_New, Function_Del, Function_Size),
+  Member(Copy, Function_Copy),
+  Member(Assign, Function_Assign),
+  Member(Call, Function_Call));
 
 void map(var self, var func) {
   foreach(item in self) {

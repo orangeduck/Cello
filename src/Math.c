@@ -70,19 +70,21 @@ static var Int_Copy(var self) {
   return new(Int, self);
 }
 
+static int64_t Int_C_Int(var self) {
+  struct Int* i = self;
+  return i->val;
+}
+
 static var Int_Eq(var self, var obj) {
-  if (implements(obj, C_Int)) {
-    return bool_var(c_int(self) is c_int(obj));
-  } else {
-    return False;
-  }
+  return bool_var(Int_C_Int(self) is c_int(obj));
 }
 
 static var Int_Gt(var self, var other) {
-  return bool_var(c_int(self) > c_int(other));
+  return bool_var(Int_C_Int(self) > c_int(other));
 }
+
 static var Int_Lt(var self, var other) {
-  return bool_var(c_int(self) < c_int(other));
+  return bool_var(Int_C_Int(self) < c_int(other));
 }
 
 static uint64_t Int_Hash(var self) {
@@ -134,11 +136,6 @@ static void Int_Exp(var self) {
  i->val = exp(i->val);
 }
 
-static int64_t Int_C_Int(var self) {
-  struct Int* i = self;
-  return i->val;
-}
-
 static double Int_C_Float(var self) {
   struct Int* i = self;
   return i->val;
@@ -156,21 +153,21 @@ static int Int_Look(var self, var input, int pos) {
   return pos + off;
 }
 
-var Int = typedecl(Int,
-  typeclass(Doc,
+var Int = Cello(Int,
+  Member(Doc,
     Int_Name, Int_Brief, Int_Description, Int_Examples, Int_Methods),
-  typeclass(New,     Int_New, Int_Del, Int_Size),
-  typeclass(Assign,  Int_Assign),
-  typeclass(Copy,    Int_Copy),
-  typeclass(Eq,      Int_Eq),
-  typeclass(Ord,     Int_Gt, Int_Lt),
-  typeclass(Hash,    Int_Hash),
-  typeclass(C_Int,   Int_C_Int),
-  typeclass(C_Float, Int_C_Float),
-  typeclass(Math,
+  Member(New,     Int_New, Int_Del, Int_Size),
+  Member(Assign,  Int_Assign),
+  Member(Copy,    Int_Copy),
+  Member(Eq,      Int_Eq),
+  Member(Ord,     Int_Gt, Int_Lt),
+  Member(Hash,    Int_Hash),
+  Member(C_Int,   Int_C_Int),
+  Member(C_Float, Int_C_Float),
+  Member(Math,
     Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Pow, 
     Int_Mod, Int_Neg, Int_Abs, Int_Exp),
-  typeclass(Show, Int_Show, Int_Look));
+  Member(Show, Int_Show, Int_Look));
 
 static const char* Float_Name(void) {
   return "Float";
@@ -242,20 +239,21 @@ static var Float_Copy(var self) {
   return new(Float, self);
 }
 
+static double Float_C_Float(var self) {
+  struct Float* f = self;
+  return f->val;
+}
+
 static var Float_Eq(var self, var obj) {
-  if (implements(obj, C_Float)) {
-    return bool_var(c_float(self) is c_float(obj));
-  } else {
-    return False;
-  }
+  return bool_var(Float_C_Float(self) is c_float(obj));
 }
 
 static var Float_Gt(var self, var obj) {
-  return bool_var(c_float(self) > c_float(obj));
+  return bool_var(Float_C_Float(self) > c_float(obj));
 }
 
 static var Float_Lt(var self, var obj) {
-  return bool_var(c_float(self) < c_float(obj));
+  return bool_var(Float_C_Float(self) < c_float(obj));
 }
 
 union interp_cast {
@@ -314,11 +312,6 @@ static void Float_Exp(var self) {
   f->val = exp(f->val);
 }
 
-static double Float_C_Float(var self) {
-  struct Float* f = self;
-  return f->val;
-}
-
 static int64_t Float_C_Int(var self) {
   struct Float* f = self;
   return f->val;
@@ -332,21 +325,21 @@ int Float_Look(var self, var input, int pos) {
   return scan_from(input, pos, "%f", self);
 }
 
-var Float = typedecl(Float,
-  typeclass(Doc,
+var Float = Cello(Float,
+  Member(Doc,
     Float_Name, Float_Brief, Float_Description, Float_Examples, Float_Methods),
-  typeclass(New,     Float_New, Float_Del, Float_Size),
-  typeclass(Assign,  Float_Assign),
-  typeclass(Copy,    Float_Copy),
-  typeclass(Eq,      Float_Eq),
-  typeclass(Ord,     Float_Gt, Float_Lt),
-  typeclass(Hash,    Float_Hash),
-  typeclass(C_Float, Float_C_Float),
-  typeclass(C_Int,   Float_C_Int),
-  typeclass(Math,
+  Member(New,     Float_New, Float_Del, Float_Size),
+  Member(Assign,  Float_Assign),
+  Member(Copy,    Float_Copy),
+  Member(Eq,      Float_Eq),
+  Member(Ord,     Float_Gt, Float_Lt),
+  Member(Hash,    Float_Hash),
+  Member(C_Float, Float_C_Float),
+  Member(C_Int,   Float_C_Int),
+  Member(Math,
     Float_Add, Float_Sub, Float_Mul, Float_Div, Float_Pow,
     Float_Mod, Float_Neg, Float_Abs, Float_Exp),
-  typeclass(Show, Float_Show, Float_Look));
+  Member(Show, Float_Show, Float_Look));
 
 
 static const char* Math_Name(void) {
@@ -373,8 +366,8 @@ static const char* Math_Methods(void) {
   return "";
 }
 
-var Math = typedecl(Math,
-  typeclass(Doc,
+var Math = Cello(Math,
+  Member(Doc,
     Math_Name, Math_Brief, Math_Description, Math_Examples, Math_Methods));
 
 void madd(var self, var obj) { method(self, Math, madd, obj); }

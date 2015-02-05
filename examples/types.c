@@ -1,11 +1,4 @@
-
 #include "Cello.h"
-
-/*
-** This example shows dynamic creation of a Type on the heap.
-** As the functions must be static there is some limitation,
-** but with creative thinking could become a powerful tool.
-*/
 
 static var Hello;
 

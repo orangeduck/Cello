@@ -24,8 +24,8 @@ static const char* Len_Methods(void) {
   return "";
 }
 
-var Len = typedecl(Len,
-  typeclass(Doc,
+var Len = Cello(Len,
+  Member(Doc,
     Len_Name, Len_Brief, Len_Description, Len_Examples, Len_Methods));
 
 size_t len(var self) {

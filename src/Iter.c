@@ -24,8 +24,8 @@ static const char* Terminal_Methods(void) {
   return "";
 }
 
-var Terminal = typedecl(Terminal,
-  typeclass(Doc,
+var Terminal = Cello(Terminal,
+  Member(Doc,
     Terminal_Name, Terminal_Brief, Terminal_Description,
     Terminal_Examples, Terminal_Methods));
 
@@ -53,8 +53,8 @@ static const char* Iter_Methods(void) {
   return "";
 }
 
-var Iter = typedecl(Iter,
-  typeclass(Doc,
+var Iter = Cello(Iter,
+  Member(Doc,
     Iter_Name, Iter_Brief, Iter_Description, Iter_Examples, Iter_Methods));
 
 var iter_init(var self) {

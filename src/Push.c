@@ -27,8 +27,8 @@ static const char* Push_Methods(void) {
   return "";
 }
 
-var Push = typedecl(Push,
-  typeclass(Doc,
+var Push = Cello(Push,
+  Member(Doc,
     Push_Name, Push_Brief, Push_Description, Push_Examples, Push_Methods));
 
 void push(var self, var val) { method(self, Push, push, val); }

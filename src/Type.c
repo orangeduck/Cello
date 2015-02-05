@@ -1,7 +1,46 @@
 #include "Cello.h"
 
-static var __Name   = typedecl(__Name);
-static var __Parent = typedecl(__Parent);
+static const char* Cast_Name(void) {
+  return "Cast";
+}
+
+/* TODO */
+static const char* Cast_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Cast_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Cast_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Cast_Methods(void) {
+  return "";
+}
+
+var Cast = Cello(Cast, Member(Doc, 
+  Cast_Name, Cast_Brief, Cast_Description, Cast_Examples, Cast_Methods));
+
+var cast(var self, var type) {
+  
+  if (implements(self, Cast)) {
+    return method(self, Cast, cast, type);
+  } else {
+    if (type_of(self) is type) {
+      return self;
+    } else {
+      return throw(ValueError,
+        "cast expected type %s, got type %s", type_of(self), type);
+    }
+  }
+  
+}
 
 static const char* Type_Name(void) {
   return "Type";
@@ -75,18 +114,17 @@ static const char* Type_Methods(void) {
     "* `self` if type is correct\n";
 }
 
+static var __Name   = Cello(__Name);
+static var __Parent = Cello(__Parent);
+
 static var Type_New(var self, var args) {
   
   var name = get(args, $(Int, 0));
-  
-  struct CelloHeader* head = malloc(
+  var head = malloc(
     sizeof(struct CelloHeader) + 
     sizeof(struct Type) * (2 + len(args) - 1));
   
-  head->type  = Type;
-  head->flags = (var)CelloHeapAlloc;
-  
-  struct Type* body = (var)head + sizeof(struct CelloHeader);
+  struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
   
   body[0] = (struct Type){ __Name, "__Name", (var)c_str(name) };
   body[1] = (struct Type){ __Parent, "__Parent", None };
@@ -111,154 +149,139 @@ static size_t Type_Size(void) {
 }
 
 static var Type_Parent(var self) {
-
   struct Type* t = self;
-
-  while(t->name) {
-    if (t->cls is __Parent) { return t->inst; }
-    if (t->cls is None and (strcmp(t->name, "__Parent") is 0)) {
-      t->cls = __Parent;
-      return t->inst;
-    }
-    t++;
-  }
-  
-  return throw(ClassError,
-    "Cannot find Class '__Parent' for object '%p' :: "
-    "Was is correctly constructed?", self);
-  
+  return t[1].inst;
 }
 
 char* Type_C_Str(var self) {
-
   struct Type* t = self;
-  
-  while(t->name) {
-    if (t->cls is __Name) { return t->inst; }
-    if (t->cls is None and (strcmp(t->name, "__Name") is 0)) {
-      t->cls = __Name;
-      return (char*)t->inst;
-    }
-    t++;
-  }
-  
-  return throw(ClassError,
-    "Cannot find Class '__Name' for object '%p' :: "
-    "Was is correctly constructed?", self);
-
+  return t[0].inst;
 }
 
-var type_implements(var self, var cls) {
+struct Type_Cache_Entry {
+  var type;
+  var cls;
+  var inst;
+};
+
+enum {
+  TYPE_CACHE_SIZE = 5
+};
+
+static int Type_Cache_Id = 0;
+static struct Type_Cache_Entry Type_Cache[TYPE_CACHE_SIZE];
+
+void Type_Scan(var self, var cls, size_t offset, var* inst, var* meth) {
   
-  cls = cast_exact(cls, Type);
+#if CELLO_METHOD_CHECK == 1
+  if (type_of(self) isnt Type) {
+    throw(TypeError, "Method call got non type '%s'", type_of(self));
+    return;
+  }
+#endif
+  
+  /* Search Cache */
+  
+  for (int i = 0; i < TYPE_CACHE_SIZE; i++) {
+    int id = (Type_Cache_Id + i) % TYPE_CACHE_SIZE;
+    struct Type_Cache_Entry te = Type_Cache[id];
+    if (te.type is self
+    and te.cls  is  cls) {
+      *inst = te.inst;
+      *meth = *(var*)((te.inst) + offset);
+      return;
+    }
+  }
+  
+  /* Search Type Entry */
+  
   char* cls_name = Type_C_Str(cls);
   
   struct Type* t = self;
   while (t->name) {
-    if (t->cls is cls) { return True; }
+    
+    if (t->cls is cls) {
+      *inst =  t->inst;
+      *meth = *(var*)((t->inst) + offset);
+      
+      /* Add to cache */      
+      Type_Cache_Id--;
+      Type_Cache_Id = Type_Cache_Id == -1 ? TYPE_CACHE_SIZE-1 : Type_Cache_Id;
+      Type_Cache[Type_Cache_Id].type = self;
+      Type_Cache[Type_Cache_Id].cls  =  cls;
+      Type_Cache[Type_Cache_Id].inst = t->inst;
+      
+      return;
+    }
+    
     if (t->cls is None and (strcmp(t->name, cls_name) is 0)) {
       t->cls = cls;
-      return True;
+      *inst =  t->inst;
+      *meth = *(var*)((t->inst) + offset);
+      
+      /* Add to cache */
+      Type_Cache_Id--;
+      Type_Cache_Id = Type_Cache_Id == -1 ? TYPE_CACHE_SIZE-1 : Type_Cache_Id;
+      Type_Cache[Type_Cache_Id].type = self;
+      Type_Cache[Type_Cache_Id].cls  =  cls;
+      Type_Cache[Type_Cache_Id].inst = t->inst;
+      
+      return;
     }
+    
     t++;
   }
   
-  var parent = Type_Parent(self);
-  return bool_var(parent isnt None and type_implements(parent, cls));
+  *inst = None;
+  *meth = None;
   
+}
+
+var type_implements(var self, var cls) {
+  var inst, meth;
+  Type_Scan(self, cls, 0, &inst, &meth);
+  return bool_var(inst isnt None);
 }
 
 var type_method_at_offset(
   var self, var cls, size_t offset, const char* method_name) {
   
-  cls = cast_exact(cls, Type);
-  char* cls_name = Type_C_Str(cls);
-  var inst = None;
-  
-  struct Type* t = self;
-  while (t->name) {
-    if (t->cls is cls) { inst = t->inst; break; }
-    if (t->cls is None and (strcmp(t->name, cls_name) is 0)) {
-      t->cls = cls;
-      inst = t->inst;
-      break;
-    }
-    t++;
-  }
-  
-  if (inst isnt None 
-  and (*(var*)(inst + offset)) isnt None) {
-    return inst;
-  }
-  
-  var parent = Type_Parent(self);
-  if (parent isnt None) {
-    return type_method_at_offset(parent, cls, offset, method_name);
-  }
+  var inst, meth;
+  Type_Scan(self, cls, offset, &inst, &meth);
   
   if (inst is None) {
     return throw(ClassError,
       "Type '%s' does not implement class '%s'",
-      self,  cls, $(String, (char*)method_name));
-  } else {
+      self,  cls);
+  }
+  
+  if (meth is None) {
     return throw(ClassError,
       "Type '%s' implements class '%s' but not the method '%s' required",
       self,  cls, $(String, (char*)method_name));  
   }
   
+  return inst;
+  
 }
 
-var type_implements_method_at_offset(
-  var self, var cls, size_t offset, const char* method_name) {
-
-  cls = cast_exact(cls, Type);
-  char* cls_name = Type_C_Str(cls);
-  var inst = None;
-  
-  struct Type* t = self;
-  while (t->name) {
-    if (t->cls is cls) { inst = t->inst; break; }
-    if (t->cls is None and (strcmp(t->name, cls_name) is 0)) {
-      t->cls = cls;
-      inst = t->inst;
-      break;
-    }
-    t++;
-  }
-  
-  if (inst isnt None 
-  and (*(var*)(inst + offset)) isnt None) {
-    return True;
-  }
-  
-  var parent = Type_Parent(self);
-  return bool_var(parent isnt None and 
-      type_implements_method_at_offset(parent, cls, offset, method_name));
-  
+var type_implements_method_at_offset(var self, var cls, size_t offset) {
+  var inst, meth;
+  Type_Scan(self, cls, offset, &inst, &meth);
+  return bool_var(inst and meth);
 }
 
 var type_instance(var self, var cls) {
   
-  cls = cast_exact(cls, Type);
-  char* cls_name = Type_C_Str(cls);
+  var inst, meth;
+  Type_Scan(self, cls, 0, &inst, &meth);
   
-  struct Type* t = self;
-  while(t->name) {
-    if (t->cls is cls) { return t->inst; }
-    if (t->cls is None and (strcmp(t->name, cls_name) is 0)) {
-      t->cls = cls;
-      return t->inst;
-    }
-    t++;
+  if (inst is None) {  
+    return throw(ClassError,
+      "Type '%s' does not implement class '%s'", self, cls);
+  } else {
+    return inst;
   }
-  
-  var parent = Type_Parent(self);
-  if (parent isnt None and type_implements(parent, cls)) {
-    return type_instance(parent, cls);
-  }
-  
-  return throw(ClassError,
-    "Type '%s' does not implement class '%s'", self, cls);
       
 }
 
@@ -266,36 +289,18 @@ static int Type_Show(var self, var output, int pos) {
   return print_to(output, pos, "%s", self);
 }
 
-static void Type_Inherit(var self, var parent) {
-  
-  struct Type* t = self;
-
-  while(t->name) {
-    if (strcmp(t->name, "__Parent") == 0) {
-      t->cls = parent;
-      return;
-    }
-    t++;
-  }
-  
-  throw(ClassError,
-    "Cannot find Class '__Parent' for object '%p' :: "
-    "Was is correctly constructed?", self);
-  
-}
-
 /* TODO */
 static void Type_Help(var self) {
   print("HELP!");
 }
 
-var Type = typedecl(Type,
-  typeclass(Doc,
+var Type = Cello(Type,
+  Member(Doc,
     Type_Name, Type_Brief, Type_Description, Type_Examples, Type_Methods),
-  typeclass(New,      Type_New, Type_Del, Type_Size),
-  typeclass(C_Str,    Type_C_Str),
-  typeclass(Show,     Type_Show, NULL),
-  typeclass(Help,     Type_Help));
+  Member(New,      Type_New, Type_Del, Type_Size),
+  Member(C_Str,    Type_C_Str),
+  Member(Show,     Type_Show, NULL),
+  Member(Help,     Type_Help));
   
 var type_of(var self) {
   
@@ -309,53 +314,39 @@ var type_of(var self) {
   **  So if we access a statically allocated object and it tells us `None` 
   **  is the type, we assume the type is `Type`.
   */
-  
-  if (self is Undefined) {
-    return throw(ValueError, "Received 'Undefined' as value to 'type_of'");
-  }
-  
-  if (self is True)  { return Bool; }
-  if (self is False) { return Bool; }
 
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
+  struct CelloHeader* head;
+
+
   
-  if (head->type is None and 
-  ((int)(intptr_t)head->flags) & CelloStaticAlloc) {
-    return Type;
-  } else {
-    return head->type;
+  switch ((intptr_t)self) {
+    case 0: return Bool;
+    case 1: return Bool;
+    default:
+    
+      head = self - sizeof(struct CelloHeader);
+    
+#if CELLO_UNDEF_CHECK == 1  
+      if (self is Undefined) {
+        return throw(ValueError, "Received 'Undefined' as value to 'type_of'");
+      }
+#endif
+
+#if CELLO_MAGIC_CHECK == 1
+      if (head isnt False and head isnt True and head->magic isnt ((var)0xCe110)) {
+        fprintf(stderr,
+          "Cello Fatal Error: Pointer '%p' passed to 'type_of' "
+          "has bad magic number - it wasn't allocated by Cello.\n", self);
+        abort();
+      }
+#endif
+    
+    return head->type is None ? Type : head->type;
   }
 
 }
 
-var cast(var self, var type) {
-  
-  var atype = type_of(self);
-  
-  do {
-    if (atype is type) { return self; }
-    atype = Type_Parent(atype);
-  } while (atype isnt None);
-  
-  if (implements(self, Pointer)) {
-    return cast(deref(self), type);
-  }
-  
-  return throw(TypeError,
-    "Cast Got Type '%s' :: Expected Type '%s'", type_of(self), type);
-  
-}
 
-var cast_exact(var self, var type) {
-  
-  if (type_of(self) is type) {
-    return self; 
-  }
-  
-  return throw(TypeError,
-    "Exact Cast Got Type '%s' :: Expected Type '%s'",
-    type_of(self), type);
-}
 
 var instance(var self, var cls) {
   return type_instance(type_of(self), cls);
@@ -370,9 +361,7 @@ var method_at_offset(
   return type_method_at_offset(type_of(self), cls, offset, method_name);
 }
 
-var implements_method_at_offset(
-  var self, var cls, size_t offset, const char* method_name) {
-  return type_implements_method_at_offset(
-    type_of(self), cls, offset, method_name);
+var implements_method_at_offset(var self, var cls, size_t offset) {
+  return type_implements_method_at_offset(type_of(self), cls, offset);
 }
   

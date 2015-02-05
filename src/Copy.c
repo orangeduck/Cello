@@ -25,8 +25,8 @@ static const char* Copy_Methods(void) {
   return "";
 }
 
-var Copy = typedecl(Copy,
-  typeclass(Doc, Copy_Name, Copy_Brief, Copy_Description, Copy_Examples, Copy_Methods));
+var Copy = Cello(Copy,
+  Member(Doc, Copy_Name, Copy_Brief, Copy_Description, Copy_Examples, Copy_Methods));
 
 
 var copy(var self) {

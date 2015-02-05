@@ -24,8 +24,8 @@ static const char* Eq_Methods(void) {
   return "";
 }
 
-var Eq = typedecl(Eq,
-  typeclass(Doc,
+var Eq = Cello(Eq,
+  Member(Doc,
     Eq_Name, Eq_Brief, Eq_Description, Eq_Examples, Eq_Methods));
 
 var eq(var self, var obj) {
@@ -63,8 +63,8 @@ static const char* Ord_Methods(void) {
   return "";
 }
 
-var Ord = typedecl(Ord,
-  typeclass(Doc,
+var Ord = Cello(Ord,
+  Member(Doc,
     Ord_Name, Ord_Brief, Ord_Description, Ord_Examples, Ord_Methods));
 
 var gt(var self, var obj) { return method(self, Ord, gt, obj); }

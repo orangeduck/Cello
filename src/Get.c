@@ -24,8 +24,8 @@ static const char* Get_Methods(void) {
   return "";
 }
 
-var Get = typedecl(Get,
-  typeclass(Doc,
+var Get = Cello(Get,
+  Member(Doc,
     Get_Name, Get_Brief, Get_Description, Get_Examples, Get_Methods));
 
 var get(var self, var key) {

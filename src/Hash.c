@@ -24,8 +24,8 @@ static const char* Hash_Methods(void) {
   return "";
 }
 
-var Hash = typedecl(Hash,
-  typeclass(Doc,
+var Hash = Cello(Hash,
+  Member(Doc,
     Hash_Name, Hash_Brief, Hash_Description, Hash_Examples, Hash_Methods));
 
 static uint64_t seed = 0xCE110;

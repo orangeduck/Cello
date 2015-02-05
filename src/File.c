@@ -141,13 +141,13 @@ static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
   return vfscanf(f->file, fmt, va);
 }
 
-var File = typedecl(File,
-  typeclass(Doc,
+var File = Cello(File,
+  Member(Doc,
     File_Name, File_Brief, File_Description, File_Examples, File_Methods),
-  typeclass(New, File_New, File_Del, File_Size),
-  typeclass(Begin, NULL, File_Close),
-  typeclass(Stream,
+  Member(New, File_New, File_Del, File_Size),
+  Member(Begin, NULL, File_Close),
+  Member(Stream,
     File_Open, File_Close, File_Seek, File_Tell,
     File_Flush, File_EOF, File_Read, File_Write),
-  typeclass(Format, File_Format_To, File_Format_From));
+  Member(Format, File_Format_To, File_Format_From));
 

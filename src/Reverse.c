@@ -24,8 +24,8 @@ const char* Reverse_Methods(void) {
   return "";
 }
 
-var Reverse = typedecl(Reverse, 
-  typeclass(Doc,
+var Reverse = Cello(Reverse, 
+  Member(Doc,
     Reverse_Name, Reverse_Brief, Reverse_Description, 
     Reverse_Examples, Reverse_Methods));
   

@@ -24,13 +24,21 @@ const char* Sort_Methods(void) {
   return "";
 }
 
-var Sort = typedecl(Sort, 
-  typeclass(Doc,
+var Sort = Cello(Sort, 
+  Member(Doc,
     Sort_Name, Sort_Brief, Sort_Description, 
     Sort_Examples, Sort_Methods));
   
+static var Sort_Lt(var args) {
+  return lt(get(args, $I(0)), get(args, $I(1)));
+}
+  
 void sort(var self) {
-  method(self, Sort, sort);
+  method(self, Sort, sort_with, $(Function, Sort_Lt));
+}
+
+void sort_with(var self, var func) {
+  method(self, Sort, sort_with, func);
 }
 
 

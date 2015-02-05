@@ -18,10 +18,6 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-BENCHMARKS := $(wildcard benchmarks/*.c)
-BENCHMARKS_OBJ := $(addprefix obj/,$(notdir $(BENCHMARKS:.c=.o)))
-BENCHMARKS_EXE := $(BENCHMARKS:.c=)
-
 CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g
 LFLAGS = -shared -g -ggdb
 
@@ -94,18 +90,16 @@ check: $(TESTS_OBJ) $(STATIC)
 obj/%.o: tests/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
 
+# Benchmark
+
+benchmark:
+	cd benchmarks; ./benchmark; cd ../
+
 # Examples
 
 examples: $(EXAMPLES_EXE)
 
 examples/%: examples/%.c $(STATIC) | obj
-	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) -o $@
-
-# Benchmarks
-
-benchmarks: $(BENCHMARKS_EXE)
-
-benchmarks/%: benchmarks/%.c $(STATIC) | obj
 	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) -o $@
 
 # Dist

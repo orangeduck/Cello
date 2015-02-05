@@ -25,7 +25,7 @@ static const char* Undefined_Methods(void) {
   return "";
 }
 
-var Undefined = typedecl(Undefined,
-  typeclass(Doc,
+var Undefined = Cello(Undefined,
+  Member(Doc,
     Undefined_Name,        Undefined_Brief,
     Undefined_Description, Undefined_Examples, Undefined_Methods));

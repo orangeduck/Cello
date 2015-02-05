@@ -24,8 +24,8 @@ static const char* Format_Methods(void) {
   return "";
 }
 
-var Format = typedecl(Format,
-  typeclass(Doc, 
+var Format = Cello(Format,
+  Member(Doc, 
     Format_Name, Format_Brief, Format_Description,
     Format_Examples, Format_Methods));
 
@@ -77,8 +77,8 @@ static const char* Show_Methods(void) {
   return "";
 }
 
-var Show = typedecl(Show,
-  typeclass(Doc, 
+var Show = Cello(Show,
+  Member(Doc, 
     Show_Name, Show_Brief, Show_Description,
     Show_Examples, Show_Methods));
 

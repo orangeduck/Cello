@@ -118,7 +118,7 @@ PT_FUNC(test_call_with) {
   
 }
 
-PT_FUNC(test_call_vl) {
+PT_FUNC(test_call_tuple) {
 
 #if defined(__clang__)
 
@@ -148,11 +148,11 @@ PT_FUNC(test_call_vl) {
 
 }
 
-PT_FUNC(test_lambda) {
+PT_FUNC(test_fun) {
 
   var out = new(String, $(String, ""));
   
-  function(hello_name, args) {
+  fun (hello_name, args) {
     var name = cast(get(args, $(Int, 0)), String);
     var out = cast(get(args, $(Int, 1)), String);
     assign(out, name);
@@ -168,7 +168,7 @@ PT_FUNC(test_lambda) {
 
 PT_FUNC(test_map) {
   
-  function(add_one, args) {
+  fun (add_one, args) {
     madd(get(args, $(Int, 0)), $(Int, 1));
     return None;
   };
@@ -195,8 +195,8 @@ PT_SUITE(suite_functional) {
   PT_REG(test_function_copy);
   PT_REG(test_call);
   PT_REG(test_call_with);
-  PT_REG(test_call_vl);
-  PT_REG(test_lambda);
+  PT_REG(test_call_tuple);
+  PT_REG(test_fun);
   PT_REG(test_map);
 
 }

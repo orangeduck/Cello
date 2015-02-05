@@ -1,61 +1,14 @@
 #include "Cello.h"
 #include "ptest.h"
 
-extern var TestType;
-
-struct TestType {
-  int test_data;
-};
-
-static var TestType_New(var self, var args) {
-  struct TestType* tt = self;
-  tt->test_data = c_int(get(args, $(Int, 0)));
-  return self;
+PT_FUNC(test_doc) {
+  PT_ASSERT_STR_EQ(name(Int), "Int");
+  /* TODO: Add other methods for Int when filled in */
 }
-
-static var TestType_Del(var self) {
-  return self;
-}
-
-static size_t TestType_Size(void) {
-  return sizeof(struct TestType);
-}
-
-static var TestType_Eq(var self, var obj) {
-  struct TestType* lhs = cast(self, TestType);
-  struct TestType* rhs = cast(obj, TestType);
-  if (lhs->test_data == rhs->test_data) {
-    return True;
-  } else {
-    return False;
-  }
-}
-
-var TestType = typedecl(TestType,
-  typeclass(New, TestType_New, TestType_Del, TestType_Size),
-  typeclass(Eq, TestType_Eq));
-
-
-struct ReturnTrue {
-  var (*return_true)(var);
-};
-
-var ReturnTrue = typedecl(ReturnTrue);
-
-static var return_true(var self) {
-  return method(self, ReturnTrue, return_true);
-}
-
-static var IntParent_ReturnTrue(var self) {
-  return True;
-}
-
-var IntParent = typedecl(IntParent,
-  typeclass(ReturnTrue, IntParent_ReturnTrue));
 
 PT_FUNC(test_type) {
-  PT_ASSERT(type_of($(Int, 1)) is Int);
-  PT_ASSERT(type_of($(Float, 1.0)) is Float);
+  PT_ASSERT(type_of($I(1)) is Int);
+  PT_ASSERT(type_of($F(1.0)) is Float);
   PT_ASSERT(type_of(True) is Bool);
   PT_ASSERT(type_of(False) is Bool);
   PT_ASSERT(type_of(Int) is Type);
@@ -78,7 +31,7 @@ PT_FUNC(test_cast) {
 
 PT_FUNC(test_new) {
   
-  var x = new(Int, $(Int, 1));
+  var x = new_$(Int, 1);
   
   PT_ASSERT(x);
   PT_ASSERT(type_of(x) is Int);
@@ -101,8 +54,6 @@ PT_FUNC(test_new) {
 
 PT_FUNC(test_assign) {
   
-  /* Integers */
-  
   var x = new(Int, $(Int, 10));
   var y = new(Int, $(Int, 20));
 
@@ -119,10 +70,8 @@ PT_FUNC(test_assign) {
   del(x);
   del(y);
   
-  /* Strings */
-  
-  var xs = new(String, $(String, "Hello"));
-  var ys = new(String, $(String, "There"));
+  var xs = new_$(String, "Hello");
+  var ys = new_$(String, "There");
   
   PT_ASSERT_STR_EQ(c_str(xs), "Hello");
   PT_ASSERT_STR_EQ(c_str(ys), "There");
@@ -154,6 +103,10 @@ PT_FUNC(test_copy) {
   
 }
 
+PT_FUNC(test_traverse) {
+  /* TODO */
+}
+
 PT_FUNC(test_eq) {
   PT_ASSERT(  eq($(Int, 1 ), $(Int, 1 )) );
   PT_ASSERT( neq($(Int, 2 ), $(Int, 20)) );
@@ -179,36 +132,34 @@ PT_FUNC(test_eq) {
   del(tab1);
   del(tab2);
   
-  /*
-  var map1 = new(Map, String, String);
-  var map2 = new(Map, String, String);
+  var tab3 = new(Table, String, String);
+  var tab4 = new(Table, String, String);
   
-  PT_ASSERT(eq(map1, map2));
-  set(map1, $(String, "name"), $(String, "Alex"));
-  PT_ASSERT(neq(map1, map2));
-  set(map2, $(String, "name"), $(String, "Alex"));
-  PT_ASSERT(eq(map1, map2));
-  set(map1, $(String, "age"), $(String, "28"));
-  set(map2, $(String, "age"), $(String, "30"));
-  PT_ASSERT(neq(map1, map2));
-  set(map1, $(String, "age"), $(String, "30"));
-  PT_ASSERT(eq(map1, map2));
-  set(map2, $(String, "nickname"), $(String, "The Wing Man"));
-  PT_ASSERT(neq(map1, map2));
+  PT_ASSERT(eq(tab3, tab4));
+  set(tab3, $(String, "name"), $(String, "Alex"));
+  PT_ASSERT(neq(tab3, tab4));
+  set(tab4, $(String, "name"), $(String, "Alex"));
+  PT_ASSERT(eq(tab3, tab4));
+  set(tab3, $(String, "age"), $(String, "28"));
+  set(tab4, $(String, "age"), $(String, "30"));
+  PT_ASSERT(neq(tab3, tab4));
+  set(tab3, $(String, "age"), $(String, "30"));
+  PT_ASSERT(eq(tab3, tab4));
+  set(tab4, $(String, "nickname"), $(String, "The Wing Man"));
+  PT_ASSERT(neq(tab3, tab4));
   
-  del(map1);
-  del(map2);
-  */
+  del(tab3);
+  del(tab4);
   
 }
 
 PT_FUNC(test_ord) {
-  PT_ASSERT(  gt($(Int, 15), $(Int, 3 )) );
-  PT_ASSERT(  lt($(Int, 70), $(Int, 81)) );
-  PT_ASSERT(  ge($(Int, 71), $(Int, 71)) );
-  PT_ASSERT(  ge($(Int, 78), $(Int, 71)) );
-  PT_ASSERT(  le($(Int, 32), $(Int, 32)) );
-  PT_ASSERT(  le($(Int, 21), $(Int, 32)) );
+  PT_ASSERT(gt($I(15), $I( 3)));
+  PT_ASSERT(lt($I(70), $I(81)));
+  PT_ASSERT(ge($I(71), $I(71)));
+  PT_ASSERT(ge($I(78), $I(71)));
+  PT_ASSERT(le($I(32), $I(32)));
+  PT_ASSERT(le($I(21), $I(32)));
 }
 
 PT_FUNC(test_hash) {
@@ -219,8 +170,68 @@ PT_FUNC(test_hash) {
   PT_ASSERT(y is 123);
 }
 
-PT_FUNC(test_collection) {
+PT_FUNC(test_len) {
+
+  PT_ASSERT(len($T($I(1), $I(2), $I(3))) is 3);
+  PT_ASSERT(len($S("Hello")) is 5);
   
+  var x = new(Array, Int, $(Int, 1), $(Int, 2));
+  PT_ASSERT(len(x) is 2);
+  del(x);
+
+}
+
+
+PT_FUNC(test_iter) {
+
+  var x = new(Array, Ref, $(Int, 1), $(Float, 2.0), $(String, "Hello"));
+  
+  foreach (y in x) {
+    PT_ASSERT(y);
+    PT_ASSERT(type_of(y) is Ref);
+  }
+  
+  del(x);
+}
+
+PT_FUNC(test_push) {
+  
+  var x = new(Array, Int);
+  var y = new(Array, Ref);
+  
+  for(int i = 0; i < 1000; i++) {
+    push(x, $(Int, 1));
+    push(y, $(Int, 2));
+  }
+  
+  for(int i = 0; i < 1000; i++) {
+    pop(x);
+    pop(y);
+  }
+  
+  push(x, $(Int, 0));
+  push(x, $(Int, 5));
+  push(x, $(Int, 10));
+  
+  PT_ASSERT(eq(get(x, $(Int, 0)), $(Int, 0)));
+  PT_ASSERT(eq(get(x, $(Int, 1)), $(Int, 5)));
+  PT_ASSERT(eq(get(x, $(Int, 2)), $(Int, 10)));
+  
+  pop_at(x, $(Int, 1));
+  
+  PT_ASSERT(eq(get(x, $(Int, 0)), $(Int, 0)));
+  PT_ASSERT(eq(get(x, $(Int, 1)), $(Int, 10)));
+  
+  del(x);
+  del(y);
+}
+
+PT_FUNC(test_concat) {
+  /* TODO */
+}
+
+PT_FUNC(test_get) {
+
   var x = new(Array, Int, $(Int, 1), $(Int, 2), $(Int, 3));
   
   PT_ASSERT(x);
@@ -261,14 +272,6 @@ PT_FUNC(test_collection) {
   PT_ASSERT(eq(get(y, $(Int, 2)), $(Float, 5.2)));
   PT_ASSERT(eq(get(y, $(Int, 3)), $(Float, 7.1)));
   
-  /*
-  var maxval = maximum(y);
-  var minval = minimum(y);
-  
-  PT_ASSERT(eq(maxval, $(Float, 7.1)));
-  PT_ASSERT(eq(minval, $(Float, 1.1)));
-  */
-  
   del(y);
   
   var z = new(Array, Float, 
@@ -298,99 +301,45 @@ PT_FUNC(test_collection) {
   
   del(w);
   
-  /*
-  var map1 = new(Map, String, String);
-  var map2 = new(Map, String, String);
+  var tab3 = new(Table, String, String);
+  var tab4 = new(Table, String, String);
   
-  PT_ASSERT(eq(map1, map2));
+  PT_ASSERT(eq(tab3, tab4));
   
-  set(map1, $(String, "key"), $(String, "val"));
-  PT_ASSERT(neq(map1, map2));
+  set(tab3, $(String, "key"), $(String, "val"));
+  PT_ASSERT(neq(tab3, tab4));
   
-  set(map2, $(String, "key"), $(String, "val"));
-  PT_ASSERT(eq(map1, map2));
+  set(tab4, $(String, "key"), $(String, "val"));
+  PT_ASSERT(eq(tab3, tab4));
   
-  set(map1, $(String, "newkey"), $(Int, 10));
-  set(map2, $(String, "newkey"), $(String, "newval"));
-  PT_ASSERT(neq(map1, map2));
+  set(tab3, $(String, "newkey"), $(String, "10"));
+  set(tab4, $(String, "newkey"), $(String, "newval"));
+  PT_ASSERT(neq(tab3, tab4));
   
-  set(map1, $(String, "newkey"), $(String, "newval"));
-  PT_ASSERT(eq(map1, map2));
+  set(tab3, $(String, "newkey"), $(String, "newval"));
+  PT_ASSERT(eq(tab3, tab4));
   
-  set(map2, $(String, "difkey"), $(Int, 5));
-  PT_ASSERT(neq(map1, map2));
+  set(tab4, $(String, "difkey"), $(String, "5"));
+  PT_ASSERT(neq(tab3, tab4));
   
-  del(map1);
-  del(map2);
-  */
-  
-}
-
-PT_FUNC(test_iter) {
-
-  var x = new(Array, Ref, $(Int, 1), $(Float, 2.0), $(String, "Hello"));
-  
-  foreach(y in x) {
-    PT_ASSERT(y);
-    PT_ASSERT(type_of(y));
-  }
-  
-  del(x);
-}
-
-PT_FUNC(test_push) {
-  
-  var x = new(Array, Int);
-  var y = new(Array, Ref);
-  
-  for(int i = 0; i < 1000; i++) {
-    push(x, $(Int, 1));
-    push(y, $(Int, 2));
-  }
-  
-  for(int i = 0; i < 1000; i++) {
-    pop(x);
-    pop(y);
-  }
-  
-  push(x, $(Int, 0));
-  push(x, $(Int, 5));
-  push(x, $(Int, 10));
-  
-  PT_ASSERT(eq(get(x, $(Int, 0)), $(Int, 0)));
-  PT_ASSERT(eq(get(x, $(Int, 1)), $(Int, 5)));
-  PT_ASSERT(eq(get(x, $(Int, 2)), $(Int, 10)));
-  
-  pop_at(x, $(Int, 1));
-  
-  PT_ASSERT(eq(get(x, $(Int, 0)), $(Int, 0)));
-  PT_ASSERT(eq(get(x, $(Int, 1)), $(Int, 10)));
-  
-  del(x);
-  del(y);
-}
-
-PT_FUNC(test_at) {
+  del(tab3);
+  del(tab4);
 
   var fst = $(Int, 1);
   var snd = $(Float, 2.0);
   var trd = $(String, "Hello");
 
-  var x = new(Array, Ref, fst, snd, trd);
+  var arr = new(Array, Ref, fst, snd, trd);
 
-  PT_ASSERT(deref(get(x, $(Int, 0))) is fst);
-  PT_ASSERT(deref(get(x, $(Int, 1))) is snd);
-  PT_ASSERT(deref(get(x, $(Int, 2))) is trd);
+  PT_ASSERT(deref(get(arr, $(Int, 0))) is fst);
+  PT_ASSERT(deref(get(arr, $(Int, 1))) is snd);
+  PT_ASSERT(deref(get(arr, $(Int, 2))) is trd);
   
-  set(x, $(Int, 1), trd);
+  set(arr, $(Int, 1), trd);
   
-  PT_ASSERT(deref(get(x, $(Int, 1))) is trd);
+  PT_ASSERT(deref(get(arr, $(Int, 1))) is trd);
   
-  del(x);
-  
-}
-
-PT_FUNC(test_dict) {
+  del(arr);
 
   var prices = new(Table, String, Int);
   set(prices, $(String, "Apple"),  $(Int, 12)); 
@@ -421,7 +370,23 @@ PT_FUNC(test_dict) {
   
 }
 
-PT_FUNC(test_as_ctype) {
+PT_FUNC(test_reverse) {
+  /* TODO */
+}
+
+PT_FUNC(test_sort) {
+  /* TODO */
+}
+
+PT_FUNC(test_clear) {
+  /* TODO */
+}
+
+PT_FUNC(test_reserve) {
+  /* TODO */
+}
+
+PT_FUNC(test_ctype) {
   
   PT_ASSERT(c_char($(Char, 'a')) is 'a');
   PT_ASSERT(c_char($(Char, 'b')) is 'b');
@@ -442,6 +407,10 @@ PT_FUNC(test_as_ctype) {
  
 }
 
+PT_FUNC(test_begin) {
+  /* TODO */
+}
+
 PT_FUNC(test_stream) {
 
   var f = $(File, None);
@@ -452,8 +421,8 @@ PT_FUNC(test_stream) {
     
     PT_ASSERT(f);
     
-    //set(f, Int, $I(1));
-    //set(f, Int, $I(22));
+    swrite(f, $I(1), $I(size(Int)));
+    swrite(f, $I(22), $I(size(Int)));
   
   sclose(f);
   
@@ -461,19 +430,53 @@ PT_FUNC(test_stream) {
     
     PT_ASSERT(f);
     
-    //var first = get(f, Int);
-    //var second = get(f, Int);
+    var fst = $I(0);
+    var snd = $I(0);
     
-    //PT_ASSERT(c_int(first) is 1);
-    //PT_ASSERT(c_int(second) is 22);
+    sread(f, fst, $I(size(Int)));
+    sread(f, snd, $I(size(Int)));
     
-    //del(first);
-    //del(second);
+    PT_ASSERT(c_int(fst) is 1);
+    PT_ASSERT(c_int(snd) is 22);
     
   sclose(f);
   
   PT_ASSERT(f);
 }
+
+extern var TestType;
+
+struct TestType {
+  int test_data;
+};
+
+static var TestType_New(var self, var args) {
+  struct TestType* tt = self;
+  tt->test_data = c_int(get(args, $(Int, 0)));
+  return self;
+}
+
+static var TestType_Del(var self) {
+  return self;
+}
+
+static size_t TestType_Size(void) {
+  return sizeof(struct TestType);
+}
+
+static var TestType_Eq(var self, var obj) {
+  struct TestType* lhs = cast(self, TestType);
+  struct TestType* rhs = cast(obj, TestType);
+  if (lhs->test_data == rhs->test_data) {
+    return True;
+  } else {
+    return False;
+  }
+}
+
+var TestType = Cello(TestType,
+  Member(New, TestType_New, TestType_Del, TestType_Size),
+  Member(Eq, TestType_Eq));
 
 PT_FUNC(test_type_new) {
  
@@ -504,6 +507,22 @@ PT_FUNC(test_type_new) {
   
 }
 
+PT_FUNC(test_pointer) {
+    /* TODO */
+}
+
+PT_FUNC(test_call) {
+  /* TODO */
+}
+
+PT_FUNC(test_math) {
+  /* TODO */
+}
+
+PT_FUNC(test_start) {
+  /* TODO */
+}
+
 PT_FUNC(test_type_implements) {
   
   PT_ASSERT(type_implements(Int, New));
@@ -513,26 +532,6 @@ PT_FUNC(test_type_implements) {
   PT_ASSERT(type_instance(Int, Ord));
   PT_ASSERT(type_instance(Array, Get));
   PT_ASSERT(type_instance(Type, C_Str));
-  
-}
-
-PT_FUNC(test_type_parent) {
-  
-  /*
-  PT_ASSERT(not type_implements(Int, ReturnTrue));
-  PT_ASSERT(not type_implements(Float, ReturnTrue));
-  PT_ASSERT(type_implements(IntParent, ReturnTrue));
-  
-  PT_ASSERT(return_true(IntParent));
-  
-  //Type_Inherit(Int, IntParent);
-  
-  PT_ASSERT(type_implements(Int, ReturnTrue));
-  PT_ASSERT(not type_implements(Float, ReturnTrue));
-  PT_ASSERT(type_implements(IntParent, ReturnTrue));
-  
-  PT_ASSERT(return_true(Int));
-  */
   
 }
 
@@ -566,26 +565,36 @@ PT_FUNC(test_look) {
 }
 
 PT_SUITE(suite_core) {
-  
+
+  PT_REG(test_doc);  
   PT_REG(test_type);
   PT_REG(test_cast);
   PT_REG(test_new);
   PT_REG(test_assign);
   PT_REG(test_copy);
+  PT_REG(test_traverse);
   PT_REG(test_eq);
   PT_REG(test_ord);
   PT_REG(test_hash);
-  PT_REG(test_collection);
+  PT_REG(test_len);
   PT_REG(test_iter);
   PT_REG(test_push);
-  PT_REG(test_at);
-  PT_REG(test_dict);
-  PT_REG(test_as_ctype);
+  PT_REG(test_concat);
+  PT_REG(test_get);
+  PT_REG(test_reverse);
+  PT_REG(test_sort);
+  PT_REG(test_clear);
+  PT_REG(test_reserve);
+  PT_REG(test_ctype);
+  PT_REG(test_begin);
   PT_REG(test_stream);
-  PT_REG(test_type_new);
-  PT_REG(test_type_implements);
-  PT_REG(test_type_parent);
+  PT_REG(test_pointer);
+  PT_REG(test_call);
   PT_REG(test_show);
   PT_REG(test_look);
+  PT_REG(test_math);
+  PT_REG(test_start);
+  PT_REG(test_type_new);
+  PT_REG(test_type_implements);
 
 }

@@ -109,8 +109,7 @@ static var Array_Item(struct Array* a, size_t i) {
 static void Array_Alloc(struct Array* a, size_t i) {
   memset(a->data + Array_Step(a) * i, 0, Array_Step(a));
   struct CelloHeader* head = a->data + Array_Step(a) * i;
-  head->type  = a->type;
-  head->flags = (var)CelloDataAlloc;
+  CelloHeader_Init(head, a->type, CelloDataAlloc);
 }
 
 static var Array_New(var self, var args) {
@@ -128,9 +127,11 @@ static var Array_New(var self, var args) {
   
   a->data = malloc(a->nslots * Array_Step(a));
   
+#if CELLO_MEMORY_CHECK == 1
   if (a->data is None) {
     throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
   }
+#endif
   
   for(size_t i = 0; i < a->nitems; i++) {
     Array_Alloc(a, i);
@@ -184,9 +185,11 @@ static var Array_Assign(var self, var obj) {
   
   a->data = malloc(a->nslots * Array_Step(a));
   
+#if CELLO_MEMORY_CHECK == 1
   if (a->data is None) {
     throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
   }
+#endif
   
   for(size_t i = 0; i < a->nitems; i++) {
     Array_Alloc(a, i);
@@ -202,9 +205,11 @@ static void Array_Reserve_More(struct Array* a) {
   if (a->nitems > a->nslots) {
     a->nslots = a->nitems + a->nitems / 2;
     a->data = realloc(a->data, Array_Step(a) * a->nslots);
+#if CELLO_MEMORY_CHECK == 1
     if (a->data is None) {
       throw(OutOfMemoryError, "Cannot grow Array, out of memory!");
     }
+#endif
   }
 
 }
@@ -275,7 +280,7 @@ static void Array_Pop_At(var self, var key) {
   struct Array* a = self;
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
   
-#if CELLO_BOUNDS_CHECK == 1
+#if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= a->nitems) {
     throw(IndexOutOfBoundsError,
       "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
@@ -330,7 +335,7 @@ static void Array_Pop(var self) {
 
   struct Array* a = self;
   
-#if CELLO_BOUNDS_CHECK == 1
+#if CELLO_BOUND_CHECK == 1
   if (a->nitems is 0) {
     throw(IndexOutOfBoundsError, "Cannot pop. Array is empty!");
     return;
@@ -348,7 +353,7 @@ static var Array_Get(var self, var key) {
   struct Array* a = self;
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
   
-#if CELLO_BOUNDS_CHECK == 1
+#if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= a->nitems) {
     return throw(IndexOutOfBoundsError,
       "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
@@ -363,7 +368,7 @@ static void Array_Set(var self, var key, var val) {
   struct Array* a = self;
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
   
-#if CELLO_BOUNDS_CHECK == 1
+#if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= a->nitems) {
     throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
@@ -400,14 +405,13 @@ static void Array_Swap(struct Array* a, size_t i, size_t j) {
 
 static void Array_Reverse(var self) {
   struct Array* a = self;
-  
-  size_t l = Array_Len(a);
-  for(size_t i = 0; i < l / 2; i++) {
-    Array_Swap(a, i, l-1-i);
+  for(size_t i = 0; i < a->nitems / 2; i++) {
+    Array_Swap(a, i, a->nitems-1-i);
   }
 }
 
-static size_t Array_Sort_Partition(struct Array* a, int64_t l, int64_t r) {
+static size_t Array_Sort_Partition(
+  struct Array* a, int64_t l, int64_t r, var f) {
   
   int64_t p = l + (r - l) / 2;
   char swapspace[sizeof(struct CelloHeader) + a->tsize];
@@ -417,7 +421,9 @@ static size_t Array_Sort_Partition(struct Array* a, int64_t l, int64_t r) {
   
   int64_t s = l;
   for (int64_t i = l; i < r; i++) {
-    if_lt (Array_Get(a, $(Int, i)), swapspace + sizeof(struct CelloHeader)) {
+    if (call(f, 
+      Array_Get(a, $(Int, i)), 
+      swapspace + sizeof(struct CelloHeader))) {
       Array_Swap(a, i, s);
       s++;
     }
@@ -428,16 +434,16 @@ static size_t Array_Sort_Partition(struct Array* a, int64_t l, int64_t r) {
   return s;
 }
 
-static void Array_Sort_Part(struct Array* a, int64_t l, int64_t r) {
+static void Array_Sort_Part(struct Array* a, int64_t l, int64_t r, var f) {
   if (l < r) {
-    int64_t s = Array_Sort_Partition(a, l, r);
-    Array_Sort_Part(a, l, s-1);
-    Array_Sort_Part(a, s+1, r);
+    int64_t s = Array_Sort_Partition(a, l, r, f);
+    Array_Sort_Part(a, l, s-1, f);
+    Array_Sort_Part(a, s+1, r, f);
   }
 }
 
-static void Array_Sort(var self) {
-  Array_Sort_Part(self, 0, Array_Len(self)-1);
+static void Array_Sort_With(var self, var f) {
+  Array_Sort_Part(self, 0, Array_Len(self)-1, f);
 }
 
 static int Array_Show(var self, var output, int pos) {
@@ -451,24 +457,47 @@ static int Array_Show(var self, var output, int pos) {
   return pos;
 }
 
-var Array = typedecl(Array,
-  typeclass(Doc,
+static void Array_Reserve(var self, var amount) {
+  struct Array* a = self;
+  int64_t nnslots = c_int(amount);
+  
+#if CELLO_BOUND_CHECK == 1
+  if (nnslots < a->nitems) {
+    throw(IndexOutOfBoundsError, 
+      "Array already has %li items, cannot reserve %li", $I(a->nitems), amount);
+  }
+#endif
+  
+  a->nslots = nnslots;
+  a->data = realloc(a->data, Array_Step(a) * a->nslots);
+
+#if CELLO_MEMORY_CHECK == 1
+  if (a->data is None) {
+    throw(OutOfMemoryError, "Cannot grow Array, out of memory!");
+  }
+#endif
+
+}
+
+var Array = Cello(Array,
+  Member(Doc,
     Array_Name,        Array_Brief,
     Array_Description, Array_Examples,
     Array_Methods),
-  typeclass(New,      Array_New, Array_Del, Array_Size),
-  typeclass(Assign,   Array_Assign),
-  typeclass(Copy,     Array_Copy),
-  typeclass(Eq,       Array_Eq),
-  typeclass(Clear,    Array_Clear),
-  typeclass(Push,
-    Array_Push,       Array_Pop,
-    Array_Push_At,    Array_Pop_At),
-  typeclass(Len,      Array_Len),
-  typeclass(Get,      Array_Get, Array_Set, Array_Mem, Array_Rem),
-  typeclass(Iter,     Array_Iter_Init, Array_Iter_Next),
-  typeclass(Reverse,  Array_Reverse),
-  typeclass(Sort,     Array_Sort),
-  typeclass(Show,     Array_Show, NULL));
+  Member(New,      Array_New, Array_Del, Array_Size),
+  Member(Assign,   Array_Assign),
+  Member(Copy,     Array_Copy),
+  Member(Eq,       Array_Eq),
+  Member(Clear,    Array_Clear),
+  Member(Push,
+    Array_Push,    Array_Pop,
+    Array_Push_At, Array_Pop_At),
+  Member(Len,      Array_Len),
+  Member(Get,      Array_Get, Array_Set, Array_Mem, Array_Rem),
+  Member(Iter,     Array_Iter_Init, Array_Iter_Next),
+  Member(Reverse,  Array_Reverse),
+  Member(Sort,     Array_Sort_With),
+  Member(Show,     Array_Show, NULL),
+  Member(Reserve,  Array_Reserve));
 
   

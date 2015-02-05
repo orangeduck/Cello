@@ -90,7 +90,7 @@ static var Tuple_Get(var self, var key) {
 
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
 
-#if CELLO_BOUNDS_CHECK == 1
+#if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= len(self)) {
     return throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Tuple of size %i.", 
@@ -106,7 +106,7 @@ static void Tuple_Set(var self, var key, var val) {
 
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
 
-#if CELLO_BOUNDS_CHECK == 1
+#if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= len(self)) {
     throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Tuple of size %i.", 
@@ -135,14 +135,14 @@ static int Tuple_Show(var self, var output, int pos) {
   return pos;
 }
 
-var Tuple = typedecl(Tuple,
-  typeclass(Doc,
+var Tuple = Cello(Tuple,
+  Member(Doc,
     Tuple_Name, Tuple_Brief, Tuple_Description, Tuple_Examples, Tuple_Methods),
-  typeclass(New,    Tuple_New, Tuple_Del, Tuple_Size),
-  typeclass(Assign, Tuple_Assign),
-  typeclass(Copy,   Tuple_Copy),
-  typeclass(Len,    Tuple_Len),
-  typeclass(Get,    Tuple_Get, Tuple_Set, Tuple_Mem, NULL),
-  typeclass(Iter,   Tuple_Iter_Init, Tuple_Iter_Next),
-  typeclass(Show,   Tuple_Show, NULL));
+  Member(New,    Tuple_New, Tuple_Del, Tuple_Size),
+  Member(Assign, Tuple_Assign),
+  Member(Copy,   Tuple_Copy),
+  Member(Len,    Tuple_Len),
+  Member(Get,    Tuple_Get, Tuple_Set, Tuple_Mem, NULL),
+  Member(Iter,   Tuple_Iter_Init, Tuple_Iter_Next),
+  Member(Show,   Tuple_Show, NULL));
 

@@ -100,18 +100,18 @@ int Bool_Show(var self, var output, int pos) {
   }
 }
 
-var Bool = typedecl(Bool,
-  typeclass(Doc,
-    Bool_Name,       Bool_Brief, Bool_Description, 
-    Bool_Examples,   Bool_Methods),
-  typeclass(Eq,      Bool_Eq),
-  typeclass(Ord,     Bool_Gt, Bool_Lt),
-  typeclass(Hash,    Bool_Hash),
-  typeclass(C_Char,  Bool_C_Char),
-  typeclass(C_Int,   Bool_C_Int),
-  typeclass(C_Float, Bool_C_Float),
-  typeclass(C_Str,   Bool_C_Str),
-  typeclass(Show,    Bool_Show, NULL));
+var Bool = Cello(Bool,
+  Member(Doc,
+    Bool_Name,     Bool_Brief, Bool_Description, 
+    Bool_Examples, Bool_Methods),
+  Member(Eq,       Bool_Eq),
+  Member(Ord,      Bool_Gt, Bool_Lt),
+  Member(Hash,     Bool_Hash),
+  Member(C_Char,   Bool_C_Char),
+  Member(C_Int,    Bool_C_Int),
+  Member(C_Float,  Bool_C_Float),
+  Member(C_Str,    Bool_C_Str),
+  Member(Show,     Bool_Show, NULL));
 
 var bool_var(intptr_t x) {
   return (var)(intptr_t)(((var)(intptr_t)x) is True);
