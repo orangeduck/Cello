@@ -190,6 +190,7 @@ enum {
   CelloHeapAlloc   = 0x04,
   CelloDataAlloc   = 0x08,
   CelloMarked      = 0x10,
+  CelloRed         = 0x20
 };
 
 struct CelloHeader {
@@ -484,6 +485,9 @@ var type_method_at_offset(var self, var cls, size_t offset, const char* method);
 var type_implements_method_at_offset(var self, var cls, size_t offset);
 
 var CelloHeader_Init(struct CelloHeader* head, var type, int flags);
+var CelloHeader_GetFlag(struct CelloHeader* head, int flag);
+void CelloHeader_SetFlag(struct CelloHeader* head, int flag);
+void CelloHeader_RemFlag(struct CelloHeader* head, int flag);
 
 #define $(T, ...) alloc_stk(T, \
   ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){}), \

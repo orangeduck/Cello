@@ -288,7 +288,7 @@ var type_instance(var self, var cls) {
 }
 
 static int Type_Show(var self, var output, int pos) {
-  return print_to(output, pos, "%s", self);
+  return format_to(output, pos, "%s", Type_C_Str(self));
 }
 
 /* TODO */

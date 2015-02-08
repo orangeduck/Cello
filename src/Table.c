@@ -213,16 +213,19 @@ static var Table_Copy(var self) {
   return r;
 }
 
+static var Table_Mem(var self, var key);
+static var Table_Get(var self, var key);
+
 static var Table_Eq(var self, var obj) {
   
   foreach (key in obj) {
-    if (not mem(self, key)) { return False; }
-    if_neq(get(obj, key), get(self, key)) { return False; }
+    if (not Table_Mem(self, key)) { return False; }
+    if_neq(get(obj, key), Table_Get(self, key)) { return False; }
   }
 	
   foreach (key in self) {
     if (not mem(obj, key)) { return False; }
-    if_neq(get(obj, key), get(self, key)) { return False; }
+    if_neq(get(obj, key), Table_Get(self, key)) { return False; }
   }
 	
   return True;
@@ -368,6 +371,7 @@ static void Table_Resize_Less(struct Table* t) {
 
 static var Table_Mem(var self, var key) {
   struct Table* t = self;
+  key = cast(key, t->ktype);
   
   if (t->nslots is 0) { return False; }
   

@@ -18,7 +18,7 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -g
+CFLAGS = -I ./include -std=gnu99 -O3 -Wall -Werror -Wno-unused -g
 LFLAGS = -shared -g -ggdb
 
 PLATFORM := $(shell uname)
@@ -86,6 +86,7 @@ obj:
 check: $(TESTS_OBJ) $(STATIC)
 	$(CC) $(TESTS_OBJ) $(STATIC) $(LIBS) -o test
 	./test
+	rm -f test.bin test.txt
 
 obj/%.o: tests/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@

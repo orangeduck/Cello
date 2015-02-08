@@ -78,6 +78,18 @@ static void Cello_Static_Push(var self) {
 
 #endif
 
+void CelloHeader_SetFlag(struct CelloHeader* head, int flag) {
+  head->flags = (var)(intptr_t)(((int)(intptr_t)head->flags) | flag);
+}
+
+void CelloHeader_RemFlag(struct CelloHeader* head, int flag) {
+  head->flags = (var)(intptr_t)(((int)(intptr_t)head->flags) & (~flag));
+}
+
+var CelloHeader_GetFlag(struct CelloHeader* head, int flag) {
+  return (var)(intptr_t)(((int)(intptr_t)head->flags) & flag);
+}
+
 var CelloHeader_Init(struct CelloHeader* head, var type, int flags) {
   
   var self = ((var)head) + sizeof(struct CelloHeader);

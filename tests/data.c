@@ -676,18 +676,12 @@ PT_FUNC(test_list_push) {
   PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 1)) );
   PT_ASSERT( eq(get(a0, $(Int, 1)), $(Int, 3)) );
   
-  show(a0);
-
   push_at(a0, $(Int, 10), $(Int, 0));
-  
-  show(a0);
   
   PT_ASSERT(len(a0) is 3);
   PT_ASSERT( eq(get(a0, $(Int, 0)), $(Int, 10)) );
   PT_ASSERT( eq(get(a0, $(Int, 1)), $(Int, 1)) );
   PT_ASSERT( eq(get(a0, $(Int, 2)), $(Int, 3)) );
-  
-  /*
   
   push_at(a0, $(Int, 20), $(Int, 1));
   
@@ -718,7 +712,6 @@ PT_FUNC(test_list_push) {
   pop(a0);
   
   PT_ASSERT(len(a0) is 0);
-  */
   
   del(a0);
   
@@ -923,6 +916,139 @@ PT_FUNC(test_table_iter) {
 
 }
 
+PT_FUNC(test_map_new) {
+  
+  var m0 = new(Map, String, Int);
+  set(m0, $(String, "Hello"), $(Int, 2));
+  set(m0, $(String, "There"), $(Int, 5));
+  
+  var m1 = new(Map, String, Int);
+  set(m1, $(String, "Bonjour"), $(Int, 9));
+  set(m1, $(String, "Where"), $(Int, 5));
+  
+  var m2 = copy(m0);
+  
+  PT_ASSERT(m0);
+  PT_ASSERT(m1);
+  PT_ASSERT(m2);
+  
+  PT_ASSERT(m0 isnt m2);
+  PT_ASSERT(m0 isnt m1);
+  
+  PT_ASSERT(mem(m0, $(String, "Hello")));
+  PT_ASSERT(mem(m1, $(String, "Bonjour")));
+  PT_ASSERT(mem(m2, $(String, "There")));
+  
+  assign(m2, m1);
+  
+  PT_ASSERT(mem(m2, $(String, "Where")));
+  PT_ASSERT(mem(m2, $(String, "Bonjour")));
+  PT_ASSERT(not mem(m2, $(String, "Hello")));
+  PT_ASSERT(not mem(m2, $(String, "There")));
+  
+  del(m0);
+  del(m1);
+  del(m2);
+  
+  var m3 = new(Map, String, Int,
+    $S("asfa"), $I(0), $S("gasg"), $I(2),
+    $S("asda"), $I(1), $S("dqga"), $I(0),
+    $S("jaja"), $I(7), $S("sdfa"), $I(2),
+    $S("jads"), $I(7), $S("kyad"), $I(2),
+    $S("kyas"), $I(7), $S("hwdw"), $I(2),
+    $S("awaa"), $I(7), $S("lkil"), $I(2));
+  
+  del(m3);
+  
+}
+
+PT_FUNC(test_map_len) {
+  /* TODO */
+}
+
+PT_FUNC(test_map_get) {
+  
+  var m0 = new(Map, String, Int);
+  set(m0, $(String, "Hello"), $(Int, 2));
+  set(m0, $(String, "There"), $(Int, 5));
+  
+  PT_ASSERT(len(m0) is 2);
+  PT_ASSERT(mem(m0, $(String, "Hello")));
+  
+  rem(m0, $(String, "Hello"));
+  
+  PT_ASSERT(len(m0) is 1);
+  PT_ASSERT(not mem(m0, $(String, "Hello")));
+  PT_ASSERT(mem(m0, $(String, "There")));
+  
+  clear(m0);
+  
+  PT_ASSERT(len(m0) is 0);
+  PT_ASSERT(not mem(m0, $(String, "Hello")));
+  PT_ASSERT(not mem(m0, $(String, "There")));
+  
+  del(m0);
+
+
+  var m1 = new(Map, String, Int);
+  set(m1, $(String, "Hello"), $(Int, 2));
+  set(m1, $(String, "There"), $(Int, 5));
+  
+  var i0 = get(m1, $(String, "Hello"));
+  var i1 = get(m1, $(String, "There"));
+  
+  PT_ASSERT( eq(i0, $(Int, 2)) );
+  PT_ASSERT( eq(i1, $(Int, 5)) );
+  
+  set(m1, $(String, "Hello"), $(Int, 6));
+  
+  var i2 = get(m1, $(String, "Hello"));
+  PT_ASSERT( eq(i2, $(Int, 6)) );
+  
+  del(m1);
+  
+  var m3 = new(Map, String, Int,
+    $S("asfa"), $I(0), $S("gasg"), $I(2),
+    $S("asda"), $I(1), $S("dqga"), $I(0),
+    $S("jaja"), $I(7), $S("sdfa"), $I(2),
+    $S("jads"), $I(7), $S("kyad"), $I(2),
+    $S("kyas"), $I(7), $S("hwdw"), $I(2),
+    $S("awaa"), $I(7), $S("lkil"), $I(2));
+  
+  rem(m3, $S("awaa"));
+  rem(m3, $S("kyad"));
+  rem(m3, $S("dqga"));
+  rem(m3, $S("jaja"));
+  rem(m3, $S("gasg"));
+  
+  del(m3);
+  
+}
+
+PT_FUNC(test_map_clear) {
+  /* TODO */
+}
+
+PT_FUNC(test_map_iter) {
+  
+  var m0 = new(Map, String, Int);
+  set(m0, $S("Hello"), $I(2));
+  set(m0, $S("There"), $I(5));
+  
+  foreach(key in m0) {
+    
+    var val = get(m0, key);
+    
+    PT_ASSERT(
+       (eq(key, $S("Hello")) and eq(val, $I(2)))
+    or (eq(key, $S("There")) and eq(val, $I(5))));
+    
+  }
+  
+  del(m0);
+
+}
+
 PT_FUNC(test_file_new) {
   
   var f0 = new(File, $S("test.bin"), $S("w")); 
@@ -1026,12 +1152,10 @@ PT_SUITE(suite_data) {
   PT_REG(test_table_iter);
   PT_REG(test_table_reserve);
   
-  /*
   PT_REG(test_map_new);
   PT_REG(test_map_len);
   PT_REG(test_map_get);
   PT_REG(test_map_iter);
-  */
   
   PT_REG(test_file_new);
   PT_REG(test_file_begin);

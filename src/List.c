@@ -41,8 +41,6 @@ static var List_Alloc(struct List* l) {
   }
 #endif
   
-  ((var*)item)[0] = Terminal;
-  ((var*)item)[1] = Terminal;
   return CelloHeader_Init(item + 2 * sizeof(var), l->type, CelloDataAlloc);
 }
 
@@ -71,11 +69,11 @@ static var List_At(struct List* l, int64_t i) {
   var item;
   
   if (i <= l->nitems/2) {
-    item = l->head;
+    item = *List_Next(l, l->head);
     while (i) { item = *List_Next(l, item); i--; }
   } else {
     i = l->nitems-i-1;
-    item = l->tail;
+    item = *List_Prev(l, l->tail);
     while (i) { item = *List_Prev(l, item); i--; }
   }
   
@@ -91,8 +89,13 @@ static var List_New(var self, var args) {
   l->type   = cast(get(args, $I(0)), Type);
   l->tsize  = size(l->type);
   l->nitems = 0;
-  l->head = Terminal;
-  l->tail = Terminal;
+  l->head = List_Alloc(l);
+  l->tail = List_Alloc(l);
+  
+  *List_Next(l, l->head) = l->tail;
+  *List_Prev(l, l->head) = Undefined;
+  *List_Next(l, l->tail) = Undefined;
+  *List_Prev(l, l->tail) = l->head;
   
   size_t nargs = len(args);
   for(size_t i = 0; i < nargs-1; i++) {
@@ -104,20 +107,23 @@ static var List_New(var self, var args) {
 
 static void List_Clear(var self) {
   struct List* l = self;
-  var item = l->head;
-  while (item isnt Terminal) {
+  var item = *List_Next(l, l->head);
+  while (item isnt l->tail) {
     var next = *List_Next(l, item);
-	destruct(item);
+	  destruct(item);
     List_Free(l, item);
     item = next;
   }
-  l->head = Terminal;
-  l->tail = Terminal;
+  *List_Next(l, l->head) = l->tail;
+  *List_Prev(l, l->tail) = l->head;
   l->nitems = 0;
 }
 
 static var List_Del(var self) {
+  struct List* l = self;
   List_Clear(self);
+  List_Free(l, l->head);
+  List_Free(l, l->tail);
   return self;
 }
 
@@ -157,7 +163,7 @@ static var List_Eq(var self, var obj) {
   struct List* l = self;
   if (l->nitems isnt len(obj)) { return False; }
   
-  var item = l->head;
+  var item = *List_Next(l, l->head);
   foreach (oitem in obj) {
     if_neq(item, oitem) { return False; }
     item = *List_Next(l, item);
@@ -173,8 +179,8 @@ static size_t List_Len(var self) {
 
 static var List_Mem(var self, var obj) {
   struct List* l = self;
-  var item = l->head;
-  while (item isnt Terminal) {
+  var item = *List_Next(l, l->head);
+  while (item isnt l->tail) {
     if_eq(item, obj) { return True; }
     item = *List_Next(l, item);
   }
@@ -198,13 +204,13 @@ static void List_Pop_At(var self, var key) {
 
 static void List_Rem(var self, var obj) {
   struct List* l = self;
-  var item = l->head;
-  while (item isnt Terminal) {
+  var item = *List_Next(l, l->head);
+  while (item isnt l->tail) {
     if_eq(item, obj) {
       var prev = *List_Prev(l, item);
       var next = *List_Next(l, item);
-      if (prev isnt Terminal) { *List_Next(l, prev) = next; }
-      if (next isnt Terminal) { *List_Prev(l, next) = prev; }
+      *List_Next(l, prev) = next;
+      *List_Prev(l, next) = prev;
       destruct(item);
       List_Free(l, item);
       l->nitems--;
@@ -221,18 +227,11 @@ static void List_Push(var self, var obj) {
   var item = List_Alloc(l);
   assign(item, obj);
   
-  if (l->tail is Terminal) {
-    l->tail = item;
-    l->head = item;
-    *List_Next(l, item) = Terminal;
-    *List_Prev(l, item) = Terminal;
-  } else {
-    *List_Next(l, l->tail) = item;
-    *List_Prev(l, item) = l->tail;
-    *List_Next(l, item) = Terminal;
-    l->tail = item;
-  }
-  
+  var last = *List_Prev(l, l->tail);
+  *List_Next(l, last) = item;
+  *List_Prev(l, item) = last;
+  *List_Next(l, item) = l->tail;
+  *List_Prev(l, l->tail) = item;
   l->nitems++;
   
 }
@@ -246,11 +245,8 @@ static void List_Push_At(var self, var obj, var key) {
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
   var next = List_At(l, i);
   var prev = *List_Prev(l, next);
-  
-  printf("%i", (int)i); show(next); show(prev);
-  
-  if (next isnt Terminal) { *List_Prev(l, next) = item; }
-  if (prev isnt Terminal) { *List_Next(l, prev) = item; }
+  *List_Prev(l, next) = item;
+  *List_Next(l, prev) = item;
   *List_Next(l, item) = next;
   *List_Prev(l, item) = prev;
   l->nitems++;
@@ -267,12 +263,12 @@ static void List_Pop(var self) {
   }
 #endif
   
-  var prev = *List_Prev(l, l->tail);
-  
-  destruct(l->tail);
-  List_Free(l, l->tail);
-  *List_Next(l, prev) = Terminal;
-  l->tail = prev;
+  var last = *List_Prev(l, l->tail);
+  var prev = *List_Prev(l, last);
+  destruct(last);
+  List_Free(l, last);
+  *List_Next(l, prev) = l->tail;
+  *List_Prev(l, l->tail) = prev;
   l->nitems--;
 }
 
@@ -291,12 +287,13 @@ static void List_Set(var self, var key, var val) {
 static var List_Iter_Init(var self) {
   struct List* l = self;
   if (l->nitems is 0) { return Terminal; }
-  return l->head;
+  return *List_Next(l, l->head);
 }
 
 static var List_Iter_Next(var self, var curr) {
   struct List* l = self;
-  return *List_Next(l, curr);
+  var next = *List_Next(l, curr);
+  return next is l->tail ? Terminal : next;
 }
 
 static void List_Swap(struct List* l, var iitem, var jitem) {
@@ -310,21 +307,21 @@ static void List_Swap(struct List* l, var iitem, var jitem) {
 
 static void List_Reverse(var self) {
   struct List* l = self;
-  var item0 = l->head;
-  var item1 = l->tail;
+  var item0 = *List_Next(l, l->head);
+  var item1 = *List_Prev(l, l->tail);
   
-  if (item0 is item1
-  or item0 is Terminal
-  or item1 is Terminal) {
-    return;
-  }
+  if (item0 is l->tail
+  or  item1 is l->head
+  or  item0 is item1) { return; }
   
   while (True) {
+    var item0_next = *List_Next(l, item0);
+    var item1_prev = *List_Prev(l, item1);
     List_Swap(l, item0, item1);
-    item0 = *List_Next(l, item0);
-    if (item0 is item1) { break; }
-    item1 = *List_Prev(l, item1);
-    if (item1 is item0) { break; }
+    if (item0_next is item1
+    or  item0_next is item1_prev) { break; }
+    item0 = item0_next;
+    item1 = item1_prev;
   }
 }
 
@@ -333,11 +330,11 @@ static void List_Reverse(var self) {
 static int List_Show(var self, var output, int pos) {
   struct List* l = self;
   pos = print_to(output, pos, "<'List' At 0x%p [", self);
-  var item = l->head;
-  while (item isnt Terminal) {
+  var item = *List_Next(l, l->head);
+  while (item isnt l->tail) {
     pos = print_to(output, pos, "%$", item);
     item = *List_Next(l, item);
-    if (item isnt Terminal) { pos = print_to(output, pos, ", "); }
+    if (item isnt l->tail) { pos = print_to(output, pos, ", "); }
   }
   pos = print_to(output, pos, "]>");
   return pos;
@@ -356,8 +353,9 @@ static void List_Reserve(var self, var amount) {
   
   while (nslots - l->nitems) {
     var item = List_Alloc(l);
-    *List_Next(l, l->tail) = item;
-    l->tail = item;
+    var last = *List_Prev(l, l->tail);
+    *List_Next(l, last) = item;
+    *List_Prev(l, l->tail) = item;
     nslots--;
   }
   
