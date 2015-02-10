@@ -39,3 +39,14 @@ void stop(var self) {
 var running(var self) {
   return method(self, Start, running);
 }
+
+var start_in(var self) {
+  start(self);
+  return self;
+}
+
+var stop_in(var self) {
+  stop(self);
+  return Terminal;
+}
+

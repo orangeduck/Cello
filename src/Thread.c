@@ -575,7 +575,7 @@ var Mutex = Cello(Mutex,
   Member(Assign, Mutex_Assign),
   Member(Copy,   Mutex_Copy),
   Member(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
-  Member(Begin,  Mutex_Lock, Mutex_Unlock));
+  Member(Start,  Mutex_Lock, Mutex_Unlock, NULL));
 
 var TypeError = Cello(TypeError);
 var ValueError = Cello(ValueError);

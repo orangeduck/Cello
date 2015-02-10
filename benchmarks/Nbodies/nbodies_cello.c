@@ -28,11 +28,11 @@ static void Bodies_Advance(var bodies, double dt) {
   struct Get* bget = instance(bodies, Get);
   size_t nbodies = len(bodies);
   
-  foreach(i in range(nbodies)) {
+  foreach(i in range($I(nbodies))) {
 
     struct Body* body0 = bget->get(bodies, i);
 
-    foreach(j in range_from(c_int(i)+1, nbodies)) {
+    foreach(j in range($I(c_int(i)+1), $I(nbodies))) {
 
       struct Body* body1 = bget->get(bodies, j);
 
@@ -73,7 +73,7 @@ static double Bodies_Energy(var bodies) {
   
   struct Get* bget = instance(bodies, Get);
   
-  foreach(i in range(nbodies)) {
+  foreach(i in range($I(nbodies))) {
   
     struct Body* body0 = bget->get(bodies, i);
 
@@ -82,7 +82,7 @@ static double Bodies_Energy(var bodies) {
         body0->vy * body0->vy +
         body0->vz * body0->vz));
 
-    foreach(j in range_from(c_int(i)+1, nbodies)) {
+    foreach(j in range($I(c_int(i)+1), $I(nbodies))) {
       
       struct Body* body1 = bget->get(bodies, j);
 
@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
   
   Body_Offset_Momentum(get(bodies, $I(0)), px, py, pz);
   
-  foreach(i in range(1000000)) {
+  foreach(i in range($I(1000000))) {
     Bodies_Advance(bodies, 1e-5);
   }
   

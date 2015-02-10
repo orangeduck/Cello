@@ -29,8 +29,8 @@ static var Tuple_New(var self, var args) {
   size_t nargs = len(args);
   
   t->items = malloc(sizeof(var) * (nargs+1));
-  foreach(i in range(nargs)) {
-    t->items[c_int(i)] = get(args, i);
+  for (size_t i = 0; i < nargs; i++) {
+    t->items[i] = get(args, $I(i));
   }
   t->items[nargs] = Terminal;
   
@@ -51,8 +51,8 @@ static var Tuple_Assign(var self, var obj) {
   struct Tuple* t = self;
   size_t nargs = len(obj);
   t->items = realloc(t->items, sizeof(var) * (nargs+1));
-  foreach(i in range(nargs)) {
-    t->items[c_int(i)] = get(obj, i);
+  for (size_t i = 0; i < nargs; i++) {
+    t->items[i] = get(obj, $I(i));
   }
   t->items[nargs-1] = Terminal;
   return t;

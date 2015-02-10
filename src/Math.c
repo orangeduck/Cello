@@ -136,11 +136,6 @@ static void Int_Exp(var self) {
  i->val = exp(i->val);
 }
 
-static double Int_C_Float(var self) {
-  struct Int* i = self;
-  return i->val;
-}
-
 static int Int_Show(var self, var output, int pos) {
   struct Int* i = self;
   return format_to(output, pos, "%li", i->val);
@@ -163,7 +158,6 @@ var Int = Cello(Int,
   Member(Ord,     Int_Gt, Int_Lt),
   Member(Hash,    Int_Hash),
   Member(C_Int,   Int_C_Int),
-  Member(C_Float, Int_C_Float),
   Member(Math,
     Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Pow, 
     Int_Mod, Int_Neg, Int_Abs, Int_Exp),
@@ -312,11 +306,6 @@ static void Float_Exp(var self) {
   f->val = exp(f->val);
 }
 
-static int64_t Float_C_Int(var self) {
-  struct Float* f = self;
-  return f->val;
-}
-
 int Float_Show(var self, var output, int pos) {
   return print_to(output, pos, "%f", self);
 }
@@ -335,7 +324,6 @@ var Float = Cello(Float,
   Member(Ord,     Float_Gt, Float_Lt),
   Member(Hash,    Float_Hash),
   Member(C_Float, Float_C_Float),
-  Member(C_Int,   Float_C_Int),
   Member(Math,
     Float_Add, Float_Sub, Float_Mul, Float_Div, Float_Pow,
     Float_Mod, Float_Neg, Float_Abs, Float_Exp),
@@ -380,5 +368,6 @@ void mneg(var self) { method(self, Math, mneg); }
 void mabs(var self) { method(self, Math, mabs); }
 void mexp(var self) { method(self, Math, mexp); }
 
-void minc(var self) { madd(self, $(Int, 1)); }
-void mdec(var self) { msub(self, $(Int, 1)); }
+void minc(var self) { madd(self, $I(1)); }
+void mdec(var self) { msub(self, $I(1)); }
+

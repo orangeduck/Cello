@@ -49,9 +49,11 @@
 #define CELLO_MEMORY_CHECK 1
 #endif
 
+#define CELLO_GC 0
+
 #ifndef CELLO_GC
 #define CELLO_GC 1
-#define CELLO_GC_HEADER NULL, NULL, NULL,
+#define CELLO_GC_HEADER NULL, NULL, 
 #else
 #define CELLO_GC 0
 #define CELLO_GC_HEADER
@@ -129,11 +131,14 @@ typedef void* var;
   NULL, (var)CelloStaticAlloc, \
   CELLO_GC_HEADER \
   CELLO_MAGIC_HEADER \
-  NULL, "__Name",     #T, \
-  NULL, "__Parent", NULL, \
+  NULL, "__Name", #T, \
+  NULL, "__Size", (var)0, \
+  NULL, "__ModMask", (var)1, \
+  NULL, "__HashMask0", (var)0, \
+  NULL, "__HashMask1", (var)0, \
   ##__VA_ARGS__, \
   NULL, NULL, NULL}) + \
-  sizeof(struct CelloHeader) + (sizeof(T) - sizeof(T))
+  sizeof(struct CelloHeader)
 
 #define Member(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
   
@@ -189,8 +194,9 @@ enum {
   CelloStackAlloc  = 0x02,
   CelloHeapAlloc   = 0x04,
   CelloDataAlloc   = 0x08,
-  CelloMarked      = 0x10,
-  CelloRed         = 0x20
+  CelloGCAlloc     = 0x10,
+  CelloMarked      = 0x20,
+  CelloRed         = 0x40
 };
 
 struct CelloHeader {
@@ -198,7 +204,6 @@ struct CelloHeader {
   var flags;
 #if CELLO_GC == 1
   var prev, next;
-  var gcnext;
 #endif
 #if CELLO_MAGIC == 1
   var magic;
@@ -258,7 +263,6 @@ extern var C_Char;
 extern var C_Str;
 extern var C_Int;
 extern var C_Float;
-extern var Begin;
 extern var Stream;
 extern var Pointer;
 extern var Call;
@@ -346,6 +350,7 @@ struct Iter {
   var (*iter_init)(var);
   var (*iter_next)(var, var);
   var (*iter_prev)(var, var);
+  var (*iter_last)(var);
 };
 
 struct Reverse {
@@ -378,11 +383,6 @@ struct C_Int {
 
 struct C_Float {
   double (*c_float)(var);
-};
-
-struct Begin {
-  void (*begin)(var);
-  void (*end)(var);
 };
 
 struct Stream {
@@ -457,7 +457,7 @@ const char* methods(var type);
 
 void help(var self);
 
-var type_of(var obj);
+var type_of(var self);
 var cast(var self, var type);
 var instance(var self, var cls);
 var implements(var self, var cls);
@@ -526,6 +526,9 @@ size_t size(var type);
 var construct_with(var self, var args);
 var destruct(var self);
 
+//#define auto(T, ...) auto_with((char[sizeof(var)]){0}, T, tuple(__VA_ARGS__))
+//var auto_with(var ptr, var type, var args);
+
 var assign(var self, var obj);
 var copy(var obj);
 
@@ -551,10 +554,13 @@ var bool_var(intptr_t x);
 
 void hash_init(uint64_t seed);
 uint64_t hash_seed(void);
-uint64_t hash(var obj);
+uint64_t hash_data(var self, size_t size);
+uint64_t hash(var self);
 
 var iter_init(var self);
 var iter_next(var self, var curr);
+var iter_prev(var self, var curr);
+var iter_last(var self);
 
 #define foreach(X) foreach_in(X)
 #define foreach_in(X, S) for( var \
@@ -589,19 +595,10 @@ char* c_str(var self);
 int64_t c_int(var self);
 double c_float(var self);
 
-void begin(var self);
-void end(var self);
+var range_with(var self, var args);
 
-var begin_with(var self);
-var end_with(var self);
-
-#define range(X) $(Range, $(Int, 0), 0, X, 1)
-#define range_from(X, Y) $(Range, $(Int, 0), X, Y, 1)
-#define range_step(X, Y, Z) $(Range, $(Int, 0), X, Y, Z)
-
-#define with(X) with_in(X)
-#define with_in(X, S) \
-  for(var X = begin_with(S); X isnt Terminal; X = end_with(X))
+#define range(...) range_with($(Range, $I(0), 0, 0, 0), tuple(__VA_ARGS__))
+#define slice(I, ...) $(Slice, I, range(__VA_ARGS__))
 
 var sopen(var self, var filename, var access);
 void sclose(var self);
@@ -684,6 +681,12 @@ var current(var type);
 void start(var self);
 void stop(var self);
 var running(var self);
+
+var start_in(var self);
+var stop_in(var self);
+
+#define with(X) with_in(X)
+#define with_in(X, S) for(var X = start_in(S); X isnt Terminal; X = stop_in(X))
 
 void join(var self);
 

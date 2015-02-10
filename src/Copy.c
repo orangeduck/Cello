@@ -26,9 +26,18 @@ static const char* Copy_Methods(void) {
 }
 
 var Copy = Cello(Copy,
-  Member(Doc, Copy_Name, Copy_Brief, Copy_Description, Copy_Examples, Copy_Methods));
-
+  Member(Doc,
+    Copy_Name, Copy_Brief, Copy_Description, 
+    Copy_Examples, Copy_Methods));
 
 var copy(var self) {
-  return method(self, Copy, copy);
+  
+  if (not implements(self, Copy)) {
+    var obj = alloc(type_of(self));
+    assign(obj, self);
+    return obj;
+  } else {
+    return method(self, Copy, copy);
+  }
 }
+

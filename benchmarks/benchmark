@@ -2,12 +2,12 @@ gcc ./ext/genint.c -o ./ext/genint
 
 gcc Nbodies/nbodies_c.c -std=c99 -O3 -lm -o Nbodies/nbodies_c
 g++ Nbodies/nbodies_cpp.cpp -std=c++11 -O3 -lm -o Nbodies/nbodies_cpp
-gcc Nbodies/nbodies_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -std=gnu99 -O3 -pg -lm -lpthread -o Nbodies/nbodies_cello
+gcc Nbodies/nbodies_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -std=gnu99 -pg -O3 -lm -lpthread -o Nbodies/nbodies_cello
 javac Nbodies/nbodies_java.java
 
 gcc Dict/dict_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Dict/dict_c
 g++ Dict/dict_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Dict/dict_cpp
-gcc Dict/dict_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -O3 -pg -lm -lpthread -o Dict/dict_cello
+gcc Dict/dict_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o Dict/dict_cello
 javac Dict/dict_java.java
 
 gcc Sudoku/sudoku_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Sudoku/sudoku_c

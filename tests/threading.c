@@ -48,10 +48,10 @@ PT_FUNC(test_multiple) {
     new(Thread, f));
   
   var args = new(Array, Int,
-    $(Int, 0), $(Int, 1), $(Int, 2),
-    $(Int, 3), $(Int, 4));
+    $I(0), $I(1), $I(2),
+    $I(3), $I(4));
   
-  foreach(i in range(len(threads))) {
+  foreach(i in range($I(len(threads)))) {
     call(deref(get(threads, i)), get(args, i));
   }
   
@@ -72,7 +72,7 @@ PT_FUNC(test_multiple) {
 PT_FUNC(test_mutex) {
   
   var mutex = new(Mutex);
-  var total = $(Int, 0);
+  var total = $I(0);
   
   fun (f, args) {
     with(m in mutex) {
@@ -86,7 +86,7 @@ PT_FUNC(test_mutex) {
     new(Thread, f), new(Thread, f),
     new(Thread, f));
   
-  PT_ASSERT(eq(total, $(Int, 0)));
+  PT_ASSERT(eq(total, $I(0)));
   
   foreach(t in threads) {
     call(deref(t));
@@ -96,7 +96,7 @@ PT_FUNC(test_mutex) {
     join(deref(t));
   }
   
-  PT_ASSERT(eq(total, $(Int, 5)));
+  PT_ASSERT(eq(total, $I(5)));
   
   del(threads);
   del(mutex);

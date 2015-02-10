@@ -553,9 +553,11 @@ static void Map_Rem(var self, var key) {
   if ((*Map_Left(m, node) isnt Terminal) 
   and (*Map_Right(m, node) isnt Terminal)) {
     var pred = Map_Maximum(m, *Map_Left(m, node));
+    var ncol = Map_Get_Color(m, node);
     memcpy(node + 3 * sizeof(var), pred + 3 * sizeof(var),
       sizeof(struct CelloHeader) + m->ksize +
       sizeof(struct CelloHeader) + m->vsize);
+    Map_Set_Color(m, node, ncol);
     node = pred;
   }
 

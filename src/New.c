@@ -5,75 +5,50 @@
 static var Cello_Heap_Root = NULL;
 static var Cello_Stack_Root = NULL;
 
-static var CelloObject_Prev_Get(var self) {
+static var* CelloObject_Prev(var self) {
   struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  return head->prev;
+  return &head->prev;
 }
 
-static var CelloObject_Next_Get(var self) {
+static var* CelloObject_Next(var self) {
   struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  return head->next;
-}
-
-static void CelloObject_Prev_Set(var self, var obj) {
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  head->prev = obj;
-}
-
-static void CelloObject_Next_Set(var self, var obj) {
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  head->next = obj;
-}
-
-static void CelloObject_GCNext_Set(var self, var obj) {
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  head->gcnext = obj;
-}
-
-static var* CelloObject_GCNext_Ptr(var self) {
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  return &head->gcnext;
+  return &head->next;
 }
 
 static void Cello_Stack_Filter(var sp) {
   var self = Cello_Stack_Root;
   while (self and self > sp) {
-    self = CelloObject_Next_Get(self);
+    self = *CelloObject_Next(self);
   }
   Cello_Stack_Root = self;
 }
 
 static void Cello_Stack_Push(var self) {
   
-  //assert(sp > self);
-  
   if (Cello_Stack_Root is None) {
     Cello_Stack_Root = self;
+    *CelloObject_Next(self) = Terminal;
+    *CelloObject_Prev(self) = Terminal;
     return;
   }
   
-  var object = Cello_Stack_Root;
-  while (object and object > self) {
-    object = CelloObject_Next_Get(object);
+  var item = Cello_Stack_Root;
+  while (item and item > self) {
+    item = *CelloObject_Next(item);
   }
   
-  var prev = CelloObject_Prev_Get(object);
-  CelloObject_Next_Set(prev, self);
-  CelloObject_Prev_Set(self, prev);
-  CelloObject_Next_Set(self, object);
-  CelloObject_Prev_Set(object, self);
+  var prev = *CelloObject_Prev(item);
+  *CelloObject_Next(prev) = self;
+  *CelloObject_Prev(self) = prev;
+  *CelloObject_Next(self) = item;
+  *CelloObject_Prev(item) = self;
 }
 
 static void Cello_Heap_Push(var self) {
-  CelloObject_Prev_Set(self, None);
-  CelloObject_Next_Set(self, Cello_Heap_Root);
-  CelloObject_Prev_Set(Cello_Heap_Root, self);
+  *CelloObject_Prev(self) = Terminal;
+  *CelloObject_Next(self) = Cello_Heap_Root;
+  *CelloObject_Prev(Cello_Heap_Root) = self;
   Cello_Heap_Root = self;
-}
-
-static void Cello_Static_Push(var self) {
-  CelloObject_Prev_Set(self, None);
-  CelloObject_Next_Set(self, None);
 }
 
 #endif
@@ -92,15 +67,15 @@ var CelloHeader_GetFlag(struct CelloHeader* head, int flag) {
 
 var CelloHeader_Init(struct CelloHeader* head, var type, int flags) {
   
+  var sp = None;
   var self = ((var)head) + sizeof(struct CelloHeader);
   head->type = type;
   head->flags = (var)(intptr_t)flags;
   
 #if CELLO_GC == 1
-  //Cello_Stack_Filter(sp); 
-  //if (flags & CelloStackAlloc)  { Cello_Stack_Push(self); }
-  //if (flags & CelloHeapAlloc)   { Cello_Heap_Push(self); }
-  //if (flags & CelloStaticAlloc) { Cello_Static_Push(self); }
+  Cello_Stack_Filter(&sp); 
+  if (flags & CelloStackAlloc) { Cello_Stack_Push(self); }
+  if (flags & CelloHeapAlloc)  { Cello_Heap_Push(self); }
 #endif
 
 #if CELLO_MAGIC == 1
@@ -225,6 +200,8 @@ void dealloc(var self) {
   }
 #endif
   
+  /* TODO: Remove from GC link lists (remove from GC main list if GC alloc) */
+  
   free(head);
   
 }
@@ -258,28 +235,46 @@ var destruct(var self) {
 #if CELLO_GC == 1
 
 bool CelloObject_Marked(var self) {
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  return ((int)(intptr_t)head->flags) & CelloMarked;
+  return CelloHeader_GetFlag(self - sizeof(struct CelloHeader), CelloMarked);
 }
 
 void CelloObject_Mark(var self) {
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  head->flags = (var)(intptr_t)(((int)(intptr_t)head->flags) & CelloMarked);
+  CelloHeader_SetFlag(self - sizeof(struct CelloHeader), CelloMarked);
 }
 
 void CellObject_Unmark(var self) {
-  struct CelloHeader* head = self - sizeof(struct CelloHeader);
-  head->flags = (var)(intptr_t)(((int)(intptr_t)head->flags) & (~CelloMarked));
+  CelloHeader_RemFlag(self - sizeof(struct CelloHeader), CelloMarked);
 }
 
 enum {
   Cello_GC_Initial = 10
 };
 
+/* TODO: Make Thread Local */
 static uint64_t Cello_GC_MaxItems = Cello_GC_Initial;
 static uint64_t Cello_GC_NumItems = 0;
+static uint64_t Cello_GC_NumSlots = 0;
 static float Cello_GC_Threshold = 1.5;
-static var Cello_GC_Root = NULL;
+static var* Cello_GC_Array = NULL;
+
+static void Cello_GC_Reserve_More(void) {
+  if (Cello_GC_NumItems > Cello_GC_NumSlots) {
+    Cello_GC_NumSlots = Cello_GC_NumItems + Cello_GC_NumItems / 2;
+    Cello_GC_Array = realloc(Cello_GC_Array, sizeof(var) * Cello_GC_NumSlots);
+#if CELLO_MEMORY_CHECK == 1
+    if (Cello_GC_Array is None) {
+      throw(OutOfMemoryError, "Cannot allocate more objects, out of memory!");
+    }
+#endif
+  }
+}
+
+static void Cello_GC_Reserve_Less(void) {
+  if (Cello_GC_NumSlots > Cello_GC_NumItems + Cello_GC_NumItems / 2) {
+    Cello_GC_NumSlots = Cello_GC_NumItems;
+    Cello_GC_Array= realloc(Cello_GC_Array, sizeof(var) * Cello_GC_NumSlots);
+  }
+}
 
 static var Cello_GC_Traverse(var self) {
   if (CelloObject_Marked(self)) {
@@ -293,30 +288,37 @@ static var Cello_GC_Traverse(var self) {
 static void Cello_GC_Mark(void) {
   var object;
   object = Cello_Heap_Root;
-  while (object isnt None) {
+  while (object isnt Terminal) {
     //traverse(object, $(Function, Cello_GC_Traverse));
-    object = CelloObject_Next_Get(object);
+    object = *CelloObject_Next(object);
   }
   
   object = Cello_Stack_Root;
-  while (object isnt None) {
+  while (object isnt Terminal) {
     //traverse(object, $(Function, Cello_GC_Traverse));
-    object = CelloObject_Next_Get(object);
+    object = *CelloObject_Next(object);
   }
 }
 
 static void Cello_GC_Sweep(void) {
-  var* object = &Cello_GC_Root;
-  while (*object) {
-    if (!CelloObject_Marked(*object)) {
-      var unreached = *object;
-      *object = *CelloObject_GCNext_Ptr(unreached);
-      del(unreached);
-      Cello_GC_NumItems--;
-    } else {
-      CellObject_Unmark(*object);
-      object = CelloObject_GCNext_Ptr(*object);
+  
+  size_t i = 0;
+  while (i < Cello_GC_NumItems) {
+    
+    if (CelloObject_Marked(Cello_GC_Array[i])) {
+      CellObject_Unmark(Cello_GC_Array[i]);
+      i++;
+      continue;
     }
+    
+    if (!CelloObject_Marked(Cello_GC_Array[i])) {
+      del(Cello_GC_Array[i]);
+      Cello_GC_Array[i] = Cello_GC_Array[Cello_GC_NumItems-1];
+      Cello_GC_NumItems--;
+      Cello_GC_Reserve_Less();
+      continue;
+    }
+    
   }
 }
 
@@ -328,20 +330,43 @@ static void Cello_GC_Run(void) {
     : Cello_GC_MaxItems + Cello_GC_Initial;
 }
 
-var gc_new_with(var type, var args) {
+/*
+var auto_with(var type, var args) {
   
   if (Cello_GC_NumItems >= Cello_GC_MaxItems) {
     Cello_GC_Run();
   }
   
-  var self = new_with(type, args);
+  var self;
+  size_t mem = size(type);
   
-  CelloObject_GCNext_Set(self, Cello_GC_Root);
-  Cello_GC_Root = self;
+  if (mem is 0) {
+    self = None;
+  } else {
+  
+    struct CelloHeader* head = calloc(1,
+      sizeof(struct CelloHeader) + mem);
+    
+#if CELLO_MEMORY_CHECK == 1
+    if (head is None) {
+      throw(OutOfMemoryError, "Cannot create new '%s', out of memory!", type);
+    }
+#endif
+    
+    self = CelloHeader_Init(head, type, CelloGCAlloc);
+  }
+  
+  if (type_implements_method(type, New, construct_with)) {
+    self = type_method(type, New, construct_with, self, args);
+  }
+  
   Cello_GC_NumItems++;
+  Cello_GC_Reserve_More();
+  Cello_GC_Array[Cello_GC_NumItems-1] = self;
   
   return self;
 }
+*/
 
 #endif
 

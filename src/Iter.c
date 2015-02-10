@@ -64,3 +64,12 @@ var iter_init(var self) {
 var iter_next(var self, var curr) {
   return method(self, Iter, iter_next, curr);
 }
+
+var iter_last(var self) {
+  return method(self, Iter, iter_last);
+}
+
+var iter_prev(var self, var curr) {
+  return method(self, Iter, iter_prev, curr);
+}
+

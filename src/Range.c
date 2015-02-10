@@ -51,3 +51,36 @@ var Range = Cello(Range,
     Range_Name, Range_Brief, Range_Description, Range_Examples, Range_Methods),
   Member(Iter, Range_Iter_Init, Range_Iter_Next));
   
+/* TODO: Make this `New` and just get macro to call constructor */
+  
+var range_with(var self, var args) {
+  struct Range* r = self;
+  size_t nargs = len(args);
+  
+  if (nargs > 3 or nargs < 1) {
+    throw(FormatError, "Recieved too many arguments to range constructor");
+  }
+  
+  if (nargs is 1) {
+    r->start = 0;
+    r->stop  = c_int(get(args, $I(0)));
+    r->step  = 1;
+    return self;
+  }
+  
+  if (nargs is 2) {
+    r->start = c_int(get(args, $I(0)));
+    r->stop  = c_int(get(args, $I(1)));
+    r->step  = 1;
+    return self;
+  }
+  
+  if (nargs is 3) {
+    r->start = c_int(get(args, $I(0)));
+    r->stop  = c_int(get(args, $I(1)));
+    r->step  = c_int(get(args, $I(2)));
+  }
+  
+  return self;
+}
+  

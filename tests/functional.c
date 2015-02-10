@@ -91,22 +91,22 @@ PT_FUNC(test_call_with) {
 #if defined(__clang__)
 
   var (^asserts_args)(var) = ^ var (var args) {
-    PT_ASSERT(get(args, $(Int, 0)));
-    PT_ASSERT(get(args, $(Int, 1)));
+    PT_ASSERT(get(args, $I(0)));
+    PT_ASSERT(get(args, $I(1)));
     return None;
   };
   
 #else
 
   var asserts_args(var args) {
-    PT_ASSERT(get(args, $(Int, 0)));
-    PT_ASSERT(get(args, $(Int, 1)));
+    PT_ASSERT(get(args, $I(0)));
+    PT_ASSERT(get(args, $I(1)));
     return None;
   }
   
 #endif
   
-  var args = new(Array, Int, $(Int, 1), $(Int, 5));
+  var args = new(Array, Int, $I(1), $I(5));
   
   var assert_func = $(Function, asserts_args);
   
@@ -123,22 +123,22 @@ PT_FUNC(test_call_tuple) {
 #if defined(__clang__)
 
   var (^asserts_args)(var) = ^ var (var args) {
-    PT_ASSERT(get(args, $(Int, 0)));
-    PT_ASSERT(get(args, $(Int, 1)));
+    PT_ASSERT(get(args, $I(0)));
+    PT_ASSERT(get(args, $I(1)));
     return None;
   };
   
 #else
 
   var asserts_args(var args) {
-    PT_ASSERT(get(args, $(Int, 0)));
-    PT_ASSERT(get(args, $(Int, 1)));
+    PT_ASSERT(get(args, $I(0)));
+    PT_ASSERT(get(args, $I(1)));
     return None;
   }
   
 #endif
 
-  var args = tuple($(Int, 1), $(Int, 5));
+  var args = tuple($I(1), $I(5));
   
   var assert_func = $(Function, asserts_args);
   
@@ -153,8 +153,8 @@ PT_FUNC(test_fun) {
   var out = new(String, $(String, ""));
   
   fun (hello_name, args) {
-    var name = cast(get(args, $(Int, 0)), String);
-    var out = cast(get(args, $(Int, 1)), String);
+    var name = cast(get(args, $I(0)), String);
+    var out = cast(get(args, $I(1)), String);
     assign(out, name);
     return None;
   };
@@ -169,17 +169,17 @@ PT_FUNC(test_fun) {
 PT_FUNC(test_map) {
   
   fun (add_one, args) {
-    madd(get(args, $(Int, 0)), $(Int, 1));
+    madd(get(args, $I(0)), $I(1));
     return None;
   };
   
-  var values = new(Array, Int, $(Int, 5), $(Int, 3), $(Int, 10));
+  var values = new(Array, Int, $I(5), $I(3), $I(10));
   
   map(values, add_one);
   
-  PT_ASSERT(c_int(get(values, $(Int, 0))) is 6);
-  PT_ASSERT(c_int(get(values, $(Int, 1))) is 4);
-  PT_ASSERT(c_int(get(values, $(Int, 2))) is 11);
+  PT_ASSERT(c_int(get(values, $I(0))) is 6);
+  PT_ASSERT(c_int(get(values, $I(1))) is 4);
+  PT_ASSERT(c_int(get(values, $I(2))) is 11);
   
   del(values);
   

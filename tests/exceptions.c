@@ -6,7 +6,7 @@ static var OtherError = Cello(OtherError);
 
 static int exception_divide(int x, int y) {
   if (y == 0) {
-    throw(DivideByZeroError, "%i / %i", $(Int, x), $(Int, y));
+    throw(DivideByZeroError, "%i / %i", $I(x), $I(y));
     return 0;
   } else {
     return x / y;
