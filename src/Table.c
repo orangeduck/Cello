@@ -96,13 +96,17 @@ static uint64_t Table_Probe(struct Table* t, uint64_t i, uint64_t h) {
 static void Table_Set(var self, var key, var val);
 static void Table_Set_Move(var self, var key, var val, var move);
 
+static size_t Table_Size_Round(size_t s) {
+  return ((s + sizeof(var) - 1) / sizeof(var)) * sizeof(var);
+}
+
 static var Table_New(var self, var args) {
   
   struct Table* t = self;
   t->ktype = cast(get(args, $(Int, 0)), Type);
   t->vtype = cast(get(args, $(Int, 1)), Type);
-  t->ksize = size(t->ktype);
-  t->vsize = size(t->vtype);
+  t->ksize = Table_Size_Round(size(t->ktype));
+  t->vsize = Table_Size_Round(size(t->vtype));
   
   size_t nargs = len(args);
   if (nargs % 2 isnt 0) {

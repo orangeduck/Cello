@@ -12,11 +12,10 @@ Cello 2.0
     below allocation address) we know the variable has been mangled and that it 
     can be removed from the root list.
 
-* Fix Map Type
-* Unit/Empty Type for empty container?
-* Alignment/padding on Array and Table
-* Optimise type info lookup with Perfect hashing
+* Typeclass for key/val type of containers
+* Update assigns for containers to look at types
 * Type Assign/Copy class
+* Quickcheck
 
 * Cast Class
 * Union Type Constructor
@@ -24,6 +23,8 @@ Cello 2.0
 * Type Forwarding?
 * Update examples
 * Update tests
+  - Add test for perfect hashing
+  - Add test for array alignment
 * Update README
 * Update INSTALL
 * Update Syntax def for Notepad++

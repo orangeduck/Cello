@@ -220,16 +220,18 @@ static void Type_Debug(struct Type* t) {
   
 }
 
-static void Type_Build_Hash(struct Type* t) {
+static var Type_Build_Hash(struct Type* t) {
   
   //printf("Building Hash for %s\n", Type_Builtin_Name(t));
   
   //Type_Debug(t);
-  
+    
   size_t i = 0;
   struct Type* ti = t;
   while (ti->name) { i++; ti++; }
   size_t nentries = i - CELLO_NBUILTINS;
+  
+  srand((uintptr_t)ti);
   
   //printf("Nentries: %li\n", nentries);
   
@@ -244,8 +246,10 @@ static void Type_Build_Hash(struct Type* t) {
   while (not valid) {
     
     if (iterations > 100000) {
-      /* TODO: Recovery */
-      abort();
+      *Type_Builtin_ModMask(t) = 1;
+      *Type_Builtin_HashMask0(t) = 0;
+      *Type_Builtin_HashMask1(t) = 0;
+      return False;
     }
     
     //printf("Trying Masks %li %li\n", 
@@ -299,16 +303,14 @@ static void Type_Build_Hash(struct Type* t) {
   
   //Type_Debug(t);
   
+  return True;
+  
 }
 
 static inline void Type_Scan(
   var self, var cls, size_t offset, var* inst, var* meth) {
 
-  struct Type* t;
-  
-restart:
-  
-  t = self;
+  struct Type* t = self;
   
 #if CELLO_METHOD_CHECK == 1
   if (type_of(self) isnt Type) {
@@ -323,7 +325,7 @@ restart:
   
   if (t[initial].cls is cls) {
     *inst = t[initial].inst;
-    *meth = *(var*)((t[initial].inst) + offset);
+    *meth = *(var*)(t[initial].inst + offset);
     return;
   }
   
@@ -335,8 +337,13 @@ restart:
     
     if (strcmp(t->name, Type_Builtin_Name(cls)) is 0) {
       t->cls = cls;
-      Type_Build_Hash(self);
-      goto restart;
+      if (Type_Build_Hash(self)) {
+        Type_Scan(self, cls, offset, inst, meth);
+      } else {
+        *inst = t->inst;
+        *meth = *(var*)(t->inst + offset);
+      }
+      return;
     }
     
     t++;

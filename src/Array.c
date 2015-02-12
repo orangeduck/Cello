@@ -112,11 +112,15 @@ static void Array_Alloc(struct Array* a, size_t i) {
   CelloHeader_Init(head, a->type, CelloDataAlloc);
 }
 
+static size_t Array_Size_Round(size_t s) {
+  return ((s + sizeof(var) - 1) / sizeof(var)) * sizeof(var);
+}
+
 static var Array_New(var self, var args) {
   
   struct Array* a = self;
   a->type   = cast(get(args, $(Int, 0)), Type);
-  a->tsize  = size(a->type);
+  a->tsize  = Array_Size_Round(size(a->type));
   a->nitems = len(args)-1;
   a->nslots = a->nitems;
   

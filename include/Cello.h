@@ -247,6 +247,7 @@ extern var New;
 extern var Assign;
 extern var Copy;
 extern var Traverse;
+extern var Subtype;
 extern var Eq;
 extern var Ord;
 extern var Hash;
@@ -308,6 +309,12 @@ struct Copy {
 
 struct Traverse {
   void (*traverse)(var, var);
+};
+
+struct Subtype {
+  var (*subtype)(var);
+  var (*key_subtype)(var);
+  var (*val_subtype)(var);
 };
 
 struct Eq {

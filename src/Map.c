@@ -66,8 +66,12 @@ static void Map_Set_Color(struct Map* m, var node, var value) {
 }
 
 static var Map_Get_Color(struct Map* m, var node) {
-  return CelloHeader_GetFlag(
-    Map_Key(m, node) - sizeof(struct CelloHeader), CelloRed);
+  if (node is Terminal) {
+    return False;
+  } else {
+    return CelloHeader_GetFlag(
+      Map_Key(m, node) - sizeof(struct CelloHeader), CelloRed);
+  }
 }
 
 static void Map_Set_Black(struct Map* m, var node) {
@@ -271,6 +275,11 @@ static var Map_Maximum(struct Map* m, var node) {
 }
 
 static var Map_Sibling(struct Map* m, var node) {
+  
+  if (node is Terminal or *Map_Parent(m, node) is Terminal) {
+    return Terminal;
+  }
+  
   if (node is *Map_Left(m, *Map_Parent(m, node))) {
     return *Map_Right(m, *Map_Parent(m, node));
   } else {
@@ -355,20 +364,16 @@ static void Map_Set_Fix(struct Map* m, var node) {
     
     if ((node is *Map_Right(m, *Map_Parent(m, node))) 
     and (*Map_Parent(m, node) is *Map_Left(m, Map_Grandparent(m, node)))) {
-    
       Map_Rotate_Left(m, *Map_Parent(m, node));
       node = *Map_Left(m, node);
-   
     }
     
     else
     
     if ((node is *Map_Left(m, *Map_Parent(m, node))) 
     and (*Map_Parent(m, node) is *Map_Right(m, Map_Grandparent(m, node)))) {
-     
       Map_Rotate_Right(m, *Map_Parent(m, node));
       node = *Map_Right(m, node);
-
     }
     
     Map_Set_Black(m, *Map_Parent(m, node));
@@ -548,7 +553,6 @@ static void Map_Rem(var self, var key) {
   
   destruct(Map_Key(m, node));
   destruct(Map_Val(m, node));
-  m->nitems--;
   
   if ((*Map_Left(m, node) isnt Terminal) 
   and (*Map_Right(m, node) isnt Terminal)) {
@@ -572,11 +576,11 @@ static void Map_Rem(var self, var key) {
     
   Map_Replace(m, node, chld);
   
-  if ((*Map_Parent(m, node) is Terminal)
-  and (chld isnt Terminal)) {
+  if ((*Map_Parent(m, node) is Terminal) and (chld isnt Terminal)) {
     Map_Set_Black(m, chld);
   }
   
+  m->nitems--;
   free(node);
   
 }
