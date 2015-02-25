@@ -89,6 +89,12 @@
 #define CELLO_GCC
 #endif
 
+#if defined(_MSC_VER)
+#define CELLO_MSC
+#define __func__ __FUNCTION__ 
+#pragma comment(lib, "DbgHelp.lib")
+#endif
+
 /* Includes */
 
 #include <stdio.h>
@@ -127,7 +133,7 @@ typedef void* var;
 
 /* Declaration */
 
-#define Cello(T, ...) (var)((var[]){ \
+#define Cello(T, ...) (var)((char*)((var[]){ \
   NULL, (var)CelloStaticAlloc, \
   CELLO_GC_HEADER \
   CELLO_MAGIC_HEADER \
@@ -138,7 +144,7 @@ typedef void* var;
   NULL, "__HashMask1", (var)0, \
   ##__VA_ARGS__, \
   NULL, NULL, NULL}) + \
-  sizeof(struct CelloHeader)
+  sizeof(struct CelloHeader))
 
 #define Member(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
   
@@ -153,7 +159,6 @@ extern var Undefined;
 extern var Ref;
 extern var Box;
 extern var Int;
-extern var Char;
 extern var Float;
 extern var String;
 
@@ -224,7 +229,6 @@ static const var None  = (var)0;
 struct Ref { var val; };
 struct Box { var val; };
 struct Int { int64_t val; };
-struct Char { char val; };
 struct Float { double val; };
 struct String { char* val; };
 struct Tuple { var* items; };
@@ -243,6 +247,8 @@ struct Function { var (*func)(var); };
 extern var Doc;
 extern var Help;
 extern var Cast;
+extern var Size;
+extern var Alloc;
 extern var New;
 extern var Assign;
 extern var Copy;
@@ -260,7 +266,6 @@ extern var Reverse;
 extern var Sort;
 extern var Clear;
 extern var Reserve;
-extern var C_Char;
 extern var C_Str;
 extern var C_Int;
 extern var C_Float;
@@ -274,6 +279,7 @@ extern var Current;
 extern var Start;
 extern var Join;
 extern var Lock;
+extern var Gen;
 
 /* Signatures */
 
@@ -293,10 +299,18 @@ struct Cast {
   var (*cast)(var, var);
 };
 
+struct Size {
+  size_t (*size)(void);
+};
+
+struct Alloc {
+  var (*alloc)(void);
+  void (*dealloc)(var);
+};
+
 struct New {
   var (*construct_with)(var, var);
   var (*destruct)(var);
-  size_t (*size)(void);
 };
 
 struct Assign {
@@ -376,10 +390,6 @@ struct Reserve {
   void (*reserve)(var, var);
 };
 
-struct C_Char {
-  char (*c_char)(var);
-};
-
 struct C_Str {
   char* (*c_str)(var);
 };
@@ -454,13 +464,12 @@ struct Lock {
   var  (*lock_try)(var);
 };
 
-/* Functions */
+struct Gen {
+  var (*gen)(void);
+  var (*shrink)(var);
+};
 
-const char* name(var type);
-const char* brief(var type);
-const char* description(var type);
-const char* examples(var type);
-const char* methods(var type);
+/* Functions */
 
 void help(var self);
 
@@ -491,50 +500,50 @@ var implements_method_at_offset(var self, var cls, size_t offset);
 var type_method_at_offset(var self, var cls, size_t offset, const char* method);
 var type_implements_method_at_offset(var self, var cls, size_t offset);
 
+struct CelloHeader* Cello_GetHeader(var self);
 var CelloHeader_Init(struct CelloHeader* head, var type, int flags);
 var CelloHeader_GetFlag(struct CelloHeader* head, int flag);
 void CelloHeader_SetFlag(struct CelloHeader* head, int flag);
 void CelloHeader_RemFlag(struct CelloHeader* head, int flag);
 
 #define $(T, ...) alloc_stk(T, \
-  ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){}), \
+  ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){0}), \
   &((struct T){__VA_ARGS__}), sizeof(struct T))
-
+  
 #define $I(X) $(Int, X)
 #define $F(X) $(Float, X)
-#define $C(X) $(Char, X)
 #define $S(X) $(String, X)
 #define $R(X) $(Ref, X)
 #define $B(X) $(Box, X)
 #define $T(...) tuple(__VA_ARGS__)
 
-#define new(T, ...) new_with(T, tuple(__VA_ARGS__))
-#define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
-var new_with(var type, var args);
-void del(var self);
+var alloc_stk(var type, var mem, var data, size_t size);
 
-#define new_$I(X) new_$(Int, X)
-#define new_$F(X) new_$(Float, X)
-#define new_$C(X) new_$(Char, X)
-#define new_$S(X) new_$(String, X)
-#define new_$R(X) new_$(Ref, X)
-#define new_$B(X) new_$(Box, X)
-#define new_$T(...) new_with(Tuple, tuple(__VA_ARGS__))
-
-#define tuple_new(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
-#define tuple(...) tuple_new(_, ##__VA_ARGS__, Terminal)
+size_t size(var type);
 
 var alloc(var type);
-var alloc_stk(var type, var mem, var data, size_t size);
 void dealloc(var self);
-size_t size(var type);
 
 #define construct(self, ...) construct_with(self, tuple(__VA_ARGS__))
 var construct_with(var self, var args);
 var destruct(var self);
 
-//#define auto(T, ...) auto_with((char[sizeof(var)]){0}, T, tuple(__VA_ARGS__))
-//var auto_with(var ptr, var type, var args);
+#define new(T, ...) new_with(T, tuple(__VA_ARGS__))
+#define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
+
+#define new_$I(X) new_$(Int, X)
+#define new_$F(X) new_$(Float, X)
+#define new_$S(X) new_$(String, X)
+#define new_$R(X) new_$(Ref, X)
+#define new_$B(X) new_$(Box, X)
+#define new_$T(...) new_with(Tuple, tuple(__VA_ARGS__))
+
+#define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, Terminal))
+#define tuple_xp(X, A) X A
+#define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
+
+var new_with(var type, var args);
+void del(var self);
 
 var assign(var self, var obj);
 var copy(var obj);
@@ -569,7 +578,8 @@ var iter_next(var self, var curr);
 var iter_prev(var self, var curr);
 var iter_last(var self);
 
-#define foreach(X) foreach_in(X)
+#define foreach(...) foreach_xp(foreach_in, (__VA_ARGS__))
+#define foreach_xp(X, A) X A
 #define foreach_in(X, S) for( var \
   __##X = (S), \
   __Iter##X = instance(__##X, Iter), \
@@ -577,6 +587,8 @@ var iter_last(var self);
   X isnt Terminal; \
   X = ((struct Iter*)(__Iter##X))->iter_next(__##X, X))
 
+
+  
 void push(var self, var obj);
 void pop(var self);
 void push_at(var self, var obj, var key);
@@ -585,6 +597,9 @@ void pop_at(var self, var key);
 void reverse(var self);
 void sort(var self);
 void sort_with(var self, var func);
+
+void concat(var self, var obj);
+void append(var self, var obj);
 
 var get(var self, var key);
 void set(var self, var key, var val);
@@ -597,7 +612,6 @@ void clear(var self);
 size_t len(var self);
 var empty(var self);
 
-char c_char(var self);
 char* c_str(var self);
 int64_t c_int(var self);
 double c_float(var self);
@@ -692,7 +706,8 @@ var running(var self);
 var start_in(var self);
 var stop_in(var self);
 
-#define with(X) with_in(X)
+#define with(...) with_xp(with_in, (__VA_ARGS__))
+#define with_xp(X, A) X A
 #define with_in(X, S) for(var X = start_in(S); X isnt Terminal; X = stop_in(X))
 
 void join(var self);
@@ -704,12 +719,12 @@ var lock_try(var self);
 #define try \
   exception_inc(); exception_deactivate(); if (!setjmp(exception_buffer()))   
 
+#define catch(...) catch_xp(catch_in, (__VA_ARGS__))
+#define catch_xp(X, A) X A
 #define catch_in(X, ...) else { exception_activate(); } exception_dec(); \
   for (var X = exception_catch(tuple(__VA_ARGS__)); \
     X isnt Terminal; X = Terminal)
 
-#define catch(...) catch_in(__VA_ARGS__)
-    
 #define throw(E, F, ...) \
   exception_throw(E, F, tuple(__VA_ARGS__))
 
@@ -727,5 +742,14 @@ var exception_buffer(void);
 
 var exception_throw(var obj, const char* fmt, var args);
 var exception_catch(var args);
+
+void gen_seed(uint64_t seed);
+uint64_t gen_c_int(void);
+double gen_c_float(void);
+var gen(var);
+var shrink(var);
+var check(var func, var name, var iterations, var types);
+
+#define quickcheck(F, ...) check(F, $S(#F), $I(1000), tuple(__VA_ARGS__))
 
 #endif

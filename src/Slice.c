@@ -30,7 +30,7 @@ static var Slice_Iter_Init(var self) {
   
   if (r->step > 0) {
     var curr = iter_init(s->iter);
-    for(uint64_t i = 0; i < r->start; i++) {
+    for(int64_t i = 0; i < r->start; i++) {
       curr = iter_next(s->iter, curr);
     }
     return curr;
@@ -38,7 +38,7 @@ static var Slice_Iter_Init(var self) {
   
   if (r->step < 0) {
     var curr = iter_last(s->iter);
-    for(uint64_t i = 0; i < len(s->iter)-r->stop; i++) {
+    for(int64_t i = 0; i < (int64_t)len(s->iter)-r->stop; i++) {
       curr = iter_prev(s->iter, curr);
     }
     return curr;
@@ -52,13 +52,13 @@ static var Slice_Iter_Next(var self, var curr) {
   struct Range* r = s->range;
   
   if (r->step > 0) {
-    for (uint64_t i = 0; i < r->step; i++) {
+    for (int64_t i = 0; i < r->step; i++) {
       curr = iter_next(s->iter, curr);
     }
   }
   
   if (r->step < 0) {
-    for (uint64_t i = 0; i < -r->step; i++) {
+    for (int64_t i = 0; i < -r->step; i++) {
       curr = iter_prev(s->iter, curr);
     }
   }

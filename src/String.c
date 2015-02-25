@@ -1,94 +1,5 @@
 #include "Cello.h"
 
-const char* Char_Name(void) {
-  return "Char";
-}
-
-/* TODO */
-const char* Char_Brief(void) {
-  return "";
-}
-
-/* TODO */
-const char* Char_Description(void) {
-  return "";
-}
-
-/* TODO */
-const char* Char_Examples(void) {
-  return "";
-}
-
-/* TODO */
-const char* Char_Methods(void) {
-  return "";
-}
-
-static var Char_New(var self, var args) {
-  struct Char* c = self;
-  c->val = c_char(get(args, $(Int, 0)));
-  return self;
-}
-
-static var Char_Del(var self) {
-  return self;
-}
-
-static size_t Char_Size(void) {
-  return sizeof(struct Char);
-}
-
-static var Char_Assign(var self, var obj) {
-  struct Char* c = self;
-  c->val = c_char(obj);
-  return self;
-}
-
-static var Char_Copy(var self) {
-  return new(Char, self);
-}
-
-static var Char_Eq(var self, var obj) {
-  return bool_var(c_char(self) == c_char(obj));
-}
-
-static var Char_Gt(var self, var obj) {
-  return bool_var(c_char(self) > c_char(obj));
-}
-
-static var Char_Lt(var self, var obj) {
-  return bool_var(c_char(self) < c_char(obj));
-}
-
-static uint64_t Char_Hash(var self) {
-  return (uint64_t)c_char(self);
-}
-
-static char Char_C_Char(var self) {
-  struct Char* c = self;
-  return c->val;
-}
-
-static int Char_Show(var self, var output, int pos) {
-  return print_to(output, pos, "%c", self);
-}
-
-static int Char_Look(var self, var input, int pos) {
-  return scan_from(input, pos, "%c", self);
-}
-
-var Char = Cello(Char,
-  Member(Doc,
-    Char_Name, Char_Brief, Char_Description, Char_Examples, Char_Methods),
-  Member(New, Char_New, Char_Del, Char_Size),
-  Member(Assign, Char_Assign),
-  Member(Copy, Char_Copy),
-  Member(Eq, Char_Eq),
-  Member(Ord, Char_Gt, Char_Lt),
-  Member(Hash, Char_Hash),
-  Member(C_Char, Char_C_Char),
-  Member(Show, Char_Show, Char_Look));
-
 static const char* String_Name(void) {
   return "String";
 }
@@ -139,7 +50,15 @@ static size_t String_Size(void) {
 static var String_Assign(var self, var obj) {
   struct String* s = self;
   char* val = c_str(obj);
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+    throw(ValueError, "Cannot reallocate String, not on heap!");
+  }
+#endif
+  
   s->val = realloc(s->val, strlen(val) + 1);
+  
 #if CELLO_MEMORY_CHECK == 1
   if (s->val is None) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
@@ -177,12 +96,21 @@ static size_t String_Len(var self) {
 
 static void String_Clear(var self) {
   struct String* s = self;
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+    throw(ValueError, "Cannot reallocate String, not on heap!");
+  }
+#endif
+  
   s->val = realloc(s->val, 1);
+  
 #if CELLO_MEMORY_CHECK == 1
   if (s->val is None) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
 #endif
+
   s->val[0] = '\0';
 }
 
@@ -192,10 +120,6 @@ static var String_Mem(var self, var obj) {
     return bool_var(strstr(c_str(self), c_str(obj)) isnt None);
   }
   
-  if (implements(obj, C_Char)) {
-    return bool_var(strchr(c_str(self), c_char(obj)) isnt None);
-  }
-  
   return False;
 }
 
@@ -203,13 +127,8 @@ static void String_Rem(var self, var obj) {
   
   if (implements(obj, C_Str)) {
     char* pos = strstr(c_str(self), c_str(obj));
-    int count = strlen(c_str(self)) - strlen(pos) - strlen(c_str(obj)) + 1;
+    size_t count = strlen(c_str(self)) - strlen(pos) - strlen(c_str(obj)) + 1;
     memmove((char*)pos, pos + strlen(c_str(obj)), count);
-  }
-  
-  if (implements(type_of(obj), C_Char)) {
-    char* pos = strchr(c_str(self), c_char(obj));
-    while (pos isnt None) { *pos = (*pos+1); pos++; }
   }
   
 }
@@ -239,6 +158,12 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   int size = _vscprintf(fmt, va_tmp);
   va_end(va_tmp);
   
+#if CELLO_ALLOC_CHECK == 1
+  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+    throw(ValueError, "Cannot reallocate String, not on heap!");
+  }
+#endif
+  
   s->val = realloc(s->val, pos + size + 1);
 
 #if CELLO_MEMORY_CHECK == 1
@@ -256,6 +181,12 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   char* tmp = NULL;
   int size = vasprintf(&tmp, fmt, va_tmp);
   va_end(va_tmp);
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+    throw(ValueError, "Cannot reallocate String, not on heap!");
+  }
+#endif
   
   s->val = realloc(s->val, pos + size + 1);
   
@@ -277,6 +208,12 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_copy(va_tmp, va);
   int size = vsnprintf(NULL, 0, fmt, va_tmp);
   va_end(va_tmp);
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+    throw(ValueError, "Cannot reallocate String, not on heap!");
+  }
+#endif
   
   s->val = realloc(s->val, pos + size + 1);
   
@@ -305,21 +242,41 @@ static int String_Look(var self, var input, int pos) {
   return scan_from(input, pos, "\"%[^\"]\"", self);
 }
 
+static var String_Gen(void) {
+  size_t l = gen_c_int() % 10;
+  
+  char characters[62] = 
+    "abcdefghijklmnopqrstuvwxyz"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "0123456789";
+  
+  char* data = malloc(l+1);
+  for (size_t i = 0; i < l; i++) {
+    data[i] = characters[gen_c_int() % 62];
+  }
+  data[l] = '\0';
+  var x = new(String, $S(data));
+  free(data);
+  return x;
+}
+
 var String = Cello(String,
   Member(Doc,
     String_Name, String_Brief, String_Description,
     String_Examples, String_Methods),
-  Member(New, String_New, String_Del, String_Size),
-  Member(Assign, String_Assign),
-  Member(Copy, String_Copy),
-  Member(Eq, String_Eq),
-  Member(Ord, String_Gt, String_Lt),
-  Member(Len, String_Len),
-  Member(Get, NULL, NULL, String_Mem, String_Rem),
-  Member(Clear, String_Clear),
+  Member(Size,    String_Size),
+  Member(New,     String_New, String_Del),
+  Member(Assign,  String_Assign),
+  Member(Copy,    String_Copy),
+  Member(Eq,      String_Eq),
+  Member(Ord,     String_Gt, String_Lt),
+  Member(Len,     String_Len),
+  Member(Get,     NULL, NULL, String_Mem, String_Rem),
+  Member(Clear,   String_Clear),
   Member(Reverse, String_Reverse),
-  Member(Hash, String_Hash),
-  Member(C_Str, String_C_Str),
-  Member(Format, String_Format_To, String_Format_From),
-  Member(Show, String_Show, String_Look));
+  Member(Hash,    String_Hash),
+  Member(C_Str,   String_C_Str),
+  Member(Format,  String_Format_To, String_Format_From),
+  Member(Show,    String_Show, String_Look),
+  Member(Gen,     String_Gen));
 

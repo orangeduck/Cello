@@ -1,34 +1,5 @@
 #include "Cello.h"
 
-static const char* C_Char_Name(void) {
-  return "C_Char";
-}
-
-/* TODO */
-static const char* C_Char_Brief(void) {
-  return "";
-}
-
-/* TODO */
-static const char* C_Char_Description(void) {
-  return "";
-}
-
-/* TODO */
-static const char* C_Char_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* C_Char_Methods(void) {
-  return "";
-}
-
-var C_Char = Cello(C_Char,
-  Member(Doc,
-    C_Char_Name, C_Char_Brief, C_Char_Description, 
-    C_Char_Examples, C_Char_Methods));
-
 static const char* C_Str_Name(void) {
   return "C_Str";
 }
@@ -115,10 +86,6 @@ var C_Float = Cello(C_Float,
   Member(Doc,
     C_Float_Name, C_Float_Brief, C_Float_Description, 
     C_Float_Examples, C_Float_Methods));
-    
-char c_char(var self) {
-  return method(self, C_Char, c_char);
-}
 
 char* c_str(var self) {
   return method(self, C_Str, c_str);

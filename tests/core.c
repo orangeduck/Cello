@@ -388,9 +388,6 @@ PT_FUNC(test_reserve) {
 
 PT_FUNC(test_ctype) {
   
-  PT_ASSERT(c_char($C('a')) is 'a');
-  PT_ASSERT(c_char($C('b')) is 'b');
-  
   PT_ASSERT_STR_EQ(c_str($S("Hello")), "Hello");
   PT_ASSERT_STR_EQ(c_str($S("There")), "There");
   
@@ -444,7 +441,7 @@ PT_FUNC(test_stream) {
 extern var TestType;
 
 struct TestType {
-  int test_data;
+  int64_t test_data;
 };
 
 static var TestType_New(var self, var args) {
@@ -472,13 +469,15 @@ static var TestType_Eq(var self, var obj) {
 }
 
 var TestType = Cello(TestType,
-  Member(New, TestType_New, TestType_Del, TestType_Size),
+  Member(Size, TestType_Size),
+  Member(New, TestType_New, TestType_Del),
   Member(Eq, TestType_Eq));
 
 PT_FUNC(test_type_new) {
  
   TestType = new(Type, $S("TestType"), $I(sizeof(struct TestType)),
-    $(New, TestType_New, TestType_Del, TestType_Size),
+    $(Size, TestType_Size),
+    $(New, TestType_New, TestType_Del),
     $(Eq, TestType_Eq));
   
   PT_ASSERT(TestType);

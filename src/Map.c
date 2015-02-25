@@ -34,23 +34,23 @@ struct Map {
 };
 
 static var* Map_Left(struct Map* m, var node) {
-  return node + 0 * sizeof(var);
+  return (var*)((char*)node + 0 * sizeof(var));
 }
 
 static var* Map_Right(struct Map* m, var node) {
-  return node + 1 * sizeof(var);
+  return (var*)((char*)node + 1 * sizeof(var));
 }
 
 static var* Map_Parent(struct Map* m, var node) {
-  return node + 2 * sizeof(var);
+  return (var*)((char*)node + 2 * sizeof(var));
 }
 
 static var Map_Key(struct Map* m, var node) {
-  return node + 3 * sizeof(var) + sizeof(struct CelloHeader);
+  return (char*)node + 3 * sizeof(var) + sizeof(struct CelloHeader);
 }
 
 static var Map_Val(struct Map* m, var node) {
-  return node + 3 * sizeof(var) + 
+  return (char*)node + 3 * sizeof(var) +
     sizeof(struct CelloHeader) + m->ksize +
     sizeof(struct CelloHeader);
 }
@@ -58,10 +58,12 @@ static var Map_Val(struct Map* m, var node) {
 static void Map_Set_Color(struct Map* m, var node, var value) {
   if (value) {
     CelloHeader_SetFlag(
-      Map_Key(m, node) - sizeof(struct CelloHeader), CelloRed);
+      (struct CelloHeader*)((char*)Map_Key(m, node) - 
+        sizeof(struct CelloHeader)), CelloRed);
   } else {
     CelloHeader_RemFlag(
-      Map_Key(m, node) - sizeof(struct CelloHeader), CelloRed);
+      (struct CelloHeader*)((char*)Map_Key(m, node) - 
+        sizeof(struct CelloHeader)), CelloRed);
   }
 }
 
@@ -70,7 +72,8 @@ static var Map_Get_Color(struct Map* m, var node) {
     return False;
   } else {
     return CelloHeader_GetFlag(
-      Map_Key(m, node) - sizeof(struct CelloHeader), CelloRed);
+      (struct CelloHeader*)((char*)Map_Key(m, node) - 
+        sizeof(struct CelloHeader)), CelloRed);
   }
 }
 
@@ -101,9 +104,11 @@ static var Map_Alloc(struct Map* m) {
   }
 #endif
   
-  var key = CelloHeader_Init(node + 3 * sizeof(var), m->ktype, CelloDataAlloc);
-  var val = CelloHeader_Init(node + 3 * sizeof(var) + 
-    sizeof(struct CelloHeader) + m->ksize, m->vtype, CelloDataAlloc);
+  var key = CelloHeader_Init((struct CelloHeader*)(
+    (char*)node + 3 * sizeof(var)), m->ktype, CelloDataAlloc);
+  var val = CelloHeader_Init((struct CelloHeader*)(
+    (char*)node + 3 * sizeof(var) +
+    sizeof(struct CelloHeader) + m->ksize), m->vtype, CelloDataAlloc);
   
   *Map_Left(m, node) = Terminal;
   *Map_Right(m, node) = Terminal;
@@ -111,20 +116,6 @@ static var Map_Alloc(struct Map* m) {
   Map_Set_Red(m, node);
   
   return node;
-}
-
-static void Map_Debug(struct Map* m, var node, int depth) {
-  
-  if (node isnt Terminal) {
-    putchar('\n');
-    for (int i = 0; i < depth; i++) { putchar(' '); }
-    print("| %c:%$:%$ >", 
-      $C(Map_Is_Red(m, node) ? 'r' : 'b'),
-      Map_Key(m, node), Map_Val(m, node));
-    Map_Debug(m, *Map_Right(m, node), depth+4); 
-    Map_Debug(m, *Map_Left(m, node), depth+4);
-  }
-  
 }
 
 static void Map_Set(var self, var key, var val);
@@ -198,7 +189,7 @@ static var Map_Copy(var self) {
   
   var curr = Map_Iter_Init(self);
   while (curr isnt Terminal) {
-    var node = curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
+    var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
     set(r, Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
   }
@@ -558,7 +549,7 @@ static void Map_Rem(var self, var key) {
   and (*Map_Right(m, node) isnt Terminal)) {
     var pred = Map_Maximum(m, *Map_Left(m, node));
     var ncol = Map_Get_Color(m, node);
-    memcpy(node + 3 * sizeof(var), pred + 3 * sizeof(var),
+    memcpy((char*)node + 3 * sizeof(var), (char*)pred + 3 * sizeof(var),
       sizeof(struct CelloHeader) + m->ksize +
       sizeof(struct CelloHeader) + m->vsize);
     Map_Set_Color(m, node, ncol);
@@ -598,7 +589,7 @@ static var Map_Iter_Init(var self) {
 static var Map_Iter_Next(var self, var curr) {
   struct Map* m = self;
   
-  var node = curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
+  var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
   var prnt = *Map_Parent(m, node);
   
   if (*Map_Right(m, node) isnt Terminal) {
@@ -629,7 +620,7 @@ static int Map_Show(var self, var output, int pos) {
   var curr = Map_Iter_Init(self);
   
   while (curr isnt Terminal) {
-    var node = curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
+    var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
     pos = print_to(output, pos, "%$:%$",
       Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
@@ -641,11 +632,29 @@ static int Map_Show(var self, var output, int pos) {
   return pos;
 }
 
+
+static var Map_Gen(void) {
+  var ktype = gen(Type);
+  var vtype = gen(Type);
+  var m = new(Map, ktype, vtype);
+  
+  size_t n = gen_c_int() % 10;
+  for (size_t i = 0; i < n; i++) {
+    var k = gen(ktype);
+    var v = gen(vtype);
+    set(m, k, v);
+    del(k); del(v);
+  }
+  
+  return m;
+}
+
 var Map = Cello(Map,
   Member(Doc,
     Map_Name, Map_Brief, Map_Description,
     Map_Examples, Map_Methods),
-  Member(New,     Map_New, Map_Del, Map_Size),
+  Member(Size,    Map_Size),
+  Member(New,     Map_New, Map_Del),
   Member(Assign,  Map_Assign),
   Member(Copy,    Map_Copy),
   Member(Eq,      Map_Eq),
@@ -653,6 +662,7 @@ var Map = Cello(Map,
   Member(Get,     Map_Get, Map_Set, Map_Mem, Map_Rem),
   Member(Clear,   Map_Clear),
   Member(Iter,    Map_Iter_Init, Map_Iter_Next),
-  Member(Show,    Map_Show, NULL));
+  Member(Show,    Map_Show, NULL),
+  Member(Gen,     Map_Gen));
 
 

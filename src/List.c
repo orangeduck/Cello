@@ -41,25 +41,25 @@ static var List_Alloc(struct List* l) {
   }
 #endif
   
-  return CelloHeader_Init(item + 2 * sizeof(var), l->type, CelloDataAlloc);
+  return CelloHeader_Init((struct CelloHeader*)((char*)item + 2 * sizeof(var)), l->type, CelloDataAlloc);
 }
 
 static void List_Free(struct List* l, var self) {
-  free(self - sizeof(struct CelloHeader) - 2 * sizeof(var));
+  free((char*)self - sizeof(struct CelloHeader) - 2 * sizeof(var));
 }
 
 static var* List_Next(struct List* l, var self) {
-  return (var*)(self - sizeof(struct CelloHeader) - 1 * sizeof(var));
+  return (var*)((char*)self - sizeof(struct CelloHeader) - 1 * sizeof(var));
 }
 
 static var* List_Prev(struct List* l, var self) {
-  return (var*)(self - sizeof(struct CelloHeader) - 2 * sizeof(var));
+  return (var*)((char*)self - sizeof(struct CelloHeader) - 2 * sizeof(var));
 }
 
 static var List_At(struct List* l, int64_t i) {
 
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= l->nitems) {
+  if (i < 0 or i >= (int64_t)l->nitems) {
     return throw(IndexOutOfBoundsError,
       "Index '%i' out of bounds for List of size %i.", 
        $(Int, i), $(Int, l->nitems));
@@ -68,7 +68,7 @@ static var List_At(struct List* l, int64_t i) {
   
   var item;
   
-  if (i <= l->nitems/2) {
+  if (i <= (int64_t)(l->nitems / 2)) {
     item = *List_Next(l, l->head);
     while (i) { item = *List_Next(l, item); i--; }
   } else {
@@ -345,7 +345,7 @@ static void List_Reserve(var self, var amount) {
   int64_t nslots = c_int(amount);
   
 #if CELLO_BOUND_CHECK == 1
-  if (nslots < l->nitems) {
+  if (nslots < (int64_t)l->nitems) {
     throw(IndexOutOfBoundsError, 
       "List already has %li items, cannot reserve %li", $I(l->nitems), amount);
   }
@@ -361,12 +361,28 @@ static void List_Reserve(var self, var amount) {
   
 }
 
+static var List_Gen(void) {
+  
+  var type = gen(Type);
+  var l = new(List, type);
+  
+  size_t n = gen_c_int() % 1024;
+  for (size_t i = 0; i < n; i++) {
+    var o = gen(type);
+    push(l, o);
+    del(o);
+  }
+  
+  return l;
+}
+
 var List = Cello(List,
   Member(Doc,
     List_Name,        List_Brief,
     List_Description, List_Examples,
     List_Methods),
-  Member(New,      List_New, List_Del, List_Size),
+  Member(Size,     List_Size),
+  Member(New,      List_New, List_Del),
   Member(Assign,   List_Assign),
   Member(Copy,     List_Copy),
   Member(Eq,       List_Eq),
@@ -380,5 +396,6 @@ var List = Cello(List,
   Member(Reverse,  List_Reverse),
   //Member(Sort,     List_Sort_With),
   Member(Show,     List_Show, NULL),
-  Member(Reserve,  List_Reserve));
+  Member(Reserve,  List_Reserve),
+  Member(Gen,      List_Gen));
   

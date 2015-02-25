@@ -1,6 +1,24 @@
 Cello 2.0
 =========
 
+* Typeclass for key/val type of containers
+* Update assigns for containers to look at types
+* Quickcheck
+* Help function
+
+* Cast Class
+* Update examples
+* Update tests
+  - Add test for perfect hashing
+  - Add test for array alignment
+* Update README
+* Update INSTALL
+* Update Syntax def for Notepad++
+* Update Syntax def for gedit
+* Update Documentation
+
+----------------
+
 * Garbage Collection
   - Heap Objects: All heap objects are roots.
   - Stack Objects: All stack objects are roots.
@@ -12,24 +30,6 @@ Cello 2.0
     below allocation address) we know the variable has been mangled and that it 
     can be removed from the root list.
 
-* Typeclass for key/val type of containers
-* Update assigns for containers to look at types
-* Type Assign/Copy class
-* Quickcheck
-
-* Cast Class
-* Union Type Constructor
-* Type Parenting?
-* Type Forwarding?
-* Update examples
-* Update tests
-  - Add test for perfect hashing
-  - Add test for array alignment
-* Update README
-* Update INSTALL
-* Update Syntax def for Notepad++
-* Update Syntax def for gedit
-* Update Documentation
 
 ----------------
 

@@ -105,10 +105,11 @@ static var Ref_Deref(var self) {
 var Ref = Cello(Ref,
   Member(Doc,
     Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, Ref_Methods),
-  Member(New, Ref_New, Ref_Del, Ref_Size),
-  Member(Assign, Ref_Assign),
-  Member(Copy, Ref_Copy),
-  Member(Show, Ref_Show, NULL),
+  Member(Size,    Ref_Size),
+  Member(New,     Ref_New, Ref_Del),
+  Member(Assign,  Ref_Assign),
+  Member(Copy,    Ref_Copy),
+  Member(Show,    Ref_Show, NULL),
   Member(Pointer, Ref_Ref, Ref_Deref));
 
   
@@ -182,9 +183,10 @@ static var Box_Deref(var self) {
 var Box = Cello(Box,
   Member(Doc,
     Box_Name, Box_Brief, Box_Description, Box_Examples, Box_Methods),
-  Member(New, Box_New, Box_Del, Box_Size),
-  Member(Assign, Box_Assign),
-  Member(Copy, Box_Copy),
-  Member(Show, Box_Show, NULL),
+  Member(Size,    Box_Size),
+  Member(New,     Box_New, Box_Del),
+  Member(Assign,  Box_Assign),
+  Member(Copy,    Box_Copy),
+  Member(Show,    Box_Show, NULL),
   Member(Pointer, Box_Ref, Box_Deref));
   

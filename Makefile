@@ -29,7 +29,7 @@ ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 
 	DYNAMIC = libCello.dll
 	STATIC = libCello.a
-	LIBS =
+	LIBS = -lDbgHelp
 
 	INSTALL_LIB = cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
 	INSTALL_INC = cp -r include/* $(INCDIR)

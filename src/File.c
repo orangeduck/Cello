@@ -75,7 +75,7 @@ static void File_Close(var self) {
 static void File_Seek(var self, var pos, var origin) {
   struct File* f = self;
   
-  int err = fseek(f->file, c_int(pos), c_int(origin));
+  int err = fseek(f->file, (long)c_int(pos), (int)c_int(origin));
   if (err != 0) {
     throw(IOError, "Failed to seek in file: %i", $(Int, err));
   }
@@ -111,7 +111,7 @@ static var File_EOF(var self) {
 static int File_Read(var self, var output, var size) {
   struct File* f = self;
   
-  int num = fread(output, c_int(size), 1, f->file);
+  int num = (int)fread(output, c_int(size), 1, f->file);
   if (num == -1) {
     throw(IOError, "Failed to read from file: %i", $(Int, num));
     return num;
@@ -123,7 +123,7 @@ static int File_Read(var self, var output, var size) {
 static int File_Write(var self, var input, var size) {
   struct File* f = self;
   
-  int num = fwrite(input, c_int(size), 1, f->file);  
+  int num = (int)fwrite(input, c_int(size), 1, f->file);
   if (num != 1 && c_int(size) != 0) {
     throw(IOError, "Failed to write to file: %i", $(Int, num));
   }
@@ -144,7 +144,8 @@ static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
 var File = Cello(File,
   Member(Doc,
     File_Name, File_Brief, File_Description, File_Examples, File_Methods),
-  Member(New, File_New, File_Del, File_Size),
+  Member(Size, File_Size),
+  Member(New, File_New, File_Del),
   Member(Start, NULL, File_Close, NULL),
   Member(Stream,
     File_Open, File_Close, File_Seek, File_Tell,

@@ -96,6 +96,8 @@ struct Array {
   size_t tsize;
   size_t nitems;
   size_t nslots;
+  var sspace0;
+  var sspace1;
 };
 
 static size_t Array_Step(struct Array* a) {
@@ -103,12 +105,12 @@ static size_t Array_Step(struct Array* a) {
 }
 
 static var Array_Item(struct Array* a, size_t i) {
-  return a->data + Array_Step(a) * i + sizeof(struct CelloHeader);
+  return (char*)a->data + Array_Step(a) * i + sizeof(struct CelloHeader);
 }
 
 static void Array_Alloc(struct Array* a, size_t i) {
-  memset(a->data + Array_Step(a) * i, 0, Array_Step(a));
-  struct CelloHeader* head = a->data + Array_Step(a) * i;
+  memset((char*)a->data + Array_Step(a) * i, 0, Array_Step(a));
+  struct CelloHeader* head = (struct CelloHeader*)((char*)a->data + Array_Step(a) * i);
   CelloHeader_Init(head, a->type, CelloDataAlloc);
 }
 
@@ -130,9 +132,11 @@ static var Array_New(var self, var args) {
   }
   
   a->data = malloc(a->nslots * Array_Step(a));
+  a->sspace0 = malloc(Array_Step(a));
+  a->sspace1 = malloc(Array_Step(a));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (a->data is None) {
+  if (a->data is None or a->sspace0 is None or a->sspace1 is None) {
     throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
   }
 #endif
@@ -153,6 +157,9 @@ static var Array_Del(var self) {
   }
   
   free(a->data);
+  free(a->sspace0);
+  free(a->sspace1);
+  
   return self;
   
 }
@@ -285,7 +292,7 @@ static void Array_Pop_At(var self, var key) {
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= a->nitems) {
+  if (i < 0 or i >= (int64_t)a->nitems) {
     throw(IndexOutOfBoundsError,
       "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
     return;
@@ -294,8 +301,8 @@ static void Array_Pop_At(var self, var key) {
   
   destruct(Array_Item(a, i));
   
-  memmove(a->data + Array_Step(a) * (i+0), 
-          a->data + Array_Step(a) * (i+1), 
+  memmove((char*)a->data + Array_Step(a) * (i+0), 
+          (char*)a->data + Array_Step(a) * (i+1), 
           Array_Step(a) * ((a->nitems-1) - i));
   
   a->nitems--;
@@ -327,8 +334,8 @@ static void Array_Push_At(var self, var obj, var key) {
   Array_Reserve_More(a);
   
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
-  memmove(a->data + Array_Step(a) * (i+1), 
-          a->data + Array_Step(a) * (i+0), 
+  memmove((char*)a->data + Array_Step(a) * (i + 1),
+          (char*)a->data + Array_Step(a) * (i+0), 
           Array_Step(a) * ((a->nitems-1) - i));
   
   Array_Alloc(self, i);
@@ -358,7 +365,7 @@ static var Array_Get(var self, var key) {
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= a->nitems) {
+  if (i < 0 or i >= (int64_t)a->nitems) {
     return throw(IndexOutOfBoundsError,
       "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
   }
@@ -373,7 +380,7 @@ static void Array_Set(var self, var key, var val) {
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= a->nitems) {
+  if (i < 0 or i >= (int64_t)a->nitems) {
     throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
     return;
@@ -394,17 +401,16 @@ static var Array_Iter_Next(var self, var curr) {
   if (curr >= Array_Item(a, a->nitems-1)) {
     return Terminal;
   } else {
-    return curr + Array_Step(a);
+    return (char*)curr + Array_Step(a);
   }
 }
 
 static void Array_Swap(struct Array* a, size_t i, size_t j) {
   if (i == j) { return; }
-  char swapspace[sizeof(struct CelloHeader) + a->tsize];
-  memcpy(swapspace, a->data + i * Array_Step(a), Array_Step(a));
-  memcpy(a->data + i * Array_Step(a), 
-         a->data + j * Array_Step(a), Array_Step(a));
-  memcpy(a->data + j * Array_Step(a), swapspace, Array_Step(a));
+  memcpy((char*)a->sspace0, (char*)a->data + i * Array_Step(a), Array_Step(a));
+  memcpy((char*)a->data + i * Array_Step(a),
+         (char*)a->data + j * Array_Step(a), Array_Step(a));
+  memcpy((char*)a->data + j * Array_Step(a), (char*)a->sspace0, Array_Step(a));
 }
 
 static void Array_Reverse(var self) {
@@ -418,8 +424,7 @@ static size_t Array_Sort_Partition(
   struct Array* a, int64_t l, int64_t r, var f) {
   
   int64_t p = l + (r - l) / 2;
-  char swapspace[sizeof(struct CelloHeader) + a->tsize];
-  memcpy(swapspace, a->data + p * Array_Step(a), Array_Step(a));
+  memcpy((char*)a->sspace1, (char*)a->data + p * Array_Step(a), Array_Step(a));
   
   Array_Swap(a, p, r);
   
@@ -427,7 +432,7 @@ static size_t Array_Sort_Partition(
   for (int64_t i = l; i < r; i++) {
     if (call(f, 
       Array_Get(a, $(Int, i)), 
-      swapspace + sizeof(struct CelloHeader))) {
+      (char*)a->sspace1 + sizeof(struct CelloHeader))) {
       Array_Swap(a, i, s);
       s++;
     }
@@ -466,7 +471,7 @@ static void Array_Reserve(var self, var amount) {
   int64_t nnslots = c_int(amount);
   
 #if CELLO_BOUND_CHECK == 1
-  if (nnslots < a->nitems) {
+  if (nnslots < (int64_t)a->nitems) {
     throw(IndexOutOfBoundsError, 
       "Array already has %li items, cannot reserve %li", $I(a->nitems), amount);
   }
@@ -483,12 +488,28 @@ static void Array_Reserve(var self, var amount) {
 
 }
 
+static var Array_Gen(void) {
+  
+  var type = gen(Type);
+  var a = new(Array, type);
+  
+  size_t n = gen_c_int() % 1024;
+  for (size_t i = 0; i < n; i++) {
+    var o = gen(type);
+    push(a, o);
+    del(o);
+  }
+  
+  return a;
+}
+
 var Array = Cello(Array,
   Member(Doc,
     Array_Name,        Array_Brief,
     Array_Description, Array_Examples,
     Array_Methods),
-  Member(New,      Array_New, Array_Del, Array_Size),
+  Member(Size,     Array_Size),
+  Member(New,      Array_New, Array_Del),
   Member(Assign,   Array_Assign),
   Member(Copy,     Array_Copy),
   Member(Eq,       Array_Eq),
@@ -502,6 +523,7 @@ var Array = Cello(Array,
   Member(Reverse,  Array_Reverse),
   Member(Sort,     Array_Sort_With),
   Member(Show,     Array_Show, NULL),
-  Member(Reserve,  Array_Reserve));
+  Member(Reserve,  Array_Reserve),
+  Member(Gen,      Array_Gen));
 
   

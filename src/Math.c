@@ -113,7 +113,7 @@ static void Int_Div(var self, var other) {
 
 static void Int_Pow(var self, var other) {
   struct Int* i = self;
-  i->val = pow(i->val, c_int(other));
+  i->val = (int64_t)pow((double)i->val, (double)c_int(other));
 }
 
 static void Int_Mod(var self, var other) {
@@ -128,12 +128,12 @@ static void Int_Neg(var self) {
 
 static void Int_Abs(var self) {
   struct Int* i = self;
- i->val = abs(i->val);
+  i->val = abs((int)i->val);
 }
 
 static void Int_Exp(var self) {
   struct Int* i = self;
- i->val = exp(i->val);
+  i->val = (int64_t)exp((double)i->val);
 }
 
 static int Int_Show(var self, var output, int pos) {
@@ -148,10 +148,15 @@ static int Int_Look(var self, var input, int pos) {
   return pos + off;
 }
 
+static var Int_Gen(void) {
+  return new(Int, $I(gen_c_int()));
+}
+
 var Int = Cello(Int,
   Member(Doc,
     Int_Name, Int_Brief, Int_Description, Int_Examples, Int_Methods),
-  Member(New,     Int_New, Int_Del, Int_Size),
+  Member(Size,    Int_Size),
+  Member(New,     Int_New, Int_Del),
   Member(Assign,  Int_Assign),
   Member(Copy,    Int_Copy),
   Member(Eq,      Int_Eq),
@@ -161,7 +166,8 @@ var Int = Cello(Int,
   Member(Math,
     Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Pow, 
     Int_Mod, Int_Neg, Int_Abs, Int_Exp),
-  Member(Show, Int_Show, Int_Look));
+  Member(Show,    Int_Show, Int_Look),
+  Member(Gen,     Int_Gen));
 
 static const char* Float_Name(void) {
   return "Float";
@@ -314,10 +320,15 @@ int Float_Look(var self, var input, int pos) {
   return scan_from(input, pos, "%f", self);
 }
 
+static var Float_Gen(void) {
+  return new(Float, $F(gen_c_float()));
+}
+
 var Float = Cello(Float,
   Member(Doc,
     Float_Name, Float_Brief, Float_Description, Float_Examples, Float_Methods),
-  Member(New,     Float_New, Float_Del, Float_Size),
+  Member(Size,    Float_Size),
+  Member(New,     Float_New, Float_Del),
   Member(Assign,  Float_Assign),
   Member(Copy,    Float_Copy),
   Member(Eq,      Float_Eq),
@@ -327,7 +338,8 @@ var Float = Cello(Float,
   Member(Math,
     Float_Add, Float_Sub, Float_Mul, Float_Div, Float_Pow,
     Float_Mod, Float_Neg, Float_Abs, Float_Exp),
-  Member(Show, Float_Show, Float_Look));
+  Member(Show,    Float_Show, Float_Look),
+  Member(Gen,     Float_Gen));
 
 
 static const char* Math_Name(void) {

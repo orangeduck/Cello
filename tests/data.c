@@ -22,50 +22,6 @@ PT_FUNC(test_bool_ctypes) {
   PT_ASSERT_STR_EQ(c_str(True), "True");
 }
 
-PT_FUNC(test_char_new) {
-  
-  var char0 = $C('a');
-  var char1 = new(Char, $C('b'));
-  var char2 = copy(char0);
-  
-  PT_ASSERT(char0);
-  PT_ASSERT(char1);
-  
-  PT_ASSERT(c_char(char0) is 'a');
-  PT_ASSERT(c_char(char1) is 'b');
-  PT_ASSERT(c_char(char2) is 'a');
-  
-  assign(char1, char2);
-  
-  PT_ASSERT(char1 isnt char2);
-  PT_ASSERT(c_char(char1) is 'a');
-  
-  del(char1);
-  del(char2);
-  
-}
-
-PT_FUNC(test_char_ord) {
-  PT_ASSERT( gt($C('b'), $C('a')) );
-  PT_ASSERT( gt($C('z'), $C('g')) );
-  PT_ASSERT( gt($C('a'), $C('A')) );
-  PT_ASSERT( gt($C('G'), $C('F')) );
-  PT_ASSERT( lt($C('V'), $C('t')) );
-  PT_ASSERT( lt($C('C'), $C('x')) );
-  PT_ASSERT( lt($C('Y'), $C('Z')) );
-  PT_ASSERT( eq($C('h'), $C('h')) );
-  PT_ASSERT( ge($C('T'), $C('T')) );
-  PT_ASSERT( le($C('A'), $C('a')) );
-  PT_ASSERT( le($C('a'), $C('a')) );
-  PT_ASSERT( neq($C('T'), $C('V')) );
-}
-
-PT_FUNC(test_char_hash) {
-  PT_ASSERT( hash($C('A')) is 65);
-  PT_ASSERT( hash($C('b')) is 98);
-  PT_ASSERT( hash($C('z')) is 122);
-}
-
 PT_FUNC(test_int_new) {
   
   var int0 = $I(1);
@@ -198,6 +154,8 @@ PT_FUNC(test_float_hash) {
   PT_ASSERT( hash($F(0.6)) is r2.c_int );
   PT_ASSERT( hash($F(82.13)) is r3.c_int );
   
+  len($I(0));
+
 }
 
 PT_FUNC(test_float_num) {
@@ -283,7 +241,6 @@ PT_FUNC(test_string_get) {
   PT_ASSERT(mem(s0, $S("Ball")));
   PT_ASSERT(mem(s0, $S("oon")));
   PT_ASSERT(mem(s0, $S("Balloons")));
-  PT_ASSERT(mem(s0, $C('l')));
   
   rem(s0, $S("oons"));
   
@@ -1094,10 +1051,6 @@ PT_SUITE(suite_data) {
   PT_REG(test_bool_ord);
   PT_REG(test_bool_hash);
   PT_REG(test_bool_ctypes);
-  
-  PT_REG(test_char_new);
-  PT_REG(test_char_ord);
-  PT_REG(test_char_hash);
 
   PT_REG(test_int_new);
   PT_REG(test_int_ord);

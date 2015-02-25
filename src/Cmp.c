@@ -34,7 +34,7 @@ var eq(var self, var obj) {
     return method(self, Eq, eq, obj);
   }
   
-  if (type_of(self) is type_of(obj) and implements_method(self, New, size)) {
+  if (type_of(self) is type_of(obj) and implements_method(self, Size, size)) {
     return bool_var(memcmp(self, obj, size(type_of(self))) is 0);
   }
   

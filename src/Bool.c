@@ -76,27 +76,31 @@ static uint64_t Bool_Hash(var self) {
   return (uint64_t)(self is True);
 }
 
-static char Bool_C_Char(var self) {
-  return (char)(self is True);
-}
-
 static char* Bool_C_Str(var self) {
   return self ? (char*)"True" : (char*)"False";
 }
 
-int64_t Bool_C_Int(var self) {
+static int64_t Bool_C_Int(var self) {
   return (int64_t)(self is True);
 }
 
-double Bool_C_Float(var self) {
+static double Bool_C_Float(var self) {
   return (double)(self is True);
 }
 
-int Bool_Show(var self, var output, int pos) {
+static int Bool_Show(var self, var output, int pos) {
   if (self) {
     return print_to(output, pos, "True");
   } else {
     return print_to(output, pos, "False");
+  }
+}
+
+static var Bool_Gen(void) {
+  if (gen_c_int() % 2) {
+    return True;
+  } else {
+    return False;
   }
 }
 
@@ -107,10 +111,10 @@ var Bool = Cello(Bool,
   Member(Eq,       Bool_Eq),
   Member(Ord,      Bool_Gt, Bool_Lt),
   Member(Hash,     Bool_Hash),
-  Member(C_Char,   Bool_C_Char),
   Member(C_Int,    Bool_C_Int),
   Member(C_Float,  Bool_C_Float),
   Member(C_Str,    Bool_C_Str),
+  Member(Gen,      Bool_Gen),
   Member(Show,     Bool_Show, NULL));
 
 var bool_var(intptr_t x) {

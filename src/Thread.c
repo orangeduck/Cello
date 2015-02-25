@@ -404,7 +404,8 @@ var Thread = Cello(Thread,
   Member(Doc,
     Thread_Name, Thread_Brief, Thread_Description, 
     Thread_Examples, Thread_Methods),
-  Member(New, Thread_New, Thread_Del, Thread_Size),
+  Member(Size,    Thread_Size),
+  Member(New,     Thread_New, Thread_Del),
   Member(Assign,  Thread_Assign),
   Member(Copy,    Thread_Copy),
   Member(Call,    Thread_Call),
@@ -571,7 +572,8 @@ static void Mutex_Unlock(var self) {
 var Mutex = Cello(Mutex,
   Member(Doc, 
     Mutex_Name, Mutex_Brief, Mutex_Description, Mutex_Examples, Mutex_Methods),
-  Member(New,    Mutex_New, Mutex_Del, Mutex_Size),
+  Member(Size,   Mutex_Size),
+  Member(New,    Mutex_New, Mutex_Del),
   Member(Assign, Mutex_Assign),
   Member(Copy,   Mutex_Copy),
   Member(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
@@ -681,6 +683,9 @@ static void Exception_Backtrace(void) {
   t->exc_backtrace_count = backtrace(t->exc_backtrace, CELLO_EXC_MAX_STRACE);
   char** symbols = backtrace_symbols(t->exc_backtrace, t->exc_backtrace_count);  
   
+  print_to($(File, stderr), 0, "!!\tStack Trace: \n");
+  print_to($(File, stderr), 0, "!!\t\n");
+
   for (int i = 0; i < t->exc_backtrace_count; i++) {
     print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", 
       $(Int, i), $(String, symbols[i]));
@@ -695,61 +700,103 @@ static void Exception_Backtrace(void) {
 
 static void Exception_Backtrace(void) {
   
-  /*
   HANDLE process = GetCurrentProcess();
   HANDLE thread = GetCurrentThread();
-
-  CONTEXT context;
-  context.ContextFlags = CONTEXT_CONTROL;
-  GetThreadContext(thread, &context);
-
-  DWORD image = IMAGE_FILE_MACHINE_AMD64;
   
+  CONTEXT context;
+  memset(&context, 0, sizeof(CONTEXT));
+  context.ContextFlags = CONTEXT_FULL;
+  RtlCaptureContext(&context);
+  
+  SymSetOptions(SYMOPT_UNDNAME|SYMOPT_LOAD_LINES);
+  SymInitialize(process, NULL, TRUE);
+  
+  DWORD image;
   STACKFRAME64 stackframe;
   ZeroMemory(&stackframe, sizeof(STACKFRAME64));
+  
+#ifdef _M_IX86
+  image = IMAGE_FILE_MACHINE_I386;
+  stackframe.AddrPC.Offset = context.Eip;
+  stackframe.AddrPC.Mode = AddrModeFlat;
+  stackframe.AddrFrame.Offset = context.Ebp;
+  stackframe.AddrFrame.Mode = AddrModeFlat;
+  stackframe.AddrStack.Offset = context.Esp;
+  stackframe.AddrStack.Mode = AddrModeFlat;
+#elif _M_X64
+  image = IMAGE_FILE_MACHINE_AMD64;
   stackframe.AddrPC.Offset = context.Rip;
   stackframe.AddrPC.Mode = AddrModeFlat;
   stackframe.AddrFrame.Offset = context.Rsp;
   stackframe.AddrFrame.Mode = AddrModeFlat;
-  stackframe.AddrStack.Offset = context.Rbp;
+  stackframe.AddrStack.Offset = context.Rsp;
   stackframe.AddrStack.Mode = AddrModeFlat;
+#elif _M_IA64
+  image = IMAGE_FILE_MACHINE_IA64;
+  stackframe.AddrPC.Offset = context.StIIP;
+  stackframe.AddrPC.Mode = AddrModeFlat;
+  stackframe.AddrFrame.Offset = context.IntSp;
+  stackframe.AddrFrame.Mode = AddrModeFlat;
+  stackframe.AddrBStore.Offset = context.RsBSP;
+  stackframe.AddrBStore.Mode = AddrModeFlat;
+  stackframe.AddrStack.Offset = context.IntSp;
+  stackframe.AddrStack.Mode = AddrModeFlat;
+#endif
 
-  SymInitialize(process, NULL, TRUE);
+  print_to($(File, stderr), 0, "!!\tStack Trace: \n");
+  print_to($(File, stderr), 0, "!!\t\n");
 
-  for (size_t i = 0; i < 10; i++) {
+  for (size_t i = 0; i < CELLO_EXC_MAX_STRACE; i++) {
+    
     BOOL result = StackWalk64(
       image, process, thread,
-      &stackframe, &context,
-      NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL);
+      &stackframe, &context, NULL, 
+      SymFunctionTableAccess64, SymGetModuleBase64, NULL);
     
     if (!result) { break; }
     
-    // SymFromAddr 
+    char* filename = "";
+    char* symbolname = "???";
+    int lineno = 0;
     
-    unsigned char buffer[sizeof(IMAGEHLP_SYMBOL64) + 256];
-    PIMAGEHLP_SYMBOL64 symbol = (PIMAGEHLP_SYMBOL64)&buffer;
-    ZeroMemory(symbol, sizeof(IMAGEHLP_SYMBOL64) + 256);
-    symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
-    symbol->MaxNameLength = 256;
+    char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
+    PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    symbol->MaxNameLen = MAX_SYM_NAME;
     
-    //IMAGEHLP_LINE64 line;
-    //line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-    
-    if (SymGetSymFromAddr64(process, stackframe.AddrPC.Offset, NULL, symbol)) {
-      print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", 
-        $(Int, i), $(String, symbol->Name));
+    DWORD64 displacement = 0;
+    if (SymFromAddr(process, stackframe.AddrPC.Offset, &displacement, symbol)) {
+      symbolname = symbol->Name;
     } else {
-      printf("Error from SymGetSymFromAddr64: %lu.\n", GetLastError());
-      print_to($(File, stderr), 0, "!!\t\t[%i] ???\n", $(Int, i));
+      symbolname = "???";
+    }
+      
+    IMAGEHLP_LINE64 line;
+    line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+    
+    DWORD displacementline = 0;
+    if (SymGetLineFromAddr64(process, 
+      stackframe.AddrPC.Offset, &displacementline, &line)) {
+      lineno = line.LineNumber;
+      filename = line.FileName;
+    } else {
+      lineno = 0;
+      filename = "";
     }
     
-    i++;
+    if (strcmp(filename, "") == 0) {
+      print_to($(File, stderr), 0, "!!\t\t[%i] %s\n",
+        $I(i), $S(symbolname));      
+    } else {
+      print_to($(File, stderr), 0, "!!\t\t[%i] %s:%i %s\n",
+        $I(i), $S(filename), $I(lineno), $S(symbolname));
+    }
+    
   }
   
   print_to($(File, stderr), 0, "!!\t\n");
   
   SymCleanup(process);
-  */
   
 }
 
@@ -768,9 +815,6 @@ static void Exception_Error(void)  {
   print_to($(File, stderr), 0, "!!\tUncaught %$\n", exception_object());
   print_to($(File, stderr), 0, "!!\t\n");
   print_to($(File, stderr), 0, "!!\t\t %s\n", exception_message());
-  print_to($(File, stderr), 0, "!!\t\n");
-  
-  print_to($(File, stderr), 0, "!!\tStack Trace: \n");
   print_to($(File, stderr), 0, "!!\t\n");
   
   Exception_Backtrace();

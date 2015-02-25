@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <time.h>
-#include <unistd.h>
 
 /* Globals */
 
@@ -38,12 +37,12 @@ enum {
 
 #ifdef _WIN32
 
-  #include <windows.h>
+#include <windows.h>
 
-  static void pt_color(int color) {
-    HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hCon, color);
-  }
+static void pt_color(int color) {
+  HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+  SetConsoleTextAttribute(hCon, color);
+}
 
 #else
 
@@ -66,11 +65,9 @@ static const char* colors[] = {
   "\x1B[37m"
 };
 
-  static void pt_color(int color) {
-    
-    printf("%s", colors[color]);
-  
-  }
+static void pt_color(int color) {
+  printf("%s", colors[color]);
+}
 
 #endif
 
@@ -208,9 +205,9 @@ void pt_run() {
   printf("    | Daniel Holden (contact@theorangeduck.com) |\n");
   printf("    +-------------------------------------------+\n");
   
-  signal(SIGFPE,  ptest_signal);
-  signal(SIGILL,  ptest_signal);
-  signal(SIGSEGV, ptest_signal);
+  //signal(SIGFPE,  ptest_signal);
+  //signal(SIGILL,  ptest_signal);
+  //signal(SIGSEGV, ptest_signal);
   
   start = clock();
   strcpy(current_suite, "");

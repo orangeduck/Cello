@@ -109,7 +109,7 @@ int println_with(const char* fmt, var args) {
 
 int print_to_with(var out, int pos, const char* fmt, var args) {
 
-  char fmt_buf[strlen(fmt)+1]; 
+  char* fmt_buf = malloc(strlen(fmt)+1); 
   var index = $(Int, 0);
   
   while(true) {
@@ -174,7 +174,7 @@ int print_to_with(var out, int pos, const char* fmt, var args) {
       }
       
       if (*fmt == 'c') {
-        int off = format_to(out, pos, fmt_buf, c_char(a));
+        int off = format_to(out, pos, fmt_buf, c_int(a));
         if (off < 0) { throw(FormatError, "Unable to output Char!"); }
         pos += off;
       }
@@ -191,6 +191,8 @@ int print_to_with(var out, int pos, const char* fmt, var args) {
     
     throw(FormatError, "Invalid Format String!");
   }
+
+  free(fmt_buf);
   
   return pos;
   
@@ -217,7 +219,7 @@ int scanln_with(const char* fmt, var args) {
 
 int scan_from_with(var input, int pos, const char* fmt, var args) {
 
-  char fmt_buf[strlen(fmt)+1];
+  char* fmt_buf = malloc(strlen(fmt)+1);
   var index = $(Int, 0);
   
   while(true) {
@@ -312,7 +314,7 @@ int scan_from_with(var input, int pos, const char* fmt, var args) {
         int err = format_from(input, pos, fmt_buf, &tmp, &off);
         if (err < 1) { throw(FormatError, "Unable to input Char!"); }
         pos += off;
-        assign(a, $(Char, tmp));
+        assign(a, $(Int, tmp));
       }
       
       if (*fmt == 'p') {
@@ -329,6 +331,8 @@ int scan_from_with(var input, int pos, const char* fmt, var args) {
     
     throw(FormatError, "Invalid Format String!");
   }
+
+  free(fmt_buf);
   
   return pos;
 

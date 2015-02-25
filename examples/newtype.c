@@ -24,8 +24,9 @@ static var Hello_Eq(var self, var obj) {
 
 int main(int argc, char** argv) {
   
-  Hello = new(Type, $S("Hello"),
-    $(New, Hello_New, NULL, Hello_Size),
+  Hello = new(Type, $S("Hello"), $I(sizeof(struct Hello)),
+    $(Size, Hello_Size),
+    $(New, Hello_New, NULL),
     $(Eq, Hello_Eq));
   
   print("%$ is a %$!\n", Hello, type_of(Hello));
