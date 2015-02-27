@@ -453,10 +453,6 @@ static var TestType_Del(var self) {
   return self;
 }
 
-static size_t TestType_Size(void) {
-  return sizeof(struct TestType);
-}
-
 static var TestType_Eq(var self, var obj) {
   struct TestType* lhs = cast(self, TestType);
   struct TestType* rhs = cast(obj, TestType);
@@ -468,14 +464,12 @@ static var TestType_Eq(var self, var obj) {
 }
 
 var TestType = Cello(TestType,
-  Instance(Size, TestType_Size),
   Instance(New, TestType_New, TestType_Del),
   Instance(Eq, TestType_Eq));
 
 PT_FUNC(test_type_new) {
  
   TestType = new(Type, $S("TestType"), $I(sizeof(struct TestType)),
-    $(Size, TestType_Size),
     $(New, TestType_New, TestType_Del),
     $(Eq, TestType_Eq));
   

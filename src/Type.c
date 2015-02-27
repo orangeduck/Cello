@@ -118,12 +118,6 @@ enum {
   CELLO_NBUILTINS = 5
 };
 
-static var __Name = CelloEmpty(__Name);
-static var __Size = CelloEmpty(__Size);
-static var __ModMask = CelloEmpty(__ModMask);
-static var __HashMask0 = CelloEmpty(__HashMask0);
-static var __HashMask1 = CelloEmpty(__HashMask1);
-
 static var Type_Alloc(void) {
   return None;
 }
@@ -138,21 +132,19 @@ static var Type_New(var self, var args) {
   
   struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
   
-  body[0] = (struct Type){ __Name, "__Name", (var)c_str(name) };
-  body[1] = (struct Type){ __Size, "__Size", (var)c_int(size) };
-  body[2] = (struct Type){ __ModMask, "__ModMask", (var)1 };
-  body[3] = (struct Type){ __HashMask0, "__HashMask0", (var)0 };
-  body[4] = (struct Type){ __HashMask1, "__HashMask1", (var)0 };
+  body[0] = (struct Type){ None, "__Name",      (var)c_str(name), {0} };
+  body[1] = (struct Type){ None, "__Size",      (var)c_int(size), {0} };
+  body[2] = (struct Type){ None, "__ModMask",   (var)1, {0} };
+  body[3] = (struct Type){ None, "__HashMask0", (var)0, {0} };
+  body[4] = (struct Type){ None, "__HashMask1", (var)0, {0} };
   
   for(size_t i = 2; i < len(args); i++) {
     var ins = get(args, $I(i));
     body[CELLO_NBUILTINS-2+i] = (struct Type){
-      type_of(ins), 
-      (var)c_str(type_of(ins)), 
-      ins };
+      None, (var)c_str(type_of(ins)), ins, {0} };
   }
   
-  body[CELLO_NBUILTINS+len(args)-2] = (struct Type){ None, None, None };
+  body[CELLO_NBUILTINS+len(args)-2] = (struct Type){ None, None, None, {0} };
   
   return body;
 }
@@ -303,8 +295,8 @@ static void Type_Scan(
   uint64_t initial = Type_Builtin_Hash(t, cls) + CELLO_NBUILTINS;
   
   if (t[initial].cls is cls) {
-    *inst = t[initial].inst;
-    *meth = *(var*)((char*)t[initial].inst + offset);
+    *inst = ((char*)t[initial].blank) + sizeof(struct CelloHeader);
+    *meth = *(var*)((char*)(*inst) + offset);
     return;
   }
   
@@ -314,11 +306,27 @@ static void Type_Scan(
     
     if (strcmp(t->name, Type_Builtin_Name(cls)) is 0) {
       t->cls = cls;
+      CelloHeader_Init((struct CelloHeader*)t->blank, cls, CelloDataAlloc);
+      size_t clssize = Type_Builtin_Size(cls);
+#if CELLO_ALLOC_CHECK == 1
+      if (clssize > CELLO_BLANK_INSTANCE_NUM * 
+        sizeof(var) - 
+        sizeof(struct CelloHeader)) {
+        fprintf(stderr, 
+          "Cello Fatal Error: Instance of %s is too big to be copied into "
+          "Type %s for caching. Consider splitting it into multiple classes "
+          "or increasing the CELLO_BLANK_INSTANCE variable.\n",
+          (char*)t->name, 
+          (char*)Type_Builtin_Name(self));
+        abort();
+      }
+#endif
+      memcpy(((char*)t->blank) + sizeof(struct CelloHeader), t->inst, clssize);
       if (Type_Build_Hash(self)) {
         Type_Scan(self, cls, offset, inst, meth);
       } else {
         *inst = t->inst;
-		*meth = *(var*)((char*)t->inst + offset);
+		    *meth = *(var*)((char*)(*inst) + offset);
       }
       return;
     }
@@ -417,7 +425,7 @@ static var Type_Of(var self) {
 
   struct CelloHeader* head;
   
-  switch ((intptr_t)self) {
+  switch ((uintptr_t)self) {
     case 0: return Bool;
     case 1: return Bool;
     default:
@@ -434,10 +442,8 @@ static var Type_Of(var self) {
       if (head isnt False 
       and head isnt True
       and head->magic isnt ((var)0xCe110)) {
-        fprintf(stderr,
-          "Cello Fatal Error: Pointer '%p' passed to 'type_of' "
-          "has bad magic number - it wasn't allocated by Cello.\n", self);
-        abort();
+        throw(ValueError, "Pointer '%p' passed to 'type_of' "
+          "has bad magic number, it wasn't allocated by Cello.\n", self);
       }
 #endif
     

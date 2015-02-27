@@ -57,6 +57,15 @@
 #define CELLO_MAGIC_HEADER
 #endif
 
+#ifndef CELLO_BLANK_INSTANCE
+#define CELLO_BLANK_INSTANCE_NUM 32
+#define CELLO_BLANK_INSTANCE \
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+#endif
+
 #if defined(_WIN32)
 #define CELLO_WINDOWS
 #endif
@@ -129,16 +138,17 @@ typedef void* var;
 #define CelloObject(T, S, ...) (var)((char*)((var[]){ \
   NULL, (var)CelloStaticAlloc, \
   CELLO_MAGIC_HEADER \
-  NULL, "__Name", #T, \
-  NULL, "__Size", (var)S, \
-  NULL, "__ModMask", (var)1, \
-  NULL, "__HashMask0", (var)0, \
-  NULL, "__HashMask1", (var)0, \
+  NULL, "__Name",          #T, CELLO_BLANK_INSTANCE, \
+  NULL, "__Size",      (var)S, CELLO_BLANK_INSTANCE, \
+  NULL, "__ModMask",   (var)1, CELLO_BLANK_INSTANCE, \
+  NULL, "__HashMask0", (var)0, CELLO_BLANK_INSTANCE, \
+  NULL, "__HashMask1", (var)0, CELLO_BLANK_INSTANCE, \
   ##__VA_ARGS__, \
-  NULL, NULL, NULL}) + \
+  NULL, NULL, NULL, CELLO_BLANK_INSTANCE}) + \
   sizeof(struct CelloHeader))
 
-#define Instance(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
+#define Instance(I, ...) \
+  NULL, #I, &((struct I){__VA_ARGS__}), CELLO_BLANK_INSTANCE
   
 /* Types */
 
@@ -209,6 +219,7 @@ struct Type {
   var cls;
   var name;
   var inst;
+  var blank[CELLO_BLANK_INSTANCE_NUM];
 };
 
 static const var True  = (var)1;

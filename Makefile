@@ -18,8 +18,8 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -O3 -Wall -Werror -Wno-unused -g
-LFLAGS = -shared -g -ggdb
+CFLAGS = -I ./include -std=gnu99 -O3 -Wall -Werror -Wno-unused -g -ggdb -rdynamic
+LFLAGS = -shared -g -ggdb -rdynamic
 
 PLATFORM := $(shell uname)
 COMPILER := $(shell $(CC) -v 2>&1 )
