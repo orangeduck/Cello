@@ -18,8 +18,8 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -O3 -Wall -Werror -Wno-unused -g -ggdb -rdynamic
-LFLAGS = -shared -g -ggdb -rdynamic
+CFLAGS = -I ./include -std=gnu99 -O3 -Wall -Werror -Wno-unused -g -ggdb
+LFLAGS = -g -ggdb
 
 PLATFORM := $(shell uname)
 COMPILER := $(shell $(CC) -v 2>&1 )
@@ -41,6 +41,7 @@ else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
 	LIBS = -lpthread -lexecinfo -lm
 
 	CFLAGS += -fPIC
+	LFLAGS += -rdynamic
 
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
 	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/* ${INCDIR}
@@ -52,6 +53,7 @@ else
 	LIBS = -lpthread -ldl -lm
 
 	CFLAGS += -fPIC
+  LFLAGS += -rdynamic
 
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
 	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/* ${INCDIR}
@@ -70,7 +72,7 @@ endif
 all: $(DYNAMIC) $(STATIC)
 
 $(DYNAMIC): $(OBJ)
-	$(CC) $(OBJ) $(LFLAGS) -o $@
+	$(CC) $(OBJ) -shared $(LFLAGS) -o $@
 
 $(STATIC): $(OBJ)
 	$(AR) rcs $@ $(OBJ)
@@ -84,7 +86,7 @@ obj:
 # Tests
 
 check: $(TESTS_OBJ) $(STATIC)
-	$(CC) $(TESTS_OBJ) $(STATIC) $(LIBS) -o test
+	$(CC) $(TESTS_OBJ) $(STATIC) $(LIBS) $(LFLAGS) -o test
 	./test
 	rm -f test.bin test.txt
 
