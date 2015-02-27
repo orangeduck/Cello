@@ -153,8 +153,6 @@ PT_FUNC(test_float_hash) {
   PT_ASSERT( hash($F(11.0)) is r1.c_int );
   PT_ASSERT( hash($F(0.6)) is r2.c_int );
   PT_ASSERT( hash($F(82.13)) is r3.c_int );
-  
-  len($I(0));
 
 }
 
@@ -1021,6 +1019,8 @@ PT_FUNC(test_file_new) {
   del(f0);
   
 }
+
+/* TODO: Test process */
 
 static char testoutput1[] = "This is a test\n";
 static char testoutput2[] = "This is a sample\n";

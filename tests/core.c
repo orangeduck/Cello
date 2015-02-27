@@ -2,8 +2,7 @@
 #include "ptest.h"
 
 PT_FUNC(test_doc) {
-  PT_ASSERT_STR_EQ(name(Int), "Int");
-  /* TODO: Add other methods for Int when filled in */
+  /* TODO: Finish */
 }
 
 PT_FUNC(test_type) {

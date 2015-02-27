@@ -172,6 +172,7 @@ extern var Slice;
 extern var File;
 extern var Mutex;
 extern var Thread;
+extern var Process;
 extern var Function;
 
 extern var IOError;
@@ -235,6 +236,7 @@ struct Tuple { var* items; };
 struct Range { var iter; int64_t start; int64_t stop; int64_t step; };
 struct Slice { var iter; var range; };
 struct File { FILE* file; };
+struct Process { FILE* proc; };
 
 #ifdef CELLO_CLANG
 struct Function { var (^func)(var); };
@@ -472,6 +474,7 @@ struct Gen {
 /* Functions */
 
 void help(var self);
+int help_to(var out, int pos, var self);
 
 var type_of(var self);
 var cast(var self, var type);

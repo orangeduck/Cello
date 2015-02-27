@@ -59,7 +59,8 @@ static var Tuple_Assign(var self, var obj) {
   size_t nargs = len(obj);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -174,7 +175,8 @@ static void Tuple_Push(var self, var obj) {
   size_t nitems = Tuple_Len(t);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -198,7 +200,8 @@ static void Tuple_Pop(var self) {
   size_t nitems = Tuple_Len(t);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -215,7 +218,8 @@ static void Tuple_Push_At(var self, var key, var obj) {
   size_t nitems = Tuple_Len(t);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -264,7 +268,8 @@ static void Tuple_Pop_At(var self, var key) {
           sizeof(var) * (nitems - (size_t)i));
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -280,7 +285,8 @@ static void Tuple_Concat(var self, var obj) {
   size_t objlen = len(obj);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -307,7 +313,8 @@ static void Tuple_Clear(var self) {
   struct Tuple* t = self;
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif

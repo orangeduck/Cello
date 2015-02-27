@@ -52,7 +52,8 @@ static var String_Assign(var self, var obj) {
   char* val = c_str(obj);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -98,7 +99,8 @@ static void String_Clear(var self) {
   struct String* s = self;
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -159,7 +161,8 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -183,7 +186,8 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -210,7 +214,8 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (not CelloHeader_GetFlag(Cello_GetHeader(self), CelloHeapAlloc)) {
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif

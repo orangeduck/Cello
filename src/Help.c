@@ -58,14 +58,41 @@ var Help = Cello(Help,
     Help_Name, Help_Brief, Help_Description,
     Help_Examples, Help_Methods));
     
-    
-void help(var self) {
-   
-  puts(type_method(self, Doc, name));
-  puts(type_method(self, Doc, brief));
-  puts(type_method(self, Doc, description));
-  puts(type_method(self, Doc, methods));
-  puts(type_method(self, Doc, examples));
+static int Help_Title(var out, int pos, int length, char type) {
+  int spos = pos;
+  for(int i = 0; i < length; i++) { pos += print_to(out, pos, "%c", $I(type)); }
+  pos += print_to(out, pos, "\n\n");
+  return spos - pos;
+}
+
+int help_to(var out, int pos, var self) {
   
+  int spos = pos;
+  
+  pos += print_to(out, pos, "\n%s - %s\n", 
+    $S((char*)type_method(self, Doc, name)),
+    $S((char*)type_method(self, Doc, brief)));
+    
+  pos += Help_Title(out, pos,
+    strlen(type_method(self, Doc, name)) +
+    strlen(type_method(self, Doc, brief)) + 3, '=');
+  
+  pos += print_to(out, pos, "Description\n");
+  pos += Help_Title(out, pos, strlen("Description"), '-');
+  pos += print_to(out, pos, "%s", $S((char*)type_method(self, Doc, description)));
+  
+  pos += print_to(out, pos, "\n\nMethods\n");
+  pos += Help_Title(out, pos, strlen("Methods"), '-');
+  pos += print_to(out, pos, "%s", $S((char*)type_method(self, Doc, methods)));
+   
+  pos += print_to(out, pos, "\n\nExamples\n");
+  pos += Help_Title(out, pos, strlen("Examples"), '-');
+  pos += print_to(out, pos, "%s", $S((char*)type_method(self, Doc, examples)));
+  
+  return pos - spos;
+}
+
+void help(var self) {
+  help_to($(File, stdout), 0, self);
 }
     
