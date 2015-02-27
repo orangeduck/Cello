@@ -49,16 +49,6 @@
 #define CELLO_MEMORY_CHECK 1
 #endif
 
-#define CELLO_GC 0
-
-#ifndef CELLO_GC
-#define CELLO_GC 1
-#define CELLO_GC_HEADER NULL, NULL, 
-#else
-#define CELLO_GC 0
-#define CELLO_GC_HEADER
-#endif
-
 #ifndef CELLO_MAGIC
 #define CELLO_MAGIC 1
 #define CELLO_MAGIC_HEADER ((var)0xCe110),
@@ -133,12 +123,14 @@ typedef void* var;
 
 /* Declaration */
 
-#define Cello(T, ...) (var)((char*)((var[]){ \
+#define Cello(T, ...) CelloStruct(T, ##__VA_ARGS__)
+#define CelloStruct(T, ...) CelloObject(T, sizeof(struct T), ##__VA_ARGS__)
+#define CelloEmpty(T, ...) CelloObject(T, 0, ##__VA_ARGS__)
+#define CelloObject(T, S, ...) (var)((char*)((var[]){ \
   NULL, (var)CelloStaticAlloc, \
-  CELLO_GC_HEADER \
   CELLO_MAGIC_HEADER \
   NULL, "__Name", #T, \
-  NULL, "__Size", (var)0, \
+  NULL, "__Size", (var)S, \
   NULL, "__ModMask", (var)1, \
   NULL, "__HashMask0", (var)0, \
   NULL, "__HashMask1", (var)0, \
@@ -146,7 +138,7 @@ typedef void* var;
   NULL, NULL, NULL}) + \
   sizeof(struct CelloHeader))
 
-#define Member(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
+#define Instance(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
   
 /* Types */
 
@@ -208,9 +200,6 @@ enum {
 struct CelloHeader {
   var type;
   var flags;
-#if CELLO_GC == 1
-  var prev, next;
-#endif
 #if CELLO_MAGIC == 1
   var magic;
 #endif
@@ -590,8 +579,6 @@ var iter_last(var self);
   X isnt Terminal; \
   X = ((struct Iter*)(__Iter##X))->iter_next(__##X, X))
 
-
-  
 void push(var self, var obj);
 void pop(var self);
 void push_at(var self, var obj, var key);

@@ -25,7 +25,7 @@ static const char* Pointer_Methods(void) {
 }
 
 var Pointer = Cello(Pointer,
-  Member(Doc,
+  Instance(Doc,
     Pointer_Name, Pointer_Brief, Pointer_Description, 
     Pointer_Examples, Pointer_Methods));
 
@@ -67,14 +67,6 @@ static var Ref_New(var self, var args) {
   return self;
 }
 
-static var Ref_Del(var self) {
-  return self;
-}
-
-static size_t Ref_Size(void) {
-  return sizeof(struct Ref);
-}
-
 static var Ref_Assign(var self, var obj) {
   if (implements(obj, Pointer)) {
     ref(self, deref(obj));
@@ -82,10 +74,6 @@ static var Ref_Assign(var self, var obj) {
     ref(self, obj);
   }
   return self;
-}
-
-static var Ref_Copy(var self) {
-  return new(Ref, self);
 }
 
 static int Ref_Show(var self, var output, int pos) {
@@ -103,14 +91,12 @@ static var Ref_Deref(var self) {
 }
 
 var Ref = Cello(Ref,
-  Member(Doc,
+  Instance(Doc,
     Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, Ref_Methods),
-  Member(Size,    Ref_Size),
-  Member(New,     Ref_New, Ref_Del),
-  Member(Assign,  Ref_Assign),
-  Member(Copy,    Ref_Copy),
-  Member(Show,    Ref_Show, NULL),
-  Member(Pointer, Ref_Ref, Ref_Deref));
+  Instance(New,     Ref_New, NULL),
+  Instance(Assign,  Ref_Assign),
+  Instance(Show,    Ref_Show, NULL),
+  Instance(Pointer, Ref_Ref, Ref_Deref));
 
   
 static const char* Box_Name(void) {
@@ -149,10 +135,6 @@ static var Box_Del(var self) {
   return self;
 }
 
-static size_t Box_Size(void) {
-  return sizeof(struct Box);
-}
-
 static var Box_Assign(var self, var obj) {
   if (implements(obj, Pointer)) {
     ref(self, deref(obj));
@@ -160,10 +142,6 @@ static var Box_Assign(var self, var obj) {
     ref(self, obj);
   }
   return self;
-}
-
-static var Box_Copy(var self) {
-  return new(Box, self);
 }
 
 static int Box_Show(var self, var output, int pos) {
@@ -181,12 +159,10 @@ static var Box_Deref(var self) {
 }
 
 var Box = Cello(Box,
-  Member(Doc,
+  Instance(Doc,
     Box_Name, Box_Brief, Box_Description, Box_Examples, Box_Methods),
-  Member(Size,    Box_Size),
-  Member(New,     Box_New, Box_Del),
-  Member(Assign,  Box_Assign),
-  Member(Copy,    Box_Copy),
-  Member(Show,    Box_Show, NULL),
-  Member(Pointer, Box_Ref, Box_Deref));
+  Instance(New,     Box_New, Box_Del),
+  Instance(Assign,  Box_Assign),
+  Instance(Show,    Box_Show, NULL),
+  Instance(Pointer, Box_Ref, Box_Deref));
   

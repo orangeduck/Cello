@@ -25,7 +25,7 @@ static const char* Stream_Methods(void) {
 }
 
 var Stream = Cello(Stream,
-  Member(Doc, 
+  Instance(Doc, 
     Stream_Name, Stream_Brief, Stream_Description,
     Stream_Examples, Stream_Methods));
 

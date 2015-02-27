@@ -25,7 +25,7 @@ const char* Reserve_Methods(void) {
 }
 
 var Reserve = Cello(Reserve, 
-  Member(Doc,
+  Instance(Doc,
     Reserve_Name, Reserve_Brief, Reserve_Description, 
     Reserve_Examples, Reserve_Methods));
   

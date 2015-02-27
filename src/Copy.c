@@ -26,7 +26,7 @@ static const char* Copy_Methods(void) {
 }
 
 var Copy = Cello(Copy,
-  Member(Doc,
+  Instance(Doc,
     Copy_Name, Copy_Brief, Copy_Description, 
     Copy_Examples, Copy_Methods));
 

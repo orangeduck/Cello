@@ -43,10 +43,6 @@ static var String_Del(var self) {
   return self;
 }
 
-static size_t String_Size(void) {
-  return sizeof(struct String);
-}
-
 static var String_Assign(var self, var obj) {
   struct String* s = self;
   char* val = c_str(obj);
@@ -266,22 +262,21 @@ static var String_Gen(void) {
 }
 
 var String = Cello(String,
-  Member(Doc,
+  Instance(Doc,
     String_Name, String_Brief, String_Description,
     String_Examples, String_Methods),
-  Member(Size,    String_Size),
-  Member(New,     String_New, String_Del),
-  Member(Assign,  String_Assign),
-  Member(Copy,    String_Copy),
-  Member(Eq,      String_Eq),
-  Member(Ord,     String_Gt, String_Lt),
-  Member(Len,     String_Len),
-  Member(Get,     NULL, NULL, String_Mem, String_Rem),
-  Member(Clear,   String_Clear),
-  Member(Reverse, String_Reverse),
-  Member(Hash,    String_Hash),
-  Member(C_Str,   String_C_Str),
-  Member(Format,  String_Format_To, String_Format_From),
-  Member(Show,    String_Show, String_Look),
-  Member(Gen,     String_Gen));
+  Instance(New,     String_New, String_Del),
+  Instance(Assign,  String_Assign),
+  Instance(Copy,    String_Copy),
+  Instance(Eq,      String_Eq),
+  Instance(Ord,     String_Gt, String_Lt),
+  Instance(Len,     String_Len),
+  Instance(Get,     NULL, NULL, String_Mem, String_Rem),
+  Instance(Clear,   String_Clear),
+  Instance(Reverse, String_Reverse),
+  Instance(Hash,    String_Hash),
+  Instance(C_Str,   String_C_Str),
+  Instance(Format,  String_Format_To, String_Format_From),
+  Instance(Show,    String_Show, String_Look),
+  Instance(Gen,     String_Gen));
 

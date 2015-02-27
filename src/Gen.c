@@ -112,7 +112,7 @@ static const char* Gen_Methods(void) {
 }
 
 var Gen = Cello(Gen,
-  Member(Doc,
+  Instance(Doc,
     Gen_Name, Gen_Brief, Gen_Description, 
     Gen_Examples, Gen_Methods));
     

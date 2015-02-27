@@ -25,7 +25,7 @@ const char* Sort_Methods(void) {
 }
 
 var Sort = Cello(Sort, 
-  Member(Doc,
+  Instance(Doc,
     Sort_Name, Sort_Brief, Sort_Description, 
     Sort_Examples, Sort_Methods));
   

@@ -25,7 +25,7 @@ static const char* C_Str_Methods(void) {
 }
 
 var C_Str = Cello(C_Str,
-  Member(Doc,
+  Instance(Doc,
     C_Str_Name, C_Str_Brief, C_Str_Description, 
     C_Str_Examples, C_Str_Methods));
 
@@ -54,7 +54,7 @@ static const char* C_Int_Methods(void) {
 }
 
 var C_Int = Cello(C_Int,
-  Member(Doc,
+  Instance(Doc,
     C_Int_Name, C_Int_Brief, C_Int_Description, 
     C_Int_Examples, C_Int_Methods));
     
@@ -83,7 +83,7 @@ static const char* C_Float_Methods(void) {
 }
 
 var C_Float = Cello(C_Float,
-  Member(Doc,
+  Instance(Doc,
     C_Float_Name, C_Float_Brief, C_Float_Description, 
     C_Float_Examples, C_Float_Methods));
 

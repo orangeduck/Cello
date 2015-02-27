@@ -24,8 +24,8 @@ static const char* Terminal_Methods(void) {
   return "";
 }
 
-var Terminal = Cello(Terminal,
-  Member(Doc,
+var Terminal = CelloEmpty(Terminal,
+  Instance(Doc,
     Terminal_Name, Terminal_Brief, Terminal_Description,
     Terminal_Examples, Terminal_Methods));
 
@@ -54,7 +54,7 @@ static const char* Iter_Methods(void) {
 }
 
 var Iter = Cello(Iter,
-  Member(Doc,
+  Instance(Doc,
     Iter_Name, Iter_Brief, Iter_Description, Iter_Examples, Iter_Methods));
 
 var iter_init(var self) {

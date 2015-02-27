@@ -24,7 +24,7 @@ static const char* Cast_Methods(void) {
   return "";
 }
 
-var Cast = Cello(Cast, Member(Doc, 
+var Cast = Cello(Cast, Instance(Doc, 
   Cast_Name, Cast_Brief, Cast_Description, Cast_Examples, Cast_Methods));
 
 var cast(var self, var type) {
@@ -118,11 +118,11 @@ enum {
   CELLO_NBUILTINS = 5
 };
 
-static var __Name = Cello(__Name);
-static var __Size = Cello(__Size);
-static var __ModMask = Cello(__ModMask);
-static var __HashMask0 = Cello(__HashMask0);
-static var __HashMask1 = Cello(__HashMask1);
+static var __Name = CelloEmpty(__Name);
+static var __Size = CelloEmpty(__Size);
+static var __ModMask = CelloEmpty(__ModMask);
+static var __HashMask0 = CelloEmpty(__HashMask0);
+static var __HashMask1 = CelloEmpty(__HashMask1);
 
 static var Type_Alloc(void) {
   return None;
@@ -215,16 +215,16 @@ static var Type_Gen(void) {
   }[gen_c_int() % 3];
 }
 
-var Type = Cello(Type,
-  Member(Doc,
+var Type = CelloEmpty(Type,
+  Instance(Doc,
     Type_Name, Type_Brief, Type_Description, Type_Examples, Type_Methods),
-  Member(Alloc,    Type_Alloc, NULL),
-  Member(New,      Type_New, NULL),
-  Member(Eq,       Type_Eq),
-  Member(Show,     Type_Show, NULL),
-  Member(C_Str,    Type_C_Str),
-  Member(Gen,      Type_Gen),
-  Member(Help,     Type_Help));
+  Instance(Alloc,    Type_Alloc, NULL),
+  Instance(New,      Type_New, NULL),
+  Instance(Eq,       Type_Eq),
+  Instance(Show,     Type_Show, NULL),
+  Instance(C_Str,    Type_C_Str),
+  Instance(Gen,      Type_Gen),
+  Instance(Help,     Type_Help));
   
 static var Type_Build_Hash(struct Type* t) {
   
@@ -465,5 +465,48 @@ var method_at_offset(
 
 var implements_method_at_offset(var self, var cls, size_t offset) {
   return Type_Implements_Method_At_Offset(Type_Of(self), cls, offset);
+}
+
+static const char* Size_Name(void) {
+  return "Size";
+}
+
+/* TODO */
+static const char* Size_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Size_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Size_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Size_Methods(void) {
+  return "";
+}
+
+var Size = Cello(Size, Instance(Doc, 
+  Size_Name, Size_Brief, Size_Description, Size_Examples, Size_Methods));
+
+size_t size(var type) {
+  if (type_implements(type, Size)) {
+    return type_method(type, Size, size);
+  }
+  
+  size_t builtinsize = Type_Builtin_Size(type);
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (builtinsize is 0) {
+    throw(TypeError, "Type %s is an empty type and so has no size.", type);
+  }
+#endif
+  
+  return builtinsize;
 }
   

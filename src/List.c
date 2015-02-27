@@ -127,10 +127,6 @@ static var List_Del(var self) {
   return self;
 }
 
-static size_t List_Size(void) {
-  return sizeof(struct List);
-}
-
 static var List_Assign(var self, var obj) {
   struct List* l = self;
 
@@ -377,25 +373,24 @@ static var List_Gen(void) {
 }
 
 var List = Cello(List,
-  Member(Doc,
+  Instance(Doc,
     List_Name,        List_Brief,
     List_Description, List_Examples,
     List_Methods),
-  Member(Size,     List_Size),
-  Member(New,      List_New, List_Del),
-  Member(Assign,   List_Assign),
-  Member(Copy,     List_Copy),
-  Member(Eq,       List_Eq),
-  Member(Clear,    List_Clear),
-  Member(Push,
-    List_Push,     List_Pop,
-    List_Push_At,  List_Pop_At),
-  Member(Len,      List_Len),
-  Member(Get,      List_Get, List_Set, List_Mem, List_Rem),
-  Member(Iter,     List_Iter_Init, List_Iter_Next),
-  Member(Reverse,  List_Reverse),
-  //Member(Sort,     List_Sort_With),
-  Member(Show,     List_Show, NULL),
-  Member(Reserve,  List_Reserve),
-  Member(Gen,      List_Gen));
+  Instance(New,     List_New, List_Del),
+  Instance(Assign,  List_Assign),
+  Instance(Copy,    List_Copy),
+  Instance(Eq,      List_Eq),
+  Instance(Clear,   List_Clear),
+  Instance(Push,
+    List_Push,      List_Pop,
+    List_Push_At,   List_Pop_At),
+  Instance(Len,     List_Len),
+  Instance(Get,     List_Get, List_Set, List_Mem, List_Rem),
+  Instance(Iter,    List_Iter_Init, List_Iter_Next),
+  Instance(Reverse, List_Reverse),
+  //Member(Sort,    List_Sort_With),
+  Instance(Show,    List_Show, NULL),
+  Instance(Reserve, List_Reserve),
+  Instance(Gen,     List_Gen));
   

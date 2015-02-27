@@ -160,10 +160,6 @@ static var Table_Del(var self) {
   return self;
 }
 
-static size_t Table_Size(void) {
-  return sizeof(struct Table);
-}
-
 static void Table_Clear(var self) {
   struct Table* t = self;
   
@@ -572,19 +568,18 @@ static var Table_Gen(void) {
 }
 
 var Table = Cello(Table,
-  Member(Doc,
+  Instance(Doc,
     Table_Name, Table_Brief, Table_Description,
     Table_Examples, Table_Methods),
-  Member(Size,    Table_Size),
-  Member(New,     Table_New, Table_Del),
-  Member(Assign,  Table_Assign),
-  Member(Copy,    Table_Copy),
-  Member(Eq,      Table_Eq),
-  Member(Len,     Table_Len),
-  Member(Get,     Table_Get, Table_Set, Table_Mem, Table_Rem),
-  Member(Clear,   Table_Clear),
-  Member(Iter,    Table_Iter_Init, Table_Iter_Next),
-  Member(Show,    Table_Show, NULL),
-  Member(Reserve, Table_Reserve),
-  Member(Gen,     Table_Gen));
+  Instance(New,     Table_New, Table_Del),
+  Instance(Assign,  Table_Assign),
+  Instance(Copy,    Table_Copy),
+  Instance(Eq,      Table_Eq),
+  Instance(Len,     Table_Len),
+  Instance(Get,     Table_Get, Table_Set, Table_Mem, Table_Rem),
+  Instance(Clear,   Table_Clear),
+  Instance(Iter,    Table_Iter_Init, Table_Iter_Next),
+  Instance(Show,    Table_Show, NULL),
+  Instance(Reserve, Table_Reserve),
+  Instance(Gen,     Table_Gen));
 

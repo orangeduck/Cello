@@ -26,7 +26,7 @@ static const char* Assign_Methods(void) {
 }
 
 var Assign = Cello(Assign,
-  Member(Doc,
+  Instance(Doc,
     Assign_Name, Assign_Brief, Assign_Description,
     Assign_Examples, Assign_Methods));
 

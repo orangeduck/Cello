@@ -167,10 +167,6 @@ static var Map_Del(var self) {
   return self;
 }
 
-static size_t Map_Size(void) {
-  return sizeof(struct Map);
-}
-
 static var Map_Assign(var self, var obj) {
   Map_Clear(self);
   foreach (key in obj) {
@@ -650,19 +646,18 @@ static var Map_Gen(void) {
 }
 
 var Map = Cello(Map,
-  Member(Doc,
+  Instance(Doc,
     Map_Name, Map_Brief, Map_Description,
     Map_Examples, Map_Methods),
-  Member(Size,    Map_Size),
-  Member(New,     Map_New, Map_Del),
-  Member(Assign,  Map_Assign),
-  Member(Copy,    Map_Copy),
-  Member(Eq,      Map_Eq),
-  Member(Len,     Map_Len),
-  Member(Get,     Map_Get, Map_Set, Map_Mem, Map_Rem),
-  Member(Clear,   Map_Clear),
-  Member(Iter,    Map_Iter_Init, Map_Iter_Next),
-  Member(Show,    Map_Show, NULL),
-  Member(Gen,     Map_Gen));
+  Instance(New,    Map_New, Map_Del),
+  Instance(Assign, Map_Assign),
+  Instance(Copy,   Map_Copy),
+  Instance(Eq,     Map_Eq),
+  Instance(Len,    Map_Len),
+  Instance(Get,    Map_Get, Map_Set, Map_Mem, Map_Rem),
+  Instance(Clear,  Map_Clear),
+  Instance(Iter,   Map_Iter_Init, Map_Iter_Next),
+  Instance(Show,   Map_Show, NULL),
+  Instance(Gen,    Map_Gen));
 
 

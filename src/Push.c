@@ -28,7 +28,7 @@ static const char* Push_Methods(void) {
 }
 
 var Push = Cello(Push,
-  Member(Doc,
+  Instance(Doc,
     Push_Name, Push_Brief, Push_Description, Push_Examples, Push_Methods));
 
 void push(var self, var val) { method(self, Push, push, val); }

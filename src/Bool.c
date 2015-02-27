@@ -104,18 +104,18 @@ static var Bool_Gen(void) {
   }
 }
 
-var Bool = Cello(Bool,
-  Member(Doc,
-    Bool_Name,     Bool_Brief, Bool_Description, 
-    Bool_Examples, Bool_Methods),
-  Member(Eq,       Bool_Eq),
-  Member(Ord,      Bool_Gt, Bool_Lt),
-  Member(Hash,     Bool_Hash),
-  Member(C_Int,    Bool_C_Int),
-  Member(C_Float,  Bool_C_Float),
-  Member(C_Str,    Bool_C_Str),
-  Member(Gen,      Bool_Gen),
-  Member(Show,     Bool_Show, NULL));
+var Bool = CelloEmpty(Bool,
+  Instance(Doc,
+    Bool_Name,      Bool_Brief, Bool_Description, 
+    Bool_Examples,  Bool_Methods),
+  Instance(Eq,      Bool_Eq),
+  Instance(Ord,     Bool_Gt, Bool_Lt),
+  Instance(Hash,    Bool_Hash),
+  Instance(C_Int,   Bool_C_Int),
+  Instance(C_Float, Bool_C_Float),
+  Instance(C_Str,   Bool_C_Str),
+  Instance(Gen,     Bool_Gen),
+  Instance(Show,    Bool_Show, NULL));
 
 var bool_var(intptr_t x) {
   return (var)(intptr_t)(((var)(intptr_t)x) is True);

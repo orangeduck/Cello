@@ -25,7 +25,7 @@ static const char* Format_Methods(void) {
 }
 
 var Format = Cello(Format,
-  Member(Doc, 
+  Instance(Doc, 
     Format_Name, Format_Brief, Format_Description,
     Format_Examples, Format_Methods));
 
@@ -78,7 +78,7 @@ static const char* Show_Methods(void) {
 }
 
 var Show = Cello(Show,
-  Member(Doc, 
+  Instance(Doc, 
     Show_Name, Show_Brief, Show_Description,
     Show_Examples, Show_Methods));
 

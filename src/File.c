@@ -39,10 +39,6 @@ static var File_Del(var self) {
   return self;
 }
 
-static size_t File_Size(void) {
-  return sizeof(struct File);
-}
-
 static var File_Open(var self, var filename, var access) {
   struct File* f = self;
   
@@ -140,15 +136,14 @@ static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
 }
 
 var File = Cello(File,
-  Member(Doc,
+  Instance(Doc,
     File_Name, File_Brief, File_Description, File_Examples, File_Methods),
-  Member(Size, File_Size),
-  Member(New, File_New, File_Del),
-  Member(Start, NULL, File_Close, NULL),
-  Member(Stream,
+  Instance(New, File_New, File_Del),
+  Instance(Start, NULL, File_Close, NULL),
+  Instance(Stream,
     File_Open, File_Close, File_Seek, File_Tell,
     File_Flush, File_EOF, File_Read, File_Write),
-  Member(Format, File_Format_To, File_Format_From));
+  Instance(Format, File_Format_To, File_Format_From));
 
 
 static const char* Process_Name(void) {
@@ -189,10 +184,6 @@ static var Process_Del(var self) {
   struct Process* p = self;
   if (p->proc isnt None) { Process_Close(self); }
   return self;
-}
-
-static size_t Process_Size(void) {
-  return sizeof(struct Process);
 }
 
 static var Process_Open(var self, var filename, var access) {
@@ -290,14 +281,13 @@ static int Process_Format_From(var self, int pos, const char* fmt, va_list va) {
 }
 
 var Process = Cello(Process,
-  Member(Doc,
+  Instance(Doc,
     Process_Name, Process_Brief, Process_Description, 
     Process_Examples, Process_Methods),
-  Member(Size, Process_Size),
-  Member(New,  Process_New, Process_Del),
-  Member(Start, NULL, Process_Close, NULL),
-  Member(Stream,
+  Instance(New,  Process_New, Process_Del),
+  Instance(Start, NULL, Process_Close, NULL),
+  Instance(Stream,
     Process_Open,  Process_Close, Process_Seek, Process_Tell,
     Process_Flush, Process_EOF,   Process_Read, Process_Write),
-  Member(Format, Process_Format_To, Process_Format_From));
+  Instance(Format, Process_Format_To, Process_Format_From));
 

@@ -25,7 +25,7 @@ static const char* Call_Methods(void) {
 }
 
 var Call = Cello(Call,
-  Member(Doc,
+  Instance(Doc,
     Call_Name, Call_Brief, Call_Description, Call_Examples, Call_Methods));
 
 var call_with(var self, var args) {
@@ -58,27 +58,7 @@ static const char* Function_Methods(void) {
 
 static var Function_New(var self, var args) {
   struct Function* f = self;
-  f->func = get(args, $(Int, 0));
-  return self;
-}
-
-static var Function_Del(var self) {
-  return self;
-}
-
-static size_t Function_Size(void) {
-  return sizeof(struct Function);
-}
-
-static var Function_Copy(var self) {
-  struct Function* f = self;
-  return new(Function, f->func);
-}
-
-static var Function_Assign(var self, var obj) {
-  struct Function* f0 = cast(self, Function);
-  struct Function* f1 = cast(obj, Function);
-  f0->func = f1->func;
+  f->func = get(args, $I(0));
   return self;
 }
 
@@ -88,14 +68,11 @@ static var Function_Call(var self, var args) {
 }
 
 var Function = Cello(Function,
-  Member(Doc,
+  Instance(Doc,
     Function_Name, Function_Brief, Function_Description,
     Function_Examples, Function_Methods),
-  Member(Size, Function_Size),
-  Member(New, Function_New, Function_Del),
-  Member(Copy, Function_Copy),
-  Member(Assign, Function_Assign),
-  Member(Call, Function_Call));
+  Instance(New, Function_New, NULL),
+  Instance(Call, Function_Call));
 
 void map(var self, var func) {
   foreach(item in self) {

@@ -47,9 +47,9 @@ static var Range_Iter_Next(var self, var curr) {
 
 /* TODO: Add extra methods */
 var Range = Cello(Range,
-  Member(Doc,
+  Instance(Doc,
     Range_Name, Range_Brief, Range_Description, Range_Examples, Range_Methods),
-  Member(Iter, Range_Iter_Init, Range_Iter_Next));
+  Instance(Iter, Range_Iter_Init, Range_Iter_Next));
   
 /* TODO: Make this `New` and just get macro to call constructor */
   

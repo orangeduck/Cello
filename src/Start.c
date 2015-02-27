@@ -24,7 +24,7 @@ const char* Start_Methods(void) {
   return "";
 }
 
-var Start = Cello(Start, Member(Doc, 
+var Start = Cello(Start, Instance(Doc, 
   Start_Name, Start_Brief, Start_Description, Start_Examples, Start_Methods));
 
 

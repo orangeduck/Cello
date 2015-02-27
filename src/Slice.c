@@ -68,7 +68,7 @@ static var Slice_Iter_Next(var self, var curr) {
 
 /* TODO: Add extra methods */
 var Slice = Cello(Slice,
-  Member(Doc,
+  Instance(Doc,
     Slice_Name, Slice_Brief, Slice_Description, Slice_Examples, Slice_Methods),
-  Member(Iter, Slice_Iter_Init, Slice_Iter_Next));
+  Instance(Iter, Slice_Iter_Init, Slice_Iter_Next));
 

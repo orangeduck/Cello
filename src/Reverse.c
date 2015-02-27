@@ -25,7 +25,7 @@ const char* Reverse_Methods(void) {
 }
 
 var Reverse = Cello(Reverse, 
-  Member(Doc,
+  Instance(Doc,
     Reverse_Name, Reverse_Brief, Reverse_Description, 
     Reverse_Examples, Reverse_Methods));
   

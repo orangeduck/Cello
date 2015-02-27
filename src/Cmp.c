@@ -25,7 +25,7 @@ static const char* Eq_Methods(void) {
 }
 
 var Eq = Cello(Eq,
-  Member(Doc,
+  Instance(Doc,
     Eq_Name, Eq_Brief, Eq_Description, Eq_Examples, Eq_Methods));
 
 var eq(var self, var obj) {
@@ -68,7 +68,7 @@ static const char* Ord_Methods(void) {
 }
 
 var Ord = Cello(Ord,
-  Member(Doc,
+  Instance(Doc,
     Ord_Name, Ord_Brief, Ord_Description, Ord_Examples, Ord_Methods));
 
 var gt(var self, var obj) {

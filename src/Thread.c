@@ -25,7 +25,7 @@ static const char* Current_Methods(void) {
 }
 
 var Current = Cello(Current,
-  Member(Doc,
+  Instance(Doc,
     Current_Name, Current_Brief, Current_Description,
     Current_Examples, Current_Methods));
 
@@ -58,7 +58,7 @@ static const char* Join_Methods(void) {
 }
 
 var Join = Cello(Join,
-  Member(Doc,
+  Instance(Doc,
     Join_Name, Join_Brief, Join_Description,
     Join_Examples, Join_Methods));
 
@@ -150,10 +150,6 @@ static var Thread_Del(var self) {
   if (t->args isnt None) { del(t->args); }
   if (t->exc_msg isnt None) { del(t->exc_msg); }
   return t;
-}
-
-static size_t Thread_Size(void) {
-  return sizeof(struct Thread);
 }
 
 static var Thread_Assign(var self, var obj) {
@@ -401,18 +397,17 @@ static var Thread_Running(var self) {
 }
 
 var Thread = Cello(Thread,
-  Member(Doc,
+  Instance(Doc,
     Thread_Name, Thread_Brief, Thread_Description, 
     Thread_Examples, Thread_Methods),
-  Member(Size,    Thread_Size),
-  Member(New,     Thread_New, Thread_Del),
-  Member(Assign,  Thread_Assign),
-  Member(Copy,    Thread_Copy),
-  Member(Call,    Thread_Call),
-  Member(Current, Thread_Current),
-  Member(Join,    Thread_Join),
-  Member(Start,   Thread_Start, Thread_Stop, Thread_Running),
-  Member(C_Int,   Thread_C_Int));
+  Instance(New,     Thread_New, Thread_Del),
+  Instance(Assign,  Thread_Assign),
+  Instance(Copy,    Thread_Copy),
+  Instance(Call,    Thread_Call),
+  Instance(Current, Thread_Current),
+  Instance(Join,    Thread_Join),
+  Instance(Start,   Thread_Start, Thread_Stop, Thread_Running),
+  Instance(C_Int,   Thread_C_Int));
 
 static const char* Lock_Name(void) {
   return "Lock";
@@ -439,7 +434,7 @@ static const char* Lock_Methods(void) {
 }
 
 var Lock = Cello(Lock,
-  Member(Doc,
+  Instance(Doc,
     Lock_Name, Lock_Brief, Lock_Description,
     Lock_Examples, Lock_Methods));
 
@@ -507,10 +502,6 @@ static var Mutex_Del(var self) {
   return m;
 }
 
-static size_t Mutex_Size(void) {
-  return sizeof(struct Mutex);
-}
-
 static var Mutex_Assign(var self, var obj) {
   struct Mutex* m0 = cast(self, Mutex);
   struct Mutex* m1 = cast(self, Mutex);
@@ -570,32 +561,31 @@ static void Mutex_Unlock(var self) {
 }
 
 var Mutex = Cello(Mutex,
-  Member(Doc, 
+  Instance(Doc, 
     Mutex_Name, Mutex_Brief, Mutex_Description, Mutex_Examples, Mutex_Methods),
-  Member(Size,   Mutex_Size),
-  Member(New,    Mutex_New, Mutex_Del),
-  Member(Assign, Mutex_Assign),
-  Member(Copy,   Mutex_Copy),
-  Member(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
-  Member(Start,  Mutex_Lock, Mutex_Unlock, NULL));
+  Instance(New,    Mutex_New, Mutex_Del),
+  Instance(Assign, Mutex_Assign),
+  Instance(Copy,   Mutex_Copy),
+  Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
+  Instance(Start,  Mutex_Lock, Mutex_Unlock, NULL));
 
-var TypeError = Cello(TypeError);
-var ValueError = Cello(ValueError);
-var ClassError = Cello(ClassError);
-var IndexOutOfBoundsError = Cello(IndexOutOfBoundsError);
-var KeyError = Cello(KeyError);
-var OutOfMemoryError = Cello(OutOfMemoryError);
-var IOError = Cello(IOError);
-var FormatError = Cello(FormatError);
-var BusyError = Cello(BusyError);
-var ResourceError = Cello(ResourceError);
+var TypeError = CelloEmpty(TypeError);
+var ValueError = CelloEmpty(ValueError);
+var ClassError = CelloEmpty(ClassError);
+var IndexOutOfBoundsError = CelloEmpty(IndexOutOfBoundsError);
+var KeyError = CelloEmpty(KeyError);
+var OutOfMemoryError = CelloEmpty(OutOfMemoryError);
+var IOError = CelloEmpty(IOError);
+var FormatError = CelloEmpty(FormatError);
+var BusyError = CelloEmpty(BusyError);
+var ResourceError = CelloEmpty(ResourceError);
 
-var ProgramAbortedError = Cello(ProgramAbortedError);
-var DivisionByZeroError = Cello(DivisionByZeroError);
-var IllegalInstructionError = Cello(IllegalInstructionError);
-var ProgramInterruptedError = Cello(ProgramInterruptedError);
-var SegmentationError = Cello(SegmentationError);
-var ProgramTerminationError = Cello(ProgramTerminationError);
+var ProgramAbortedError = CelloEmpty(ProgramAbortedError);
+var DivisionByZeroError = CelloEmpty(DivisionByZeroError);
+var IllegalInstructionError = CelloEmpty(IllegalInstructionError);
+var ProgramInterruptedError = CelloEmpty(ProgramInterruptedError);
+var SegmentationError = CelloEmpty(SegmentationError);
+var ProgramTerminationError = CelloEmpty(ProgramTerminationError);
 
 static void Exception_Signal(int sig) {
   switch(sig) {

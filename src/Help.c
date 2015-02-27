@@ -25,7 +25,7 @@ const char* Doc_Methods(void) {
 }
 
 var Doc = Cello(Doc,
-  Member(Doc,
+  Instance(Doc,
     Doc_Name, Doc_Brief, Doc_Description,
     Doc_Examples, Doc_Methods));
     
@@ -54,7 +54,7 @@ const char* Help_Methods(void) {
 }
 
 var Help = Cello(Help,
-  Member(Doc,
+  Instance(Doc,
     Help_Name, Help_Brief, Help_Description,
     Help_Examples, Help_Methods));
     

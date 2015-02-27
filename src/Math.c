@@ -52,22 +52,10 @@ static var Int_New(var self, var args) {
   return self;
 }
 
-static var Int_Del(var self) {
-  return self;
-}
-
-static size_t Int_Size(void) {
-  return sizeof(struct Int);
-}
-
 static var Int_Assign(var self, var obj) {
   struct Int* i = self;
   i->val = c_int(obj);
   return self;
-}
-
-static var Int_Copy(var self) {
-  return new(Int, self);
 }
 
 static int64_t Int_C_Int(var self) {
@@ -153,21 +141,19 @@ static var Int_Gen(void) {
 }
 
 var Int = Cello(Int,
-  Member(Doc,
+  Instance(Doc,
     Int_Name, Int_Brief, Int_Description, Int_Examples, Int_Methods),
-  Member(Size,    Int_Size),
-  Member(New,     Int_New, Int_Del),
-  Member(Assign,  Int_Assign),
-  Member(Copy,    Int_Copy),
-  Member(Eq,      Int_Eq),
-  Member(Ord,     Int_Gt, Int_Lt),
-  Member(Hash,    Int_Hash),
-  Member(C_Int,   Int_C_Int),
-  Member(Math,
+  Instance(New,     Int_New, NULL),
+  Instance(Assign,  Int_Assign),
+  Instance(Eq,      Int_Eq),
+  Instance(Ord,     Int_Gt, Int_Lt),
+  Instance(Hash,    Int_Hash),
+  Instance(C_Int,   Int_C_Int),
+  Instance(Math,
     Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Pow, 
     Int_Mod, Int_Neg, Int_Abs, Int_Exp),
-  Member(Show,    Int_Show, Int_Look),
-  Member(Gen,     Int_Gen));
+  Instance(Show,    Int_Show, Int_Look),
+  Instance(Gen,     Int_Gen));
 
 static const char* Float_Name(void) {
   return "Float";
@@ -221,22 +207,10 @@ static var Float_New(var self, var args) {
   return self;
 }
 
-static var Float_Del(var self) {
-  return self;
-}
-
-static size_t Float_Size(void) {
-  return sizeof(struct Float);
-}
-
 static var Float_Assign(var self, var obj) {
   struct Float* f = self;
   f->val = c_float(obj);
   return self;
-}
-
-static var Float_Copy(var self) {
-  return new(Float, self);
 }
 
 static double Float_C_Float(var self) {
@@ -325,21 +299,19 @@ static var Float_Gen(void) {
 }
 
 var Float = Cello(Float,
-  Member(Doc,
+  Instance(Doc,
     Float_Name, Float_Brief, Float_Description, Float_Examples, Float_Methods),
-  Member(Size,    Float_Size),
-  Member(New,     Float_New, Float_Del),
-  Member(Assign,  Float_Assign),
-  Member(Copy,    Float_Copy),
-  Member(Eq,      Float_Eq),
-  Member(Ord,     Float_Gt, Float_Lt),
-  Member(Hash,    Float_Hash),
-  Member(C_Float, Float_C_Float),
-  Member(Math,
+  Instance(New,     Float_New, NULL),
+  Instance(Assign,  Float_Assign),
+  Instance(Eq,      Float_Eq),
+  Instance(Ord,     Float_Gt, Float_Lt),
+  Instance(Hash,    Float_Hash),
+  Instance(C_Float, Float_C_Float),
+  Instance(Math,
     Float_Add, Float_Sub, Float_Mul, Float_Div, Float_Pow,
     Float_Mod, Float_Neg, Float_Abs, Float_Exp),
-  Member(Show,    Float_Show, Float_Look),
-  Member(Gen,     Float_Gen));
+  Instance(Show,    Float_Show, Float_Look),
+  Instance(Gen,     Float_Gen));
 
 
 static const char* Math_Name(void) {
@@ -367,7 +339,7 @@ static const char* Math_Methods(void) {
 }
 
 var Math = Cello(Math,
-  Member(Doc,
+  Instance(Doc,
     Math_Name, Math_Brief, Math_Description, Math_Examples, Math_Methods));
 
 void madd(var self, var obj) { method(self, Math, madd, obj); }

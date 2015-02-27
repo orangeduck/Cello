@@ -25,7 +25,7 @@ static const char* Get_Methods(void) {
 }
 
 var Get = Cello(Get,
-  Member(Doc,
+  Instance(Doc,
     Get_Name, Get_Brief, Get_Description, Get_Examples, Get_Methods));
 
 var get(var self, var key) {

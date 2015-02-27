@@ -1,8 +1,8 @@
 #include "Cello.h"
 #include "ptest.h"
 
-static var DivideByZeroError = Cello(DivideByZeroError);
-static var OtherError = Cello(OtherError);
+static var DivideByZeroError = CelloEmpty(DivideByZeroError);
+static var OtherError = CelloEmpty(OtherError);
 
 static int exception_divide(int x, int y) {
   if (y == 0) {

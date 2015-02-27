@@ -164,10 +164,6 @@ static var Array_Del(var self) {
   
 }
 
-static size_t Array_Size(void) {
-  return sizeof(struct Array);
-}
-
 static void Array_Clear(var self) {
   struct Array* a = self;
   
@@ -504,26 +500,25 @@ static var Array_Gen(void) {
 }
 
 var Array = Cello(Array,
-  Member(Doc,
+  Instance(Doc,
     Array_Name,        Array_Brief,
     Array_Description, Array_Examples,
     Array_Methods),
-  Member(Size,     Array_Size),
-  Member(New,      Array_New, Array_Del),
-  Member(Assign,   Array_Assign),
-  Member(Copy,     Array_Copy),
-  Member(Eq,       Array_Eq),
-  Member(Clear,    Array_Clear),
-  Member(Push,
-    Array_Push,    Array_Pop,
-    Array_Push_At, Array_Pop_At),
-  Member(Len,      Array_Len),
-  Member(Get,      Array_Get, Array_Set, Array_Mem, Array_Rem),
-  Member(Iter,     Array_Iter_Init, Array_Iter_Next),
-  Member(Reverse,  Array_Reverse),
-  Member(Sort,     Array_Sort_With),
-  Member(Show,     Array_Show, NULL),
-  Member(Reserve,  Array_Reserve),
-  Member(Gen,      Array_Gen));
+  Instance(New,     Array_New, Array_Del),
+  Instance(Assign,  Array_Assign),
+  Instance(Copy,    Array_Copy),
+  Instance(Eq,      Array_Eq),
+  Instance(Clear,   Array_Clear),
+  Instance(Push,
+    Array_Push,     Array_Pop,
+    Array_Push_At,  Array_Pop_At),
+  Instance(Len,     Array_Len),
+  Instance(Get,     Array_Get, Array_Set, Array_Mem, Array_Rem),
+  Instance(Iter,    Array_Iter_Init, Array_Iter_Next),
+  Instance(Reverse, Array_Reverse),
+  Instance(Sort,    Array_Sort_With),
+  Instance(Show,    Array_Show, NULL),
+  Instance(Reserve, Array_Reserve),
+  Instance(Gen,     Array_Gen));
 
   

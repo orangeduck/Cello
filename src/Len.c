@@ -25,7 +25,7 @@ static const char* Len_Methods(void) {
 }
 
 var Len = Cello(Len,
-  Member(Doc,
+  Instance(Doc,
     Len_Name, Len_Brief, Len_Description, Len_Examples, Len_Methods));
 
 size_t len(var self) {

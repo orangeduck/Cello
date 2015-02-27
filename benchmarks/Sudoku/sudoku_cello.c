@@ -26,11 +26,7 @@ static var Sudoku_New(var self, var args) {
 
 }
 
-static size_t Sudoku_Size(void) {
-  return sizeof(struct Sudoku);
-}
-
-static var Sudoku = Cello(Sudoku, Member(New, Sudoku_New, NULL, Sudoku_Size));
+static var Sudoku = Cello(Sudoku, Instance(New, Sudoku_New, NULL));
 
 static int Sudoku_Update(
   struct Sudoku* aux, int8_t sr[729], uint8_t sc[324], int r, int v) {

@@ -25,7 +25,7 @@ static const char* Hash_Methods(void) {
 }
 
 var Hash = Cello(Hash,
-  Member(Doc,
+  Instance(Doc,
     Hash_Name, Hash_Brief, Hash_Description, Hash_Examples, Hash_Methods));
 
 static uint64_t seed = 0xCe110;

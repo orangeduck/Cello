@@ -22,12 +22,7 @@ static var Matrix_Del(var self) {
 	return self;
 }
 
-static size_t Matrix_Size(void) {
-  return sizeof(struct Matrix);
-}
-
-static var Matrix = Cello(Matrix,
-  Member(New, Matrix_New, Matrix_Del, Matrix_Size));
+static var Matrix = Cello(Matrix, Instance(New, Matrix_New, Matrix_Del));
 
 static struct Matrix* Matrix_Gen(int n) {
 	struct Matrix* m = new(Matrix, $I(n));

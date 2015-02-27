@@ -40,37 +40,6 @@ var CelloHeader_Init(struct CelloHeader* head, var type, int flags) {
   return ((char*)head) + sizeof(struct CelloHeader);
 }
 
-static const char* Size_Name(void) {
-  return "Size";
-}
-
-/* TODO */
-static const char* Size_Brief(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Size_Description(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Size_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Size_Methods(void) {
-  return "";
-}
-
-var Size = Cello(Size, Member(Doc, 
-  Size_Name, Size_Brief, Size_Description, Size_Examples, Size_Methods));
-
-size_t size(var type) {
-  return type_method(type, Size, size);
-}
-
 static const char* Alloc_Name(void) {
   return "Alloc";
 }
@@ -95,7 +64,7 @@ static const char* Alloc_Methods(void) {
   return "";
 }
 
-var Alloc = Cello(Alloc, Member(Doc, 
+var Alloc = Cello(Alloc, Instance(Doc, 
   Alloc_Name, Alloc_Brief, Alloc_Description, Alloc_Examples, Alloc_Methods));
 
 
@@ -190,7 +159,7 @@ static const char* New_Methods(void) {
 }
 
 var New = Cello(New,
-  Member(Doc, New_Name, New_Brief, New_Description, New_Examples, New_Methods));
+  Instance(Doc, New_Name, New_Brief, New_Description, New_Examples, New_Methods));
 
 var construct_with(var self, var args) {
   return method(self, New, construct_with, args);

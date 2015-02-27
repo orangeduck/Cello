@@ -468,9 +468,9 @@ static var TestType_Eq(var self, var obj) {
 }
 
 var TestType = Cello(TestType,
-  Member(Size, TestType_Size),
-  Member(New, TestType_New, TestType_Del),
-  Member(Eq, TestType_Eq));
+  Instance(Size, TestType_Size),
+  Instance(New, TestType_New, TestType_Del),
+  Instance(Eq, TestType_Eq));
 
 PT_FUNC(test_type_new) {
  

@@ -9,10 +9,6 @@ struct Body {
   double mass;
 };
 
-static size_t Body_Size(void) {
-  return sizeof(struct Body);
-}
-
 static void Body_Offset_Momentum(var self, double px, double py, double pz) {
   struct Body* b = self;
   b->vx = -px / solar_mass;
@@ -20,7 +16,7 @@ static void Body_Offset_Momentum(var self, double px, double py, double pz) {
   b->vz = -pz / solar_mass;
 }
 
-var Body = Cello(Body, Member(New, NULL, NULL, Body_Size));
+var Body = Cello(Body);
 
 static void Bodies_Advance(var bodies, double dt) {
   

@@ -46,12 +46,16 @@ static var Tuple_New(var self, var args) {
 
 static var Tuple_Del(var self) {
   struct Tuple* t = self;
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
+  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+    throw(ValueError, "Cannot free Tuple, not on heap!");
+  }
+#endif
+  
   free(t->items);
   return self;
-}
-
-static size_t Tuple_Size(void) {
-  return sizeof(struct Tuple);
 }
 
 static var Tuple_Assign(var self, var obj) {
@@ -324,17 +328,16 @@ static void Tuple_Clear(var self) {
 }
 
 var Tuple = Cello(Tuple,
-  Member(Doc,
+  Instance(Doc,
     Tuple_Name, Tuple_Brief, Tuple_Description, Tuple_Examples, Tuple_Methods),
-  Member(Size,   Tuple_Size),
-  Member(New,    Tuple_New, Tuple_Del),
-  Member(Assign, Tuple_Assign),
-  Member(Copy,   Tuple_Copy),
-  Member(Len,    Tuple_Len),
-  Member(Get,    Tuple_Get, Tuple_Set, Tuple_Mem, Tuple_Rem),
-  Member(Push,   Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),
-  Member(Concat, Tuple_Concat, Tuple_Push),
-  Member(Clear,  Tuple_Clear),
-  Member(Iter,   Tuple_Iter_Init, Tuple_Iter_Next),
-  Member(Show,   Tuple_Show, NULL));
+  Instance(New,    Tuple_New, Tuple_Del),
+  Instance(Assign, Tuple_Assign),
+  Instance(Copy,   Tuple_Copy),
+  Instance(Len,    Tuple_Len),
+  Instance(Get,    Tuple_Get, Tuple_Set, Tuple_Mem, Tuple_Rem),
+  Instance(Push,   Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),
+  Instance(Concat, Tuple_Concat, Tuple_Push),
+  Instance(Clear,  Tuple_Clear),
+  Instance(Iter,   Tuple_Iter_Init, Tuple_Iter_Next),
+  Instance(Show,   Tuple_Show, NULL));
 

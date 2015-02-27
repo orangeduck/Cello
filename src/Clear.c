@@ -25,7 +25,7 @@ const char* Clear_Methods(void) {
 }
 
 var Clear = Cello(Clear, 
-  Member(Doc,
+  Instance(Doc,
     Clear_Name, Clear_Brief, Clear_Description, 
     Clear_Examples, Clear_Methods));
   
