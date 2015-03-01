@@ -105,6 +105,11 @@ static var List_New(var self, var args) {
   return self;
 }
 
+static var List_Subtype(var self) {
+  struct List* l = self;
+  return l->type;
+}
+
 static void List_Clear(var self) {
   struct List* l = self;
   var item = *List_Next(l, l->head);
@@ -131,6 +136,18 @@ static var List_Assign(var self, var obj) {
   struct List* l = self;
 
   List_Clear(self);
+  if (l->head isnt None) { List_Free(l, l->head); }
+  if (l->head isnt None) { List_Free(l, l->tail); }
+  
+  l->type = subtype(obj);
+  l->tsize = size(l->type);
+  l->head = List_Alloc(l);
+  l->tail = List_Alloc(l);
+  
+  *List_Next(l, l->head) = l->tail;
+  *List_Prev(l, l->head) = Undefined;
+  *List_Next(l, l->tail) = Undefined;
+  *List_Prev(l, l->tail) = l->head;
   
   size_t nargs = len(obj);
   for(size_t i = 0; i < nargs; i++) {
@@ -372,25 +389,36 @@ static var List_Gen(void) {
   return l;
 }
 
+static void List_Traverse(var self, var func) {
+  struct List* l = self;
+  var item = *List_Next(l, l->head);
+  while (item isnt l->tail) {
+    call_with(func, item);
+    item = *List_Next(l, item);
+  }
+}
+
 var List = Cello(List,
   Instance(Doc,
     List_Name,        List_Brief,
     List_Description, List_Examples,
     List_Methods),
-  Instance(New,     List_New, List_Del),
-  Instance(Assign,  List_Assign),
-  Instance(Copy,    List_Copy),
-  Instance(Eq,      List_Eq),
-  Instance(Clear,   List_Clear),
+  Instance(New,      List_New, List_Del),
+  Instance(Subtype,  List_Subtype, NULL, NULL),
+  Instance(Assign,   List_Assign),
+  Instance(Copy,     List_Copy),
+  Instance(Traverse, List_Traverse),
+  Instance(Eq,       List_Eq),
+  Instance(Clear,    List_Clear),
   Instance(Push,
-    List_Push,      List_Pop,
-    List_Push_At,   List_Pop_At),
-  Instance(Len,     List_Len),
-  Instance(Get,     List_Get, List_Set, List_Mem, List_Rem),
-  Instance(Iter,    List_Iter_Init, List_Iter_Next),
-  Instance(Reverse, List_Reverse),
-  //Member(Sort,    List_Sort_With),
-  Instance(Show,    List_Show, NULL),
-  Instance(Reserve, List_Reserve),
-  Instance(Gen,     List_Gen));
+    List_Push,       List_Pop,
+    List_Push_At,    List_Pop_At),
+  Instance(Len,      List_Len),
+  Instance(Get,      List_Get, List_Set, List_Mem, List_Rem),
+  Instance(Iter,     List_Iter_Init, List_Iter_Next),
+  Instance(Reverse,  List_Reverse),
+  //Member(Sort,     List_Sort_With),
+  Instance(Show,     List_Show, NULL),
+  Instance(Reserve,  List_Reserve),
+  Instance(Gen,      List_Gen));
   

@@ -167,8 +167,23 @@ static var Map_Del(var self) {
   return self;
 }
 
+static var Map_Key_Subtype(var self) {
+  struct Map* m = self;  
+  return m->ktype;
+}
+
+static var Map_Val_Subtype(var self) {
+  struct Map* m = self;  
+  return m->vtype;
+}
+
 static var Map_Assign(var self, var obj) {
+  struct Map* m = self;
   Map_Clear(self);
+  m->ktype = key_subtype(obj);
+  m->vtype = val_subtype(obj);
+  m->ksize = size(m->ktype);
+  m->vsize = size(m->vtype);
   foreach (key in obj) {
     Map_Set(self, key, get(obj, key));
   }
@@ -645,19 +660,35 @@ static var Map_Gen(void) {
   return m;
 }
 
+static void Map_Traverse(var self, var func) {  
+  struct Map* m = self;
+
+  var curr = Map_Iter_Init(self);
+  
+  while (curr isnt Terminal) {
+    var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
+    call_with(func, Map_Key(m, node));
+    call_with(func, Map_Val(m, node));
+    curr = Map_Iter_Next(self, curr);
+  }
+  
+}
+
 var Map = Cello(Map,
   Instance(Doc,
     Map_Name, Map_Brief, Map_Description,
     Map_Examples, Map_Methods),
-  Instance(New,    Map_New, Map_Del),
-  Instance(Assign, Map_Assign),
-  Instance(Copy,   Map_Copy),
-  Instance(Eq,     Map_Eq),
-  Instance(Len,    Map_Len),
-  Instance(Get,    Map_Get, Map_Set, Map_Mem, Map_Rem),
-  Instance(Clear,  Map_Clear),
-  Instance(Iter,   Map_Iter_Init, Map_Iter_Next),
-  Instance(Show,   Map_Show, NULL),
-  Instance(Gen,    Map_Gen));
+  Instance(New,      Map_New, Map_Del),
+  Instance(Subtype,  Map_Key_Subtype, Map_Key_Subtype, Map_Val_Subtype),
+  Instance(Assign,   Map_Assign),
+  Instance(Copy,     Map_Copy),
+  Instance(Traverse, Map_Traverse),
+  Instance(Eq,       Map_Eq),
+  Instance(Len,      Map_Len),
+  Instance(Get,      Map_Get, Map_Set, Map_Mem, Map_Rem),
+  Instance(Clear,    Map_Clear),
+  Instance(Iter,     Map_Iter_Init, Map_Iter_Next),
+  Instance(Show,     Map_Show, NULL),
+  Instance(Gen,      Map_Gen));
 
 

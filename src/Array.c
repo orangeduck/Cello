@@ -149,6 +149,11 @@ static var Array_New(var self, var args) {
   return self;
 }
 
+static var Array_Subtype(var self) {
+  struct Array* a = self;
+  return a->type;
+}
+
 static var Array_Del(var self) {
   
   struct Array* a = self;
@@ -182,6 +187,8 @@ static var Array_Assign(var self, var obj) {
 
   Array_Clear(self);
   
+  a->type = subtype(obj);
+  a->tsize = Array_Size_Round(size(a->type));
   a->nitems = len(obj);
   a->nslots = a->nitems;
   
@@ -191,9 +198,11 @@ static var Array_Assign(var self, var obj) {
   }
   
   a->data = malloc(a->nslots * Array_Step(a));
+  a->sspace0 = realloc(a->sspace0, Array_Step(a));
+  a->sspace1 = realloc(a->sspace1, Array_Step(a));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (a->data is None) {
+  if (a->data is None or a->sspace0 is None or a->sspace1 is None) {
     throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
   }
 #endif
@@ -499,26 +508,35 @@ static var Array_Gen(void) {
   return a;
 }
 
+static void Array_Traverse(var self, var func) {
+  struct Array* a = self;
+  for (size_t i = 0; i < a->nitems; i++) {
+    call_with(func, Array_Item(a, i));
+  }
+}
+
 var Array = Cello(Array,
   Instance(Doc,
     Array_Name,        Array_Brief,
     Array_Description, Array_Examples,
     Array_Methods),
-  Instance(New,     Array_New, Array_Del),
-  Instance(Assign,  Array_Assign),
-  Instance(Copy,    Array_Copy),
-  Instance(Eq,      Array_Eq),
-  Instance(Clear,   Array_Clear),
+  Instance(New,      Array_New, Array_Del),
+  Instance(Subtype,  Array_Subtype, NULL, NULL),
+  Instance(Assign,   Array_Assign),
+  Instance(Copy,     Array_Copy),
+  Instance(Traverse, Array_Traverse),
+  Instance(Eq,       Array_Eq),
+  Instance(Clear,    Array_Clear),
   Instance(Push,
-    Array_Push,     Array_Pop,
-    Array_Push_At,  Array_Pop_At),
-  Instance(Len,     Array_Len),
-  Instance(Get,     Array_Get, Array_Set, Array_Mem, Array_Rem),
-  Instance(Iter,    Array_Iter_Init, Array_Iter_Next),
-  Instance(Reverse, Array_Reverse),
-  Instance(Sort,    Array_Sort_With),
-  Instance(Show,    Array_Show, NULL),
-  Instance(Reserve, Array_Reserve),
-  Instance(Gen,     Array_Gen));
+    Array_Push,      Array_Pop,
+    Array_Push_At,   Array_Pop_At),
+  Instance(Len,      Array_Len),
+  Instance(Get,      Array_Get, Array_Set, Array_Mem, Array_Rem),
+  Instance(Iter,     Array_Iter_Init, Array_Iter_Next),
+  Instance(Reverse,  Array_Reverse),
+  Instance(Sort,     Array_Sort_With),
+  Instance(Show,     Array_Show, NULL),
+  Instance(Reserve,  Array_Reserve),
+  Instance(Gen,      Array_Gen));
 
   

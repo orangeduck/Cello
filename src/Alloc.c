@@ -71,7 +71,8 @@ var Alloc = Cello(Alloc, Instance(Doc,
 var alloc_stk(var type, var head, var data, size_t size) {
   CelloHeader_Init(head, type, CelloStackAlloc);
   memcpy((char*)head + sizeof(struct CelloHeader), data, size);
-  return (char*)head + sizeof(struct CelloHeader);
+  var self = (char*)head + sizeof(struct CelloHeader);  
+  return self;
 }
 
 var alloc(var type) {
@@ -180,9 +181,35 @@ var new_with(var type, var args) {
     self = type_method(type, New, construct_with, self, args);
   }
   
+#if CELLO_GC == 1
+  Cello_GC_Add(self, CelloHeapAlloc);
+#endif
+  
   return self;
 }
 
+#if CELLO_GC == 1
+
+var new_gc_with(var type, var args) {
+  
+  var self = alloc(type);
+  
+  if (type_implements_method(type, New, construct_with)) {
+    self = type_method(type, New, construct_with, self, args);
+  }
+  
+  Cello_GC_Add(self, CelloGCAlloc);
+  
+  return self;
+  
+}
+
+#endif
+
 void del(var self) {
   dealloc(destruct(self));
+
+#if CELLO_GC == 1
+  Cello_GC_Rem(self);
+#endif
 }

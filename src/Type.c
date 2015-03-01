@@ -185,7 +185,7 @@ static void Type_Builtin_Hash_Inc(struct Type* t) {
 }
 
 static int Type_Show(var self, var output, int pos) {
-  return format_to(output, pos, "%s", self);
+  return format_to(output, pos, "%s", Type_Builtin_Name(self));
 }
 
 static var Type_Eq(var self, var obj) {
@@ -443,7 +443,7 @@ static var Type_Of(var self) {
       and head isnt True
       and head->magic isnt ((var)0xCe110)) {
         throw(ValueError, "Pointer '%p' passed to 'type_of' "
-          "has bad magic number, it wasn't allocated by Cello.\n", self);
+          "has bad magic number, it wasn't allocated by Cello.", self);
       }
 #endif
     

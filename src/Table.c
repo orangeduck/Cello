@@ -160,6 +160,16 @@ static var Table_Del(var self) {
   return self;
 }
 
+static var Table_Key_Subtype(var self) {
+  struct Table* t = self;  
+  return t->ktype;
+}
+
+static var Table_Val_Subtype(var self) {
+  struct Table* t = self;  
+  return t->vtype;
+}
+
 static void Table_Clear(var self) {
   struct Table* t = self;
   
@@ -182,6 +192,10 @@ static var Table_Assign(var self, var obj) {
   struct Table* t = self;  
   Table_Clear(t);
   
+  t->ktype = key_subtype(obj);
+  t->vtype = val_subtype(obj);
+  t->ksize = Table_Size_Round(size(t->ktype));
+  t->vsize = Table_Size_Round(size(t->vtype));
   t->nitems = 0;
   t->nslots = Table_Ideal_Size(len(obj));
   
@@ -191,12 +205,17 @@ static var Table_Assign(var self, var obj) {
   }
   
   t->data = calloc(t->nslots, Table_Step(t));
+  t->sspace0 = realloc(t->sspace0, Table_Step(t));
+  t->sspace1 = realloc(t->sspace1, Table_Step(t));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->data is None) {
+  if (t->data is None or t->sspace0 is None or t->sspace1 is None) {
     throw(OutOfMemoryError, "Cannot allocate Table, out of memory!");
   }
 #endif
+
+  memset(t->sspace0, 0, Table_Step(t));
+  memset(t->sspace1, 0, Table_Step(t));
   
   foreach(key in obj) {
     Table_Set_Move(t, key, get(obj, key), False);
@@ -567,19 +586,31 @@ static var Table_Gen(void) {
   return t;
 }
 
+static void Table_Traverse(var self, var func) {
+  struct Table* t = self;
+  for(size_t i = 0; i < t->nslots; i++) {
+    if (Table_Key_Hash(t, i) isnt 0) {
+      call_with(func, Table_Key(t, i));
+      call_with(func, Table_Val(t, i));
+    }
+  }
+}
+
 var Table = Cello(Table,
   Instance(Doc,
     Table_Name, Table_Brief, Table_Description,
-    Table_Examples, Table_Methods),
-  Instance(New,     Table_New, Table_Del),
-  Instance(Assign,  Table_Assign),
-  Instance(Copy,    Table_Copy),
-  Instance(Eq,      Table_Eq),
-  Instance(Len,     Table_Len),
-  Instance(Get,     Table_Get, Table_Set, Table_Mem, Table_Rem),
-  Instance(Clear,   Table_Clear),
-  Instance(Iter,    Table_Iter_Init, Table_Iter_Next),
-  Instance(Show,    Table_Show, NULL),
-  Instance(Reserve, Table_Reserve),
-  Instance(Gen,     Table_Gen));
+    Table_Examples,  Table_Methods),
+  Instance(New,      Table_New, Table_Del),
+  Instance(Subtype,  Table_Key_Subtype, Table_Key_Subtype, Table_Val_Subtype),
+  Instance(Assign,   Table_Assign),
+  Instance(Copy,     Table_Copy),
+  Instance(Traverse, Table_Traverse),
+  Instance(Eq,       Table_Eq),
+  Instance(Len,      Table_Len),
+  Instance(Get,      Table_Get, Table_Set, Table_Mem, Table_Rem),
+  Instance(Clear,    Table_Clear),
+  Instance(Iter,     Table_Iter_Init, Table_Iter_Next),
+  Instance(Show,     Table_Show, NULL),
+  Instance(Reserve,  Table_Reserve),
+  Instance(Gen,      Table_Gen));
 

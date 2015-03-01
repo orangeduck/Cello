@@ -1,4 +1,4 @@
-
+#include "../include/Cello.h"
 #include "ptest.h"
 
 void suite_core(void);
@@ -24,5 +24,7 @@ int main(int argc, char** argv) {
   pt_add_suite(suite_exception);
   
   pt_run();
+  
+  return 0;
   
 }

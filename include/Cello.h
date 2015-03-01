@@ -49,6 +49,10 @@
 #define CELLO_MEMORY_CHECK 1
 #endif
 
+#ifndef CELLO_GC
+#define CELLO_GC 1
+#endif
+
 #ifndef CELLO_MAGIC
 #define CELLO_MAGIC 1
 #define CELLO_MAGIC_HEADER ((var)0xCe110),
@@ -551,7 +555,11 @@ void del(var self);
 var assign(var self, var obj);
 var copy(var obj);
 
-void traverse(var self, var f);
+void traverse(var self, var func);
+
+var subtype(var self);
+var key_subtype(var self);
+var val_subtype(var self);
 
 var eq(var self, var obj);
 var neq(var self, var obj);
@@ -753,4 +761,27 @@ var check(var func, var name, var iterations, var types);
 
 #define quickcheck(F, ...) check(F, $S(#F), $I(1000), tuple(__VA_ARGS__))
 
+#if CELLO_GC == 1
+
+#define new_gc(T, ...) new_gc_with(T, tuple(__VA_ARGS__))
+var new_gc_with(var type, var args);
+
+extern var Cello_GC_StackBottom;
+
+void Cello_GC_Add(var ptr, int flags);
+void Cello_GC_Rem(var ptr);
+void Cello_GC_Mark(void);
+void Cello_GC_Sweep(void);
+
+int Cello_Main(int,char**);
+
+#define main(...) \
+  main(int argc, char** argv) { \
+    var stk; Cello_GC_StackBottom = &stk; \
+    return Cello_Main(argc, argv); \
+  }; \
+  int Cello_Main(__VA_ARGS__)
+
+#endif
+  
 #endif
