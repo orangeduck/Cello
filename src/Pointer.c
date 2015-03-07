@@ -90,13 +90,18 @@ static var Ref_Deref(var self) {
   return r->val;
 }
 
+static void Ref_Traverse(var self, var func) {
+  call_with(func, Ref_Deref(self));
+}
+
 var Ref = Cello(Ref,
   Instance(Doc,
     Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, Ref_Methods),
-  Instance(New,     Ref_New, NULL),
-  Instance(Assign,  Ref_Assign),
-  Instance(Show,    Ref_Show, NULL),
-  Instance(Pointer, Ref_Ref, Ref_Deref));
+  Instance(New,      Ref_New, NULL),
+  Instance(Assign,   Ref_Assign),
+  Instance(Traverse, Ref_Traverse),
+  Instance(Show,     Ref_Show, NULL),
+  Instance(Pointer,  Ref_Ref, Ref_Deref));
 
   
 static const char* Box_Name(void) {
@@ -158,11 +163,16 @@ static var Box_Deref(var self) {
   return b->val;
 }
 
+static void Box_Traverse(var self, var func) {
+  call_with(func, Box_Deref(self));
+}
+
 var Box = Cello(Box,
   Instance(Doc,
     Box_Name, Box_Brief, Box_Description, Box_Examples, Box_Methods),
-  Instance(New,     Box_New, Box_Del),
-  Instance(Assign,  Box_Assign),
-  Instance(Show,    Box_Show, NULL),
-  Instance(Pointer, Box_Ref, Box_Deref));
+  Instance(New,      Box_New, Box_Del),
+  Instance(Assign,   Box_Assign),
+  Instance(Traverse, Box_Traverse),
+  Instance(Show,     Box_Show, NULL),
+  Instance(Pointer,  Box_Ref, Box_Deref));
   

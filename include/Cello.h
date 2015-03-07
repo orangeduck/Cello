@@ -536,6 +536,7 @@ var construct_with(var self, var args);
 var destruct(var self);
 
 #define new(T, ...) new_with(T, tuple(__VA_ARGS__))
+#define new_root(T, ...) new_root_with(T, tuple(__VA_ARGS__))
 #define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
 
 #define new_$I(X) new_$(Int, X)
@@ -550,6 +551,7 @@ var destruct(var self);
 #define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
 
 var new_with(var type, var args);
+var new_root_with(var type, var args);
 void del(var self);
 
 var assign(var self, var obj);
@@ -763,21 +765,17 @@ var check(var func, var name, var iterations, var types);
 
 #if CELLO_GC == 1
 
-#define new_gc(T, ...) new_gc_with(T, tuple(__VA_ARGS__))
-var new_gc_with(var type, var args);
-
-extern var Cello_GC_StackBottom;
-
+void Cello_GC_Init(var stk);
 void Cello_GC_Add(var ptr, int flags);
 void Cello_GC_Rem(var ptr);
 void Cello_GC_Mark(void);
 void Cello_GC_Sweep(void);
 
-int Cello_Main(int,char**);
+int Cello_Main(int argc, char** argv);
 
 #define main(...) \
   main(int argc, char** argv) { \
-    var stk; Cello_GC_StackBottom = &stk; \
+    var stk; Cello_GC_Init(&stk); \
     return Cello_Main(argc, argv); \
   }; \
   int Cello_Main(__VA_ARGS__)

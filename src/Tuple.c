@@ -327,17 +327,26 @@ static void Tuple_Clear(var self) {
   t->items[0] = Terminal;
 }
 
+static void Tuple_Traverse(var self, var func) {
+  struct Tuple* t = self;
+  size_t i = 0;
+  while (t->items[i] isnt Terminal) {
+    call_with(func, t->items[i]); i++;
+  }
+}
+
 var Tuple = Cello(Tuple,
   Instance(Doc,
     Tuple_Name, Tuple_Brief, Tuple_Description, Tuple_Examples, Tuple_Methods),
-  Instance(New,    Tuple_New, Tuple_Del),
-  Instance(Assign, Tuple_Assign),
-  Instance(Copy,   Tuple_Copy),
-  Instance(Len,    Tuple_Len),
-  Instance(Get,    Tuple_Get, Tuple_Set, Tuple_Mem, Tuple_Rem),
-  Instance(Push,   Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),
-  Instance(Concat, Tuple_Concat, Tuple_Push),
-  Instance(Clear,  Tuple_Clear),
-  Instance(Iter,   Tuple_Iter_Init, Tuple_Iter_Next),
-  Instance(Show,   Tuple_Show, NULL));
+  Instance(New,      Tuple_New, Tuple_Del),
+  Instance(Assign,   Tuple_Assign),
+  Instance(Copy,     Tuple_Copy),
+  Instance(Len,      Tuple_Len),
+  Instance(Get,      Tuple_Get, Tuple_Set, Tuple_Mem, Tuple_Rem),
+  Instance(Push,     Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),
+  Instance(Concat,   Tuple_Concat, Tuple_Push),
+  Instance(Clear,    Tuple_Clear),
+  Instance(Iter,     Tuple_Iter_Init, Tuple_Iter_Next),
+  Instance(Traverse, Tuple_Traverse),
+  Instance(Show,     Tuple_Show, NULL));
 

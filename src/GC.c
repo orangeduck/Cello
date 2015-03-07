@@ -2,8 +2,8 @@
 
 #if CELLO_GC == 1
 
-var Cello_GC_StackBottom = NULL;
-var Cello_GC_GCTab = NULL;
+static var Cello_GC_StackBottom = NULL;
+static var Cello_GC_GCTab = NULL;
 
 enum {
   GCTAB_PRIMES_COUNT = 24
@@ -132,11 +132,7 @@ static void GCTab_Set(struct GCTab* t, var ptr, uint64_t flags) {
 
 static void GCTab_Rem(struct GCTab* t, var ptr) {
   
-  if (t->nslots is 0) {
-    /* TODO: Error not in table */
-    fprintf(stderr, "GC ERROR %p NOT IN TABLE\n", ptr);
-    abort();
-  }
+  if (t->nslots is 0) { return; }
   
   uint64_t i = GCTab_Hash(ptr) % t->nslots;
   uint64_t j = 0;
@@ -144,12 +140,7 @@ static void GCTab_Rem(struct GCTab* t, var ptr) {
   while (True) {
     
     uint64_t h = t->entries[i].hash;
-    if (h is 0 or j > GCTab_Probe(t, i, h)) {
-      /* TODO: Error not in table */
-      fprintf(stderr, "GC ERROR %p NOT IN TABLE\n", ptr);
-      abort();
-    }
-    
+    if (h is 0 or j > GCTab_Probe(t, i, h)) { return; }
     if (t->entries[i].ptr == ptr) {
       
       memset(&t->entries[i], 0, sizeof(struct GCEntry));
@@ -168,6 +159,7 @@ static void GCTab_Rem(struct GCTab* t, var ptr) {
         
       }
       
+      t->nitems--;
       return;
     }
     
@@ -180,21 +172,25 @@ static var Cello_GC_Mark_Item(var ptr);
 
 static void Cello_GC_Recurse(var ptr) {
   
+  if (ptr is Undefined
+  or  ptr is Terminal
+  or  ptr is True
+  or  ptr is False) { return; }
+  
   var type = type_of(ptr);
   
-  if (type is Int   or type is Float 
-  or type is String or type is Type 
-  or type is Bool   or type is Terminal
-  or type is File   or type is Function
-  or type is Undefined) { return; }
+  if (type is Int    or type is Float 
+  or  type is String or type is Type
+  or  type is File   or type is Process
+  or  type is Function) { return; }
   
-  if (implements(ptr, Traverse)) {
+  if (type_implements(type, Traverse)) {
     traverse(ptr, $(Function, Cello_GC_Mark_Item));
     return;
   }
   
   for (size_t s = 0; s < size(type); s += sizeof(var)) {
-    Cello_GC_Mark_Item((var)(((char*)ptr) + sizeof(var) * s));
+    Cello_GC_Mark_Item(((char*)ptr) + sizeof(var) * s);
   }
   
 }
@@ -208,8 +204,11 @@ static var Cello_GC_Mark_Item(var ptr) {
   uint64_t j = 0;
   
   while (True) {
+    
     uint64_t h = t->entries[i].hash;
+    
     if (h is 0 or j > GCTab_Probe(t, i, h)) { return False; }
+    
     if ((t->entries[i].ptr == ptr) and
     not (t->entries[i].flags & CelloMarked)) {
       t->entries[i].flags |= CelloMarked;
@@ -310,16 +309,19 @@ void Cello_GC_Sweep(void) {
   
 }
 
+static void Cello_GC_Finish(void) {
+  Cello_GC_Sweep();
+  free(Cello_GC_GCTab);
+}
+
+void Cello_GC_Init(var stk) {
+  Cello_GC_StackBottom = stk;
+  Cello_GC_GCTab = calloc(sizeof(struct GCTab), 1);
+  atexit(Cello_GC_Finish);
+}
+
 void Cello_GC_Add(var ptr, int flags) {
-  
   struct GCTab* t = Cello_GC_GCTab;
-  
-  if (t is None) {
-    t = calloc(sizeof(struct GCTab), 1);
-    Cello_GC_GCTab = t;
-    atexit(Cello_GC_Sweep);
-  }
-  
   t->nitems++;
   GCTab_Resize_More(t);
   GCTab_Set(t, ptr, flags);
@@ -328,7 +330,6 @@ void Cello_GC_Add(var ptr, int flags) {
 void Cello_GC_Rem(var ptr) {
   struct GCTab* t = Cello_GC_GCTab;
   GCTab_Rem(t, ptr);
-  t->nitems--;
   GCTab_Resize_Less(t);
 }
 

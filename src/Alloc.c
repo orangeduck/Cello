@@ -175,6 +175,26 @@ var destruct(var self) {
 
 var new_with(var type, var args) { 
   
+#if CELLO_GC == 1
+  Cello_GC_Mark();
+  Cello_GC_Sweep();
+#endif
+  
+  var self = alloc(type);
+  
+  if (type_implements_method(type, New, construct_with)) {
+    self = type_method(type, New, construct_with, self, args);
+  }
+  
+#if CELLO_GC == 1
+  Cello_GC_Add(self, CelloGCAlloc);
+#endif
+  
+  return self;
+}
+
+var new_root_with(var type, var args) { 
+  
   var self = alloc(type);
   
   if (type_implements_method(type, New, construct_with)) {
@@ -187,24 +207,6 @@ var new_with(var type, var args) {
   
   return self;
 }
-
-#if CELLO_GC == 1
-
-var new_gc_with(var type, var args) {
-  
-  var self = alloc(type);
-  
-  if (type_implements_method(type, New, construct_with)) {
-    self = type_method(type, New, construct_with, self, args);
-  }
-  
-  Cello_GC_Add(self, CelloGCAlloc);
-  
-  return self;
-  
-}
-
-#endif
 
 void del(var self) {
   dealloc(destruct(self));
