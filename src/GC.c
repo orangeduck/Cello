@@ -2,7 +2,6 @@
 
 #if CELLO_GC == 1
 
-static var Cello_GC_StackBottom = NULL;
 static var Cello_GC_GCTab = NULL;
 
 enum {
@@ -28,6 +27,10 @@ struct GCTab {
   struct GCEntry* entries;
   size_t nslots;
   size_t nitems;
+  size_t mitems;
+  uintptr_t maxptr;
+  uintptr_t minptr;
+  var bottom;
 };
 
 static uint64_t GCTab_Probe(struct GCTab* t, uint64_t i, uint64_t h) {
@@ -225,8 +228,10 @@ static var Cello_GC_Mark_Item(var ptr) {
 
 static void Cello_GC_Mark_Stack(void) {
   
-  var stk;
-  var bot = Cello_GC_StackBottom;
+  struct GCTab* t = Cello_GC_GCTab;
+  
+  var stk = None;
+  var bot = t->bottom;
   var top = &stk;
   
   if (bot is None) {
@@ -241,15 +246,16 @@ static void Cello_GC_Mark_Stack(void) {
   
   for (var p = top; p <= bot; p += sizeof(var)) {
     uintptr_t a = *((uintptr_t*)p);
-    if (a % sizeof(var) is 0 and a > 8 and a isnt 0xCe110) {
-      Cello_GC_Mark_Item((var)a);
-    }
+    if (a % sizeof(var) is 0
+    and a isnt 0xCe110
+    and a >= t->minptr
+    and a <= t->maxptr) { Cello_GC_Mark_Item((var)a); }
   }
   
 }
 
-void Cello_GC_Mark(void) {
-
+void gc_mark(void) {
+  
   struct GCTab* t = Cello_GC_GCTab;
   if (t is None) { return; }
   
@@ -263,13 +269,28 @@ void Cello_GC_Mark(void) {
   }
   
   jmp_buf env;
+  memset(&env, 0, sizeof(jmp_buf));
   setjmp(env);
   Cello_GC_Mark_Stack();
   
 }
 
-void Cello_GC_Sweep(void) {
+static void Cello_GC_Print(void) {
+ 
   struct GCTab* t = Cello_GC_GCTab;
+  printf("| GC TABLE\n");
+  for (int i = 0; i < t->nslots; i++) {
+    if (t->entries[i].hash is 0) { printf("| %i : ---\n", i); continue; }
+    printf("| %i : %p %li\n", i, t->entries[i].ptr, t->entries[i].flags);
+  }
+  printf("|======\n");
+}
+
+void gc_sweep(void) {
+  struct GCTab* t = Cello_GC_GCTab;
+  
+  //printf("SWEEPING %li items\n", t->nitems);
+  //Cello_GC_Print();
   
   int i = 0;
   while (i < t->nslots) {
@@ -284,16 +305,18 @@ void Cello_GC_Sweep(void) {
     if ((t->entries[i].flags & CelloGCAlloc) and 
     not (t->entries[i].flags & CelloMarked)) {
       
+      //printf("Deleting item %i: %p\n", i, t->entries[i].ptr);
       dealloc(destruct(t->entries[i].ptr));
       memset(&t->entries[i], 0, sizeof(struct GCEntry));
       
+      uint64_t j = i;
       while (True) { 
-        uint64_t ni = (i+1) % t->nslots;
-        uint64_t nh = t->entries[ni].hash;
-        if (nh isnt 0 and GCTab_Probe(t, ni, nh) > 0) {
-          memcpy(&t->entries[i], &t->entries[ni], sizeof(struct GCEntry));
-          memset(&t->entries[ni], 0, sizeof(struct GCEntry));
-          i = ni;
+        uint64_t nj = (j+1) % t->nslots;
+        uint64_t nh = t->entries[nj].hash;
+        if (nh isnt 0 and GCTab_Probe(t, nj, nh) > 0) {
+          memcpy(&t->entries[j], &t->entries[nj], sizeof(struct GCEntry));
+          memset(&t->entries[nj], 0, sizeof(struct GCEntry));
+          j = nj;
         } else {
           break;
         }  
@@ -303,34 +326,51 @@ void Cello_GC_Sweep(void) {
       continue;
     }
     
+    i++;
   }
   
   GCTab_Resize_Less(t);
   
+  t->mitems = t->nitems * 1.5 + 1;
+  
+  //Cello_GC_Print();
 }
 
 static void Cello_GC_Finish(void) {
-  Cello_GC_Sweep();
-  free(Cello_GC_GCTab);
+  gc_sweep();
+  struct GCTab* t = Cello_GC_GCTab;
+  free(t->entries);
+  free(t);
 }
 
-void Cello_GC_Init(var stk) {
-  Cello_GC_StackBottom = stk;
+void gc_init(var bottom) {
   Cello_GC_GCTab = calloc(sizeof(struct GCTab), 1);
+  struct GCTab* t = Cello_GC_GCTab;
+  t->bottom = bottom;
+  t->maxptr = 0;
+  t->minptr = UINTPTR_MAX;
   atexit(Cello_GC_Finish);
 }
 
-void Cello_GC_Add(var ptr, int flags) {
+void gc_add(var ptr, int flags) {
   struct GCTab* t = Cello_GC_GCTab;
   t->nitems++;
+  t->maxptr = (uintptr_t)ptr > t->maxptr ? (uintptr_t)ptr : t->maxptr;
+  t->minptr = (uintptr_t)ptr < t->minptr ? (uintptr_t)ptr : t->minptr;
   GCTab_Resize_More(t);
   GCTab_Set(t, ptr, flags);
+  if (t->nitems > t->mitems) {
+    gc_mark();
+    gc_sweep();
+  }
+  //gc_mark(); gc_sweep();
 }
 
-void Cello_GC_Rem(var ptr) {
+void gc_rem(var ptr) {
   struct GCTab* t = Cello_GC_GCTab;
   GCTab_Rem(t, ptr);
   GCTab_Resize_Less(t);
+  t->mitems = t->nitems * 1.5 + 1;
 }
 
 

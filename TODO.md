@@ -3,6 +3,8 @@ Cello 2.0
 
 * Fix Crashing Exceptions on Windows
 * Remove all static variables
+* Make garbage collection run based on allocation size not number of items
+* Make garbage collection thread local
 
 * Update examples
 * Update tests

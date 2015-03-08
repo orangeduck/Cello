@@ -65,10 +65,6 @@ static var String_Assign(var self, var obj) {
   return self;
 }
 
-static var String_Copy(var self) {
-  return new(String, self);
-}
-
 static char* String_C_Str(var self) {
   struct String* s = self;
   return s->val;
@@ -267,7 +263,6 @@ var String = Cello(String,
     String_Examples, String_Methods),
   Instance(New,     String_New, String_Del),
   Instance(Assign,  String_Assign),
-  Instance(Copy,    String_Copy),
   Instance(Eq,      String_Eq),
   Instance(Ord,     String_Gt, String_Lt),
   Instance(Len,     String_Len),

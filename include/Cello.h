@@ -765,20 +765,21 @@ var check(var func, var name, var iterations, var types);
 
 #if CELLO_GC == 1
 
-void Cello_GC_Init(var stk);
-void Cello_GC_Add(var ptr, int flags);
-void Cello_GC_Rem(var ptr);
-void Cello_GC_Mark(void);
-void Cello_GC_Sweep(void);
+void gc_init(var bottom);
+void gc_add(var ptr, int flags);
+void gc_rem(var ptr);
+void gc_mark(void);
+void gc_sweep(void);
 
-int Cello_Main(int argc, char** argv);
+int gc_main(int argc, char** argv);
 
 #define main(...) \
   main(int argc, char** argv) { \
-    var stk; Cello_GC_Init(&stk); \
-    return Cello_Main(argc, argv); \
+    var bottom = None; \
+    gc_init(&bottom); \
+    return gc_main(argc, argv); \
   }; \
-  int Cello_Main(__VA_ARGS__)
+  int gc_main(__VA_ARGS__)
 
 #endif
   

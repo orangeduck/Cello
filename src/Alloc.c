@@ -175,11 +175,6 @@ var destruct(var self) {
 
 var new_with(var type, var args) { 
   
-#if CELLO_GC == 1
-  Cello_GC_Mark();
-  Cello_GC_Sweep();
-#endif
-  
   var self = alloc(type);
   
   if (type_implements_method(type, New, construct_with)) {
@@ -187,7 +182,7 @@ var new_with(var type, var args) {
   }
   
 #if CELLO_GC == 1
-  Cello_GC_Add(self, CelloGCAlloc);
+  gc_add(self, CelloGCAlloc);
 #endif
   
   return self;
@@ -202,7 +197,7 @@ var new_root_with(var type, var args) {
   }
   
 #if CELLO_GC == 1
-  Cello_GC_Add(self, CelloHeapAlloc);
+  gc_add(self, CelloHeapAlloc);
 #endif
   
   return self;
@@ -212,6 +207,54 @@ void del(var self) {
   dealloc(destruct(self));
 
 #if CELLO_GC == 1
-  Cello_GC_Rem(self);
+  gc_rem(self);
 #endif
 }
+
+
+/* TODO */
+static const char* Copy_Name(void) {
+  return "Copy";
+}
+
+/* TODO */
+static const char* Copy_Brief(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Copy_Description(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Copy_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Copy_Methods(void) {
+  return "";
+}
+
+var Copy = Cello(Copy,
+  Instance(Doc,
+    Copy_Name, Copy_Brief, Copy_Description, 
+    Copy_Examples, Copy_Methods));
+
+var copy(var self) {
+  
+  if (not implements(self, Copy)) {
+    var obj = assign(alloc(type_of(self)), self);
+    
+#if CELLO_GC == 1
+    gc_add(obj, CelloGCAlloc);
+#endif
+    
+    return obj;
+  } else {
+    return method(self, Copy, copy);
+  }
+  
+}
+
