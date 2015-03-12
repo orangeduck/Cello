@@ -175,11 +175,6 @@ static var Cello_GC_Mark_Item(var ptr);
 
 static void Cello_GC_Recurse(var ptr) {
   
-  if (ptr is Undefined
-  or  ptr is Terminal
-  or  ptr is True
-  or  ptr is False) { return; }
-  
   var type = type_of(ptr);
   
   if (type is Int    or type is Float 
@@ -193,7 +188,8 @@ static void Cello_GC_Recurse(var ptr) {
   }
   
   for (size_t s = 0; s < size(type); s += sizeof(var)) {
-    Cello_GC_Mark_Item(((char*)ptr) + sizeof(var) * s);
+    var p = ((char*)ptr) + s;
+    Cello_GC_Mark_Item(*((var*)p));
   }
   
 }
@@ -201,6 +197,12 @@ static void Cello_GC_Recurse(var ptr) {
 static var Cello_GC_Mark_Item(var ptr) {
   
   struct GCTab* t = Cello_GC_GCTab;
+
+  uintptr_t pval = (uintptr_t)ptr;
+  if (pval % sizeof(var) is 0
+  or  pval < t->minptr
+  or  pval > t->maxptr) { return False; }
+  
   if (t->nslots is 0) { return False; }
   
   uint64_t i = GCTab_Hash(ptr) % t->nslots;
@@ -234,25 +236,23 @@ static void Cello_GC_Mark_Stack(void) {
   var bot = t->bottom;
   var top = &stk;
   
-  if (bot is None) {
-    fprintf(stderr, "Bottom of stack not set!\n");
-    abort();
+  if (bot == top) { return; }
+  
+  if (bot < top) {
+    for (var p = top; p >= bot; p -= sizeof(var)) {
+      Cello_GC_Mark_Item(*((var*)p));
+    }
   }
   
-  if (bot <= top) {
-    fprintf(stderr, "Bottom of stack less than top!\n");
-    abort();
-  }
-  
-  for (var p = top; p <= bot; p += sizeof(var)) {
-    uintptr_t a = *((uintptr_t*)p);
-    if (a % sizeof(var) is 0
-    and a isnt 0xCe110
-    and a >= t->minptr
-    and a <= t->maxptr) { Cello_GC_Mark_Item((var)a); }
+  if (top > bot) {
+    for (var p = top; p <= bot; p += sizeof(var)) {
+      Cello_GC_Mark_Item(*((var*)p));
+    }
   }
   
 }
+
+static void Cello_GC_Mark_Stack_Fake(void) { }
 
 void gc_mark(void) {
   
@@ -268,10 +268,18 @@ void gc_mark(void) {
     }
   }
   
+  /* Flush Registers to Stack */
   jmp_buf env;
   memset(&env, 0, sizeof(jmp_buf));
   setjmp(env);
-  Cello_GC_Mark_Stack();
+  
+  /* Avoid Inlining function call */
+  volatile int noinline = 1;
+  void (*mark_stack)(void) = noinline
+    ? Cello_GC_Mark_Stack
+    : (void(*)(void))(None);
+
+  mark_stack();
   
 }
 
@@ -281,7 +289,7 @@ static void Cello_GC_Print(void) {
   printf("| GC TABLE\n");
   for (int i = 0; i < t->nslots; i++) {
     if (t->entries[i].hash is 0) { printf("| %i : ---\n", i); continue; }
-    printf("| %i : %p %li\n", i, t->entries[i].ptr, t->entries[i].flags);
+    printf("| %i : %p %i\n", i, t->entries[i].ptr, (int)t->entries[i].flags);
   }
   printf("|======\n");
 }
