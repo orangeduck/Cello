@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	int i, n = 5000000; // by default, output 5 million integers
+	int i, n = 500000; // by default, output 5 million integers
 	if (argc > 1) n = atoi(argv[1]);
 	srand48(11);
 	for (i = 0; i < n; ++i)

@@ -1,7 +1,17 @@
-local h, max, n = {}, 0, 0
+rb = dofile "/home/dan/Projects/libCello/benchmarks/Map/rb.lua" 
+
+local h = rb.new()
+local max = 0
 for l in io.lines() do
-	if (h[l]) then h[l] = h[l] + 1
-	else n, h[l] = n + 1, 1 end
-	max = max > h[l] and max or h[l]
+	local c = rb.search(h, l)
+	if (c) then
+	  rb.insert(h, l, c+1)
+	  max = max > c and max or c
+	else
+	  rb.insert(h, l, 1)
+  end
 end
+
+rb.delete(h)
+
 -- print(n, max)

@@ -153,12 +153,13 @@ int main(int argc, char** argv) {
   
   Body_Offset_Momentum(get(bodies, $I(0)), px, py, pz);
   
-  foreach(i in range($I(1000000))) {
+  foreach(i in range($I(100000))) {
     Bodies_Advance(bodies, 1e-5);
   }
   
   del(bodies);
-  
+    
+  return 0;
 }
 
 

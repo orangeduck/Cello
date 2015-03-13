@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <utility>
-#include <ordered_map>
+#include <map>
 
 using namespace std;
 
@@ -12,19 +12,7 @@ struct eqstr {
     }
 };
 
-namespace std {
-	template<>
-	struct hash<const char *> : public std::unary_function<const char *, size_t> {
-		size_t operator()(const char *s) const
-		{ 
-			size_t h = *s;
-			if (h) for (++s ; *s; ++s) h = (h << 5) - h + *s;
-		return h;
-		}
-	};
-}
-
-typedef ordered_map<const char*, int> strmap;
+typedef map<const char*, int, eqstr> strmap;
 
 #define BUF_SIZE 0x10000
 #define BLOCK_SIZE 0x100000
@@ -41,7 +29,7 @@ int main(int argc, char *argv[])
 	curr = block_end = 0;
 	while (!feof(stdin)) {
 		fgets(buf, BUF_SIZE, stdin);
-		strhash::iterator p = m->find(buf);
+		strmap::iterator p = m->find(buf);
 		if (p == m->end()) {
 			int l = strlen(buf) + 1;
 			if (block_end + l > BLOCK_SIZE) {

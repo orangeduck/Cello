@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
   
   Body_Offset_Momentum(&bodies[0], px, py, pz);
   
-  for(size_t i = 0; i < 1000000; i++) {
+  for(size_t i = 0; i < 100000; i++) {
     Bodies_Advance(bodies, nbodies, 1e-5);
   }
   

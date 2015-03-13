@@ -160,7 +160,7 @@ def bodies_energy(bodies):
 # Run
 
 bodies = bodies_new()
-for i in xrange(1000000):
+for i in xrange(100000):
     bodies_advance(bodies, 1e-5)
 
 

@@ -138,7 +138,7 @@ end
 
 body_offset_momentum(bodies[1], px, py, pz);
 
-for i = 1, 1000000 do
+for i = 1, 100000 do
     bodies_advance(bodies, 1e-5)
 end
 

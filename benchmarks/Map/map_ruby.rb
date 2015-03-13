@@ -1,6 +1,6 @@
-require 'set'
+require 'rbtree'
 
-h, max = SortedSet.new, 0
+h, max = RBTree[], 0
 STDIN.each do |l|
 	if h[l] == nil
 		h[l] = 1

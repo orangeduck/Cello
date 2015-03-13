@@ -339,6 +339,15 @@ static void Array_Push_At(var self, var obj, var key) {
   Array_Reserve_More(a);
   
   int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  
+#if CELLO_BOUND_CHECK == 1
+  if (i < 0 or i >= (int64_t)a->nitems) {
+    throw(IndexOutOfBoundsError,
+      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+    return;
+  }
+#endif
+  
   memmove((char*)a->data + Array_Step(a) * (i + 1),
           (char*)a->data + Array_Step(a) * (i+0), 
           Array_Step(a) * ((a->nitems-1) - i));

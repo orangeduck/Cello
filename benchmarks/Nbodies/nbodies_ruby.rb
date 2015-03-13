@@ -118,7 +118,7 @@ BODIES = [
 
 offset_momentum(BODIES)
 
-1000000.times do
+100000.times do
   i = 0
   while i < BODIES.size
     b = BODIES[i]

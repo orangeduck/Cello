@@ -101,7 +101,7 @@ static int Sudoku_Solve(struct Sudoku* aux, const char *_s) {
 	return n; // return the number of solutions
 }
 
-int main() {
+int main(int argc, char** argv) {
 	struct Sudoku* a = new(Sudoku);
 	char buf[1024];
 	while (fgets(buf, 1024, stdin) != 0) {

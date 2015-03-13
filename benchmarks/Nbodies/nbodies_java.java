@@ -2,7 +2,7 @@ public final class nbodies_java {
     public static void main(String[] args) {
 
         NBodySystem bodies = new NBodySystem();
-        for (int i=0; i<1000000; ++i) {
+        for (int i=0; i<100000; ++i) {
            bodies.advance(1e-5);
         }
     }

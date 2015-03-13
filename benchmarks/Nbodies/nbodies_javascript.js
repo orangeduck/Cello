@@ -143,7 +143,7 @@ function bodies_energy(bodies) {
 }
 
 var bodies = bodies_new()
-for (var i = 0; i < 1000000; i++) {
+for (var i = 0; i < 100000; i++) {
     bodies_advance(bodies, 1e-5)
 }
 

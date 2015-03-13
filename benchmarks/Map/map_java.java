@@ -1,7 +1,7 @@
 import java.util.TreeMap;
 import java.io.*;
 
-class dict_java {
+class map_java {
 	public static void main(String[] args) {
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 		TreeMap<String, Integer> h = new TreeMap<String, Integer>();
