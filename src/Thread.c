@@ -338,7 +338,7 @@ var Thread_Current(void) {
   if (wrapper is None) {
   
     if (Thread_Main is None) {
-      Thread_Main = new(Thread, None);
+      Thread_Main = new_root(Thread, None);
       atexit(Thread_Main_Del);
     }
     

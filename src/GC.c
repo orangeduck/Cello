@@ -199,11 +199,9 @@ static var Cello_GC_Mark_Item(var ptr) {
   struct GCTab* t = Cello_GC_GCTab;
 
   uintptr_t pval = (uintptr_t)ptr;
-  if (pval % sizeof(var) is 0
+  if (pval % sizeof(var) isnt 0
   or  pval < t->minptr
   or  pval > t->maxptr) { return False; }
-  
-  if (t->nslots is 0) { return False; }
   
   uint64_t i = GCTab_Hash(ptr) % t->nslots;
   uint64_t j = 0;
@@ -244,7 +242,7 @@ static void Cello_GC_Mark_Stack(void) {
     }
   }
   
-  if (top > bot) {
+  if (bot > top) {
     for (var p = top; p <= bot; p += sizeof(var)) {
       Cello_GC_Mark_Item(*((var*)p));
     }
@@ -257,7 +255,11 @@ static void Cello_GC_Mark_Stack_Fake(void) { }
 void gc_mark(void) {
   
   struct GCTab* t = Cello_GC_GCTab;
-  if (t is None) { return; }
+  
+  if (t is None
+  or  t->nitems is 0) {
+    return;
+  }
   
   for (int i = 0; i < t->nslots; i++) {
     if (t->entries[i].hash is 0) { continue; }
@@ -297,9 +299,6 @@ static void Cello_GC_Print(void) {
 void gc_sweep(void) {
   struct GCTab* t = Cello_GC_GCTab;
   
-  //printf("SWEEPING %li items\n", t->nitems);
-  //Cello_GC_Print();
-  
   int i = 0;
   while (i < t->nslots) {
     
@@ -313,7 +312,6 @@ void gc_sweep(void) {
     if ((t->entries[i].flags & CelloGCAlloc) and 
     not (t->entries[i].flags & CelloMarked)) {
       
-      //printf("Deleting item %i: %p\n", i, t->entries[i].ptr);
       dealloc(destruct(t->entries[i].ptr));
       memset(&t->entries[i], 0, sizeof(struct GCEntry));
       
@@ -338,10 +336,7 @@ void gc_sweep(void) {
   }
   
   GCTab_Resize_Less(t);
-  
   t->mitems = t->nitems * 1.5 + 1;
-  
-  //Cello_GC_Print();
 }
 
 static void Cello_GC_Finish(void) {

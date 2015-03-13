@@ -50,7 +50,7 @@
 #endif
 
 #ifndef CELLO_GC
-#define CELLO_GC 0
+#define CELLO_GC 1
 #endif
 
 #ifndef CELLO_MAGIC
