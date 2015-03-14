@@ -2,8 +2,6 @@
 
 #if CELLO_GC == 1
 
-static var Cello_GC_GCTab = NULL;
-
 enum {
   GCTAB_PRIMES_COUNT = 24
 };
@@ -196,7 +194,7 @@ static void Cello_GC_Recurse(var ptr) {
 
 static var Cello_GC_Mark_Item(var ptr) {
   
-  struct GCTab* t = Cello_GC_GCTab;
+  struct GCTab* t = gc_get_table();
 
   uintptr_t pval = (uintptr_t)ptr;
   if (pval % sizeof(var) isnt 0
@@ -228,7 +226,7 @@ static var Cello_GC_Mark_Item(var ptr) {
 
 static void Cello_GC_Mark_Stack(void) {
   
-  struct GCTab* t = Cello_GC_GCTab;
+  struct GCTab* t = gc_get_table();
   
   var stk = None;
   var bot = t->bottom;
@@ -252,9 +250,7 @@ static void Cello_GC_Mark_Stack(void) {
 
 static void Cello_GC_Mark_Stack_Fake(void) { }
 
-void gc_mark(void) {
-  
-  struct GCTab* t = Cello_GC_GCTab;
+void Cello_GC_Mark(struct GCTab* t) {
   
   if (t is None
   or  t->nitems is 0) {
@@ -287,7 +283,7 @@ void gc_mark(void) {
 
 static void Cello_GC_Print(void) {
  
-  struct GCTab* t = Cello_GC_GCTab;
+  struct GCTab* t = gc_get_table();
   printf("| GC TABLE\n");
   for (int i = 0; i < t->nslots; i++) {
     if (t->entries[i].hash is 0) { printf("| %i : ---\n", i); continue; }
@@ -296,8 +292,7 @@ static void Cello_GC_Print(void) {
   printf("|======\n");
 }
 
-void gc_sweep(void) {
-  struct GCTab* t = Cello_GC_GCTab;
+void Cello_GC_Sweep(struct GCTab* t) {
   
   int i = 0;
   while (i < t->nslots) {
@@ -339,42 +334,47 @@ void gc_sweep(void) {
   t->mitems = t->nitems * 1.5 + 1;
 }
 
-static void Cello_GC_Finish(void) {
-  gc_sweep();
-  struct GCTab* t = Cello_GC_GCTab;
+void gc_finish(void) {
+  struct GCTab* t = gc_get_table();
+  Cello_GC_Sweep(t);
   free(t->entries);
   free(t);
 }
 
 void gc_init(var bottom) {
-  Cello_GC_GCTab = calloc(sizeof(struct GCTab), 1);
-  struct GCTab* t = Cello_GC_GCTab;
+  struct GCTab* t = calloc(sizeof(struct GCTab), 1);
+  gc_set_table(t);
   t->bottom = bottom;
   t->maxptr = 0;
   t->minptr = UINTPTR_MAX;
-  atexit(Cello_GC_Finish);
 }
 
 void gc_add(var ptr, int flags) {
-  struct GCTab* t = Cello_GC_GCTab;
+  struct GCTab* t = gc_get_table();
   t->nitems++;
   t->maxptr = (uintptr_t)ptr > t->maxptr ? (uintptr_t)ptr : t->maxptr;
   t->minptr = (uintptr_t)ptr < t->minptr ? (uintptr_t)ptr : t->minptr;
   GCTab_Resize_More(t);
   GCTab_Set(t, ptr, flags);
-  if (t->nitems > t->mitems) {
-    gc_mark();
-    gc_sweep();
-  }
-  //gc_mark(); gc_sweep();
+  //if (t->nitems > t->mitems) {
+  //  Cello_GC_Mark(t);
+  //  Cello_GC_Sweep(t);
+  //}
+  Cello_GC_Mark(t);
+  Cello_GC_Sweep(t);
 }
 
 void gc_rem(var ptr) {
-  struct GCTab* t = Cello_GC_GCTab;
+  struct GCTab* t = gc_get_table();
   GCTab_Rem(t, ptr);
   GCTab_Resize_Less(t);
   t->mitems = t->nitems * 1.5 + 1;
 }
 
+void gc_run(void) {
+  struct GCTab* t = gc_get_table();
+  Cello_GC_Mark(t);
+  Cello_GC_Sweep(t);
+}
 
 #endif

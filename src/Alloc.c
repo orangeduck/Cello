@@ -204,10 +204,10 @@ var new_root_with(var type, var args) {
 }
 
 void del(var self) {
-  dealloc(destruct(self));
+  //dealloc(destruct(self));
 
 #if CELLO_GC == 1
-  gc_rem(self);
+  //gc_rem(self);
 #endif
 }
 

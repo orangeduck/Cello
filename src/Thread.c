@@ -94,7 +94,27 @@ struct Thread {
   void*   exc_backtrace[CELLO_EXC_MAX_STRACE];
   size_t  exc_backtrace_count;
   
+#if CELLO_GC == 1
+  var gc_table;
+#endif
+  
 };
+
+static var Thread_Current(void);
+
+#if CELLO_GC == 1
+
+var gc_get_table(void) {
+  struct Thread* t = Thread_Current();
+  return t->gc_table;
+}
+
+void gc_set_table(var table) {
+  struct Thread* t = Thread_Current();
+  t->gc_table = table;
+}
+
+#endif
 
 static const char* Thread_Name(void) {
   return "Thread";
@@ -123,7 +143,7 @@ static const char* Thread_Methods(void) {
 static var Thread_New(var self, var args) {
   
   struct Thread* t = self;
-  t->func = get(args, $(Int, 0));
+  t->func = get(args, $I(0));
   t->args = None;
   t->is_main = false;
   t->is_running = false;
@@ -133,7 +153,7 @@ static var Thread_New(var self, var args) {
   memset(t->exc_buffers, 0, sizeof(jmp_buf) * CELLO_EXC_MAX_DEPTH);
   
   t->exc_obj = Undefined;
-  t->exc_msg = new(String, $(String, ""));
+  t->exc_msg = None;
   memset(t->exc_backtrace, 0, sizeof(void*) * CELLO_EXC_MAX_STRACE);
   t->exc_backtrace_count = 0;
   
@@ -147,40 +167,9 @@ static var Thread_Del(var self) {
   CloseHandle(t->thread);
 #endif
   
-  if (t->args isnt None) { del(t->args); }
-  if (t->exc_msg isnt None) { del(t->exc_msg); }
+  if (t->args isnt None) { dealloc(destruct(t->args)); }
+  if (t->exc_msg isnt None) { dealloc(destruct(t->exc_msg)); }
   return t;
-}
-
-static var Thread_Assign(var self, var obj) {
-  
-  struct Thread* t0 = self;
-  struct Thread* t1 = obj;
-  
-  t0->func = t1->func;
-  t0->args = t1->args;
-  
-  t0->thread = t1->thread;
-  t0->is_main = t1->is_main;
-  t0->is_running = t1->is_running;
-  
-  t0->exc_active = t1->exc_active;
-  t0->exc_depth = t1->exc_depth;
-  memcpy(t0->exc_buffers, t1->exc_buffers,
-    sizeof(jmp_buf) * CELLO_EXC_MAX_DEPTH);
-  
-  assign(t0->exc_obj, t1->exc_obj);
-  assign(t0->exc_msg, t1->exc_msg);
-  
-  memcpy(t0->exc_backtrace, t1->exc_backtrace,
-    sizeof(void*) * CELLO_EXC_MAX_STRACE);
-  t0->exc_backtrace_count = t1->exc_backtrace_count;
-  
-  return self;
-}
-
-static var Thread_Copy(var self) {
-  return assign(new(Thread, None), self);
 }
 
 static uint64_t Thread_Hash(var self) {
@@ -232,9 +221,20 @@ static var Thread_Init_Run(var self) {
   struct Thread* t = self;  
   pthread_setspecific(Thread_Key_Wrapper, t);
   t->is_running = True;
+  
+#if CELLO_GC == 1
+  var bottom = None;
+  gc_init(&bottom);
+#endif
+  
   var x = call_with(t->func, t->args);
-  del(t->args);
+  dealloc(destruct(t->args));
   t->args = None;
+  
+#if CELLO_GC == 1
+  gc_finish();
+#endif
+  
   return x;
 }
 
@@ -250,12 +250,24 @@ static void Thread_TLS_Key_Delete(void) {
 }
 
 static DWORD Thread_Init_Run(var self) {
+  
   struct Thread* t = self;
   TlsSetValue(Thread_Key_Wrapper, t);
   t->is_running = True;
+  
+#if CELLO_GC == 1
+  var bottom = None;
+  gc_init(&bottom);
+#endif
+  
   call_with(t->func, t->args);
-  del(t->args);
+  dealloc(destruct(t->args));
   t->args = None;
+  
+#if CELLO_GC == 1
+  gc_finish();
+#endif
+  
   return 0;
 }
 
@@ -273,7 +285,7 @@ static var Thread_Call(var self, var args) {
     atexit(Thread_TLS_Key_Delete);
   }
   
-  t->args = copy(args);
+  t->args = assign(alloc(type_of(args)), args);  
   
   /* Call Init Thread & Run */
   
@@ -311,10 +323,10 @@ static var Thread_Call(var self, var args) {
 static var Thread_Main = NULL;
 
 static void Thread_Main_Del(void) {
-  del(Thread_Main);
+  dealloc(destruct(Thread_Main));
 }
 
-var Thread_Current(void) {
+static var Thread_Current(void) {
   
 #if defined(__unix__) || defined(__APPLE__)
   var wrapper = pthread_getspecific(Thread_Key_Wrapper);
@@ -338,7 +350,7 @@ var Thread_Current(void) {
   if (wrapper is None) {
   
     if (Thread_Main is None) {
-      Thread_Main = new_root(Thread, None);
+      Thread_Main = construct(alloc(Thread), None);
       atexit(Thread_Main_Del);
     }
     
@@ -401,8 +413,6 @@ var Thread = Cello(Thread,
     Thread_Name, Thread_Brief, Thread_Description, 
     Thread_Examples, Thread_Methods),
   Instance(New,     Thread_New, Thread_Del),
-  Instance(Assign,  Thread_Assign),
-  Instance(Copy,    Thread_Copy),
   Instance(Call,    Thread_Call),
   Instance(Current, Thread_Current),
   Instance(Join,    Thread_Join),
@@ -608,7 +618,7 @@ void exception_register_signals(void) {
 }
 
 void exception_inc(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   if (t->exc_depth is CELLO_EXC_MAX_DEPTH) {
     fprintf(stderr, "Cello Fatal Error: Exception Buffer Overflow!\n");
     abort();
@@ -617,7 +627,7 @@ void exception_inc(void) {
 }
 
 void exception_dec(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   if (t->exc_depth == 0) {
     fprintf(stderr, "Cello Fatal Error: Exception Buffer Underflow!\n");
     abort();
@@ -626,32 +636,32 @@ void exception_dec(void) {
 }
 
 var exception_active(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   return t->exc_active;
 }
 
 void exception_activate(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   t->exc_active = True;
 }
 
 void exception_deactivate(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   t->exc_active = False;  
 }
 
 var exception_object(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   return t->exc_obj;  
 }
 
 var exception_message(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   return t->exc_msg;
 }
 
 var exception_buffer(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   if (t->exc_depth == 0) {
     fprintf(stderr, "Cello Fatal Error: Exception Buffer Out of Bounds!\n");
     abort();
@@ -660,7 +670,7 @@ var exception_buffer(void) {
 }
 
 size_t exception_depth(void) {
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   return t->exc_depth;
 }
 
@@ -668,7 +678,7 @@ size_t exception_depth(void) {
 
 static void Exception_Backtrace(void) {
   
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   
   t->exc_backtrace_count = backtrace(t->exc_backtrace, CELLO_EXC_MAX_STRACE);
   char** symbols = backtrace_symbols(t->exc_backtrace, t->exc_backtrace_count);  
@@ -798,7 +808,7 @@ static void Exception_Backtrace(void) {}
 
 static void Exception_Error(void)  {
   
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   
   print_to($(File, stderr), 0, "\n");
   print_to($(File, stderr), 0, "!!\t\n");
@@ -815,9 +825,14 @@ static void Exception_Error(void)  {
 
 var exception_throw(var obj, const char* fmt, var args) {
 
-  struct Thread* t = current(Thread);
+  struct Thread* t = Thread_Current();
   
   t->exc_obj = obj;
+  
+  if (t->exc_msg is None) {
+    t->exc_msg = construct(alloc(String), $S(""));
+  }
+  
   print_to_with(t->exc_msg, 0, fmt, args);
   
   if (exception_depth() >= 1) {

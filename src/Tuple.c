@@ -80,7 +80,8 @@ static var Tuple_Assign(var self, var obj) {
   for (size_t i = 0; i < nargs; i++) {
     t->items[i] = get(obj, $I(i));
   }
-  t->items[nargs-1] = Terminal;
+  t->items[nargs] = Terminal;
+  
   return t;
 }
 
