@@ -131,6 +131,12 @@ void dealloc(var self) {
   }
 #endif
   
+#if CELLO_ALLOC_CHECK == 1
+  if (implements(self, Size)) {
+    memset(head, 0, sizeof(struct CelloHeader) + size(self));
+  }
+#endif
+  
   free(head);
   
 }
@@ -163,7 +169,10 @@ var New = Cello(New,
   Instance(Doc, New_Name, New_Brief, New_Description, New_Examples, New_Methods));
 
 var construct_with(var self, var args) {
-  return method(self, New, construct_with, args);
+  if (implements_method(self, New, construct_with)) {
+    return method(self, New, construct_with, args);
+  }
+  return self;
 }
 
 var destruct(var self) {
@@ -175,26 +184,18 @@ var destruct(var self) {
 
 var new_with(var type, var args) { 
   
-  var self = alloc(type);
-  
-  if (type_implements_method(type, New, construct_with)) {
-    self = type_method(type, New, construct_with, self, args);
-  }
-  
+  var self = construct_with(alloc(type), args);
+
 #if CELLO_GC == 1
   gc_add(self, CelloGCAlloc);
 #endif
-  
+
   return self;
 }
 
 var new_root_with(var type, var args) { 
   
-  var self = alloc(type);
-  
-  if (type_implements_method(type, New, construct_with)) {
-    self = type_method(type, New, construct_with, self, args);
-  }
+  var self = construct_with(alloc(type), args);
   
 #if CELLO_GC == 1
   gc_add(self, CelloHeapAlloc);
@@ -204,10 +205,10 @@ var new_root_with(var type, var args) {
 }
 
 void del(var self) {
-  //dealloc(destruct(self));
+  dealloc(destruct(self));
 
 #if CELLO_GC == 1
-  //gc_rem(self);
+  gc_rem(self);
 #endif
 }
 
@@ -244,17 +245,17 @@ var Copy = Cello(Copy,
 
 var copy(var self) {
   
-  if (not implements(self, Copy)) {
-    var obj = assign(alloc(type_of(self)), self);
+  if (implements(self, Copy)) {
+    return method(self, Copy, copy); 
+  }
+  
+  var obj = assign(alloc(type_of(self)), self);
     
 #if CELLO_GC == 1
-    gc_add(obj, CelloGCAlloc);
+  gc_add(obj, CelloGCAlloc);
 #endif
     
-    return obj;
-  } else {
-    return method(self, Copy, copy);
-  }
+  return obj;
   
 }
 

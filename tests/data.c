@@ -26,23 +26,23 @@ PT_FUNC(test_int_new) {
   
   var int0 = $I(1);
   var int1 = new(Int, $I(24313));
-  var int2 = copy(int0);
+  //var int2 = copy(int0);
   
   PT_ASSERT(int0);
   PT_ASSERT(int1);
-  PT_ASSERT(int2);
+  //PT_ASSERT(int2);
   
   PT_ASSERT(c_int(int0) is 1);
   PT_ASSERT(c_int(int1) is 24313);
-  PT_ASSERT(c_int(int2) is 1);
+  //PT_ASSERT(c_int(int2) is 1);
   
-  assign(int2, int1);
+  //assign(int2, int1);
   
-  PT_ASSERT( not(int2 is int1) );
-  PT_ASSERT(c_int(int2) is 24313);
+  //PT_ASSERT( not(int2 is int1) );
+  //PT_ASSERT(c_int(int2) is 24313);
   
   del(int1);
-  del(int2);
+  //del(int2);
   
 }
 

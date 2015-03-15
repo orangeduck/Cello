@@ -119,16 +119,33 @@ enum {
 };
 
 static var Type_Alloc(void) {
-  return None;
+
+  struct CelloHeader* head = calloc(1, sizeof(struct CelloHeader));
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (head is None) {
+    throw(OutOfMemoryError, "Cannot create new 'Type', out of memory!");
+  }
+#endif
+  
+  return CelloHeader_Init(head, Type, CelloHeapAlloc);
 }
 
 static var Type_New(var self, var args) {
   
   var name = get(args, $I(0));
   var size = get(args, $I(1));
-  var head = malloc(
+  
+  var head = ((char*)self) - sizeof(struct CelloHeader);
+  head = realloc(head, 
     sizeof(struct CelloHeader) + 
     sizeof(struct Type) * (CELLO_NBUILTINS + len(args) - 2 + 1));
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (head is None) {
+    throw(OutOfMemoryError, "Cannot create new 'Type', out of memory!");
+  }
+#endif
   
   struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
   

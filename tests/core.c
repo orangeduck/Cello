@@ -437,7 +437,7 @@ PT_FUNC(test_stream) {
   PT_ASSERT(f);
 }
 
-extern var TestType;
+static var TestType;
 
 struct TestType {
   int64_t test_data;
@@ -463,13 +463,9 @@ static var TestType_Eq(var self, var obj) {
   }
 }
 
-var TestType = Cello(TestType,
-  Instance(New, TestType_New, TestType_Del),
-  Instance(Eq, TestType_Eq));
-
 PT_FUNC(test_type_new) {
  
-  TestType = new(Type, $S("TestType"), $I(sizeof(struct TestType)),
+  TestType = new_root(Type, $S("TestType"), $I(sizeof(struct TestType)),
     $(New, TestType_New, TestType_Del),
     $(Eq, TestType_Eq));
   
