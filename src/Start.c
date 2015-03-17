@@ -36,7 +36,7 @@ void stop(var self) {
   method(self, Start, stop);
 }
 
-var running(var self) {
+bool running(var self) {
   return method(self, Start, running);
 }
 

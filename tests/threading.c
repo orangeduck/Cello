@@ -15,19 +15,19 @@ void cello_sleep(int ms) {
 
 PT_FUNC(test_new) {
   
-  var in_func = $(Ref, False);
+  var in_func = $I(0);
   
   fun (f, args) {
-    ref(in_func, True);
-    return None;
+    assign(in_func, $I(1));
+    return NULL;
   };
   
   var t = new(Thread, f);
   
-  PT_ASSERT(not deref(in_func));
+  PT_ASSERT(not c_int(in_func));
   call(t);
   join(t);
-  PT_ASSERT(deref(in_func));
+  PT_ASSERT(c_int(in_func));
   
   del(t);
 
@@ -35,11 +35,11 @@ PT_FUNC(test_new) {
 
 PT_FUNC(test_multiple) {
   
-  var inside = new(Array, Ref, False, False, False, False, False);
+  var inside = new(Array, Int, $I(0), $I(0), $I(0), $I(0), $I(0));
   
   fun (f, a) {
-    set(inside, get(a, $I(0)), True);
-    return None;
+    set(inside, get(a, $I(0)), $I(1));
+    return NULL;
   };
   
   var threads = new(Array, Box,
@@ -60,7 +60,7 @@ PT_FUNC(test_multiple) {
   }
   
   foreach(i in inside) {
-    PT_ASSERT(deref(i));
+    PT_ASSERT(c_int(i));
   }
   
   del(args);
@@ -76,9 +76,9 @@ PT_FUNC(test_mutex) {
   
   fun (f, args) {
     with(m in mutex) {
-      minc(total);
+      assign(total, $I(c_int(total)+1));
     }
-    return None;
+    return NULL;
   };
   
   var threads = new(Array, Box,
@@ -110,7 +110,7 @@ PT_FUNC(test_exception) {
       cello_sleep(20);
       PT_ASSERT(exception_depth() is 1);
     } catch(e) { }
-    return None;
+    return NULL;
   };
   
   var t = new(Thread, f);

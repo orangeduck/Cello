@@ -123,7 +123,7 @@ static var Type_Alloc(void) {
   struct CelloHeader* head = calloc(1, sizeof(struct CelloHeader));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (head is None) {
+  if (head is NULL) {
     throw(OutOfMemoryError, "Cannot create new 'Type', out of memory!");
   }
 #endif
@@ -142,26 +142,26 @@ static var Type_New(var self, var args) {
     sizeof(struct Type) * (CELLO_NBUILTINS + len(args) - 2 + 1));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (head is None) {
+  if (head is NULL) {
     throw(OutOfMemoryError, "Cannot create new 'Type', out of memory!");
   }
 #endif
   
   struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
   
-  body[0] = (struct Type){ None, "__Name",      (var)c_str(name), {0} };
-  body[1] = (struct Type){ None, "__Size",      (var)c_int(size), {0} };
-  body[2] = (struct Type){ None, "__ModMask",   (var)1, {0} };
-  body[3] = (struct Type){ None, "__HashMask0", (var)0, {0} };
-  body[4] = (struct Type){ None, "__HashMask1", (var)0, {0} };
+  body[0] = (struct Type){ NULL, "__Name",      (var)c_str(name), {0} };
+  body[1] = (struct Type){ NULL, "__Size",      (var)c_int(size), {0} };
+  body[2] = (struct Type){ NULL, "__ModMask",   (var)1, {0} };
+  body[3] = (struct Type){ NULL, "__HashMask0", (var)0, {0} };
+  body[4] = (struct Type){ NULL, "__HashMask1", (var)0, {0} };
   
   for(size_t i = 2; i < len(args); i++) {
     var ins = get(args, $I(i));
     body[CELLO_NBUILTINS-2+i] = (struct Type){
-      None, (var)c_str(type_of(ins)), ins, {0} };
+      NULL, (var)c_str(type_of(ins)), ins, {0} };
   }
   
-  body[CELLO_NBUILTINS+len(args)-2] = (struct Type){ None, None, None, {0} };
+  body[CELLO_NBUILTINS+len(args)-2] = (struct Type){ NULL, NULL, NULL, {0} };
   
   return body;
 }
@@ -205,9 +205,11 @@ static int Type_Show(var self, var output, int pos) {
   return format_to(output, pos, "%s", Type_Builtin_Name(self));
 }
 
-static var Type_Eq(var self, var obj) {
-  return bool_var(self is obj);
+static bool Type_Eq(var self, var obj) {
+  return self is obj;
 }
+
+/* TODO: Type Hash */
 
 static char* Type_C_Str(var self) {
   return Type_Builtin_Name(self);
@@ -235,7 +237,7 @@ var Type = CelloEmpty(Type,
   Instance(Gen,      Type_Gen),
   Instance(Help,     Type_Help));
   
-static var Type_Build_Hash(struct Type* t) {
+static bool Type_Build_Hash(struct Type* t) {
   
   size_t i = 0;
   struct Type* ti = t;
@@ -246,7 +248,7 @@ static var Type_Build_Hash(struct Type* t) {
   
   *Type_Builtin_ModMask(t) = nentries;
   
-  var valid = False;
+  bool valid = false;
   var* overlap = malloc(sizeof(var) * nentries);
   
   size_t iterations = 0;
@@ -256,20 +258,20 @@ static var Type_Build_Hash(struct Type* t) {
       *Type_Builtin_ModMask(t) = 1;
       *Type_Builtin_HashMask0(t) = 0;
       *Type_Builtin_HashMask1(t) = 0;
-      return False;
+      return false;
     }
     
-    valid = True;
+    valid = true;
     memset(overlap, 0, sizeof(var) * nentries);
     
     for (size_t i = 0; i < nentries; i++) {
       var cls = t[CELLO_NBUILTINS+i].cls;
-      if (cls is None) { continue; }
+      if (cls is NULL) { continue; }
       
       uint64_t initial = Type_Builtin_Hash(t, cls);
       
       if (overlap[initial]) {
-        valid = False;
+        valid = false;
         Type_Builtin_Hash_Inc(t);
         break;
       }
@@ -281,7 +283,7 @@ static var Type_Build_Hash(struct Type* t) {
   }
   
   for (size_t i = 0; i < nentries; i++) {
-    if (overlap[i] is None) { continue; }
+    if (overlap[i] is NULL) { continue; }
     for (size_t j = 0; j < nentries; j++) {
       if (t[CELLO_NBUILTINS+j].cls is overlap[i] and i isnt j) {
         struct Type tmp = t[i+CELLO_NBUILTINS];
@@ -293,7 +295,7 @@ static var Type_Build_Hash(struct Type* t) {
   }
   
   free(overlap);
-  return True;
+  return true;
   
 }
 
@@ -351,36 +353,36 @@ static void Type_Scan(
     t++;
   }
   
-  *inst = None;
-  *meth = None;
+  *inst = NULL;
+  *meth = NULL;
   
 }
 
-static var Type_Implements(var self, var cls) {
-  var inst = None, meth = None;
+static bool Type_Implements(var self, var cls) {
+  var inst = NULL, meth = NULL;
   Type_Scan(self, cls, 0, &inst, &meth);
-  return bool_var(inst isnt None);
+  return inst isnt NULL;
 }
 
 
-var type_implements(var self, var cls) {
+bool type_implements(var self, var cls) {
   return Type_Implements(self, cls);
 }
 
 static var Type_Method_At_Offset(
   var self, var cls, size_t offset, const char* method_name) {
 
-  var inst = None, meth = None;
+  var inst = NULL, meth = NULL;
   Type_Scan(self, cls, offset, &inst, &meth);
   
 #if CELLO_METHOD_CHECK == 1
-  if (inst is None) {
+  if (inst is NULL) {
     return throw(ClassError,
       "Type '%s' does not implement class '%s'",
       self,  cls);
   }
   
-  if (meth is None) {
+  if (meth is NULL) {
     return throw(ClassError,
       "Type '%s' implements class '%s' but not the method '%s' required",
       self,  cls, $(String, (char*)method_name));  
@@ -396,24 +398,24 @@ var type_method_at_offset(
   return Type_Method_At_Offset(self, cls, offset, method_name);  
 }
 
-static var Type_Implements_Method_At_Offset(
+static bool Type_Implements_Method_At_Offset(
   var self, var cls, size_t offset) {
-  var inst = None, meth = None;
+  var inst = NULL, meth = NULL;
   Type_Scan(self, cls, offset, &inst, &meth);
-  return bool_var(inst and meth);
+  return inst and meth;
 }
 
-var type_implements_method_at_offset(var self, var cls, size_t offset) {
+bool type_implements_method_at_offset(var self, var cls, size_t offset) {
   return Type_Implements_Method_At_Offset(self, cls, offset);
 }
 
 static var Type_Instance(var self, var cls) {
 
-  var inst = None, meth = None;
+  var inst = NULL, meth = NULL;
   Type_Scan(self, cls, 0, &inst, &meth);
   
 #if CELLO_METHOD_CHECK == 1
-  if (inst is None) {  
+  if (inst is NULL) {  
     return throw(ClassError,
       "Type '%s' does not implement class '%s'", self, cls);
   }
@@ -435,37 +437,30 @@ static var Type_Of(var self) {
   **  compile time.
   **
   **  But we really want to be able to construct types statically. So by 
-  **  convention at compile time the type of a Type object is set to `None`.
-  **  So if we access a statically allocated object and it tells us `None` 
+  **  convention at compile time the type of a Type object is set to `NULL`.
+  **  So if we access a statically allocated object and it tells us `NULL` 
   **  is the type, we assume the type is `Type`.
   */
 
-  struct CelloHeader* head;
-  
-  switch ((uintptr_t)self) {
-    case 0: return Bool;
-    case 1: return Bool;
-    default:
-    
-      head = (struct CelloHeader*)((char*)self - sizeof(struct CelloHeader));
-    
 #if CELLO_UNDEF_CHECK == 1  
-      if (self is Undefined) {
-        return throw(ValueError, "Received 'Undefined' as value to 'type_of'");
-      }
+    if (self is Undefined) {
+      return throw(ValueError, "Received 'Undefined' as value to 'type_of'");
+    }
 #endif
+  
+  struct CelloHeader* head = 
+    (struct CelloHeader*)((char*)self - sizeof(struct CelloHeader));
 
 #if CELLO_MAGIC_CHECK == 1
-      if (head isnt False 
-      and head isnt True
-      and head->magic isnt ((var)CELLO_MAGIC_NUM)) {
-        throw(ValueError, "Pointer '%p' passed to 'type_of' "
-          "has bad magic number, it wasn't allocated by Cello.", self);
-      }
+  if (head->magic isnt ((var)CELLO_MAGIC_NUM)) {
+    throw(ValueError, "Pointer '%p' passed to 'type_of' "
+      "has bad magic number, it wasn't allocated by Cello.", self);
+  }
 #endif
     
-    return head->type is None ? Type : head->type;
-  }
+  if (head->type is NULL) { head->type = Type; }
+  
+  return head->type;
 
 }
   
@@ -477,7 +472,7 @@ var instance(var self, var cls) {
   return Type_Instance(Type_Of(self), cls);
 }
 
-var implements(var self, var cls) {  
+bool implements(var self, var cls) {  
   return Type_Implements(Type_Of(self), cls);
 }
 
@@ -486,7 +481,7 @@ var method_at_offset(
   return Type_Method_At_Offset(Type_Of(self), cls, offset, method_name);
 }
 
-var implements_method_at_offset(var self, var cls, size_t offset) {
+bool implements_method_at_offset(var self, var cls, size_t offset) {
   return Type_Implements_Method_At_Offset(Type_Of(self), cls, offset);
 }
 

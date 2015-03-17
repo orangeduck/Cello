@@ -83,12 +83,12 @@ struct Thread {
   HANDLE thread;
 #endif
 
-  var is_main;
-  var is_running;
+  bool is_main;
+  bool is_running;
   
   var      exc_obj;
   var      exc_msg;
-  var      exc_active;
+  bool     exc_active;
   size_t   exc_depth;
   jmp_buf* exc_buffers[CELLO_EXC_MAX_DEPTH];
   
@@ -142,7 +142,7 @@ static var Thread_New(var self, var args) {
   
   struct Thread* t = self;
   t->func = get(args, $I(0));
-  t->args = None;
+  t->args = NULL;
   t->is_main = false;
   t->is_running = false;
   
@@ -150,7 +150,7 @@ static var Thread_New(var self, var args) {
   t->exc_depth = 0;
   memset(t->exc_buffers, 0, sizeof(jmp_buf*) * CELLO_EXC_MAX_DEPTH);
   t->exc_obj = Undefined;
-  t->exc_msg = None;
+  t->exc_msg = NULL;
   
   return t;
 }
@@ -162,8 +162,8 @@ static var Thread_Del(var self) {
   CloseHandle(t->thread);
 #endif
   
-  if (t->args isnt None) { dealloc(destruct(t->args)); }
-  if (t->exc_msg isnt None) { dealloc(destruct(t->exc_msg)); }
+  if (t->args isnt NULL) { dealloc(destruct(t->args)); }
+  if (t->exc_msg isnt NULL) { dealloc(destruct(t->exc_msg)); }
   return t;
 }
 
@@ -186,16 +186,16 @@ static int64_t Thread_C_Int(var self) {
   
 }
 
-static var Thread_Eq(var self, var obj) {
-  return bool_var(c_int(self) == c_int(obj));
+static bool Thread_Eq(var self, var obj) {
+  return Thread_C_Int(self) == c_int(obj);
 }
 
-static var Thread_Gt(var self, var obj) {
-  return bool_var(c_int(self) > c_int(obj));
+static bool Thread_Gt(var self, var obj) {
+  return Thread_C_Int(self) > c_int(obj);
 }
 
-static var Thread_Lt(var self, var obj) {
-  return bool_var(c_int(self) < c_int(obj));
+static bool Thread_Lt(var self, var obj) {
+  return Thread_C_Int(self) < c_int(obj);
 }
 
 static bool Thread_TLS_Key_Created = false;
@@ -215,16 +215,16 @@ static var Thread_Init_Run(var self) {
 
   struct Thread* t = self;  
   pthread_setspecific(Thread_Key_Wrapper, t);
-  t->is_running = True;
+  t->is_running = true;
   
 #if CELLO_GC == 1
-  var bottom = None;
+  var bottom = NULL;
   gc_init(&bottom);
 #endif
   
   var x = call_with(t->func, t->args);
   dealloc(destruct(t->args));
-  t->args = None;
+  t->args = NULL;
   
 #if CELLO_GC == 1
   gc_finish();
@@ -248,16 +248,16 @@ static DWORD Thread_Init_Run(var self) {
   
   struct Thread* t = self;
   TlsSetValue(Thread_Key_Wrapper, t);
-  t->is_running = True;
+  t->is_running = true;
   
 #if CELLO_GC == 1
-  var bottom = None;
+  var bottom = NULL;
   gc_init(&bottom);
 #endif
   
   call_with(t->func, t->args);
   dealloc(destruct(t->args));
-  t->args = None;
+  t->args = NULL;
   
 #if CELLO_GC == 1
   gc_finish();
@@ -339,19 +339,19 @@ static var Thread_Current(void) {
   ** thread on OSX using this non-portable method
   */
 #if defined(__APPLE__)
-  if (pthread_main_np()) { wrapper = None; }
+  if (pthread_main_np()) { wrapper = NULL; }
 #endif
   
-  if (wrapper is None) {
+  if (wrapper is NULL) {
   
-    if (Thread_Main is None) {
-      Thread_Main = construct(alloc(Thread), None);
+    if (Thread_Main is NULL) {
+      Thread_Main = construct(alloc(Thread), NULL);
       atexit(Thread_Main_Del);
     }
     
     struct Thread* t = Thread_Main;
-    t->is_main = True;
-    t->is_running = True;
+    t->is_main = true;
+    t->is_running = true;
     
 #if defined(__unix__) || defined(__APPLE__)
     t->thread = pthread_self();
@@ -398,7 +398,7 @@ static void Thread_Stop(var self) {
   
 }
 
-static var Thread_Running(var self) {
+static bool Thread_Running(var self) {
   struct Thread* t = self;
   return t->is_running;
 }
@@ -451,7 +451,7 @@ void unlock(var self) {
   method(self, Lock, unlock);
 }
 
-var lock_try(var self) {
+bool lock_try(var self) {
   return method(self, Lock, lock_try);
 }
 
@@ -538,7 +538,7 @@ static void Mutex_Lock(var self) {
   
 }
 
-static var Mutex_Lock_Try(var self) {
+static bool Mutex_Lock_Try(var self) {
   struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
   int err = pthread_mutex_trylock(&m->mutex);
@@ -546,9 +546,9 @@ static var Mutex_Lock_Try(var self) {
   if (err is EINVAL) {
     throw(ValueError, "Invalid Argument to Mutex Lock Try");
   }
-  return True;
+  return true;
 #elif defined(_WIN32)
-  return bool_var(not (WaitForSingleObject(m->mutex, 0) is WAIT_TIMEOUT));
+  return not (WaitForSingleObject(m->mutex, 0) is WAIT_TIMEOUT);
 #endif
   
 }
@@ -630,19 +630,19 @@ void exception_dec(void) {
   t->exc_depth--;
 }
 
-var exception_active(void) {
+bool exception_active(void) {
   struct Thread* t = Thread_Current();
   return t->exc_active;
 }
 
 void exception_activate(void) {
   struct Thread* t = Thread_Current();
-  t->exc_active = True;
+  t->exc_active = true;
 }
 
 void exception_deactivate(void) {
   struct Thread* t = Thread_Current();
-  t->exc_active = False;  
+  t->exc_active = false;  
 }
 
 var exception_object(void) {
@@ -832,7 +832,7 @@ var exception_throw(var obj, const char* fmt, var args) {
   
   t->exc_obj = obj;
   
-  if (t->exc_msg is None) {
+  if (t->exc_msg is NULL) {
     t->exc_msg = construct(alloc(String), $S(""));
   }
   

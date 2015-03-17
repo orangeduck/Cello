@@ -30,7 +30,7 @@ var Sort = Cello(Sort,
     Sort_Examples, Sort_Methods));
   
 static var Sort_Lt(var args) {
-  return lt(get(args, $I(0)), get(args, $I(1)));
+  return (var)lt(get(args, $I(0)), get(args, $I(1)));
 }
   
 void sort(var self) {

@@ -55,7 +55,7 @@ static var Map_Val(struct Map* m, var node) {
     sizeof(struct CelloHeader);
 }
 
-static void Map_Set_Color(struct Map* m, var node, var value) {
+static void Map_Set_Color(struct Map* m, var node, bool value) {
   if (value) {
     CelloHeader_SetFlag(
       (struct CelloHeader*)((char*)Map_Key(m, node) - 
@@ -67,9 +67,9 @@ static void Map_Set_Color(struct Map* m, var node, var value) {
   }
 }
 
-static var Map_Get_Color(struct Map* m, var node) {
+static bool Map_Get_Color(struct Map* m, var node) {
   if (node is Terminal) {
-    return False;
+    return false;
   } else {
     return CelloHeader_GetFlag(
       (struct CelloHeader*)((char*)Map_Key(m, node) - 
@@ -78,19 +78,19 @@ static var Map_Get_Color(struct Map* m, var node) {
 }
 
 static void Map_Set_Black(struct Map* m, var node) {
-  Map_Set_Color(m, node, False);
+  Map_Set_Color(m, node, false);
 }
 
 static void Map_Set_Red(struct Map* m, var node) {
-  Map_Set_Color(m, node, True);
+  Map_Set_Color(m, node, true);
 }
 
-static var Map_Is_Red(struct Map* m, var node) {
+static bool Map_Is_Red(struct Map* m, var node) {
   return Map_Get_Color(m, node);
 }
 
-static var Map_Is_Black(struct Map* m, var node) {
-  return bool_var(not Map_Get_Color(m, node));
+static bool Map_Is_Black(struct Map* m, var node) {
+  return not Map_Get_Color(m, node);
 }
 
 static var Map_Alloc(struct Map* m) {
@@ -99,7 +99,7 @@ static var Map_Alloc(struct Map* m) {
     sizeof(struct CelloHeader) + m->vsize);
   
 #if CELLO_MEMORY_CHECK == 1
-  if (node is None) {
+  if (node is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Map entry, out of memory!");
   }
 #endif
@@ -208,22 +208,22 @@ static var Map_Copy(var self) {
   return r;
 }
 
-static var Map_Mem(var self, var key);
+static bool Map_Mem(var self, var key);
 static var Map_Get(var self, var key);
 
-static var Map_Eq(var self, var obj) {
+static bool Map_Eq(var self, var obj) {
   
   foreach (key in obj) {
-    if (not Map_Mem(self, key)) { return False; }
-    if_neq(get(obj, key), Map_Get(self, key)) { return False; }
+    if (not Map_Mem(self, key)) { return false; }
+    if_neq(get(obj, key), Map_Get(self, key)) { return false; }
   }
 	
   foreach (key in self) {
-    if (not mem(obj, key)) { return False; }
-    if_neq(get(obj, key), Map_Get(self, key)) { return False; }
+    if (not mem(obj, key)) { return false; }
+    if_neq(get(obj, key), Map_Get(self, key)) { return false; }
   }
 	
-  return True;
+  return true;
 }
 
 static size_t Map_Len(var self) {
@@ -231,7 +231,7 @@ static size_t Map_Len(var self) {
   return m->nitems;
 }
 
-static var Map_Mem(var self, var key) {
+static bool Map_Mem(var self, var key) {
   struct Map* m = self;
   key = cast(key, m->ktype);
   
@@ -239,7 +239,7 @@ static var Map_Mem(var self, var key) {
   while (node isnt Terminal) { 
   
     if_eq(Map_Key(m, node), key) {
-      return True;
+      return true;
     }
     
     node = lt(Map_Key(m, node), key) 
@@ -247,7 +247,7 @@ static var Map_Mem(var self, var key) {
       : *Map_Right(m, node);
   }
   
-  return False;
+  return false;
 }
 
 static var Map_Get(var self, var key) {
@@ -346,7 +346,7 @@ static void Map_Rotate_Right(struct Map* m, var node) {
 
 static void Map_Set_Fix(struct Map* m, var node) {
   
-  while (True) {
+  while (true) {
   
     if (*Map_Parent(m, node) is Terminal) {
       Map_Set_Black(m, node);
@@ -410,7 +410,7 @@ static void Map_Set(var self, var key, var val) {
     return;
   }
   
-  while(True) {
+  while (true) {
     
     if_eq (Map_Key(m, node), key) {
       assign(Map_Key(m, node), key);
@@ -456,7 +456,7 @@ static void Map_Set(var self, var key, var val) {
 
 static void Map_Rem_Fix(struct Map* m, var node) {
  
-  while (True) {
+  while (true) {
   
     if (*Map_Parent(m, node) is Terminal) { return; }
     
@@ -534,12 +534,12 @@ static void Map_Rem(var self, var key) {
   
   key = cast(key, m->ktype);
   
-  var found = False;
+  bool found = false;
   var node = m->root;
   while (node isnt Terminal) {
   
     if_eq(Map_Key(m, node), key) {
-      found = True;
+      found = true;
       break;
     }
     
@@ -559,7 +559,7 @@ static void Map_Rem(var self, var key) {
   if ((*Map_Left(m, node) isnt Terminal) 
   and (*Map_Right(m, node) isnt Terminal)) {
     var pred = Map_Maximum(m, *Map_Left(m, node));
-    var ncol = Map_Get_Color(m, node);
+    bool ncol = Map_Get_Color(m, node);
     memcpy((char*)node + 3 * sizeof(var), (char*)pred + 3 * sizeof(var),
       sizeof(struct CelloHeader) + m->ksize +
       sizeof(struct CelloHeader) + m->vsize);
@@ -611,7 +611,7 @@ static var Map_Iter_Next(var self, var curr) {
     return Map_Key(m, node);
   }
   
-  while (True) {
+  while (true) {
     if (prnt is Terminal) { return Terminal; }
     if (node is *Map_Left(m, prnt)) { return Map_Key(m, prnt); }
     if (node is *Map_Right(m, prnt)) {

@@ -160,7 +160,6 @@ typedef void* var;
 /* Types */
 
 extern var Type;
-extern var Bool;
 extern var Tuple;
 extern var Terminal;
 extern var Undefined;
@@ -229,11 +228,6 @@ struct Type {
   var blank[CELLO_BLANK_INSTANCE_NUM];
 };
 
-static const var True  = (var)1;
-static const var False = (var)0;
-static const var Okay  = (var)1;
-static const var None  = (var)0;
-
 struct Ref { var val; };
 struct Box { var val; };
 struct Int { int64_t val; };
@@ -283,7 +277,6 @@ extern var Pointer;
 extern var Call;
 extern var Format;
 extern var Show;
-extern var Math;
 extern var Current;
 extern var Start;
 extern var Join;
@@ -341,12 +334,12 @@ struct Subtype {
 };
 
 struct Eq {
-  var (*eq)(var, var);
+  bool (*eq)(var, var);
 };
 
 struct Ord {
-  var (*gt)(var, var);
-  var (*lt)(var, var);
+  bool (*gt)(var, var);
+  bool (*lt)(var, var);
 };
 
 struct Hash {
@@ -372,7 +365,7 @@ struct Concat {
 struct Get {
   var  (*get)(var, var);
   void (*set)(var, var, var);
-  var  (*mem)(var, var);
+  bool (*mem)(var, var);
   void (*rem)(var, var);
 };
 
@@ -415,11 +408,11 @@ struct Stream {
   var  (*sopen)(var, var, var);
   void (*sclose)(var);
   void (*sseek)(var, var, var);
-  int  (*stell)(var);
+  int64_t (*stell)(var);
   void (*sflush)(var);
-  var  (*seof)(var);
-  int  (*sread)(var, var, var);
-  int  (*swrite)(var, var, var);
+  bool (*seof)(var);
+  size_t (*sread)(var, var, var);
+  size_t (*swrite)(var, var, var);
 };
 
 struct Pointer {
@@ -441,18 +434,6 @@ struct Show {
   int (*look)(var, var, int);
 };
 
-struct Math {
-  void (*madd)(var, var);
-  void (*msub)(var, var);
-  void (*mmul)(var, var);
-  void (*mdiv)(var, var);
-  void (*mpow)(var, var);
-  void (*mmod)(var, var);
-  void (*mneg)(var);
-  void (*mabs)(var);
-  void (*mexp)(var);
-};
-
 struct Current {
   var (*current)(void);
 };
@@ -460,7 +441,7 @@ struct Current {
 struct Start {
   void (*start)(var);
   void (*stop)(var);
-  var (*running)(var);
+  bool (*running)(var);
 };
 
 struct Join {
@@ -470,7 +451,7 @@ struct Join {
 struct Lock {
   void (*lock)(var);
   void (*unlock)(var);
-  var  (*lock_try)(var);
+  bool (*lock_try)(var);
 };
 
 struct Gen {
@@ -486,9 +467,9 @@ int help_to(var out, int pos, var self);
 var type_of(var self);
 var cast(var self, var type);
 var instance(var self, var cls);
-var implements(var self, var cls);
+bool implements(var self, var cls);
 var type_instance(var self, var cls);
-var type_implements(var self, var cls);
+bool type_implements(var self, var cls);
 
 #define method(X, C, M, ...) \
   ((struct C*)method_at_offset(X, C, \
@@ -505,10 +486,10 @@ var type_implements(var self, var cls);
   type_implements_method_at_offset(T, C, offsetof(struct C, M))
   
 var method_at_offset(var self, var cls, size_t offset, const char* method);
-var implements_method_at_offset(var self, var cls, size_t offset);
+bool implements_method_at_offset(var self, var cls, size_t offset);
 
 var type_method_at_offset(var self, var cls, size_t offset, const char* method);
-var type_implements_method_at_offset(var self, var cls, size_t offset);
+bool type_implements_method_at_offset(var self, var cls, size_t offset);
 
 struct CelloHeader* Cello_GetHeader(var self);
 var CelloHeader_Init(struct CelloHeader* head, var type, int flags);
@@ -566,23 +547,21 @@ var subtype(var self);
 var key_subtype(var self);
 var val_subtype(var self);
 
-var eq(var self, var obj);
-var neq(var self, var obj);
+bool eq(var self, var obj);
+bool neq(var self, var obj);
 
 #define if_eq(X,Y) if(eq(X,Y))
 #define if_neq(X,Y) if(neq(X,Y))
 
-var gt(var self, var obj);
-var lt(var self, var obj);
-var ge(var self, var obj);
-var le(var self, var obj);
+bool gt(var self, var obj);
+bool lt(var self, var obj);
+bool ge(var self, var obj);
+bool le(var self, var obj);
 
 #define if_lt(X,Y) if(lt(X,Y))
 #define if_gt(X,Y) if(gt(X,Y))
 #define if_le(X,Y) if(le(X,Y))
 #define if_ge(X,Y) if(ge(X,Y))
-
-var bool_var(intptr_t x);
 
 void hash_init(uint64_t seed);
 uint64_t hash_seed(void);
@@ -615,16 +594,16 @@ void sort_with(var self, var func);
 void concat(var self, var obj);
 void append(var self, var obj);
 
-var get(var self, var key);
+var  get(var self, var key);
 void set(var self, var key, var val);
-var mem(var self, var key);
+bool mem(var self, var key);
 void rem(var self, var key);
 
 void reserve(var self, var amount);
 void clear(var self);
 
 size_t len(var self);
-var empty(var self);
+bool empty(var self);
 
 char* c_str(var self);
 int64_t c_int(var self);
@@ -638,33 +617,19 @@ var range_with(var self, var args);
 var sopen(var self, var filename, var access);
 void sclose(var self);
 void sseek(var self, var pos, var origin);
-int stell(var self);
+int64_t stell(var self);
 void sflush(var self);
-var seof(var self);
-int sread(var self, var output, var size);
-int swrite(var self, var input, var size);
+bool seof(var self);
+size_t sread(var self, var output, var size);
+size_t swrite(var self, var input, var size);
 
 void ref(var self, var item);
 var deref(var self);
 
-void minc(var self);
-void mdec(var self);
-void mneg(var self);
-void mabs(var self);
-void mexp(var self);
-void madd(var self, var obj);
-void msub(var self, var obj);
-void mmul(var self, var obj);
-void mdiv(var self, var obj);
-void mpow(var self, var obj);
-void mmod(var self, var obj);
-void minc(var self);
-void mdec(var self);
-
 #if defined(CELLO_CLANG)
 
 #define fun(X, A) \
-  struct Function* X = $(Function, None); \
+  struct Function* X = $(Function); \
   X->func = ^ var (var A)
 
 #else
@@ -715,7 +680,7 @@ var current(var type);
 
 void start(var self);
 void stop(var self);
-var running(var self);
+bool running(var self);
 
 var start_in(var self);
 var stop_in(var self);
@@ -727,8 +692,8 @@ var stop_in(var self);
 void join(var self);
 
 void lock(var self);
+bool lock_try(var self);
 void unlock(var self);
-var lock_try(var self);
 
 #define try { jmp_buf __env; exception_try(&__env); if (!setjmp(__env))
 
@@ -743,7 +708,7 @@ var lock_try(var self);
 void exception_register_signals(void);
 void exception_inc(void);
 void exception_dec(void);
-var exception_active(void);
+bool exception_active(void);
 void exception_activate(void);
 void exception_deactivate(void);
 
@@ -761,7 +726,7 @@ uint64_t gen_c_int(void);
 double gen_c_float(void);
 var gen(var);
 var shrink(var);
-var check(var func, var name, var iterations, var types);
+bool check(var func, var name, var iterations, var types);
 
 #define quickcheck(F, ...) check(F, $S(#F), $I(1000), tuple(__VA_ARGS__))
 
@@ -779,7 +744,7 @@ int gc_main(int argc, char** argv);
 
 #define main(...) \
   main(int argc, char** argv) { \
-    var bottom = None; \
+    var bottom = NULL; \
     gc_init(&bottom); \
     atexit(gc_finish); \
     return gc_main(argc, argv); \

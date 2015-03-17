@@ -85,7 +85,7 @@ var alloc(var type) {
     sizeof(struct CelloHeader) + size(type));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (head is None) {
+  if (head is NULL) {
     throw(OutOfMemoryError, "Cannot create new '%s', out of memory!", type);
   }
 #endif
@@ -104,12 +104,8 @@ void dealloc(var self) {
     (char*)self - sizeof(struct CelloHeader));
 
 #if CELLO_ALLOC_CHECK == 1
-  if (self is  True) {
-    throw(ResourceError, "Attempt to deallocate \"True\"/\"Okay\"!"); 
-  }
-  
-  if (self is False) {
-    throw(ResourceError, "Attempt to deallocate \"False\"/\"None\"/\"NULL\"!"); 
+  if (self is NULL) {
+    throw(ResourceError, "Attempt to deallocate NULL!"); 
   }
 
   if (((int)(intptr_t)head->flags) & CelloStaticAlloc) {

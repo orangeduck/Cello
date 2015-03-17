@@ -96,7 +96,7 @@ static uint64_t Table_Probe(struct Table* t, uint64_t i, uint64_t h) {
 }
 
 static void Table_Set(var self, var key, var val);
-static void Table_Set_Move(var self, var key, var val, var move);
+static void Table_Set_Move(var self, var key, var val, bool move);
 
 static size_t Table_Size_Round(size_t s) {
   return ((s + sizeof(var) - 1) / sizeof(var)) * sizeof(var);
@@ -120,7 +120,7 @@ static var Table_New(var self, var args) {
   t->nitems = 0;
   
   if (t->nslots is 0) {
-    t->data = None;
+    t->data = NULL;
     return self;
   }
   
@@ -129,7 +129,7 @@ static var Table_New(var self, var args) {
   t->sspace1 = calloc(1, Table_Step(t));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->data is None or t->sspace0 is None or t->sspace1 is None) {
+  if (t->data is NULL or t->sspace0 is NULL or t->sspace1 is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Table, out of memory!");
   }
 #endif
@@ -137,7 +137,7 @@ static var Table_New(var self, var args) {
   for(size_t i = 0; i < (nargs-2)/2; i++) {
     var key = get(args, $(Int, 2+(i*2)+0));
     var val = get(args, $(Int, 2+(i*2)+1));
-    Table_Set_Move(t, key, val, False);
+    Table_Set_Move(t, key, val, false);
   }
   
   return self;
@@ -184,7 +184,7 @@ static void Table_Clear(var self) {
   
   t->nslots = 0;
   t->nitems = 0;
-  t->data = None;
+  t->data = NULL;
   
 }
 
@@ -200,7 +200,7 @@ static var Table_Assign(var self, var obj) {
   t->nslots = Table_Ideal_Size(len(obj));
   
   if (t->nslots is 0) {
-    t->data = None;
+    t->data = NULL;
     return self;
   }
   
@@ -209,7 +209,7 @@ static var Table_Assign(var self, var obj) {
   t->sspace1 = realloc(t->sspace1, Table_Step(t));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->data is None or t->sspace0 is None or t->sspace1 is None) {
+  if (t->data is NULL or t->sspace0 is NULL or t->sspace1 is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Table, out of memory!");
   }
 #endif
@@ -218,7 +218,7 @@ static var Table_Assign(var self, var obj) {
   memset(t->sspace1, 0, Table_Step(t));
   
   foreach(key in obj) {
-    Table_Set_Move(t, key, get(obj, key), False);
+    Table_Set_Move(t, key, get(obj, key), false);
   }
   
   return self;
@@ -239,22 +239,22 @@ static var Table_Copy(var self) {
   return r;
 }
 
-static var Table_Mem(var self, var key);
+static bool Table_Mem(var self, var key);
 static var Table_Get(var self, var key);
 
-static var Table_Eq(var self, var obj) {
+static bool Table_Eq(var self, var obj) {
   
   foreach (key in obj) {
-    if (not Table_Mem(self, key)) { return False; }
-    if_neq(get(obj, key), Table_Get(self, key)) { return False; }
+    if (not Table_Mem(self, key)) { return false; }
+    if_neq(get(obj, key), Table_Get(self, key)) { return false; }
   }
 	
   foreach (key in self) {
-    if (not mem(obj, key)) { return False; }
-    if_neq(get(obj, key), Table_Get(self, key)) { return False; }
+    if (not mem(obj, key)) { return false; }
+    if_neq(get(obj, key), Table_Get(self, key)) { return false; }
   }
 	
-  return True;
+  return true;
 }
 
 static size_t Table_Len(var self) {
@@ -275,7 +275,7 @@ static var Table_Swapspace_Val(struct Table* t, var space) {
     t->ksize + sizeof(struct CelloHeader); 
 }
 
-static void Table_Set_Move(var self, var key, var val, var move) {
+static void Table_Set_Move(var self, var key, var val, bool move) {
   
   struct Table* t = self;
   key = cast(key, t->ktype);
@@ -317,7 +317,7 @@ static void Table_Set_Move(var self, var key, var val, var move) {
       + t->ksize + sizeof(struct CelloHeader), val);
   }
   
-  while (True) {
+  while (true) {
     
     uint64_t h = Table_Key_Hash(t, i);
     if (h is 0) {
@@ -357,7 +357,7 @@ static void Table_Rehash(struct Table* t, size_t new_size) {
   t->data = calloc(t->nslots, Table_Step(t));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->data is None) {
+  if (t->data is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Table, out of memory!");
   }
 #endif
@@ -372,7 +372,7 @@ static void Table_Rehash(struct Table* t, size_t new_size) {
       var val = (char*)old_data + i * Table_Step(t) +
         sizeof(uint64_t) + sizeof(struct CelloHeader) + 
         t->ksize + sizeof(struct CelloHeader);
-      Table_Set_Move(t, key, val, True);
+      Table_Set_Move(t, key, val, true);
     }
     
   }
@@ -392,30 +392,30 @@ static void Table_Resize_Less(struct Table* t) {
   if (new_size < old_size) { Table_Rehash(t, new_size); }
 }
 
-static var Table_Mem(var self, var key) {
+static bool Table_Mem(var self, var key) {
   struct Table* t = self;
   key = cast(key, t->ktype);
   
-  if (t->nslots is 0) { return False; }
+  if (t->nslots is 0) { return false; }
   
   uint64_t i = hash(key) % t->nslots;
   uint64_t j = 0;
   
-  while (True) {
+  while (true) {
     
     uint64_t h = Table_Key_Hash(t, i);
     if (h is 0 or j > Table_Probe(t, i, h)) {
-      return False;
+      return false;
     }
     
     if_eq(Table_Key(t, i), key) {
-      return True;
+      return true;
     }
     
     i = (i+1) % t->nslots; j++;
   }
   
-  return False;
+  return false;
 }
 
 static void Table_Rem(var self, var key) {
@@ -429,7 +429,7 @@ static void Table_Rem(var self, var key) {
   uint64_t i = hash(key) % t->nslots;
   uint64_t j = 0;
   
-  while (True) {
+  while (true) {
     
     uint64_t h = Table_Key_Hash(t, i);
     if (h is 0 or j > Table_Probe(t, i, h)) {
@@ -442,7 +442,7 @@ static void Table_Rem(var self, var key) {
       destruct(Table_Val(t, i));
       memset((char*)t->data + i * Table_Step(t), 0, Table_Step(t));
       
-      while (True) {
+      while (true) {
         
         uint64_t ni = (i+1) % t->nslots;
         uint64_t nh = Table_Key_Hash(t, ni);
@@ -480,7 +480,7 @@ static var Table_Get(var self, var key) {
   uint64_t i = hash(key) % t->nslots;
   uint64_t j = 0;
   
-  while (True) {
+  while (true) {
 
     uint64_t h = Table_Key_Hash(t, i);
     if (h is 0 or j > Table_Probe(t, i, h)) {
@@ -498,7 +498,7 @@ static var Table_Get(var self, var key) {
 }
 
 static void Table_Set(var self, var key, var val) {
-  Table_Set_Move(self, key, val, False);
+  Table_Set_Move(self, key, val, false);
   Table_Resize_More(self);
 }
 
@@ -520,7 +520,7 @@ static var Table_Iter_Next(var self, var curr) {
   
   curr = (char*)curr + Table_Step(t);
   
-  while (True) {
+  while (true) {
 
     if (curr > Table_Key(t, t->nslots-1)) {
       return Terminal;

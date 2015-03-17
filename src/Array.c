@@ -127,7 +127,7 @@ static var Array_New(var self, var args) {
   a->nslots = a->nitems;
   
   if (a->nslots is 0) {
-    a->data = None;
+    a->data = NULL;
     return self;
   }
   
@@ -136,7 +136,7 @@ static var Array_New(var self, var args) {
   a->sspace1 = malloc(Array_Step(a));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (a->data is None or a->sspace0 is None or a->sspace1 is None) {
+  if (a->data is NULL or a->sspace0 is NULL or a->sspace1 is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
   }
 #endif
@@ -177,7 +177,7 @@ static void Array_Clear(var self) {
   }
   
   free(a->data);
-  a->data  = None;
+  a->data  = NULL;
   a->nitems = 0;
   a->nslots = 0;
 }
@@ -193,7 +193,7 @@ static var Array_Assign(var self, var obj) {
   a->nslots = a->nitems;
   
   if (a->nslots is 0) {
-    a->data = None;
+    a->data = NULL;
     return self;
   }
   
@@ -202,7 +202,7 @@ static var Array_Assign(var self, var obj) {
   a->sspace1 = realloc(a->sspace1, Array_Step(a));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (a->data is None or a->sspace0 is None or a->sspace1 is None) {
+  if (a->data is NULL or a->sspace0 is NULL or a->sspace1 is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
   }
 #endif
@@ -222,7 +222,7 @@ static void Array_Reserve_More(struct Array* a) {
     a->nslots = a->nitems + a->nitems / 2;
     a->data = realloc(a->data, Array_Step(a) * a->nslots);
 #if CELLO_MEMORY_CHECK == 1
-    if (a->data is None) {
+    if (a->data is NULL) {
       throw(OutOfMemoryError, "Cannot grow Array, out of memory!");
     }
 #endif
@@ -255,18 +255,18 @@ static var Array_Copy(var self) {
   return b;
 }
 
-static var Array_Eq(var self, var obj) {
+static bool Array_Eq(var self, var obj) {
   
   struct Array* a = self;
-  if (a->nitems isnt len(obj)) { return False; }
+  if (a->nitems isnt len(obj)) { return false; }
   
   for(size_t i = 0; i < a->nitems; i++) {
     if_neq(Array_Item(a, i), get(obj, $(Int, i))) {
-      return False;
+      return false;
     }
   }
   
-  return True;
+  return true;
 }
 
 static size_t Array_Len(var self) {
@@ -274,14 +274,14 @@ static size_t Array_Len(var self) {
   return a->nitems;
 }
 
-static var Array_Mem(var self, var obj) {
+static bool Array_Mem(var self, var obj) {
   struct Array* a = self;
   for(size_t i = 0; i < a->nitems; i++) {
     if_eq(Array_Item(a, i), obj) {
-      return True;
+      return true;
     }
   }
-  return False;
+  return false;
 }
 
 static void Array_Reserve_Less(struct Array* a) {
@@ -495,7 +495,7 @@ static void Array_Reserve(var self, var amount) {
   a->data = realloc(a->data, Array_Step(a) * a->nslots);
 
 #if CELLO_MEMORY_CHECK == 1
-  if (a->data is None) {
+  if (a->data is NULL) {
     throw(OutOfMemoryError, "Cannot grow Array, out of memory!");
   }
 #endif

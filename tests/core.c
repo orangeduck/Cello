@@ -8,8 +8,6 @@ PT_FUNC(test_doc) {
 PT_FUNC(test_type) {
   PT_ASSERT(type_of($I(1)) is Int);
   PT_ASSERT(type_of($F(1.0)) is Float);
-  PT_ASSERT(type_of(True) is Bool);
-  PT_ASSERT(type_of(False) is Bool);
   PT_ASSERT(type_of(Int) is Type);
   PT_ASSERT(type_of(Float) is Type);
   PT_ASSERT(type_of(Type) is Type);
@@ -406,7 +404,7 @@ PT_FUNC(test_begin) {
 
 PT_FUNC(test_stream) {
 
-  var f = $(File, None);
+  var f = $(File);
   
   PT_ASSERT(f);
   
@@ -453,14 +451,10 @@ static var TestType_Del(var self) {
   return self;
 }
 
-static var TestType_Eq(var self, var obj) {
+static bool TestType_Eq(var self, var obj) {
   struct TestType* lhs = cast(self, TestType);
   struct TestType* rhs = cast(obj, TestType);
-  if (lhs->test_data == rhs->test_data) {
-    return True;
-  } else {
-    return False;
-  }
+  return lhs->test_data == rhs->test_data;
 }
 
 PT_FUNC(test_type_new) {
@@ -510,7 +504,7 @@ PT_FUNC(test_start) {
 PT_FUNC(test_type_implements) {
   
   PT_ASSERT(type_implements(Int, New));
-  PT_ASSERT(type_implements(Float, Math));
+  PT_ASSERT(type_implements(Float, C_Float));
   PT_ASSERT(type_implements(String, Eq));
   
   PT_ASSERT(type_instance(Int, Ord));

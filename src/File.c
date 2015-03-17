@@ -35,18 +35,18 @@ static var File_New(var self, var args) {
 
 static var File_Del(var self) {
   struct File* f = self;
-  if (f->file isnt None) { File_Close(self); }
+  if (f->file isnt NULL) { File_Close(self); }
   return self;
 }
 
 static var File_Open(var self, var filename, var access) {
   struct File* f = self;
   
-  if (f->file isnt None) { File_Close(self); }
+  if (f->file isnt NULL) { File_Close(self); }
   
   f->file = fopen(c_str(filename), c_str(access));
   
-  if (f->file is None) {
+  if (f->file is NULL) {
     throw(IOError, "Could not open file: %s", filename);
   }
   
@@ -61,13 +61,13 @@ static void File_Close(var self) {
     throw(IOError, "Failed to close file: %i", $I(err));
   }
   
-  f->file = None;
+  f->file = NULL;
 }
 
 static void File_Seek(var self, var pos, var origin) {
   struct File* f = self;
   
-  /* TODO: Check file isnt None, also for other functions */
+  /* TODO: Check file isnt NULL, also for other functions */
   
   int err = fseek(f->file, (long)c_int(pos), (int)c_int(origin));
   if (err != 0) {
@@ -76,10 +76,10 @@ static void File_Seek(var self, var pos, var origin) {
   
 }
 
-static int File_Tell(var self) {
+static int64_t File_Tell(var self) {
   struct File* f = self;
   
-  int i = ftell(f->file);
+  int64_t i = ftell(f->file);
   if (i == -1) {
     throw(IOError, "Failed to tell file: %i", $I(i));
   }
@@ -97,12 +97,12 @@ static void File_Flush(var self) {
   
 }
 
-static var File_EOF(var self) {
+static bool File_EOF(var self) {
   struct File* f = self;
-  return bool_var(feof(f->file));
+  return feof(f->file);
 }
 
-static int File_Read(var self, var output, var size) {
+static size_t File_Read(var self, var output, var size) {
   struct File* f = self;
   
   size_t num = fread(output, c_int(size), 1, f->file);
@@ -114,7 +114,7 @@ static int File_Read(var self, var output, var size) {
   return num;
 }
 
-static int File_Write(var self, var input, var size) {
+static size_t File_Write(var self, var input, var size) {
   struct File* f = self;
   
   size_t num = fwrite(input, c_int(size), 1, f->file);
@@ -175,25 +175,25 @@ static void Process_Close(var self);
 
 static var Process_New(var self, var args) {
   struct Process* p = self;
-  p->proc = None;
+  p->proc = NULL;
   Process_Open(self, get(args, $I(0)), get(args, $I(1)));
   return self;
 }
 
 static var Process_Del(var self) {
   struct Process* p = self;
-  if (p->proc isnt None) { Process_Close(self); }
+  if (p->proc isnt NULL) { Process_Close(self); }
   return self;
 }
 
 static var Process_Open(var self, var filename, var access) {
   struct Process* p = self;
   
-  if (p->proc isnt None) { Process_Close(self); }
+  if (p->proc isnt NULL) { Process_Close(self); }
   
   p->proc = popen(c_str(filename), c_str(access));
   
-  if (p->proc is None) {
+  if (p->proc is NULL) {
     throw(IOError, "Could not open process: %s", filename);
   }
   
@@ -208,7 +208,7 @@ static void Process_Close(var self) {
     throw(IOError, "Failed to close process: %i", $I(err));
   }
   
-  p->proc = None;
+  p->proc = NULL;
 }
 
 static void Process_Seek(var self, var pos, var origin) {
@@ -221,10 +221,10 @@ static void Process_Seek(var self, var pos, var origin) {
   
 }
 
-static int Process_Tell(var self) {
+static int64_t Process_Tell(var self) {
   struct Process* p = self;
   
-  int i = ftell(p->proc);
+  int64_t i = ftell(p->proc);
   if (i == -1) {
     throw(IOError, "Failed to tell process: %i", $I(i));
   }
@@ -242,16 +242,16 @@ static void Process_Flush(var self) {
   
 }
 
-static var Process_EOF(var self) {
+static bool Process_EOF(var self) {
   struct Process* p = self;
-  return bool_var(feof(p->proc));
+  return feof(p->proc);
 }
 
-static int Process_Read(var self, var output, var size) {
+static size_t Process_Read(var self, var output, var size) {
   struct Process* p = self;
   
-  int num = (int)fread(output, c_int(size), 1, p->proc);
-  if (num == -1) {
+  size_t num = fread(output, c_int(size), 1, p->proc);
+  if (num isnt 1 and c_int(size) isnt 0) {
     throw(IOError, "Failed to read from process: %i", $I(num));
     return num;
   }
@@ -259,11 +259,11 @@ static int Process_Read(var self, var output, var size) {
   return num;
 }
 
-static int Process_Write(var self, var input, var size) {
+static size_t Process_Write(var self, var input, var size) {
   struct Process* p = self;
   
-  int num = (int)fwrite(input, c_int(size), 1, p->proc);
-  if (num != 1 && c_int(size) != 0) {
+  size_t num = fwrite(input, c_int(size), 1, p->proc);
+  if (num isnt 1 and c_int(size) isnt 0) {
     throw(IOError, "Failed to write to process: %i", $I(num));
   }
   

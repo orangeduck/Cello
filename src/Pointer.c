@@ -136,7 +136,7 @@ static var Box_New(var self, var args) {
 
 static var Box_Del(var self) {
   del(deref(self));
-  ref(self, None);
+  ref(self, NULL);
   return self;
 }
 

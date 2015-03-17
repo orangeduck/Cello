@@ -32,6 +32,6 @@ size_t len(var self) {
   return method(self, Len, len);
 }
 
-var empty(var self) {
-  return bool_var(len(self) is 0);
+bool empty(var self) {
+  return len(self) is 0;
 }

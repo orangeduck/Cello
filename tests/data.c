@@ -1,27 +1,6 @@
 #include "Cello.h"
 #include "ptest.h"
 
-PT_FUNC(test_bool_ord) {
-  PT_ASSERT(eq(True, True));
-  PT_ASSERT(eq(False, False));
-  PT_ASSERT(gt(True, False));
-  PT_ASSERT(lt(False, True)); 
-}
-
-PT_FUNC(test_bool_hash) {
-  PT_ASSERT(hash(True) is 1);
-  PT_ASSERT(hash(False) is 0);
-}
-
-PT_FUNC(test_bool_ctypes) {
-  PT_ASSERT(c_int(True) is 1);
-  PT_ASSERT(c_int(False) is 0);
-  PT_ASSERT(c_float(True) is 1.0);
-  PT_ASSERT(c_float(False) is 0.0);
-  PT_ASSERT_STR_EQ(c_str(False), "False");
-  PT_ASSERT_STR_EQ(c_str(True), "True");
-}
-
 PT_FUNC(test_int_new) {
   
   var int0 = $I(1);
@@ -69,22 +48,6 @@ PT_FUNC(test_int_hash) {
   PT_ASSERT( hash($I(11)) is 11 );
   PT_ASSERT( hash($I(06)) is 06 );
   PT_ASSERT( hash($I(8213)) is 8213 );
-  
-}
-
-PT_FUNC(test_int_num) {
-  
-  var tester = $I(0);
-  
-  PT_ASSERT(c_int(tester) is 0);
-  
-  madd(tester, $I(10)); PT_ASSERT(c_int(tester) is 10);
-  msub(tester, $I(4)); PT_ASSERT(c_int(tester) is 6);
-  mmul(tester, $I(10)); PT_ASSERT(c_int(tester) is 60);
-  mdiv(tester, $I(3)); PT_ASSERT(c_int(tester) is 20);
-  mneg(tester); PT_ASSERT(c_int(tester) is -20);
-  mabs(tester); PT_ASSERT(c_int(tester) is 20);
-  mabs(tester); PT_ASSERT(c_int(tester) is 20);
   
 }
 
@@ -153,28 +116,6 @@ PT_FUNC(test_float_hash) {
   PT_ASSERT( hash($F(11.0)) is r1.c_int );
   PT_ASSERT( hash($F(0.6)) is r2.c_int );
   PT_ASSERT( hash($F(82.13)) is r3.c_int );
-  
-}
-
-PT_FUNC(test_float_num) {
-  
-  double base = 0.0;
-  var mirror = $F(0.0);
-  
-  base += 0.1; madd(mirror, $F(0.1));
-  PT_ASSERT(c_float(mirror) is base);
-  
-  base *= 4.0; mmul(mirror, $F(4.0));
-  PT_ASSERT(c_float(mirror) is base);
-  
-  base /= 2.0; mdiv(mirror, $F(2.0));
-  PT_ASSERT(c_float(mirror) is base);
-  
-  base = -base; mneg(mirror);
-  PT_ASSERT(c_float(mirror) is base);  
-  
-  base = fabs(base); mabs(mirror);
-  PT_ASSERT(c_float(mirror) is base);  
   
 }
 
@@ -1009,7 +950,7 @@ PT_FUNC(test_map_iter) {
 PT_FUNC(test_file_new) {
   
   var f0 = new(File, $S("test.bin"), $S("w")); 
-  var f1 = $(File, None);
+  var f1 = $(File);
   
   PT_ASSERT(f0);
   PT_ASSERT(f1);
@@ -1048,21 +989,15 @@ PT_FUNC(test_file_begin) {
 
 PT_SUITE(suite_data) {
 
-  PT_REG(test_bool_ord);
-  PT_REG(test_bool_hash);
-  PT_REG(test_bool_ctypes);
-
   PT_REG(test_int_new);
   PT_REG(test_int_ord);
   PT_REG(test_int_hash);
-  PT_REG(test_int_num);
   PT_REG(test_int_look);
   PT_REG(test_int_show);
 
   PT_REG(test_float_new);
   PT_REG(test_float_ord);
   PT_REG(test_float_hash);
-  PT_REG(test_float_num);
   PT_REG(test_float_look);
   PT_REG(test_float_show);
 

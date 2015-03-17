@@ -31,7 +31,7 @@ static var Tuple_New(var self, var args) {
   t->items = malloc(sizeof(var) * (nargs+1));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->items is None) {
+  if (t->items is NULL) {
     throw(OutOfMemoryError, "Cannot create Tuple, out of memory!");
   }
 #endif
@@ -72,7 +72,7 @@ static var Tuple_Assign(var self, var obj) {
   t->items = realloc(t->items, sizeof(var) * (nargs+1));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->items is None) {
+  if (t->items is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Tuple, out of memory!");
   }
 #endif
@@ -145,11 +145,11 @@ static void Tuple_Set(var self, var key, var val) {
   t->items[i] = val;
 }
 
-static var Tuple_Mem(var self, var item) {
+static bool Tuple_Mem(var self, var item) {
   foreach (obj in self) {
-    if_neq (obj, item) { return False; }
+    if_neq (obj, item) { return false; }
   }
-  return True;  
+  return true;  
 }
 
 static void Tuple_Pop_At(var self, var key);
@@ -189,7 +189,7 @@ static void Tuple_Push(var self, var obj) {
   t->items = realloc(t->items, sizeof(var) * (nitems+2));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->items is None) {
+  if (t->items is NULL) {
     throw(OutOfMemoryError, "Cannot grow Tuple, out of memory!");
   }
 #endif
@@ -232,7 +232,7 @@ static void Tuple_Push_At(var self, var key, var obj) {
   t->items = realloc(t->items, sizeof(var) * (nitems+2));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->items is None) {
+  if (t->items is NULL) {
     throw(OutOfMemoryError, "Cannot grow Tuple, out of memory!");
   }
 #endif
@@ -299,7 +299,7 @@ static void Tuple_Concat(var self, var obj) {
   t->items = realloc(t->items, sizeof(var) * (nitems+1+objlen));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->items is None) {
+  if (t->items is NULL) {
     throw(OutOfMemoryError, "Cannot grow Tuple, out of memory!");
   }
 #endif

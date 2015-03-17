@@ -29,7 +29,7 @@ static var String_New(var self, var args) {
   char* init = c_str(get(args, $(Int, 0)));
   s->val = malloc(strlen(init) + 1);
 #if CELLO_MEMORY_CHECK == 1
-  if (s->val is None) {
+  if (s->val is NULL) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
 #endif
@@ -57,10 +57,11 @@ static var String_Assign(var self, var obj) {
   s->val = realloc(s->val, strlen(val) + 1);
   
 #if CELLO_MEMORY_CHECK == 1
-  if (s->val is None) {
+  if (s->val is NULL) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
 #endif
+
   strcpy(s->val, val);
   return self;
 }
@@ -70,16 +71,16 @@ static char* String_C_Str(var self) {
   return s->val;
 }
 
-static var String_Eq(var self, var obj) {
-  return bool_var(strcmp(String_C_Str(self), c_str(obj)) == 0);
+static bool String_Eq(var self, var obj) {
+  return strcmp(String_C_Str(self), c_str(obj)) == 0;
 }
 
-static var String_Gt(var self, var obj) {
-  return bool_var(strcmp(String_C_Str(self), c_str(obj)) > 0);
+static bool String_Gt(var self, var obj) {
+  return strcmp(String_C_Str(self), c_str(obj)) > 0;
 }
 
-static var String_Lt(var self, var obj) {
-  return bool_var(strcmp(String_C_Str(self), c_str(obj)) < 0);
+static bool String_Lt(var self, var obj) {
+  return strcmp(String_C_Str(self), c_str(obj)) < 0;
 }
 
 static size_t String_Len(var self) {
@@ -100,7 +101,7 @@ static void String_Clear(var self) {
   s->val = realloc(s->val, 1);
   
 #if CELLO_MEMORY_CHECK == 1
-  if (s->val is None) {
+  if (s->val is NULL) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
 #endif
@@ -108,13 +109,13 @@ static void String_Clear(var self) {
   s->val[0] = '\0';
 }
 
-static var String_Mem(var self, var obj) {
+static bool String_Mem(var self, var obj) {
   
   if (implements(obj, C_Str)) {
-    return bool_var(strstr(c_str(self), c_str(obj)) isnt None);
+    return strstr(String_C_Str(self), c_str(obj));
   }
   
-  return False;
+  return false;
 }
 
 static void String_Rem(var self, var obj) {
@@ -162,7 +163,7 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   s->val = realloc(s->val, pos + size + 1);
 
 #if CELLO_MEMORY_CHECK == 1
-  if (s->val is None) {
+  if (s->val is NULL) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");  
   }
 #endif
@@ -187,7 +188,7 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   s->val = realloc(s->val, pos + size + 1);
   
 #if CELLO_MEMORY_CHECK == 1
-  if (s->val is None) {
+  if (s->val is NULL) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
 #endif
@@ -215,7 +216,7 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   s->val = realloc(s->val, pos + size + 1);
   
 #if CELLO_MEMORY_CHECK == 1
-  if (s->val is None) {
+  if (s->val is NULL) {
     throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
   }
 #endif

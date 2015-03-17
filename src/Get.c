@@ -36,7 +36,7 @@ void set(var self, var key, var val) {
   method(self, Get, set, key, val);
 }
 
-var mem(var self, var key) {
+bool mem(var self, var key) {
   return method(self, Get, mem, key);
 }
 

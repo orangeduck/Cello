@@ -63,65 +63,20 @@ static int64_t Int_C_Int(var self) {
   return i->val;
 }
 
-static var Int_Eq(var self, var obj) {
-  return bool_var(Int_C_Int(self) is c_int(obj));
+static bool Int_Eq(var self, var obj) {
+  return Int_C_Int(self) is c_int(obj);
 }
 
-static var Int_Gt(var self, var other) {
-  return bool_var(Int_C_Int(self) > c_int(other));
+static bool Int_Gt(var self, var other) {
+  return Int_C_Int(self) > c_int(other);
 }
 
-static var Int_Lt(var self, var other) {
-  return bool_var(Int_C_Int(self) < c_int(other));
+static bool Int_Lt(var self, var other) {
+  return Int_C_Int(self) < c_int(other);
 }
 
 static uint64_t Int_Hash(var self) {
   return (uint64_t)c_int(self);
-}
-
-static void Int_Add(var self, var other) {
-  struct Int* i = self;
-  i->val += c_int(other);
-}
-
-static void Int_Sub(var self, var other) {
-  struct Int* i = self;
-  i->val -= c_int(other);
-}
-
-static void Int_Mul(var self, var other) {
-  struct Int* i = self;
-  i->val *= c_int(other);
-}
-
-static void Int_Div(var self, var other) {
-  struct Int* i = self;
-  i->val /= c_int(other);
-}
-
-static void Int_Pow(var self, var other) {
-  struct Int* i = self;
-  i->val = (int64_t)pow((double)i->val, (double)c_int(other));
-}
-
-static void Int_Mod(var self, var other) {
-  struct Int* i = self;
-  i->val %= c_int(other);
-}
-
-static void Int_Neg(var self) {
-  struct Int* i = self;
-  i->val = -i->val;
-}
-
-static void Int_Abs(var self) {
-  struct Int* i = self;
-  i->val = abs((int)i->val);
-}
-
-static void Int_Exp(var self) {
-  struct Int* i = self;
-  i->val = (int64_t)exp((double)i->val);
 }
 
 static int Int_Show(var self, var output, int pos) {
@@ -149,9 +104,6 @@ var Int = Cello(Int,
   Instance(Ord,     Int_Gt, Int_Lt),
   Instance(Hash,    Int_Hash),
   Instance(C_Int,   Int_C_Int),
-  Instance(Math,
-    Int_Add, Int_Sub, Int_Mul, Int_Div, Int_Pow, 
-    Int_Mod, Int_Neg, Int_Abs, Int_Exp),
   Instance(Show,    Int_Show, Int_Look),
   Instance(Gen,     Int_Gen));
 
@@ -218,16 +170,16 @@ static double Float_C_Float(var self) {
   return f->val;
 }
 
-static var Float_Eq(var self, var obj) {
-  return bool_var(Float_C_Float(self) is c_float(obj));
+static bool Float_Eq(var self, var obj) {
+  return Float_C_Float(self) is c_float(obj);
 }
 
-static var Float_Gt(var self, var obj) {
-  return bool_var(Float_C_Float(self) > c_float(obj));
+static bool Float_Gt(var self, var obj) {
+  return Float_C_Float(self) > c_float(obj);
 }
 
-static var Float_Lt(var self, var obj) {
-  return bool_var(Float_C_Float(self) < c_float(obj));
+static bool Float_Lt(var self, var obj) {
+  return Float_C_Float(self) < c_float(obj);
 }
 
 union interp_cast {
@@ -239,51 +191,6 @@ static uint64_t Float_Hash(var self) {
   union interp_cast ic;
   ic.as_flt = c_float(self);
   return ic.as_int;
-}
-
-static void Float_Add(var self, var other) {
-  struct Float* f = self;
-  f->val += c_float(other);
-}
-
-static void Float_Sub(var self, var other) {
-  struct Float* f = self;
-  f->val -= c_float(other);
-}
-
-static void Float_Mul(var self, var other) {
-  struct Float* f = self;
-  f->val *= c_float(other);
-}
-
-static void Float_Div(var self, var other) {
-  struct Float* f = self;
-  f->val /= c_float(other);
-}
-
-static void Float_Pow(var self, var other) {
-  struct Float* f = self;
-  f->val = pow(f->val, c_float(other));
-}
-
-static void Float_Mod(var self, var other) {
-  struct Float* f = self;
-  f->val = fmod(f->val, c_float(other));
-}
-
-static void Float_Neg(var self) {
-  struct Float* f = self;
-  f->val = -f->val;
-}
-
-static void Float_Abs(var self) {
-  struct Float* f = self;
-  f->val = fabs(f->val);
-}
-
-static void Float_Exp(var self) {
-  struct Float* f = self;
-  f->val = exp(f->val);
 }
 
 int Float_Show(var self, var output, int pos) {
@@ -307,51 +214,5 @@ var Float = Cello(Float,
   Instance(Ord,     Float_Gt, Float_Lt),
   Instance(Hash,    Float_Hash),
   Instance(C_Float, Float_C_Float),
-  Instance(Math,
-    Float_Add, Float_Sub, Float_Mul, Float_Div, Float_Pow,
-    Float_Mod, Float_Neg, Float_Abs, Float_Exp),
   Instance(Show,    Float_Show, Float_Look),
   Instance(Gen,     Float_Gen));
-
-
-static const char* Math_Name(void) {
-  return "Math";
-}
-
-/* TODO */
-static const char* Math_Brief(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Math_Description(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Math_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Math_Methods(void) {
-  return "";
-}
-
-var Math = Cello(Math,
-  Instance(Doc,
-    Math_Name, Math_Brief, Math_Description, Math_Examples, Math_Methods));
-
-void madd(var self, var obj) { method(self, Math, madd, obj); }
-void msub(var self, var obj) { method(self, Math, msub, obj); }
-void mmul(var self, var obj) { method(self, Math, mmul, obj); }
-void mdiv(var self, var obj) { method(self, Math, mdiv, obj); }
-void mpow(var self, var obj) { method(self, Math, mpow, obj); }
-void mmod(var self, var obj) { method(self, Math, mmod, obj); }
-void mneg(var self) { method(self, Math, mneg); }
-void mabs(var self) { method(self, Math, mabs); }
-void mexp(var self) { method(self, Math, mexp); }
-
-void minc(var self) { madd(self, $I(1)); }
-void mdec(var self) { msub(self, $I(1)); }
-

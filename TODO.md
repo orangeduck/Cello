@@ -1,7 +1,7 @@
 Cello 2.0
 =========
 
-* Remove Bool Type - Make NULL errorous value
+* Make NULL only errorous value
 * Remove Closures
 
 * Remove static variables (hash/gen stuff)

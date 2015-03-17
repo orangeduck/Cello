@@ -124,14 +124,14 @@ var shrink(var self) {
   if (implements_method(self, Gen, shrink)) {
     return method(self, Gen, shrink);
   } else {
-    return None;
+    return NULL;
   }
 }
 
-var check(var func, var name, var iterations, var types) {
+bool check(var func, var name, var iterations, var types) {
   
   var fargs = new(Tuple);
-  var success = True;
+  bool success = true;
   int64_t i = 0;
   
   while (success and i < c_int(iterations)) {
@@ -143,7 +143,7 @@ var check(var func, var name, var iterations, var types) {
       print("Arguments: "); foreach (a in fargs) { print("%$ ", a); }
       print("\n");
       /* TODO: Shrinking */
-      success = False;
+      success = false;
     }
     
     foreach (a in fargs) { del(a); }
@@ -156,9 +156,9 @@ var check(var func, var name, var iterations, var types) {
   
   if (success) {
     print("%s: Checked %i - All Passed\n", name, iterations);
-    return True;
+    return true;
   } else {
-    return False;
+    return false;
   }
   
 }

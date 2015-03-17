@@ -36,7 +36,7 @@ static var List_Alloc(struct List* l) {
   var item = calloc(1, 2 * sizeof(var) + sizeof(struct CelloHeader) + l->tsize);
   
 #if CELLO_MEMORY_CHECK == 1
-  if (item is None) {
+  if (item is NULL) {
     throw(OutOfMemoryError, "Cannot allocate List entry, out of memory!");
   }
 #endif
@@ -136,8 +136,8 @@ static var List_Assign(var self, var obj) {
   struct List* l = self;
 
   List_Clear(self);
-  if (l->head isnt None) { List_Free(l, l->head); }
-  if (l->head isnt None) { List_Free(l, l->tail); }
+  if (l->head isnt NULL) { List_Free(l, l->head); }
+  if (l->head isnt NULL) { List_Free(l, l->tail); }
   
   l->type = subtype(obj);
   l->tsize = size(l->type);
@@ -171,18 +171,18 @@ static var List_Copy(var self) {
   return b;
 }
 
-static var List_Eq(var self, var obj) {
+static bool List_Eq(var self, var obj) {
   
   struct List* l = self;
-  if (l->nitems isnt len(obj)) { return False; }
+  if (l->nitems isnt len(obj)) { return false; }
   
   var item = *List_Next(l, l->head);
   foreach (oitem in obj) {
-    if_neq(item, oitem) { return False; }
+    if_neq(item, oitem) { return false; }
     item = *List_Next(l, item);
   }
   
-  return True;
+  return true;
 }
 
 static size_t List_Len(var self) {
@@ -190,14 +190,14 @@ static size_t List_Len(var self) {
   return l->nitems;
 }
 
-static var List_Mem(var self, var obj) {
+static bool List_Mem(var self, var obj) {
   struct List* l = self;
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
-    if_eq(item, obj) { return True; }
+    if_eq(item, obj) { return true; }
     item = *List_Next(l, item);
   }
-  return False;
+  return false;
 }
 
 static void List_Pop_At(var self, var key) {
@@ -327,7 +327,7 @@ static void List_Reverse(var self) {
   or  item1 is l->head
   or  item0 is item1) { return; }
   
-  while (True) {
+  while (true) {
     var item0_next = *List_Next(l, item0);
     var item1_prev = *List_Prev(l, item1);
     List_Swap(l, item0, item1);

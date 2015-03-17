@@ -110,7 +110,7 @@ int println_with(const char* fmt, var args) {
 int print_to_with(var out, int pos, const char* fmt, var args) {
 
   char* fmt_buf = malloc(strlen(fmt)+1); 
-  var index = $(Int, 0);
+  size_t index = 0;
   
   while(true) {
     
@@ -147,11 +147,11 @@ int print_to_with(var out, int pos, const char* fmt, var args) {
       strncpy(fmt_buf, start, (fmt - start)+1);
       fmt_buf[(fmt - start)+1] = '\0';
       
-      if_ge(index, $(Int, len(args))) {
+      if (index >= len(args)) {
         throw(FormatError, "Not enough arguments to Format String!");
       }
       
-      var a = get(args, index); minc(index);
+      var a = get(args, $I(index)); index++;
       
       if (*fmt == '$') { pos = show_to(a, out, pos); }
       
@@ -220,7 +220,7 @@ int scanln_with(const char* fmt, var args) {
 int scan_from_with(var input, int pos, const char* fmt, var args) {
 
   char* fmt_buf = malloc(strlen(fmt)+1);
-  var index = $(Int, 0);
+  size_t index = 0;
   
   while(true) {
     
@@ -265,11 +265,11 @@ int scan_from_with(var input, int pos, const char* fmt, var args) {
       strncpy(fmt_buf, start, (fmt - start)+1);
       fmt_buf[(fmt - start)+1] = '\0';
       
-      if_ge(index, $(Int, len(args))) {
+      if (index >= len(args)) {
         throw(FormatError, "Not enough arguments to Format String!");
       }
       
-      var a = get(args, index); minc(index);
+      var a = get(args, $I(index)); index++;
       
       if (*fmt == '$') { pos = look_from(a, input, pos); }
       

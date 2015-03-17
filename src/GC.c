@@ -63,7 +63,7 @@ static void GCTab_Rehash(struct GCTab* t, size_t new_size) {
   t->entries = calloc(t->nslots, sizeof(struct GCEntry));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (t->entries is None) {
+  if (t->entries is NULL) {
     throw(OutOfMemoryError, "Cannot allocate GC Pointer Table, out of memory!");
     return;
   }
@@ -102,7 +102,7 @@ static void GCTab_Set(struct GCTab* t, var ptr, uint64_t flags) {
   uint64_t ihash = i+1;
   struct GCEntry entry = { ptr, ihash, flags };
   
-  while (True) {
+  while (true) {
     
     uint64_t h = t->entries[i].hash;
     if (h is 0) {
@@ -138,7 +138,7 @@ static void GCTab_Rem(struct GCTab* t, var ptr) {
   uint64_t i = GCTab_Hash(ptr) % t->nslots;
   uint64_t j = 0;
   
-  while (True) {
+  while (true) {
     
     uint64_t h = t->entries[i].hash;
     if (h is 0 or j > GCTab_Probe(t, i, h)) { return; }
@@ -146,7 +146,7 @@ static void GCTab_Rem(struct GCTab* t, var ptr) {
       
       memset(&t->entries[i], 0, sizeof(struct GCEntry));
       
-      while (True) {
+      while (true) {
         
         uint64_t ni = (i+1) % t->nslots;
         uint64_t nh = t->entries[ni].hash;
@@ -175,10 +175,10 @@ static void Cello_GC_Recurse(var ptr) {
   
   var type = type_of(ptr);
   
-  if (type is Bool    or type is Int 
-  or  type is Float   or type is String
-  or  type is Type    or type is File 
-  or  type is Process or type is Function) { return; }
+  if (type is Int    or  type is Float   
+  or  type is String or  type is Type
+  or  type is File   or  type is Process
+  or  type is Function) { return; }
   
   if (type_implements(type, Traverse)) {
     traverse(ptr, $(Function, Cello_GC_Mark_Item));
@@ -204,28 +204,28 @@ static var Cello_GC_Mark_Item(var ptr) {
   uintptr_t pval = (uintptr_t)ptr;
   if (pval % sizeof(var) isnt 0
   or  pval < t->minptr
-  or  pval > t->maxptr) { return False; }
+  or  pval > t->maxptr) { return NULL; }
   
   uint64_t i = GCTab_Hash(ptr) % t->nslots;
   uint64_t j = 0;
   
-  while (True) {
+  while (true) {
     
     uint64_t h = t->entries[i].hash;
     
-    if (h is 0 or j > GCTab_Probe(t, i, h)) { return False; }
+    if (h is 0 or j > GCTab_Probe(t, i, h)) { return NULL; }
     
     if ((t->entries[i].ptr == ptr) and
     not (t->entries[i].flags & CelloMarked)) {
       t->entries[i].flags |= CelloMarked;
       Cello_GC_Recurse(t->entries[i].ptr);
-      return True;
+      return NULL;
     }
     
     i = (i+1) % t->nslots; j++;
   }
   
-  return False;
+  return NULL;
   
 }
 
@@ -233,7 +233,7 @@ static void Cello_GC_Mark_Stack(void) {
   
   struct GCTab* t = gc_get_table();
   
-  var stk = None;
+  var stk = NULL;
   var bot = t->bottom;
   var top = &stk;
   
@@ -257,7 +257,7 @@ static void Cello_GC_Mark_Stack_Fake(void) { }
 
 void Cello_GC_Mark(struct GCTab* t) {
   
-  if (t is None or t->nitems is 0) { return; }
+  if (t is NULL or t->nitems is 0) { return; }
   
   for (size_t i = 0; i < t->nslots; i++) {
     if (t->entries[i].hash is 0) { continue; }
@@ -280,7 +280,7 @@ void Cello_GC_Mark(struct GCTab* t) {
   /* Avoid Inlining function call */
   void (*mark_stack)(void) = noinline
     ? Cello_GC_Mark_Stack
-    : (void(*)(void))(None);
+    : (void(*)(void))(NULL);
 
   mark_stack();
   
@@ -317,7 +317,7 @@ void Cello_GC_Sweep(struct GCTab* t) {
       memset(&t->entries[i], 0, sizeof(struct GCEntry));
       
       uint64_t j = i;
-      while (True) { 
+      while (true) { 
         uint64_t nj = (j+1) % t->nslots;
         uint64_t nh = t->entries[nj].hash;
         if (nh isnt 0 and GCTab_Probe(t, nj, nh) > 0) {

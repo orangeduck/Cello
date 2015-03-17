@@ -41,7 +41,7 @@ void sseek(var self, var pos, var origin) {
   method(self, Stream, sseek, pos, origin);
 }
 
-int stell(var self) {
+int64_t stell(var self) {
   return method(self, Stream, stell);
 }
 
@@ -49,14 +49,14 @@ void sflush(var self) {
   method(self, Stream, sflush);
 }
 
-var seof(var self) {
+bool seof(var self) {
   return method(self, Stream, seof);
 }
 
-int sread(var self, var output, var size) {
+size_t sread(var self, var output, var size) {
   return method(self, Stream, sread, output, size);
 }
 
-int swrite(var self, var input, var size) {
+size_t swrite(var self, var input, var size) {
   return method(self, Stream, swrite, input, size);
 }
