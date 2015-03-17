@@ -28,7 +28,8 @@ var Hash = Cello(Hash,
   Instance(Doc,
     Hash_Name, Hash_Brief, Hash_Description, Hash_Examples, Hash_Methods));
 
-static uint64_t seed = 0xCe110;
+/* TODO: Make non-static */
+static uint64_t seed = CELLO_MAGIC_NUM;
 
 void hash_init(uint64_t s) {
   seed = s;

@@ -86,13 +86,11 @@ struct Thread {
   var is_main;
   var is_running;
   
-  var     exc_obj;
-  var     exc_msg;
-  var     exc_active;
-  size_t  exc_depth;
-  jmp_buf exc_buffers[CELLO_EXC_MAX_DEPTH];
-  void*   exc_backtrace[CELLO_EXC_MAX_STRACE];
-  size_t  exc_backtrace_count;
+  var      exc_obj;
+  var      exc_msg;
+  var      exc_active;
+  size_t   exc_depth;
+  jmp_buf* exc_buffers[CELLO_EXC_MAX_DEPTH];
   
 #if CELLO_GC == 1
   var gc_table;
@@ -150,12 +148,9 @@ static var Thread_New(var self, var args) {
   
   t->exc_active = false;
   t->exc_depth = 0;
-  memset(t->exc_buffers, 0, sizeof(jmp_buf) * CELLO_EXC_MAX_DEPTH);
-  
+  memset(t->exc_buffers, 0, sizeof(jmp_buf*) * CELLO_EXC_MAX_DEPTH);
   t->exc_obj = Undefined;
   t->exc_msg = None;
-  memset(t->exc_backtrace, 0, sizeof(void*) * CELLO_EXC_MAX_STRACE);
-  t->exc_backtrace_count = 0;
   
   return t;
 }
@@ -660,7 +655,14 @@ var exception_message(void) {
   return t->exc_msg;
 }
 
-var exception_buffer(void) {
+void exception_try(jmp_buf* env) {
+  struct Thread* t = Thread_Current();
+  exception_inc();
+  exception_deactivate();
+  t->exc_buffers[t->exc_depth-1] = env;
+}
+
+jmp_buf* exception_buffer(void) {
   struct Thread* t = Thread_Current();
   if (t->exc_depth == 0) {
     fprintf(stderr, "Cello Fatal Error: Exception Buffer Out of Bounds!\n");
@@ -680,13 +682,14 @@ static void Exception_Backtrace(void) {
   
   struct Thread* t = Thread_Current();
   
-  t->exc_backtrace_count = backtrace(t->exc_backtrace, CELLO_EXC_MAX_STRACE);
-  char** symbols = backtrace_symbols(t->exc_backtrace, t->exc_backtrace_count);  
+  var exc_backtrace[CELLO_EXC_MAX_STRACE];
+  size_t exc_backtrace_count = backtrace(exc_backtrace, CELLO_EXC_MAX_STRACE);
+  char** symbols = backtrace_symbols(exc_backtrace, exc_backtrace_count);  
   
   print_to($(File, stderr), 0, "!!\tStack Trace: \n");
   print_to($(File, stderr), 0, "!!\t\n");
 
-  for (int i = 0; i < t->exc_backtrace_count; i++) {
+  for (size_t i = 0; i < exc_backtrace_count; i++) {
     print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", 
       $(Int, i), $(String, symbols[i]));
   }
@@ -836,7 +839,7 @@ var exception_throw(var obj, const char* fmt, var args) {
   print_to_with(t->exc_msg, 0, fmt, args);
   
   if (exception_depth() >= 1) {
-    longjmp(exception_buffer(), 1);
+    longjmp(*exception_buffer(), 1);
   } else {
     Exception_Error();
   }
@@ -863,7 +866,7 @@ var exception_catch(var args) {
   
   /* No matches found. Propagate to outward block */
   if (exception_depth() >= 1) {
-    longjmp(exception_buffer(), 1);
+    longjmp(*exception_buffer(), 1);
   } else {
     Exception_Error();
   }

@@ -34,7 +34,7 @@ var CelloHeader_Init(struct CelloHeader* head, var type, int flags) {
   head->flags = (var)(intptr_t)flags;
 
 #if CELLO_MAGIC == 1
-  head->magic = (var)0xCe110;
+  head->magic = (var)CELLO_MAGIC_NUM;
 #endif
 
   return ((char*)head) + sizeof(struct CelloHeader);

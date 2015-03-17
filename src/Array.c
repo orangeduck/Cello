@@ -472,7 +472,7 @@ static void Array_Sort_With(var self, var f) {
 static int Array_Show(var self, var output, int pos) {
   struct Array* a = self;
   pos = print_to(output, pos, "<'Array' At 0x%p [", self);
-  for(int i = 0; i < a->nitems; i++) {
+  for(size_t i = 0; i < a->nitems; i++) {
     pos = print_to(output, pos, "%$", Array_Item(a, i));
     if (i < a->nitems-1) { pos = print_to(output, pos, ", "); }
   }

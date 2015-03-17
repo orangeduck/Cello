@@ -240,13 +240,13 @@ static void Cello_GC_Mark_Stack(void) {
   if (bot == top) { return; }
   
   if (bot < top) {
-    for (var p = top; p >= bot; p -= sizeof(var)) {
+    for (var p = top; p >= bot; p = ((char*)p) - sizeof(var)) {
       Cello_GC_Mark_Item(*((var*)p));
     }
   }
   
   if (bot > top) {
-    for (var p = top; p <= bot; p += sizeof(var)) {
+    for (var p = top; p <= bot; p = ((char*)p) + sizeof(var)) {
       Cello_GC_Mark_Item(*((var*)p));
     }
   }
@@ -259,7 +259,7 @@ void Cello_GC_Mark(struct GCTab* t) {
   
   if (t is None or t->nitems is 0) { return; }
   
-  for (int i = 0; i < t->nslots; i++) {
+  for (size_t i = 0; i < t->nslots; i++) {
     if (t->entries[i].hash is 0) { continue; }
     if (t->entries[i].flags & CelloMarked) { continue; }
     if (t->entries[i].flags & CelloHeapAlloc) {
@@ -290,9 +290,9 @@ static void Cello_GC_Print(void) {
  
   struct GCTab* t = gc_get_table();
   printf("| GC TABLE\n");
-  for (int i = 0; i < t->nslots; i++) {
-    if (t->entries[i].hash is 0) { printf("| %i : ---\n", i); continue; }
-    printf("| %i : %p %i\n", i, t->entries[i].ptr, (int)t->entries[i].flags);
+  for (size_t i = 0; i < t->nslots; i++) {
+    if (t->entries[i].hash is 0) { printf("| %i : ---\n", (int)i); continue; }
+    printf("| %i : %p %i\n", (int)i, t->entries[i].ptr, (int)t->entries[i].flags);
   }
   printf("|======\n");
   
@@ -345,7 +345,7 @@ void Cello_GC_Sweep(struct GCTab* t) {
   }
   
   GCTab_Resize_Less(t);
-  t->mitems = t->nitems * 1.5 + 1;
+  t->mitems = t->nitems + t->nitems / 2 + 1;
   
   for (size_t i = 0; i < freenum; i++) {
     dealloc(destruct(freelist[i]));
@@ -389,7 +389,7 @@ void gc_rem(var ptr) {
   struct GCTab* t = gc_get_table();
   GCTab_Rem(t, ptr);
   GCTab_Resize_Less(t);
-  t->mitems = t->nitems * 1.5 + 1;
+  t->mitems = t->nitems + t->nitems / 2 + 1;
 }
 
 void gc_run(void) {

@@ -55,7 +55,8 @@
 
 #ifndef CELLO_MAGIC
 #define CELLO_MAGIC 1
-#define CELLO_MAGIC_HEADER ((var)0xCe110),
+#define CELLO_MAGIC_NUM 0xCe110
+#define CELLO_MAGIC_HEADER ((var)CELLO_MAGIC_NUM),
 #else
 #define CELLO_MAGIC 0
 #define CELLO_MAGIC_HEADER
@@ -94,6 +95,8 @@
 
 #if defined(_MSC_VER)
 #define CELLO_MSC
+#define popen _popen
+#define pclose _pclose
 #define __func__ __FUNCTION__ 
 #pragma comment(lib, "DbgHelp.lib")
 #endif
@@ -242,7 +245,7 @@ struct Slice { var iter; var range; };
 struct File { FILE* file; };
 struct Process { FILE* proc; };
 
-#ifdef CELLO_CLANG
+#if CELLO_CLANG
 struct Function { var (^func)(var); };
 #else
 struct Function { var (*func)(var); };
@@ -658,12 +661,12 @@ void mmod(var self, var obj);
 void minc(var self);
 void mdec(var self);
 
-#ifdef CELLO_CLANG
+#if defined(CELLO_CLANG)
 
 #define fun(X, A) \
   struct Function* X = $(Function, None); \
   X->func = ^ var (var A)
-  
+
 #else
 
 #define fun(X, A) \
@@ -727,17 +730,15 @@ void lock(var self);
 void unlock(var self);
 var lock_try(var self);
 
-#define try \
-  exception_inc(); exception_deactivate(); if (!setjmp(exception_buffer()))   
+#define try { jmp_buf __env; exception_try(&__env); if (!setjmp(__env))
 
 #define catch(...) catch_xp(catch_in, (__VA_ARGS__))
 #define catch_xp(X, A) X A
-#define catch_in(X, ...) else { exception_activate(); } exception_dec(); \
+#define catch_in(X, ...) else { exception_activate(); } exception_dec(); } \
   for (var X = exception_catch(tuple(__VA_ARGS__)); \
     X isnt Terminal; X = Terminal)
 
-#define throw(E, F, ...) \
-  exception_throw(E, F, tuple(__VA_ARGS__))
+#define throw(E, F, ...) exception_throw(E, F, tuple(__VA_ARGS__))
 
 void exception_register_signals(void);
 void exception_inc(void);
@@ -749,7 +750,8 @@ void exception_deactivate(void);
 var exception_object(void);
 var exception_message(void);
 size_t exception_depth(void);
-var exception_buffer(void);
+void exception_try(jmp_buf* env);
+jmp_buf* exception_buffer(void);
 
 var exception_throw(var obj, const char* fmt, var args);
 var exception_catch(var args);

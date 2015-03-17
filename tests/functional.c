@@ -2,42 +2,27 @@
 #include "ptest.h"
 
 PT_FUNC(test_stack_function) {
-
-#if defined(__clang__)
-  var (^empty_function)(var) = ^ var (var args) { return None; };
-#else
-  var empty_function(var args) { return None; }  
-#endif
-
-  var f = $(Function, empty_function);
+  fun (f, args) { return None; };
   PT_ASSERT(f);
 }
 
 PT_FUNC(test_heap_function) {
 
-#if defined(__clang__)
-  var (^empty_function)(var) = ^ var (var args) { return None; };
-#else
-  var empty_function(var args) { return None; }  
-#endif
+  fun (f0, args) { return None; }
+  var f1 = new(Function, f0);
 
-  var f = new(Function, $(Function, empty_function));
-  PT_ASSERT(f);
-  del(f);
+  PT_ASSERT(f0);
+  PT_ASSERT(f1);
+  del(f1);
 }
 
 PT_FUNC(test_function_assign) {
   
-#if defined(__clang__)
-  var (^empty_function)(var) = ^ var (var args) { return None; };
-  var (^empty_function2)(var) = ^ var (var args) { return Some; };
-#else
-  var empty_function(var args) { return None; }  
-  var empty_function2(var args) { return Okay; }
-#endif
-  
-  var f1 = new(Function, $(Function, empty_function));
-  var f2 = new(Function, $(Function, empty_function2));
+  fun (empty_function1, args) { return None; }
+  fun (empty_function2, args) { return Okay; }
+
+  var f1 = new(Function, empty_function1);
+  var f2 = new(Function, empty_function2);
   
   PT_ASSERT(((struct Function*)f1)->func isnt ((struct Function*)f2)->func);
   
@@ -52,13 +37,9 @@ PT_FUNC(test_function_assign) {
 
 PT_FUNC(test_function_copy) {
 
-#if defined(__clang__)
-  var (^empty_function)(var) = ^ var (var args) { return None; };
-#else
-  var empty_function(var args) { return None; }  
-#endif
+  fun (empty_function, args) { return None; }
 
-  var f1 = new(Function, $(Function, empty_function));
+  var f1 = new(Function, empty_function);
   var f2 = copy(f1);
   
   PT_ASSERT(((struct Function*)f1)->func is ((struct Function*)f2)->func);
@@ -70,16 +51,11 @@ PT_FUNC(test_function_copy) {
 
 PT_FUNC(test_call) {
   
-#if defined(__clang__)
-  var (^empty_function)(var) = ^ var (var args) { return None; };
-  var (^empty_function2)(var) = ^ var (var args) { return Some; };
-#else
-  var empty_function(var args) { return None; }  
-  var empty_function2(var args) { return Okay; }
-#endif
+  fun (empty_function1, args) { return None; }
+  fun (empty_function2, args) { return Okay; }
   
-  var result1 = call($(Function, empty_function));
-  var result2 = call($(Function, empty_function2));
+  var result1 = call(empty_function1);
+  var result2 = call(empty_function2);
   
   PT_ASSERT(result1 is None);
   PT_ASSERT(result2 is Okay);
@@ -88,29 +64,14 @@ PT_FUNC(test_call) {
 
 PT_FUNC(test_call_with) {
   
-#if defined(__clang__)
-
-  var (^asserts_args)(var) = ^ var (var args) {
-    PT_ASSERT(get(args, $I(0)));
-    PT_ASSERT(get(args, $I(1)));
-    return None;
-  };
-  
-#else
-
-  var asserts_args(var args) {
+  fun (asserts_args, args) {
     PT_ASSERT(get(args, $I(0)));
     PT_ASSERT(get(args, $I(1)));
     return None;
   }
   
-#endif
-  
   var args = new(Array, Int, $I(1), $I(5));
-  
-  var assert_func = $(Function, asserts_args);
-  
-  var result = call_with(assert_func, args);
+  var result = call_with(asserts_args, args);
   
   PT_ASSERT(result is None);
   
@@ -120,29 +81,14 @@ PT_FUNC(test_call_with) {
 
 PT_FUNC(test_call_tuple) {
 
-#if defined(__clang__)
-
-  var (^asserts_args)(var) = ^ var (var args) {
-    PT_ASSERT(get(args, $I(0)));
-    PT_ASSERT(get(args, $I(1)));
-    return None;
-  };
-  
-#else
-
-  var asserts_args(var args) {
+  fun(asserts_args, args) {
     PT_ASSERT(get(args, $I(0)));
     PT_ASSERT(get(args, $I(1)));
     return None;
   }
-  
-#endif
 
   var args = tuple($I(1), $I(5));
-  
-  var assert_func = $(Function, asserts_args);
-  
-  var result = call_with(assert_func, args);
+  var result = call_with(asserts_args, args);
   
   PT_ASSERT(result is None);
 

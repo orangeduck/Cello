@@ -458,7 +458,7 @@ static var Type_Of(var self) {
 #if CELLO_MAGIC_CHECK == 1
       if (head isnt False 
       and head isnt True
-      and head->magic isnt ((var)0xCe110)) {
+      and head->magic isnt ((var)CELLO_MAGIC_NUM)) {
         throw(ValueError, "Pointer '%p' passed to 'type_of' "
           "has bad magic number, it wasn't allocated by Cello.", self);
       }

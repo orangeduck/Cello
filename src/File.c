@@ -105,8 +105,8 @@ static var File_EOF(var self) {
 static int File_Read(var self, var output, var size) {
   struct File* f = self;
   
-  int num = (int)fread(output, c_int(size), 1, f->file);
-  if (num == -1) {
+  size_t num = fread(output, c_int(size), 1, f->file);
+  if (num isnt 1 and c_int(size) isnt 0) {
     throw(IOError, "Failed to read from file: %i", $I(num));
     return num;
   }
@@ -117,8 +117,8 @@ static int File_Read(var self, var output, var size) {
 static int File_Write(var self, var input, var size) {
   struct File* f = self;
   
-  int num = (int)fwrite(input, c_int(size), 1, f->file);
-  if (num != 1 && c_int(size) != 0) {
+  size_t num = fwrite(input, c_int(size), 1, f->file);
+  if (num isnt 1 and c_int(size) isnt 0) {
     throw(IOError, "Failed to write to file: %i", $I(num));
   }
   
