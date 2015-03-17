@@ -27,11 +27,11 @@ static const char* Range_Methods(void) {
 static var Range_Iter_Init(var self) {
   struct Range* r = self;
   struct Int* i = r->iter;
-  if (r->step == 0) { return Terminal; }
+  if (r->step == 0) { return NULL; }
   if (r->step  > 0) { i->val = r->start; }
   if (r->step  < 0) { i->val = r->stop-1; }
-  if (r->step  > 0 and i->val >= r->stop) { return Terminal; }
-  if (r->step  < 0 and i->val <  r->stop) { return Terminal; }
+  if (r->step  > 0 and i->val >= r->stop) { return NULL; }
+  if (r->step  < 0 and i->val <  r->stop) { return NULL; }
   return i;
 }
 
@@ -39,9 +39,9 @@ static var Range_Iter_Next(var self, var curr) {
   struct Range* r = self;
   struct Int* i = r->iter;
   i->val += r->step;
-  if (r->step == 0) { return Terminal; }
-  if (r->step  > 0 and i->val >= r->stop) { return Terminal; }
-  if (r->step  < 0 and i->val < r->start) { return Terminal; }
+  if (r->step == 0) { return NULL; }
+  if (r->step  > 0 and i->val >= r->stop) { return NULL; }
+  if (r->step  < 0 and i->val < r->start) { return NULL; }
   return i;
 }
 

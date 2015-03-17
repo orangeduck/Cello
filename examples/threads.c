@@ -8,7 +8,7 @@ int main(int argc, char** argv) {
     with (m in mutex) {
       println("Hello from %$!", current(Thread));
     }
-    return None;
+    return NULL;
   };
   
   var threads = new(Array, Box,

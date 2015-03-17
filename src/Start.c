@@ -47,6 +47,6 @@ var start_in(var self) {
 
 var stop_in(var self) {
   stop(self);
-  return Terminal;
+  return NULL;
 }
 

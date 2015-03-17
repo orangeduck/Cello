@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
       println("IOError: %$", e);
     }
 
-    return None;
+    return NULL;
   };
 
   /* Tuple is a simple stack based collection */

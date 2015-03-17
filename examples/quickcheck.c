@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
   /* Property that object is Equal to Self */
   fun (test_eq_id, args) {
     var x = get(args, $I(0));
-    return eq(x, x);
+    return (var)eq(x, x);
   };
   
   /* Quickcheck property for some Types */

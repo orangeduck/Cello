@@ -1,34 +1,5 @@
 #include "Cello.h"
 
-static const char* Terminal_Name(void) {
-  return "Terminal";
-}
-
-/* TODO */
-static const char* Terminal_Brief(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Terminal_Description(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Terminal_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Terminal_Methods(void) {
-  return "";
-}
-
-var Terminal = CelloEmpty(Terminal,
-  Instance(Doc,
-    Terminal_Name, Terminal_Brief, Terminal_Description,
-    Terminal_Examples, Terminal_Methods));
-
 static const char* Iter_Name(void) {
   return "Iter";
 }

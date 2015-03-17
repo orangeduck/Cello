@@ -68,7 +68,7 @@ static void Map_Set_Color(struct Map* m, var node, bool value) {
 }
 
 static bool Map_Get_Color(struct Map* m, var node) {
-  if (node is Terminal) {
+  if (node is NULL) {
     return false;
   } else {
     return CelloHeader_GetFlag(
@@ -110,9 +110,9 @@ static var Map_Alloc(struct Map* m) {
     (char*)node + 3 * sizeof(var) +
     sizeof(struct CelloHeader) + m->ksize), m->vtype, CelloDataAlloc);
   
-  *Map_Left(m, node) = Terminal;
-  *Map_Right(m, node) = Terminal;
-  *Map_Parent(m, node) = Terminal;
+  *Map_Left(m, node) = NULL;
+  *Map_Right(m, node) = NULL;
+  *Map_Parent(m, node) = NULL;
   Map_Set_Red(m, node);
   
   return node;
@@ -127,7 +127,7 @@ static var Map_New(var self, var args) {
   m->ksize = size(m->ktype);
   m->vsize = size(m->vtype);
   m->nitems = 0;
-  m->root = Terminal;
+  m->root = NULL;
 
   size_t nargs = len(args);
   if (nargs % 2 isnt 0) {
@@ -145,7 +145,7 @@ static var Map_New(var self, var args) {
 }
 
 static void Map_Clear_Entry(struct Map* m, var node) {
-  if (node isnt Terminal) {
+  if (node isnt NULL) {
     Map_Clear_Entry(m, *Map_Left(m, node));
     Map_Clear_Entry(m, *Map_Right(m, node));
     destruct(Map_Key(m, node));
@@ -158,7 +158,7 @@ static void Map_Clear(var self) {
   struct Map* m = self;
   Map_Clear_Entry(m, m->root);
   m->nitems = 0;
-  m->root = Terminal;
+  m->root = NULL;
 }
 
 static var Map_Del(var self) {
@@ -199,7 +199,7 @@ static var Map_Copy(var self) {
   var r = new(Map, m->ktype, m->vtype);
   
   var curr = Map_Iter_Init(self);
-  while (curr isnt Terminal) {
+  while (curr isnt NULL) {
     var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
     set(r, Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
@@ -236,7 +236,7 @@ static bool Map_Mem(var self, var key) {
   key = cast(key, m->ktype);
   
   var node = m->root;
-  while (node isnt Terminal) { 
+  while (node isnt NULL) { 
   
     if_eq(Map_Key(m, node), key) {
       return true;
@@ -255,7 +255,7 @@ static var Map_Get(var self, var key) {
   key = cast(key, m->ktype);
   
   var node = m->root;
-  while (node isnt Terminal) {
+  while (node isnt NULL) {
   
     if_eq(Map_Key(m, node), key) {
       return Map_Val(m, node);
@@ -270,7 +270,7 @@ static var Map_Get(var self, var key) {
 }
 
 static var Map_Maximum(struct Map* m, var node) {
-  while (*Map_Right(m, node) isnt Terminal) {
+  while (*Map_Right(m, node) isnt NULL) {
     node = *Map_Right(m, node);
   }
   return node;
@@ -278,8 +278,8 @@ static var Map_Maximum(struct Map* m, var node) {
 
 static var Map_Sibling(struct Map* m, var node) {
   
-  if (node is Terminal or *Map_Parent(m, node) is Terminal) {
-    return Terminal;
+  if (node is NULL or *Map_Parent(m, node) is NULL) {
+    return NULL;
   }
   
   if (node is *Map_Left(m, *Map_Parent(m, node))) {
@@ -290,16 +290,16 @@ static var Map_Sibling(struct Map* m, var node) {
 }
 
 static var Map_Grandparent(struct Map* m, var node) {
-  if ((node isnt Terminal) and (*Map_Parent(m, node) isnt Terminal)) {
+  if ((node isnt NULL) and (*Map_Parent(m, node) isnt NULL)) {
     return *Map_Parent(m, *Map_Parent(m, node));
   } else {
-    return Terminal;
+    return NULL;
   }
 }
 
 static var Map_Uncle(struct Map* m, var node) {
   var gpar = Map_Grandparent(m, node);
-  if (gpar is Terminal) { return Terminal; }
+  if (gpar is NULL) { return NULL; }
   if (*Map_Parent(m, node) is *Map_Left(m, gpar)) {
     return *Map_Right(m, gpar);
   } else {
@@ -308,7 +308,7 @@ static var Map_Uncle(struct Map* m, var node) {
 }
 
 void Map_Replace(struct Map* m, var oldn, var newn) {
-  if (*Map_Parent(m, oldn) is Terminal) {
+  if (*Map_Parent(m, oldn) is NULL) {
     m->root = newn;
   } else {
     if (oldn is *Map_Left(m, *Map_Parent(m, oldn))) {
@@ -317,7 +317,7 @@ void Map_Replace(struct Map* m, var oldn, var newn) {
       *Map_Right(m, *Map_Parent(m, oldn)) = newn;
     }
   }
-  if (newn isnt Terminal) {
+  if (newn isnt NULL) {
     *Map_Parent(m, newn) = *Map_Parent(m, oldn);
   }
 }
@@ -326,7 +326,7 @@ static void Map_Rotate_Left(struct Map* m, var node) {
   var r = *Map_Right(m, node);
   Map_Replace(m, node, r);
   *Map_Right(m, node) = *Map_Left(m, r);
-  if (*Map_Left(m, r) isnt Terminal) {
+  if (*Map_Left(m, r) isnt NULL) {
       *Map_Parent(m, *Map_Left(m, r)) = node;
   }
   *Map_Left(m, r) = node;
@@ -337,7 +337,7 @@ static void Map_Rotate_Right(struct Map* m, var node) {
   var l = *Map_Left(m, node);
   Map_Replace(m, node, l);
   *Map_Left(m, node) = *Map_Right(m, l);
-  if (*Map_Right(m, l) isnt Terminal) {
+  if (*Map_Right(m, l) isnt NULL) {
     *Map_Parent(m, *Map_Right(m, l)) = node;
   }
   *Map_Right(m, l) = node;
@@ -348,14 +348,14 @@ static void Map_Set_Fix(struct Map* m, var node) {
   
   while (true) {
   
-    if (*Map_Parent(m, node) is Terminal) {
+    if (*Map_Parent(m, node) is NULL) {
       Map_Set_Black(m, node);
       return;
     }
     
     if (Map_Is_Black(m, *Map_Parent(m, node))) { return; }
     
-    if ((Map_Uncle(m, node) isnt Terminal)
+    if ((Map_Uncle(m, node) isnt NULL)
     and (Map_Is_Red(m, Map_Uncle(m, node)))) {
       Map_Set_Black(m, *Map_Parent(m, node));
       Map_Set_Black(m, Map_Uncle(m, node));
@@ -400,7 +400,7 @@ static void Map_Set(var self, var key, var val) {
   
   var node = m->root;
   
-  if (node is Terminal) {
+  if (node is NULL) {
     var node = Map_Alloc(m);
     assign(Map_Key(m, node), key);
     assign(Map_Val(m, node), val);
@@ -420,7 +420,7 @@ static void Map_Set(var self, var key, var val) {
     
     if_lt (Map_Key(m, node), key) {
     
-      if (*Map_Left(m, node) is Terminal) {
+      if (*Map_Left(m, node) is NULL) {
         var newn = Map_Alloc(m);
         assign(Map_Key(m, newn), key);
         assign(Map_Val(m, newn), val);
@@ -435,7 +435,7 @@ static void Map_Set(var self, var key, var val) {
       
     } else {
     
-      if (*Map_Right(m, node) is Terminal) {
+      if (*Map_Right(m, node) is NULL) {
         var newn = Map_Alloc(m);
         assign(Map_Key(m, newn), key);
         assign(Map_Val(m, newn), val);
@@ -458,7 +458,7 @@ static void Map_Rem_Fix(struct Map* m, var node) {
  
   while (true) {
   
-    if (*Map_Parent(m, node) is Terminal) { return; }
+    if (*Map_Parent(m, node) is NULL) { return; }
     
     if (Map_Is_Red(m, Map_Sibling(m, node))) {
       Map_Set_Red(m, *Map_Parent(m, node));
@@ -536,7 +536,7 @@ static void Map_Rem(var self, var key) {
   
   bool found = false;
   var node = m->root;
-  while (node isnt Terminal) {
+  while (node isnt NULL) {
   
     if_eq(Map_Key(m, node), key) {
       found = true;
@@ -556,8 +556,8 @@ static void Map_Rem(var self, var key) {
   destruct(Map_Key(m, node));
   destruct(Map_Val(m, node));
   
-  if ((*Map_Left(m, node) isnt Terminal) 
-  and (*Map_Right(m, node) isnt Terminal)) {
+  if ((*Map_Left(m, node) isnt NULL) 
+  and (*Map_Right(m, node) isnt NULL)) {
     var pred = Map_Maximum(m, *Map_Left(m, node));
     bool ncol = Map_Get_Color(m, node);
     memcpy((char*)node + 3 * sizeof(var), (char*)pred + 3 * sizeof(var),
@@ -567,7 +567,7 @@ static void Map_Rem(var self, var key) {
     node = pred;
   }
 
-  var chld = *Map_Right(m, node) is Terminal 
+  var chld = *Map_Right(m, node) is NULL 
     ? *Map_Left(m, node) 
     : *Map_Right(m, node);
     
@@ -578,7 +578,7 @@ static void Map_Rem(var self, var key) {
     
   Map_Replace(m, node, chld);
   
-  if ((*Map_Parent(m, node) is Terminal) and (chld isnt Terminal)) {
+  if ((*Map_Parent(m, node) is NULL) and (chld isnt NULL)) {
     Map_Set_Black(m, chld);
   }
   
@@ -589,9 +589,9 @@ static void Map_Rem(var self, var key) {
 
 static var Map_Iter_Init(var self) {
   struct Map* m = self;
-  if (m->nitems is 0) { return Terminal; }
+  if (m->nitems is 0) { return NULL; }
   var node = m->root;
-  while (*Map_Left(m, node) isnt Terminal) {
+  while (*Map_Left(m, node) isnt NULL) {
     node = *Map_Left(m, node);
   }
   return Map_Key(m, node);
@@ -603,16 +603,16 @@ static var Map_Iter_Next(var self, var curr) {
   var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
   var prnt = *Map_Parent(m, node);
   
-  if (*Map_Right(m, node) isnt Terminal) {
+  if (*Map_Right(m, node) isnt NULL) {
     node = *Map_Right(m, node);
-    while (*Map_Left(m, node) isnt Terminal) {
+    while (*Map_Left(m, node) isnt NULL) {
       node = *Map_Left(m, node);
     }
     return Map_Key(m, node);
   }
   
   while (true) {
-    if (prnt is Terminal) { return Terminal; }
+    if (prnt is NULL) { return NULL; }
     if (node is *Map_Left(m, prnt)) { return Map_Key(m, prnt); }
     if (node is *Map_Right(m, prnt)) {
       prnt = *Map_Parent(m, prnt);
@@ -620,7 +620,7 @@ static var Map_Iter_Next(var self, var curr) {
     }
   }
   
-  return Terminal;
+  return NULL;
 }
 
 static int Map_Show(var self, var output, int pos) {
@@ -630,12 +630,12 @@ static int Map_Show(var self, var output, int pos) {
   
   var curr = Map_Iter_Init(self);
   
-  while (curr isnt Terminal) {
+  while (curr isnt NULL) {
     var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
     pos = print_to(output, pos, "%$:%$",
       Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
-    if (curr isnt Terminal) { pos = print_to(output, pos, ", "); }
+    if (curr isnt NULL) { pos = print_to(output, pos, ", "); }
   }
   
   pos = print_to(output, pos, "}>");
@@ -665,7 +665,7 @@ static void Map_Traverse(var self, var func) {
 
   var curr = Map_Iter_Init(self);
   
-  while (curr isnt Terminal) {
+  while (curr isnt NULL) {
     var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
     call_with(func, Map_Key(m, node));
     call_with(func, Map_Val(m, node));

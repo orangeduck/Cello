@@ -443,8 +443,8 @@ static var Type_Of(var self) {
   */
 
 #if CELLO_UNDEF_CHECK == 1  
-    if (self is Undefined) {
-      return throw(ValueError, "Received 'Undefined' as value to 'type_of'");
+    if (self is NULL) {
+      return throw(ValueError, "Received NULL as value to 'type_of'");
     }
 #endif
   

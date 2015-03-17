@@ -161,8 +161,6 @@ typedef void* var;
 
 extern var Type;
 extern var Tuple;
-extern var Terminal;
-extern var Undefined;
 
 extern var Ref;
 extern var Box;
@@ -530,7 +528,7 @@ var destruct(var self);
 #define new_$B(X) new_$(Box, X)
 #define new_$T(...) new_with(Tuple, tuple(__VA_ARGS__))
 
-#define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, Terminal))
+#define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, NULL))
 #define tuple_xp(X, A) X A
 #define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
 
@@ -579,7 +577,7 @@ var iter_last(var self);
   __##X = (S), \
   __Iter##X = instance(__##X, Iter), \
   X = ((struct Iter*)(__Iter##X))->iter_init(__##X); \
-  X isnt Terminal; \
+  X isnt NULL; \
   X = ((struct Iter*)(__Iter##X))->iter_next(__##X, X))
 
 void push(var self, var obj);
@@ -687,7 +685,7 @@ var stop_in(var self);
 
 #define with(...) with_xp(with_in, (__VA_ARGS__))
 #define with_xp(X, A) X A
-#define with_in(X, S) for(var X = start_in(S); X isnt Terminal; X = stop_in(X))
+#define with_in(X, S) for(var X = start_in(S); X isnt NULL; X = stop_in(X))
 
 void join(var self);
 
@@ -701,7 +699,7 @@ void unlock(var self);
 #define catch_xp(X, A) X A
 #define catch_in(X, ...) else { exception_activate(); } exception_dec(); } \
   for (var X = exception_catch(tuple(__VA_ARGS__)); \
-    X isnt Terminal; X = Terminal)
+    X isnt NULL; X = NULL)
 
 #define throw(E, F, ...) exception_throw(E, F, tuple(__VA_ARGS__))
 

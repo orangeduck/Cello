@@ -406,14 +406,14 @@ static void Array_Set(var self, var key, var val) {
 
 static var Array_Iter_Init(var self) {
   struct Array* a = self;
-  if (a->nitems is 0) { return Terminal; }
+  if (a->nitems is 0) { return NULL; }
   return Array_Item(a, 0);
 }
 
 static var Array_Iter_Next(var self, var curr) {
   struct Array* a = self;
   if (curr >= Array_Item(a, a->nitems-1)) {
-    return Terminal;
+    return NULL;
   } else {
     return (char*)curr + Array_Step(a);
   }

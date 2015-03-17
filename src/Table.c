@@ -494,7 +494,7 @@ static var Table_Get(var self, var key) {
     i = (i+1) % t->nslots; j++;
   }
   
-  return Undefined;
+  return NULL;
 }
 
 static void Table_Set(var self, var key, var val) {
@@ -504,7 +504,7 @@ static void Table_Set(var self, var key, var val) {
 
 static var Table_Iter_Init(var self) {
   struct Table* t = self;
-  if (t->nitems is 0) { return Terminal; }
+  if (t->nitems is 0) { return NULL; }
   
   for (size_t i = 0; i < t->nslots; i++) {
     if (Table_Key_Hash(t, i) isnt 0) {
@@ -512,7 +512,7 @@ static var Table_Iter_Init(var self) {
     }
   }
   
-  return Terminal;
+  return NULL;
 }
 
 static var Table_Iter_Next(var self, var curr) {
@@ -523,7 +523,7 @@ static var Table_Iter_Next(var self, var curr) {
   while (true) {
 
     if (curr > Table_Key(t, t->nslots-1)) {
-      return Terminal;
+      return NULL;
     }
 
     uint64_t h = *(uint64_t*)((char*)curr - sizeof(struct CelloHeader) - sizeof(uint64_t));
@@ -532,7 +532,7 @@ static var Table_Iter_Next(var self, var curr) {
     curr = (char*)curr + Table_Step(t);
   }
   
-  return Terminal;
+  return NULL;
 }
 
 static int Table_Show(var self, var output, int pos) {

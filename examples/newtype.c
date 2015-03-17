@@ -16,10 +16,10 @@ static size_t Hello_Size(void) {
   return sizeof(struct Hello);
 }
 
-static var Hello_Eq(var self, var obj) {
+static bool Hello_Eq(var self, var obj) {
   struct Hello* lhs = self;
   struct Hello* rhs = cast(obj, Hello);
-  return bool_var(lhs->hello_val is rhs->hello_val);
+  return lhs->hello_val is rhs->hello_val;
 }
 
 int main(int argc, char** argv) {
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
   var hello_obj1 = new(Hello, $I(1));
   var hello_obj2 = new(Hello, $I(2));
 
-  print("Equal? %d\n", eq(hello_obj1, hello_obj2));
+  print("Equal? %d\n", $I(eq(hello_obj1, hello_obj2)));
   
   del(hello_obj1);
   del(hello_obj2);

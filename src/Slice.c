@@ -44,7 +44,7 @@ static var Slice_Iter_Init(var self) {
     return curr;
   }
 
-  return Terminal;
+  return NULL;
 }
 
 static var Slice_Iter_Next(var self, var curr) {

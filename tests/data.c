@@ -767,7 +767,7 @@ PT_FUNC(test_table_rehash) {
   
   var d0 = new(Table, Int, Int);
   var value = $I(23);
-  var test_key = Undefined;
+  var test_key = NULL;
 
   int max = 1000;
   int r = rand() % max;
@@ -780,7 +780,7 @@ PT_FUNC(test_table_rehash) {
     set(d0, key, value);
   }
 
-  PT_ASSERT(test_key isnt Undefined);
+  PT_ASSERT(test_key isnt NULL);
   PT_ASSERT(eq(get(d0, test_key), value));
   PT_ASSERT(len(d0) is max);
 

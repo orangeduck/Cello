@@ -141,7 +141,8 @@ static const char* Thread_Methods(void) {
 static var Thread_New(var self, var args) {
   
   struct Thread* t = self;
-  t->func = get(args, $I(0));
+  
+  t->func = empty(args) ? NULL : get(args, $I(0));
   t->args = NULL;
   t->is_main = false;
   t->is_running = false;
@@ -149,7 +150,7 @@ static var Thread_New(var self, var args) {
   t->exc_active = false;
   t->exc_depth = 0;
   memset(t->exc_buffers, 0, sizeof(jmp_buf*) * CELLO_EXC_MAX_DEPTH);
-  t->exc_obj = Undefined;
+  t->exc_obj = NULL;
   t->exc_msg = NULL;
   
   return t;
@@ -345,7 +346,7 @@ static var Thread_Current(void) {
   if (wrapper is NULL) {
   
     if (Thread_Main is NULL) {
-      Thread_Main = construct(alloc(Thread), NULL);
+      Thread_Main = construct(alloc(Thread));
       atexit(Thread_Main_Del);
     }
     
@@ -844,13 +845,13 @@ var exception_throw(var obj, const char* fmt, var args) {
     Exception_Error();
   }
   
-  return Undefined;
+  return NULL;
   
 }
 
 var exception_catch(var args) {
   
-  if (not exception_active()) { return Terminal; }
+  if (not exception_active()) { return NULL; }
   
   /* If no Arguments catch all */
   if (len(args) is 0) {
@@ -871,6 +872,6 @@ var exception_catch(var args) {
     Exception_Error();
   }
   
-  return Terminal;
+  return NULL;
   
 }

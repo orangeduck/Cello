@@ -93,8 +93,8 @@ static var List_New(var self, var args) {
   l->tail = List_Alloc(l);
   
   *List_Next(l, l->head) = l->tail;
-  *List_Prev(l, l->head) = Undefined;
-  *List_Next(l, l->tail) = Undefined;
+  *List_Prev(l, l->head) = NULL;
+  *List_Next(l, l->tail) = NULL;
   *List_Prev(l, l->tail) = l->head;
   
   size_t nargs = len(args);
@@ -145,8 +145,8 @@ static var List_Assign(var self, var obj) {
   l->tail = List_Alloc(l);
   
   *List_Next(l, l->head) = l->tail;
-  *List_Prev(l, l->head) = Undefined;
-  *List_Next(l, l->tail) = Undefined;
+  *List_Prev(l, l->head) = NULL;
+  *List_Next(l, l->tail) = NULL;
   *List_Prev(l, l->tail) = l->head;
   
   size_t nargs = len(obj);
@@ -299,14 +299,14 @@ static void List_Set(var self, var key, var val) {
 
 static var List_Iter_Init(var self) {
   struct List* l = self;
-  if (l->nitems is 0) { return Terminal; }
+  if (l->nitems is 0) { return NULL; }
   return *List_Next(l, l->head);
 }
 
 static var List_Iter_Next(var self, var curr) {
   struct List* l = self;
   var next = *List_Next(l, curr);
-  return next is l->tail ? Terminal : next;
+  return next is l->tail ? NULL : next;
 }
 
 static void List_Swap(struct List* l, var iitem, var jitem) {

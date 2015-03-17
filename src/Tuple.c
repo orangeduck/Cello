@@ -39,7 +39,7 @@ static var Tuple_New(var self, var args) {
   for (size_t i = 0; i < nargs; i++) {
     t->items[i] = get(args, $I(i));
   }
-  t->items[nargs] = Terminal;
+  t->items[nargs] = NULL;
   
   return t;
 }
@@ -80,7 +80,7 @@ static var Tuple_Assign(var self, var obj) {
   for (size_t i = 0; i < nargs; i++) {
     t->items[i] = get(obj, $I(i));
   }
-  t->items[nargs] = Terminal;
+  t->items[nargs] = NULL;
   
   return t;
 }
@@ -93,7 +93,7 @@ static size_t Tuple_Len(var self) {
   struct Tuple* t = self;
   size_t x = 0;
   size_t i = 0;
-  while (t->items[i] isnt Terminal) { i++; }
+  while (t->items[i] isnt NULL) { i++; }
   return i;
 }
 
@@ -105,11 +105,11 @@ static var Tuple_Iter_Init(var self) {
 static var Tuple_Iter_Next(var self, var curr) {
   struct Tuple* t = self;
   size_t i = 0;
-  while (t->items[i] isnt Terminal) {
+  while (t->items[i] isnt NULL) {
     if (t->items[i] is curr) { return t->items[i+1]; }
     i++;
   }
-  return Terminal;
+  return NULL;
 }
 
 static var Tuple_Get(var self, var key) {
@@ -195,7 +195,7 @@ static void Tuple_Push(var self, var obj) {
 #endif
   
   t->items[nitems+0] = obj;
-  t->items[nitems+1] = Terminal;
+  t->items[nitems+1] = NULL;
   
 }
 
@@ -212,7 +212,7 @@ static void Tuple_Pop(var self) {
 #endif
   
   t->items = realloc(t->items, sizeof(var) * nitems);
-  t->items[nitems-1] = Terminal;
+  t->items[nitems-1] = NULL;
   
 }
 
@@ -310,7 +310,7 @@ static void Tuple_Concat(var self, var obj) {
     i++;
   }
   
-  t->items[nitems+objlen] = Terminal;
+  t->items[nitems+objlen] = NULL;
   
 }
 
@@ -325,13 +325,13 @@ static void Tuple_Clear(var self) {
 #endif
   
   t->items = realloc(t->items, sizeof(var));
-  t->items[0] = Terminal;
+  t->items[0] = NULL;
 }
 
 static void Tuple_Traverse(var self, var func) {
   struct Tuple* t = self;
   size_t i = 0;
-  while (t->items[i] isnt Terminal) {
+  while (t->items[i] isnt NULL) {
     call_with(func, t->items[i]); i++;
   }
 }
