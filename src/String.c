@@ -72,7 +72,7 @@ static char* String_C_Str(var self) {
 }
 
 static bool String_Eq(var self, var obj) {
-  return strcmp(String_C_Str(self), c_str(obj)) == 0;
+  return strcmp(String_C_Str(self), c_str(obj)) is 0;
 }
 
 static bool String_Gt(var self, var obj) {
@@ -111,8 +111,9 @@ static void String_Clear(var self) {
 
 static bool String_Mem(var self, var obj) {
   
-  if (implements(obj, C_Str)) {
-    return strstr(String_C_Str(self), c_str(obj));
+  struct C_Str* c = instance(obj, C_Str);
+  if (c and c->c_str) {
+    return strstr(String_C_Str(self), c->c_str(obj));
   }
   
   return false;
@@ -120,10 +121,12 @@ static bool String_Mem(var self, var obj) {
 
 static void String_Rem(var self, var obj) {
   
-  if (implements(obj, C_Str)) {
-    char* pos = strstr(c_str(self), c_str(obj));
-    size_t count = strlen(c_str(self)) - strlen(pos) - strlen(c_str(obj)) + 1;
-    memmove((char*)pos, pos + strlen(c_str(obj)), count);
+  struct C_Str* c = instance(obj, C_Str);
+  if (c and c->c_str) {
+    char* pos = strstr(String_C_Str(self), c->c_str(obj));
+    size_t count = strlen(String_C_Str(self)) - strlen(pos) - 
+      strlen(c->c_str(obj)) + 1;
+    memmove((char*)pos, pos + strlen(c->c_str(obj)), count);
   }
   
 }

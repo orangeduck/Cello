@@ -88,11 +88,12 @@ int show(var self) {
 
 int show_to(var self, var out, int pos) {
   
-  if (not implements(self, Show)) {
-    return print_to(out, 0, "<'%s' At 0x%p>", type_of(self), self);
-  } else {
-    return method(self, Show, show, out, pos);
+  struct Show* s = instance(self, Show);
+  if (s and s->show) {
+    return s->show(self, out, pos);
   }
+  
+  return print_to(out, 0, "<'%s' At 0x%p>", type_of(self), self);
   
 }
 

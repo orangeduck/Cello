@@ -61,6 +61,9 @@ static const char* Ref_Methods(void) {
   return "";
 }
 
+static void Ref_Ref(var self, var val);
+static var Ref_Deref(var self);
+
 static var Ref_New(var self, var args) {
   struct Ref* r = self;
   r->val = get(args, $(Int, 0));
@@ -68,10 +71,11 @@ static var Ref_New(var self, var args) {
 }
 
 static var Ref_Assign(var self, var obj) {
-  if (implements(obj, Pointer)) {
-    ref(self, deref(obj));
+  struct Pointer* p = instance(obj, Pointer);
+  if (p and p->deref) {
+    Ref_Ref(self, p->deref(obj));
   } else {
-    ref(self, obj);
+    Ref_Ref(self, obj);
   }
   return self;
 }
@@ -128,6 +132,9 @@ static const char* Box_Methods(void) {
   return "";
 }
 
+static void Box_Ref(var self, var val);
+static var Box_Deref(var self);
+
 static var Box_New(var self, var args) {
   struct Box* b = self;
   b->val = get(args, $(Int, 0));
@@ -135,16 +142,17 @@ static var Box_New(var self, var args) {
 }
 
 static var Box_Del(var self) {
-  del(deref(self));
-  ref(self, NULL);
+  del(Box_Deref(self));
+  Box_Ref(self, NULL);
   return self;
 }
 
 static var Box_Assign(var self, var obj) {
-  if (implements(obj, Pointer)) {
-    ref(self, deref(obj));
+  struct Pointer* p = instance(obj, Pointer);
+  if (p and p->deref) {
+    Box_Ref(self, p->deref(obj));
   } else {
-    ref(self, obj);
+    Box_Ref(self, obj);
   }
   return self;
 }

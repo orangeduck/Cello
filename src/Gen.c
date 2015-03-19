@@ -121,8 +121,9 @@ var gen(var type) {
 }
 
 var shrink(var self) {
-  if (implements_method(self, Gen, shrink)) {
-    return method(self, Gen, shrink);
+  struct Gen* g = instance(self, Gen);
+  if (g and g->shrink) {
+    return g->shrink(self);
   } else {
     return NULL;
   }

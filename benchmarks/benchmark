@@ -8,7 +8,7 @@ javac Nbodies/nbodies_java.java
 #gcc List/list_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o List/list_c
 g++ List/list_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o List/list_cpp
 gcc List/list_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o List/list_cello
-#javac List/list_java.java
+javac List/list_java.java
 
 gcc Dict/dict_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Dict/dict_c
 g++ Dict/dict_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Dict/dict_cpp
@@ -39,14 +39,14 @@ echo -n "* C++: "
 time -f "%e" ./List/list_cpp
 echo -n "* Cello: "
 time -f "%e" ./List/list_cello
-#echo -n "* Java: "
-#time -f "%e" java -cp ./List list_java
+echo -n "* Java: "
+time -f "%e" java -cp ./List list_java
 echo -n "* Javascript: "
 time -f "%e" nodejs List/list_javascript.js
 echo -n "* Python: "
 time -f "%e" python List/list_python.py
-#echo -n "* Ruby: "
-#time -f "%e" ruby List/list_ruby.rb
+echo -n "* Ruby: "
+time -f "%e" ruby List/list_ruby.rb
 echo -n "* Lua: "
 time -f "%e" lua List/list_lua.lua
 echo -n "* Lua JIT: "
