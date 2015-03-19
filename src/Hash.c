@@ -89,7 +89,12 @@ uint64_t hash_data(var self, size_t size) {
 }
     
 uint64_t hash(var self) {
-  if (implements(self, Hash)) { return method(self, Hash, hash); }
+  
+  struct Hash* h = instance(self, Hash);
+  if (h and h->hash) {
+    return h->hash(self);
+  }
+  
   return hash_data(self, size(self));
 }
 

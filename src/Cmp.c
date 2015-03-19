@@ -44,12 +44,14 @@ var Eq = Cello(Eq,
 
 bool eq(var self, var obj) {
   
-  if (implements(self, Eq)) {
-    return method(self, Eq, eq, obj);
+  struct Eq* e = instance(self, Eq);
+  if (e and e->eq) {
+    return e->eq(self, obj);
   }
   
-  if (type_of(self) is type_of(obj) and implements_method(self, Size, size)) {
-    return memcmp(self, obj, size(type_of(self))) is 0;
+  struct Size* s = instance(self, Size);
+  if (type_of(self) is type_of(obj) and s and s->size) {
+    return memcmp(self, obj, s->size()) is 0;
   }
   
   return self is obj;
@@ -93,12 +95,14 @@ var Ord = Cello(Ord,
 
 bool gt(var self, var obj) {
 
-  if (implements_method(self, Ord, gt)) {
-    return method(self, Ord, gt, obj);
+  struct Ord* o = instance(self, Ord);
+  if (o and o->gt) {
+    return o->gt(self, obj);
   }
   
-  if (type_of(self) is type_of(obj)) {
-    return memcmp(self, obj, size(type_of(self))) > 0;
+  struct Size* s = instance(self, Size);
+  if (type_of(self) is type_of(obj) and s and s->size) {
+    return memcmp(self, obj, s->size()) > 0;
   }
   
   return self > obj;
@@ -107,12 +111,14 @@ bool gt(var self, var obj) {
 
 bool lt(var self, var obj) {
 
-  if (implements_method(self, Ord, lt)) {
-    return method(self, Ord, lt, obj);
+  struct Ord* o = instance(self, Ord);
+  if (o and o->lt) {
+    return o->lt(self, obj);
   }
   
-  if (type_of(self) is type_of(obj)) {
-    return memcmp(self, obj, size(type_of(self))) < 0;
+  struct Size* s = instance(self, Size);
+  if (type_of(self) is type_of(obj) and s and s->size) {
+    return memcmp(self, obj, s->size()) < 0;
   }
   
   return self < obj;

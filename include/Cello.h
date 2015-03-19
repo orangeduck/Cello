@@ -37,14 +37,14 @@
 #define CELLO_BOUND_CHECK  0
 #define CELLO_MAGIC_CHECK  0
 #define CELLO_ALLOC_CHECK  0
-#define CELLO_UNDEF_CHECK  0
+#define CELLO_NULL_CHECK   0
 #define CELLO_METHOD_CHECK 0
 #define CELLO_MEMORY_CHECK 0
 #else
 #define CELLO_BOUND_CHECK  1
 #define CELLO_MAGIC_CHECK  1
 #define CELLO_ALLOC_CHECK  1
-#define CELLO_UNDEF_CHECK  1
+#define CELLO_NULL_CHECK   1
 #define CELLO_METHOD_CHECK 1
 #define CELLO_MEMORY_CHECK 1
 #endif
@@ -60,15 +60,6 @@
 #else
 #define CELLO_MAGIC 0
 #define CELLO_MAGIC_HEADER
-#endif
-
-#ifndef CELLO_BLANK_INSTANCE
-#define CELLO_BLANK_INSTANCE_NUM 32
-#define CELLO_BLANK_INSTANCE \
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, \
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 #endif
 
 #if defined(_WIN32)
@@ -145,17 +136,14 @@ typedef void* var;
 #define CelloObject(T, S, ...) (var)((char*)((var[]){ \
   NULL, (var)CelloStaticAlloc, \
   CELLO_MAGIC_HEADER \
-  NULL, "__Name",          #T, CELLO_BLANK_INSTANCE, \
-  NULL, "__Size",      (var)S, CELLO_BLANK_INSTANCE, \
-  NULL, "__ModMask",   (var)1, CELLO_BLANK_INSTANCE, \
-  NULL, "__HashMask0", (var)0, CELLO_BLANK_INSTANCE, \
-  NULL, "__HashMask1", (var)0, CELLO_BLANK_INSTANCE, \
+  NULL, "__Name",          #T,  \
+  NULL, "__Size",      (var)S,  \
   ##__VA_ARGS__, \
-  NULL, NULL, NULL, CELLO_BLANK_INSTANCE}) + \
+  NULL, NULL, NULL}) + \
   sizeof(struct CelloHeader))
 
 #define Instance(I, ...) \
-  NULL, #I, &((struct I){__VA_ARGS__}), CELLO_BLANK_INSTANCE
+  NULL, #I, &((struct I){__VA_ARGS__})
   
 /* Types */
 
@@ -223,7 +211,6 @@ struct Type {
   var cls;
   var name;
   var inst;
-  var blank[CELLO_BLANK_INSTANCE_NUM];
 };
 
 struct Ref { var val; };

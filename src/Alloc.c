@@ -87,8 +87,9 @@ var alloc_stk(var type, var head, var data, size_t size) {
 
 var alloc(var type) {
   
-  if (type_implements_method(type, Alloc, alloc)) {
-    return type_method(type, Alloc, alloc);
+  struct Alloc* a = type_instance(type, Alloc);
+  if (a and a->alloc) {
+    return a->alloc();
   }
   
   struct CelloHeader* head = calloc(1,
@@ -105,8 +106,9 @@ var alloc(var type) {
 
 void dealloc(var self) {
 
-  if (implements_method(self, Alloc, dealloc)) {
-    method(self, Alloc, dealloc);
+  struct Alloc* a = instance(self, Alloc);
+  if (a and a->dealloc) {
+    a->dealloc(self);
     return;
   }
 
@@ -138,8 +140,9 @@ void dealloc(var self) {
 #endif
   
 #if CELLO_ALLOC_CHECK == 1
-  if (implements(self, Size)) {
-    memset(head, 0, sizeof(struct CelloHeader) + size(self));
+  struct Size* s = instance(self, Size);
+  if (s and s->size) {
+    memset(head, 0, sizeof(struct CelloHeader) + s->size());
   }
 #endif
   
@@ -194,15 +197,17 @@ var New = Cello(New,
   Instance(Doc, New_Name, New_Brief, New_Description, New_Examples, New_Methods));
 
 var construct_with(var self, var args) {
-  if (implements_method(self, New, construct_with)) {
-    return method(self, New, construct_with, args);
+  struct New* n = instance(self, New);
+  if (n and n->construct_with) {
+    return n->construct_with(self, args);
   }
   return self;
 }
 
 var destruct(var self) {
-  if (implements_method(self, New, destruct)) {
-    return method(self, New, destruct);
+  struct New* n = instance(self, New);
+  if (n and n->destruct) {
+    return n->destruct(self);
   }
   return self;
 }
@@ -282,8 +287,9 @@ var Copy = Cello(Copy,
 
 var copy(var self) {
   
-  if (implements(self, Copy)) {
-    return method(self, Copy, copy); 
+  struct Copy* c = instance(self, Copy);
+  if (c and c->copy) {
+    return c->copy(self); 
   }
   
   var obj = assign(alloc(type_of(self)), self);

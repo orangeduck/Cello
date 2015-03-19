@@ -543,7 +543,7 @@ static bool Mutex_Lock_Try(var self) {
   struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
   int err = pthread_mutex_trylock(&m->mutex);
-  if (err == EBUSY) { return False; }
+  if (err == EBUSY) { return false; }
   if (err is EINVAL) {
     throw(ValueError, "Invalid Argument to Mutex Lock Try");
   }

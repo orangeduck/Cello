@@ -29,15 +29,16 @@ var Cast = Cello(Cast, Instance(Doc,
 
 var cast(var self, var type) {
   
-  if (implements(self, Cast)) {
-    return method(self, Cast, cast, type);
+  struct Cast* c = instance(self, Cast);
+  if (c and c->cast) {
+    return c->cast(self, type);
+  }
+  
+  if (type_of(self) is type) {
+    return self;
   } else {
-    if (type_of(self) is type) {
-      return self;
-    } else {
-      return throw(ValueError,
-        "cast expected type %s, got type %s", type_of(self), type);
-    }
+    return throw(ValueError,
+      "cast expected type %s, got type %s", type_of(self), type);
   }
   
 }
@@ -115,7 +116,7 @@ static const char* Type_Methods(void) {
 }
 
 enum {
-  CELLO_NBUILTINS = 5
+  CELLO_NBUILTINS = 2
 };
 
 static var Type_Alloc(void) {
@@ -149,19 +150,16 @@ static var Type_New(var self, var args) {
   
   struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
   
-  body[0] = (struct Type){ NULL, "__Name",      (var)c_str(name), {0} };
-  body[1] = (struct Type){ NULL, "__Size",      (var)c_int(size), {0} };
-  body[2] = (struct Type){ NULL, "__ModMask",   (var)1, {0} };
-  body[3] = (struct Type){ NULL, "__HashMask0", (var)0, {0} };
-  body[4] = (struct Type){ NULL, "__HashMask1", (var)0, {0} };
+  body[0] = (struct Type){ NULL, "__Name", (var)c_str(name) };
+  body[1] = (struct Type){ NULL, "__Size", (var)c_int(size) };
   
   for(size_t i = 2; i < len(args); i++) {
     var ins = get(args, $I(i));
     body[CELLO_NBUILTINS-2+i] = (struct Type){
-      NULL, (var)c_str(type_of(ins)), ins, {0} };
+      NULL, (var)c_str(type_of(ins)), ins };
   }
   
-  body[CELLO_NBUILTINS+len(args)-2] = (struct Type){ NULL, NULL, NULL, {0} };
+  body[CELLO_NBUILTINS+len(args)-2] = (struct Type){ NULL, NULL, NULL };
   
   return body;
 }
@@ -172,33 +170,6 @@ static char* Type_Builtin_Name(struct Type* t) {
 
 static size_t Type_Builtin_Size(struct Type* t) {
   return (size_t)t[1].inst;
-}
-
-static uintptr_t* Type_Builtin_ModMask(struct Type* t) {
-  return (uintptr_t*)(&t[2].inst);
-}
-
-static uintptr_t* Type_Builtin_HashMask0(struct Type* t) {
-  return (uintptr_t*)(&t[3].inst);
-}
-
-static uintptr_t* Type_Builtin_HashMask1(struct Type* t) {
-  return (uintptr_t*)(&t[4].inst);
-}
-
-static uint64_t Type_Builtin_Hash(struct Type* t, var cls) {
-  uintptr_t m0 = *Type_Builtin_ModMask(t);
-  uintptr_t m1 = *Type_Builtin_HashMask0(t);
-  uintptr_t m2 = *Type_Builtin_HashMask1(t);
-  uintptr_t x = ((uintptr_t)cls)>>sizeof(var);
-  x = ((x >> 16) ^ x) * (0x45d9f3b ^ m1);
-  x = ((x >> 16) ^ x) * (0x45d9f3b ^ m2);
-  return x % m0;
-}
-
-static void Type_Builtin_Hash_Inc(struct Type* t) {
-  *Type_Builtin_HashMask0(t) = rand();
-  *Type_Builtin_HashMask1(t) = rand();
 }
 
 static int Type_Show(var self, var output, int pos) {
@@ -217,7 +188,7 @@ static char* Type_C_Str(var self) {
 
 /* TODO */
 static void Type_Help(var self) {
-  print("HELP!", NULL);
+  return;
 }
 
 static var Type_Gen(void) {
@@ -236,132 +207,35 @@ var Type = CelloEmpty(Type,
   Instance(C_Str,    Type_C_Str),
   Instance(Gen,      Type_Gen),
   Instance(Help,     Type_Help));
-  
-static bool Type_Build_Hash(struct Type* t) {
-  
-  size_t i = 0;
-  struct Type* ti = t;
-  while (ti->name) { i++; ti++; }
-  size_t nentries = i - CELLO_NBUILTINS;
-  
-  srand((unsigned int)(uintptr_t)ti);
-  
-  *Type_Builtin_ModMask(t) = nentries;
-  
-  bool valid = false;
-  var* overlap = malloc(sizeof(var) * nentries);
-  
-  size_t iterations = 0;
-  while (not valid) {
-    
-    if (iterations > 100000) {
-      *Type_Builtin_ModMask(t) = 1;
-      *Type_Builtin_HashMask0(t) = 0;
-      *Type_Builtin_HashMask1(t) = 0;
-      return false;
-    }
-    
-    valid = true;
-    memset(overlap, 0, sizeof(var) * nentries);
-    
-    for (size_t i = 0; i < nentries; i++) {
-      var cls = t[CELLO_NBUILTINS+i].cls;
-      if (cls is NULL) { continue; }
-      
-      uint64_t initial = Type_Builtin_Hash(t, cls);
-      
-      if (overlap[initial]) {
-        valid = false;
-        Type_Builtin_Hash_Inc(t);
-        break;
-      }
-      
-      overlap[initial] = cls;
-    }
-    
-    iterations++;
-  }
-  
-  for (size_t i = 0; i < nentries; i++) {
-    if (overlap[i] is NULL) { continue; }
-    for (size_t j = 0; j < nentries; j++) {
-      if (t[CELLO_NBUILTINS+j].cls is overlap[i] and i isnt j) {
-        struct Type tmp = t[i+CELLO_NBUILTINS];
-        t[i+CELLO_NBUILTINS] = t[j+CELLO_NBUILTINS];
-        t[j+CELLO_NBUILTINS] = tmp;
-        break;
-      }
-    }
-  }
-  
-  free(overlap);
-  return true;
-  
-}
 
-static void Type_Scan(
-  var self, var cls, size_t offset, var* inst, var* meth) {
-
-  struct Type* t = self;
-  
-#if CELLO_METHOD_CHECK == 1
+static var Type_Instance(var self, var cls) {
+ 
+ #if CELLO_METHOD_CHECK == 1
   if (type_of(self) isnt Type) {
-    throw(TypeError, "Method call got non type '%s'", type_of(self));
-    return;
+    return throw(TypeError, "Method call got non type '%s'", type_of(self));
   }
 #endif
   
-  uint64_t initial = Type_Builtin_Hash(t, cls) + CELLO_NBUILTINS;
+  struct Type* t;
   
-  if (t[initial].cls is cls) {
-    *inst = ((char*)t[initial].blank) + sizeof(struct CelloHeader);
-    *meth = *(var*)((char*)(*inst) + offset);
-    return;
-  }
-  
-  t += CELLO_NBUILTINS;
-  
+  t = (struct Type*)self + CELLO_NBUILTINS; 
+  while (t->name) { if (t->cls is cls) { return t->inst; } t++; }
+
+  t = (struct Type*)self + CELLO_NBUILTINS; 
   while (t->name) {
-    
     if (strcmp(t->name, Type_Builtin_Name(cls)) is 0) {
       t->cls = cls;
-      CelloHeader_Init((struct CelloHeader*)t->blank, cls, CelloDataAlloc);
-      size_t clssize = Type_Builtin_Size(cls);
-#if CELLO_ALLOC_CHECK == 1
-      if (clssize > CELLO_BLANK_INSTANCE_NUM * 
-        sizeof(var) - 
-        sizeof(struct CelloHeader)) {
-        fprintf(stderr, 
-          "Cello Fatal Error: Instance of %s is too big to be copied into "
-          "Type %s for caching. Consider splitting it into multiple classes "
-          "or increasing the CELLO_BLANK_INSTANCE variable.\n",
-          (char*)t->name, 
-          (char*)Type_Builtin_Name(self));
-        abort();
-      }
-#endif
-      memcpy(((char*)t->blank) + sizeof(struct CelloHeader), t->inst, clssize);
-      if (Type_Build_Hash(self)) {
-        Type_Scan(self, cls, offset, inst, meth);
-      } else {
-        *inst = t->inst;
-		    *meth = *(var*)((char*)(*inst) + offset);
-      }
-      return;
+      return t->inst;
     }
-    
     t++;
   }
   
-  *inst = NULL;
-  *meth = NULL;
+  return NULL;
   
 }
 
 static bool Type_Implements(var self, var cls) {
-  var inst = NULL, meth = NULL;
-  Type_Scan(self, cls, 0, &inst, &meth);
-  return inst isnt NULL;
+  return Type_Instance(self, cls) isnt NULL;
 }
 
 
@@ -372,8 +246,7 @@ bool type_implements(var self, var cls) {
 static var Type_Method_At_Offset(
   var self, var cls, size_t offset, const char* method_name) {
 
-  var inst = NULL, meth = NULL;
-  Type_Scan(self, cls, offset, &inst, &meth);
+  var inst = Type_Instance(self, cls);
   
 #if CELLO_METHOD_CHECK == 1
   if (inst is NULL) {
@@ -381,7 +254,11 @@ static var Type_Method_At_Offset(
       "Type '%s' does not implement class '%s'",
       self,  cls);
   }
+#endif
   
+#if CELLO_METHOD_CHECK == 1  
+  var meth = *((var*)(((char*)inst) + offset));
+
   if (meth is NULL) {
     return throw(ClassError,
       "Type '%s' implements class '%s' but not the method '%s' required",
@@ -398,31 +275,16 @@ var type_method_at_offset(
   return Type_Method_At_Offset(self, cls, offset, method_name);  
 }
 
-static bool Type_Implements_Method_At_Offset(
-  var self, var cls, size_t offset) {
-  var inst = NULL, meth = NULL;
-  Type_Scan(self, cls, offset, &inst, &meth);
-  return inst and meth;
+static bool Type_Implements_Method_At_Offset(var self, var cls, size_t offset) {
+  var inst = Type_Instance(self, cls);
+  if (inst is NULL) { return false; }
+  var meth = *((var*)(((char*)inst) + offset));
+  if (meth is NULL) { return false; }
+  return true;
 }
 
 bool type_implements_method_at_offset(var self, var cls, size_t offset) {
   return Type_Implements_Method_At_Offset(self, cls, offset);
-}
-
-static var Type_Instance(var self, var cls) {
-
-  var inst = NULL, meth = NULL;
-  Type_Scan(self, cls, 0, &inst, &meth);
-  
-#if CELLO_METHOD_CHECK == 1
-  if (inst is NULL) {  
-    return throw(ClassError,
-      "Type '%s' does not implement class '%s'", self, cls);
-  }
-#endif
-  
-  return inst;
-
 }
 
 var type_instance(var self, var cls) {
@@ -442,7 +304,7 @@ static var Type_Of(var self) {
   **  is the type, we assume the type is `Type`.
   */
 
-#if CELLO_UNDEF_CHECK == 1  
+#if CELLO_NULL_CHECK == 1  
     if (self is NULL) {
       return throw(ValueError, "Received NULL as value to 'type_of'");
     }
@@ -513,8 +375,10 @@ var Size = Cello(Size, Instance(Doc,
   Size_Name, Size_Brief, Size_Description, Size_Examples, Size_Methods));
 
 size_t size(var type) {
-  if (type_implements(type, Size)) {
-    return type_method(type, Size, size);
+
+  struct Size* s = type_instance(type, Size);
+  if (s and s->size) {
+    return s->size();
   }
   
   size_t builtinsize = Type_Builtin_Size(type);

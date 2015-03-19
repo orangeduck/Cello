@@ -180,14 +180,16 @@ static void Cello_GC_Recurse(var ptr) {
   or  type is File   or  type is Process
   or  type is Function) { return; }
   
-  if (type_implements(type, Traverse)) {
-    traverse(ptr, $(Function, Cello_GC_Mark_Item));
+  struct Traverse* t = type_instance(type, Traverse);
+  if (t and t->traverse) {
+    t->traverse(ptr, $(Function, Cello_GC_Mark_Item));
     return;
   }
   
-  if (type_implements(type, Size)) {
-    for (size_t s = 0; s < size(type); s += sizeof(var)) {
-      var p = ((char*)ptr) + s;
+  struct Size* s = type_instance(type, Size);
+  if (s and s->size) {
+    for (size_t i = 0; i < s->size(); i += sizeof(var)) {
+      var p = ((char*)ptr) + i;
       Cello_GC_Mark_Item(*((var*)p));
     }
     return;
