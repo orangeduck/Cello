@@ -128,3 +128,19 @@ bool lt(var self, var obj) {
 bool ge(var self, var obj) { return not lt(self, obj); }
 bool le(var self, var obj) { return not gt(self, obj); }
 
+int cmp(var self, var obj) {
+  
+  struct Ord* o = instance(self, Ord);
+  if (o and o->cmp) {
+    return o->cmp(self, obj);
+  }
+  
+  struct Size* s = instance(self, Size);
+  if (type_of(self) is type_of(obj) and s and s->size) {
+    return memcmp(self, obj, s->size());
+  }
+  
+  if (self < obj) { return -1; }
+  if (self > obj) { return  1; }
+  return 0;
+}

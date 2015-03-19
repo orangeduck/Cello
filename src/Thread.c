@@ -860,7 +860,7 @@ var exception_catch(var args) {
   
   /* Check Exception against Arguments */
   foreach(arg in args) {
-    if_eq(arg, exception_object()) {
+    if (eq(arg, exception_object())) {
       return exception_object();
     }
   }

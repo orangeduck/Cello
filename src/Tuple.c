@@ -147,7 +147,7 @@ static void Tuple_Set(var self, var key, var val) {
 
 static bool Tuple_Mem(var self, var item) {
   foreach (obj in self) {
-    if_neq (obj, item) { return false; }
+    if (neq(obj, item)) { return false; }
   }
   return true;  
 }
@@ -157,7 +157,7 @@ static void Tuple_Pop_At(var self, var key);
 static void Tuple_Rem(var self, var item) {
   size_t i = 0;
   foreach (obj in self) {
-    if_eq (obj, item) {
+    if (eq(obj, item)) {
       Tuple_Pop_At(self, $I(i)); break;
     }
     i++;

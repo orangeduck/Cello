@@ -215,12 +215,12 @@ static bool Map_Eq(var self, var obj) {
   
   foreach (key in obj) {
     if (not Map_Mem(self, key)) { return false; }
-    if_neq(get(obj, key), Map_Get(self, key)) { return false; }
+    if (neq(get(obj, key), Map_Get(self, key))) { return false; }
   }
 	
   foreach (key in self) {
     if (not mem(obj, key)) { return false; }
-    if_neq(get(obj, key), Map_Get(self, key)) { return false; }
+    if (neq(get(obj, key), Map_Get(self, key))) { return false; }
   }
 	
   return true;
@@ -237,14 +237,9 @@ static bool Map_Mem(var self, var key) {
   
   var node = m->root;
   while (node isnt NULL) { 
-  
-    if_eq(Map_Key(m, node), key) {
-      return true;
-    }
-    
-    node = lt(Map_Key(m, node), key) 
-      ? *Map_Left(m, node) 
-      : *Map_Right(m, node);
+    int c = cmp(Map_Key(m, node), key);
+    if (c is 0) { return true; }
+    node = c < 0 ? *Map_Left(m, node) : *Map_Right(m, node);
   }
   
   return false;
@@ -256,14 +251,9 @@ static var Map_Get(var self, var key) {
   
   var node = m->root;
   while (node isnt NULL) {
-  
-    if_eq(Map_Key(m, node), key) {
-      return Map_Val(m, node);
-    }
-    
-    node = lt(Map_Key(m, node), key) 
-      ? *Map_Left(m, node) 
-      : *Map_Right(m, node);
+    int c = cmp(Map_Key(m, node), key);
+    if (c is 0) { return Map_Val(m, node); }
+    node = c < 0 ? *Map_Left(m, node) : *Map_Right(m, node);
   }
   
   return throw(KeyError, "Key %$ not in Map!", key);
@@ -412,13 +402,15 @@ static void Map_Set(var self, var key, var val) {
   
   while (true) {
     
-    if_eq (Map_Key(m, node), key) {
+    int c = cmp(Map_Key(m, node), key);
+    
+    if (c is 0) {
       assign(Map_Key(m, node), key);
       assign(Map_Val(m, node), val);
       return;
     }
     
-    if_lt (Map_Key(m, node), key) {
+    if (c < 0) {
     
       if (*Map_Left(m, node) is NULL) {
         var newn = Map_Alloc(m);
@@ -432,8 +424,9 @@ static void Map_Set(var self, var key, var val) {
       }
       
       node = *Map_Left(m, node);
+    }
       
-    } else {
+    if (c > 0) {
     
       if (*Map_Right(m, node) is NULL) {
         var newn = Map_Alloc(m);
@@ -447,7 +440,6 @@ static void Map_Set(var self, var key, var val) {
       }
       
       node = *Map_Right(m, node);
-      
     }
     
   }
@@ -537,15 +529,9 @@ static void Map_Rem(var self, var key) {
   bool found = false;
   var node = m->root;
   while (node isnt NULL) {
-  
-    if_eq(Map_Key(m, node), key) {
-      found = true;
-      break;
-    }
-    
-    node = lt(Map_Key(m, node), key) 
-      ? *Map_Left(m, node) 
-      : *Map_Right(m, node);
+    int c = cmp(Map_Key(m, node), key);
+    if (c is 0) { found = true; break; }
+    node = c < 0 ? *Map_Left(m, node) : *Map_Right(m, node);
   }
   
   if (not found) {

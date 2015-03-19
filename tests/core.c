@@ -169,7 +169,7 @@ PT_FUNC(test_hash) {
 
 PT_FUNC(test_len) {
 
-  PT_ASSERT(len($T($I(1), $I(2), $I(3))) is 3);
+  PT_ASSERT(len(tuple($I(1), $I(2), $I(3))) is 3);
   PT_ASSERT(len($S("Hello")) is 5);
   
   var x = new(Array, Int, $I(1), $I(2));
@@ -404,7 +404,7 @@ PT_FUNC(test_begin) {
 
 PT_FUNC(test_stream) {
 
-  var f = $(File);
+  var f = $(File, NULL);
   
   PT_ASSERT(f);
   

@@ -1,5 +1,34 @@
 #include "Cello.h"
 
+static const char* C_Str_Name(void) {
+  return "C_Str";
+}
+
+static const char* C_Str_Brief(void) {
+  return "Interpret as C String";
+}
+
+static const char* C_Str_Description(void) {
+  return
+    "The `C_Str` class should be overridden by types which are representable "
+    "as a C style String.";
+}
+
+/* TODO */
+static const char* C_Str_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* C_Str_Methods(void) {
+  return "";
+}
+
+var C_Str = Cello(C_Str,
+  Instance(Doc,
+    C_Str_Name, C_Str_Brief, C_Str_Description, 
+    C_Str_Examples, C_Str_Methods));
+
 static const char* String_Name(void) {
   return "String";
 }
@@ -81,6 +110,10 @@ static bool String_Gt(var self, var obj) {
 
 static bool String_Lt(var self, var obj) {
   return strcmp(String_C_Str(self), c_str(obj)) < 0;
+}
+
+static int String_Cmp(var self, var obj) {
+  return strcmp(String_C_Str(self), c_str(obj));
 }
 
 static size_t String_Len(var self) {
@@ -268,7 +301,7 @@ var String = Cello(String,
   Instance(New,     String_New, String_Del),
   Instance(Assign,  String_Assign),
   Instance(Eq,      String_Eq),
-  Instance(Ord,     String_Gt, String_Lt),
+  Instance(Ord,     String_Gt, String_Lt, String_Cmp),
   Instance(Len,     String_Len),
   Instance(Get,     NULL, NULL, String_Mem, String_Rem),
   Instance(Clear,   String_Clear),

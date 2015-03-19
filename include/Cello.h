@@ -59,6 +59,7 @@
 #define CELLO_MAGIC_HEADER ((var)CELLO_MAGIC_NUM),
 #else
 #define CELLO_MAGIC 0
+#define CELLO_MAGIC_NUM 0xCe110
 #define CELLO_MAGIC_HEADER
 #endif
 
@@ -223,12 +224,7 @@ struct Range { var iter; int64_t start; int64_t stop; int64_t step; };
 struct Slice { var iter; var range; };
 struct File { FILE* file; };
 struct Process { FILE* proc; };
-
-#if CELLO_CLANG
-struct Function { var (^func)(var); };
-#else
 struct Function { var (*func)(var); };
-#endif
   
 /* Classes */
 
@@ -325,6 +321,7 @@ struct Eq {
 struct Ord {
   bool (*gt)(var, var);
   bool (*lt)(var, var);
+  int (*cmp)(var, var);
 };
 
 struct Hash {
@@ -485,13 +482,12 @@ void CelloHeader_RemFlag(struct CelloHeader* head, int flag);
 #define $(T, ...) alloc_stk(T, \
   ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){0}), \
   &((struct T){__VA_ARGS__}), sizeof(struct T))
-  
+
 #define $I(X) $(Int, X)
 #define $F(X) $(Float, X)
 #define $S(X) $(String, X)
 #define $R(X) $(Ref, X)
 #define $B(X) $(Box, X)
-#define $T(...) tuple(__VA_ARGS__)
 
 var alloc_stk(var type, var mem, var data, size_t size);
 
@@ -513,7 +509,6 @@ var destruct(var self);
 #define new_$S(X) new_$(String, X)
 #define new_$R(X) new_$(Ref, X)
 #define new_$B(X) new_$(Box, X)
-#define new_$T(...) new_with(Tuple, tuple(__VA_ARGS__))
 
 #define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, NULL))
 #define tuple_xp(X, A) X A
@@ -535,18 +530,11 @@ var val_subtype(var self);
 bool eq(var self, var obj);
 bool neq(var self, var obj);
 
-#define if_eq(X,Y) if(eq(X,Y))
-#define if_neq(X,Y) if(neq(X,Y))
-
 bool gt(var self, var obj);
 bool lt(var self, var obj);
 bool ge(var self, var obj);
 bool le(var self, var obj);
-
-#define if_lt(X,Y) if(lt(X,Y))
-#define if_gt(X,Y) if(gt(X,Y))
-#define if_le(X,Y) if(le(X,Y))
-#define if_ge(X,Y) if(ge(X,Y))
+int cmp(var self, var obj);
 
 void hash_init(uint64_t seed);
 uint64_t hash_seed(void);
@@ -665,6 +653,15 @@ void lock(var self);
 bool lock_try(var self);
 void unlock(var self);
 
+void gen_seed(uint64_t seed);
+uint64_t gen_c_int(void);
+double gen_c_float(void);
+var gen(var);
+var shrink(var);
+bool check(var func, var name, var iterations, var types);
+
+#define quickcheck(F, ...) check(F, $S(#F), $I(1000), tuple(__VA_ARGS__))
+
 #define try { jmp_buf __env; exception_try(&__env); if (!setjmp(__env))
 
 #define catch(...) catch_xp(catch_in, (__VA_ARGS__))
@@ -690,15 +687,6 @@ jmp_buf* exception_buffer(void);
 
 var exception_throw(var obj, const char* fmt, var args);
 var exception_catch(var args);
-
-void gen_seed(uint64_t seed);
-uint64_t gen_c_int(void);
-double gen_c_float(void);
-var gen(var);
-var shrink(var);
-bool check(var func, var name, var iterations, var types);
-
-#define quickcheck(F, ...) check(F, $S(#F), $I(1000), tuple(__VA_ARGS__))
 
 #if CELLO_GC == 1
 

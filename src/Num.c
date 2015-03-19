@@ -1,5 +1,75 @@
 #include "Cello.h"
 
+static const char* C_Int_Name(void) {
+  return "C_Int";
+}
+
+static const char* C_Int_Brief(void) {
+  return "Interpret as C Integer";
+}
+
+static const char* C_Int_Description(void) {
+  return
+    "The `C_Int` class should be overridden by types which are representable "
+    "as a C style Integer of the type `int64_t`.";
+}
+
+/* TODO */
+static const char* C_Int_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* C_Int_Methods(void) {
+  return "";
+}
+
+var C_Int = Cello(C_Int,
+  Instance(Doc,
+    C_Int_Name, C_Int_Brief, C_Int_Description, 
+    C_Int_Examples, C_Int_Methods));
+    
+static const char* C_Float_Name(void) {
+  return "C_Float";
+}
+
+static const char* C_Float_Brief(void) {
+  return "Interpret as C Float";
+}
+
+static const char* C_Float_Description(void) {
+  return
+    "The `C_Float` class should be overridden by types which are representable "
+    "as a C style Float of the type `double`.";
+}
+
+/* TODO */
+static const char* C_Float_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* C_Float_Methods(void) {
+  return "";
+}
+
+var C_Float = Cello(C_Float,
+  Instance(Doc,
+    C_Float_Name, C_Float_Brief, C_Float_Description, 
+    C_Float_Examples, C_Float_Methods));
+
+char* c_str(var self) {
+  return method(self, C_Str, c_str);
+}
+
+int64_t c_int(var self) {
+  return method(self, C_Int, c_int);
+}
+
+double c_float(var self) {
+  return method(self, C_Float, c_float);
+}
+
 static const char* Int_Name(void) {
   return "Int";
 }
@@ -75,6 +145,14 @@ static bool Int_Lt(var self, var other) {
   return Int_C_Int(self) < c_int(other);
 }
 
+static int Int_Cmp(var self, var other) {
+  int64_t i0 = Int_C_Int(self);
+  int64_t i1 = c_int(other);
+  if (i0 < i1) { return -1; }
+  if (i0 > i1) { return  1; }
+  return 0;
+}
+
 static uint64_t Int_Hash(var self) {
   return (uint64_t)c_int(self);
 }
@@ -101,7 +179,7 @@ var Int = Cello(Int,
   Instance(New,     Int_New, NULL),
   Instance(Assign,  Int_Assign),
   Instance(Eq,      Int_Eq),
-  Instance(Ord,     Int_Gt, Int_Lt),
+  Instance(Ord,     Int_Gt, Int_Lt, Int_Cmp),
   Instance(Hash,    Int_Hash),
   Instance(C_Int,   Int_C_Int),
   Instance(Show,    Int_Show, Int_Look),
@@ -182,6 +260,14 @@ static bool Float_Lt(var self, var obj) {
   return Float_C_Float(self) < c_float(obj);
 }
 
+static int Float_Cmp(var self, var other) {
+  double i0 = Float_C_Float(self);
+  double i1 = c_float(other);
+  if (i0 < i1) { return -1; }
+  if (i0 > i1) { return  1; }
+  return 0;
+}
+
 union interp_cast {
   double   as_flt;
   uint64_t as_int;
@@ -211,7 +297,7 @@ var Float = Cello(Float,
   Instance(New,     Float_New, NULL),
   Instance(Assign,  Float_Assign),
   Instance(Eq,      Float_Eq),
-  Instance(Ord,     Float_Gt, Float_Lt),
+  Instance(Ord,     Float_Gt, Float_Lt, Float_Cmp),
   Instance(Hash,    Float_Hash),
   Instance(C_Float, Float_C_Float),
   Instance(Show,    Float_Show, Float_Look),

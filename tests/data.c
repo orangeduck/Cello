@@ -950,7 +950,7 @@ PT_FUNC(test_map_iter) {
 PT_FUNC(test_file_new) {
   
   var f0 = new(File, $S("test.bin"), $S("w")); 
-  var f1 = $(File);
+  var f1 = $(File, NULL);
   
   PT_ASSERT(f0);
   PT_ASSERT(f1);

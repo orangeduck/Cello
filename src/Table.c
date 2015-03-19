@@ -246,12 +246,12 @@ static bool Table_Eq(var self, var obj) {
   
   foreach (key in obj) {
     if (not Table_Mem(self, key)) { return false; }
-    if_neq(get(obj, key), Table_Get(self, key)) { return false; }
+    if (neq(get(obj, key), Table_Get(self, key))) { return false; }
   }
 	
   foreach (key in self) {
     if (not mem(obj, key)) { return false; }
-    if_neq(get(obj, key), Table_Get(self, key)) { return false; }
+    if (neq(get(obj, key), Table_Get(self, key))) { return false; }
   }
 	
   return true;
@@ -326,7 +326,7 @@ static void Table_Set_Move(var self, var key, var val, bool move) {
       return;
     }
     
-    if_eq(Table_Key(t, i), Table_Swapspace_Key(t, t->sspace0)) {
+    if (eq(Table_Key(t, i), Table_Swapspace_Key(t, t->sspace0))) {
       destruct(Table_Key(t, i));
       destruct(Table_Val(t, i));
       memcpy((char*)t->data + i * Table_Step(t), t->sspace0, Table_Step(t));
@@ -408,7 +408,7 @@ static bool Table_Mem(var self, var key) {
       return false;
     }
     
-    if_eq(Table_Key(t, i), key) {
+    if (eq(Table_Key(t, i), key)) {
       return true;
     }
     
@@ -436,7 +436,7 @@ static void Table_Rem(var self, var key) {
       throw(KeyError, "Key %$ not in Table!", key);
     }
     
-    if_eq(Table_Key(t, i), key) {
+    if (eq(Table_Key(t, i), key)) {
       
       destruct(Table_Key(t, i));
       destruct(Table_Val(t, i));
@@ -487,7 +487,7 @@ static var Table_Get(var self, var key) {
       throw(KeyError, "Key %$ not in Table!", key);
     }
     
-    if_eq(Table_Key(t, i), key) {
+    if (eq(Table_Key(t, i), key)) {
       return Table_Val(t, i);
     }
     

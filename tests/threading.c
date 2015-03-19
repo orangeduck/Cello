@@ -74,7 +74,7 @@ PT_FUNC(test_multiple) {
 static var increment(var args) {
   var mut = get(args, $I(0));
   var tot = get(args, $I(1));
-  with (m in mutex) {
+  with (m in mut) {
     assign(tot, $I(c_int(tot)+1));
   }
   return NULL;

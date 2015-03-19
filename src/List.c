@@ -178,7 +178,7 @@ static bool List_Eq(var self, var obj) {
   
   var item = *List_Next(l, l->head);
   foreach (oitem in obj) {
-    if_neq(item, oitem) { return false; }
+    if (neq(item, oitem)) { return false; }
     item = *List_Next(l, item);
   }
   
@@ -194,7 +194,7 @@ static bool List_Mem(var self, var obj) {
   struct List* l = self;
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
-    if_eq(item, obj) { return true; }
+    if (eq(item, obj)) { return true; }
     item = *List_Next(l, item);
   }
   return false;
@@ -219,7 +219,7 @@ static void List_Rem(var self, var obj) {
   struct List* l = self;
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
-    if_eq(item, obj) {
+    if (eq(item, obj)) {
       var prev = *List_Prev(l, item);
       var next = *List_Next(l, item);
       *List_Next(l, prev) = next;

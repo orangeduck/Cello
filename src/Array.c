@@ -207,7 +207,7 @@ static bool Array_Eq(var self, var obj) {
   if (a->nitems isnt len(obj)) { return false; }
   
   for(size_t i = 0; i < a->nitems; i++) {
-    if_neq(Array_Item(a, i), get(obj, $(Int, i))) {
+    if (neq(Array_Item(a, i), get(obj, $(Int, i)))) {
       return false;
     }
   }
@@ -223,7 +223,7 @@ static size_t Array_Len(var self) {
 static bool Array_Mem(var self, var obj) {
   struct Array* a = self;
   for(size_t i = 0; i < a->nitems; i++) {
-    if_eq(Array_Item(a, i), obj) {
+    if (eq(Array_Item(a, i), obj)) {
       return true;
     }
   }
@@ -263,7 +263,7 @@ static void Array_Pop_At(var self, var key) {
 static void Array_Rem(var self, var obj) {
   struct Array* a = self;
   for(size_t i = 0; i < a->nitems; i++) {
-    if_eq(Array_Item(a, i), obj) {
+    if (eq(Array_Item(a, i), obj)) {
       Array_Pop_At(a, $(Int, i));
       return;
     }
