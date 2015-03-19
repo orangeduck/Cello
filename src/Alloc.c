@@ -44,14 +44,24 @@ static const char* Alloc_Name(void) {
   return "Alloc";
 }
 
-/* TODO */
 static const char* Alloc_Brief(void) {
-  return "";
+  return "Memory Allocation";
 }
 
-/* TODO */
 static const char* Alloc_Description(void) {
-  return "";
+  return
+    "The `Alloc` class can be used to override how memory is allocated for a "
+    "given data type. By default memory is allocated using `malloc` along with "
+    "the `Size` class to determine the amount of memory to allocate.";
+    "\n\n"
+    "A custom allocator should be careful to also intialise the header for the "
+    "allocated memory using the function `CelloHeader_Init`. Cello objects "
+    "without a header wont be recognised as such as so will throw errors when "
+    "used with Cello functions."
+    "\n\n"
+    "Allocating memory via `alloc` avoids the garbage collector and so much be "
+    "manually freed using `dealloc`."
+  ;
 }
 
 /* TODO */
@@ -141,14 +151,33 @@ static const char* New_Name(void) {
   return "New";
 }
 
-/* TODO */
 static const char* New_Brief(void) {
-  return "";
+  return "Construction and Destruction";
 }
 
-/* TODO */
 static const char* New_Description(void) {
-  return "";
+  return
+    "The `New` class allows the user to define constructors and destructors "
+    "for a type, accessible via `new` and `del`. Objects allocated with `new` "
+    "are allocated on the heap and also registered with the Garbage Collector "
+    "this means technically it isn't required to call `del` on them as they "
+    "will be cleaned up at a later date."
+    "\n\n"
+    "The `new_root` function can be called to register a variable with the "
+    "Garbage Collector but to indicate that it will be manually destructed "
+    "with `del` by the user. This should be used for variables that wont be "
+    "reachable by the Garbage Collector such as those in the data segment or "
+    "via vanilla C structures."
+    "\n\n"
+    "It is also possible to simply call the `construct` and `destruct` "
+    "functions if you wish to construct an already allocated object without "
+    "interacting with the Garbage Collector."
+    "\n\n"
+    "Constructors should assume that memory is zero'd for an object but "
+    "nothing else."
+    "\n\n"
+    "The `new` function takes a list of `var` as it's arguments. This means "
+    "if you want to pass it native C types you should wrap them using `$`.";
 }
 
 /* TODO */
@@ -209,19 +238,31 @@ void del(var self) {
 }
 
 
-/* TODO */
 static const char* Copy_Name(void) {
   return "Copy";
 }
 
-/* TODO */
 static const char* Copy_Brief(void) {
-  return "";
+  return "Copyable";
 }
 
-/* TODO */
 static const char* Copy_Description(void) {
-  return "";
+  return
+    "The `Copy` class can be used to override the behaviour of an object when "
+    "a copy is made of it. By default the `Copy` class allocates a new empty "
+    "object of the same type and uses the `Assign` class to set the "
+    "contents. The copy is then registered with the Garbage Collector as if it "
+    "had been constructed with `new`. This means when using manual memory "
+    "management a copy must be deleted manually."
+    "\n\n"
+    "If the `copy` class is overridden then the implementor may manually have "
+    "to register the object with the Garbage Collector if they wish for it to "
+    "be tracked. For this they should call `gc_add` with the new object."
+    "\n\n"
+    "By convention `copy` follows the semantics of `Assign`, which typically "
+    "means a _deep copy_ should be made, and that an object will create a "
+    "copy of all of the sub-objects it references or contains - although this "
+    "could vary depending on the type's overridden behaviours.";
 }
 
 /* TODO */

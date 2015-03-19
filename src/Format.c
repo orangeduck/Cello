@@ -4,14 +4,22 @@ static const char* Format_Name(void) {
   return "Format";
 }
 
-/* TODO */
 static const char* Format_Brief(void) {
-  return "";
+  return "Read or Write with Format String";
 }
 
-/* TODO */
 static const char* Format_Description(void) {
-  return "";
+  return
+    "Format abstracts the class of operations such as `scanf`, `sprintf` and "
+    "`fprintf` with matching semantics. It provides general `printf` and "
+    "`scanf` functionality for several different types objects in a "
+    "uniform way. This class is essentially an inbetween class, used by by the "
+    "`Show` class to read and write output."
+    "\n\n"
+    "It is important to note that the semantics of these options match "
+    "`printf` and not the newly defined `Show` class. For example it is "
+    "perfectly valid to pass a C `int` to these functions, while the `println` "
+    "function from `Show` must be passed only `var` objects.";
 }
 
 /* TODO */
@@ -57,14 +65,31 @@ static const char* Show_Name(void) {
   return "Show";
 }
 
-/* TODO */
 static const char* Show_Brief(void) {
-  return "";
+  return "Convert To or From String";
 }
 
-/* TODO */
 static const char* Show_Description(void) {
-  return "";
+  return
+    "The `Show` class is used to convert objects to, and from, a `String` "
+    "representation. Objects which implement `Show` should expect the "
+    "input/output object to be one that support the `Format` class, such as "
+    "`File` or `String`."
+    "\n\n"
+    "The `print`, `println` and `print_to` functions provide a mechanism for "
+    "writing formatted strings with Cello objects. To do this they provide a "
+    "new format specifier `%$` which uses an object's `Show` functionality to "
+    "write that part of the string. All objects which don't support `Show` can "
+    "still be shown via a default implementation."
+    "\n\n"
+    "All the Show methods which are variable arguments only take `var` objects "
+    "as input. To print native C types wrap them in Cello types using `$`."
+    "\n\n"
+    "Standard format specifiers such as `%f` and `%d` will call functions such "
+    "as `c_float` and `c_int` on their passed arguments to convert objects to "
+    "C types before performing the standard C formatting behaviour."
+    "\n\n"
+    "See `printf` for more information on format specifiers.";
 }
 
 /* TODO */

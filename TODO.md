@@ -1,9 +1,7 @@
 Cello 2.0
 =========
 
-* Make NULL only errorous value
 * Remove Closures
-
 * Remove static variables (hash/gen stuff)
 
 * Update examples

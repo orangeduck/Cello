@@ -4,14 +4,24 @@ static const char* Hash_Name(void) {
   return "Hash";
 }
 
-/* TODO */
 static const char* Hash_Brief(void) {
-  return "";
+  return "Hashable";
 }
 
-/* TODO */
 static const char* Hash_Description(void) {
-  return "";
+  return
+    "The `Hash` class provides a mechanism for hashing an object. This hash "
+    "value should remain the same across objects that are also considered "
+    "equal by the `Eq` class. For objects that are not considered equal this "
+    "value should aim to be evenly distributed across integers."
+    "\n\n"
+    "This is not a cryptographic hash. It is used for various objects or "
+    "data structures that require fast hashing such as the `Table` type. Due "
+    "to this it should not be used for cryptography or security."
+    "\n\n"
+    "By default an object is hashed by using its raw memory in the "
+    "Murmurhash algorithm. Due to the link between them it is recommended to "
+    "only override `Hash` and `Eq` in conjunction.";
 }
 
 /* TODO */

@@ -4,14 +4,14 @@ static const char* C_Str_Name(void) {
   return "C_Str";
 }
 
-/* TODO */
 static const char* C_Str_Brief(void) {
-  return "";
+  return "Interpret as C String";
 }
 
-/* TODO */
 static const char* C_Str_Description(void) {
-  return "";
+  return
+    "The `C_Str` class should be overridden by types which are representable "
+    "as a C style String.";
 }
 
 /* TODO */
@@ -33,14 +33,14 @@ static const char* C_Int_Name(void) {
   return "C_Int";
 }
 
-/* TODO */
 static const char* C_Int_Brief(void) {
-  return "";
+  return "Interpret as C Integer";
 }
 
-/* TODO */
 static const char* C_Int_Description(void) {
-  return "";
+  return
+    "The `C_Int` class should be overridden by types which are representable "
+    "as a C style Integer of the type `int64_t`.";
 }
 
 /* TODO */
@@ -62,14 +62,14 @@ static const char* C_Float_Name(void) {
   return "C_Float";
 }
 
-/* TODO */
 static const char* C_Float_Brief(void) {
-  return "";
+  return "Interpret as C Float";
 }
 
-/* TODO */
 static const char* C_Float_Description(void) {
-  return "";
+  return
+    "The `C_Float` class should be overridden by types which are representable "
+    "as a C style Float of the type `double`.";
 }
 
 /* TODO */

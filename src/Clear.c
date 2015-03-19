@@ -4,14 +4,14 @@ const char* Clear_Name(void) {
   return "Clear";
 }
 
-/* TODO */
 const char* Clear_Brief(void) {
-  return "";
+  return "Object can be Emptied";
 }
 
-/* TODO */
 const char* Clear_Description(void) {
-  return "";
+  return
+    "The `Clear` class can be implemented when it makes sense to _clear_ an "
+    "object, such as to remove all of the items from an `Array` or `Table`.";
 }
 
 /* TODO */

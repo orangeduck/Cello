@@ -4,14 +4,14 @@ static const char* Get_Name(void) {
   return "Get";
 }
 
-/* TODO */
 static const char* Get_Brief(void) {
-  return "";
+  return "Gettable or Settable";
 }
 
-/* TODO */
 static const char* Get_Description(void) {
-  return "";
+  return
+    "The `Get` class provides a method to _get_ or _set_ certain properties "
+    "of an object in a key-value sense.";
 }
 
 /* TODO */

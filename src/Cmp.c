@@ -4,14 +4,28 @@ static const char* Eq_Name(void) {
   return "Eq";
 }
 
-/* TODO */
 static const char* Eq_Brief(void) {
-  return "";
+  return "Value Equality";
 }
 
-/* TODO */
 static const char* Eq_Description(void) {
-  return "";
+  return
+    "The `Eq` class is used to define equality between two object values. "
+    "This class is important as it is used by many data structures to test "
+    "for duplicate items or equality between two items."
+    "\n\n"
+    "By default, if passed two objects of the same type, the `Eq` class will "
+    "simply compare the raw memory of both objects, using the `Size` "
+    "class. If passed two objects of different types it will return `false`."
+    "\n\n"
+    "For objects that manage their own data this class may need to be "
+    "overridden to ensure that objects of the same _value_ are still treated "
+    "as equal. E.G. for string types."
+    "\n\n"
+    "This class to used to test for _value_ equality between objects, I.E. if "
+    "they represent the same thing. For _object_ equality the `is` keyword can "
+    "be used, which will return `true` only if two variables are pointing to "
+    "the same object in memory.";
 }
 
 /* TODO */
@@ -47,14 +61,20 @@ static const char* Ord_Name(void) {
   return "Ord";
 }
 
-/* TODO */
 static const char* Ord_Brief(void) {
-  return "";
+  return "Comparable by Order";
 }
 
-/* TODO */
 static const char* Ord_Description(void) {
-  return "";
+  return
+    "The `Ord` class can be implemented to provide an ordering relationship "
+    "between objects. In other words, to test if one object is _less than_ or "
+    "_greater than_ another."
+    "\n\n"
+    "By default the `Ord` class will simply compare the raw memory of two "
+    "objects using `memcmp` and the `Size` class, but for objects where "
+    "ordering is more meaningful (such as Strings or Integers) this should "
+    "be overridden.";
 }
 
 /* TODO */

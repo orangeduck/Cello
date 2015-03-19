@@ -13,19 +13,19 @@ void cello_sleep(int ms) {
 #endif
 }
 
+static var set_one(var args) {
+  assign(get(args, $I(0)), $I(1));
+  return NULL;
+}
+
 PT_FUNC(test_new) {
   
   var in_func = $I(0);
   
-  fun (f, args) {
-    assign(in_func, $I(1));
-    return NULL;
-  };
-  
-  var t = new(Thread, f);
+  var t = new(Thread, $(Function, set_one));
   
   PT_ASSERT(not c_int(in_func));
-  call(t);
+  call(t, in_func);
   join(t);
   PT_ASSERT(c_int(in_func));
   
@@ -33,26 +33,28 @@ PT_FUNC(test_new) {
 
 }
 
+static var set_inside(var args) {
+  var inside = get(args, $I(0));
+  var index  = get(args, $I(1));
+  set(inside, index, $I(1));
+  return NULL;
+}  
+
 PT_FUNC(test_multiple) {
   
   var inside = new(Array, Int, $I(0), $I(0), $I(0), $I(0), $I(0));
   
-  fun (f, a) {
-    set(inside, get(a, $I(0)), $I(1));
-    return NULL;
-  };
-  
   var threads = new(Array, Box,
-    new(Thread, f), new(Thread, f),
-    new(Thread, f), new(Thread, f),
-    new(Thread, f));
+    new(Thread, $(Function, set_inside)), new(Thread, $(Function, set_inside)),
+    new(Thread, $(Function, set_inside)), new(Thread, $(Function, set_inside)),
+    new(Thread, $(Function, set_inside)));
   
   var args = new(Array, Int,
     $I(0), $I(1), $I(2),
     $I(3), $I(4));
   
   foreach(i in range($I(len(threads)))) {
-    call(deref(get(threads, i)), get(args, i));
+    call(deref(get(threads, i)), inside, get(args, i));
   }
   
   foreach(t in threads) {
@@ -69,27 +71,29 @@ PT_FUNC(test_multiple) {
   
 }
 
+static var increment(var args) {
+  var mut = get(args, $I(0));
+  var tot = get(args, $I(1));
+  with (m in mutex) {
+    assign(tot, $I(c_int(tot)+1));
+  }
+  return NULL;
+}
+
 PT_FUNC(test_mutex) {
   
   var mutex = new(Mutex);
   var total = $I(0);
   
-  fun (f, args) {
-    with(m in mutex) {
-      assign(total, $I(c_int(total)+1));
-    }
-    return NULL;
-  };
-  
   var threads = new(Array, Box,
-    new(Thread, f), new(Thread, f),
-    new(Thread, f), new(Thread, f),
-    new(Thread, f));
+    new(Thread, $(Function, increment)), new(Thread, $(Function, increment)),
+    new(Thread, $(Function, increment)), new(Thread, $(Function, increment)),
+    new(Thread, $(Function, increment)));
   
   PT_ASSERT(eq(total, $I(0)));
   
   foreach(t in threads) {
-    call(deref(t));
+    call(deref(t), mutex, total);
   }
   
   foreach(t in threads) {
@@ -103,17 +107,17 @@ PT_FUNC(test_mutex) {
   
 }
 
+static var exception_sleep(var args) {
+  try {
+    cello_sleep(20);
+    PT_ASSERT(exception_depth() is 1);
+  } catch(e) { }
+  return NULL;
+}
+
 PT_FUNC(test_exception) {
   
-  fun (f, args) {
-    try {
-      cello_sleep(20);
-      PT_ASSERT(exception_depth() is 1);
-    } catch(e) { }
-    return NULL;
-  };
-  
-  var t = new(Thread, f);
+  var t = new(Thread, $(Function, exception_sleep));
   
   call(t);
   cello_sleep(10);

@@ -4,14 +4,18 @@ const char* Doc_Name(void) {
   return "Doc";
 }
 
-/* TODO */
 const char* Doc_Brief(void) {
-  return "";
+  return "Has Documentation";
 }
 
-/* TODO */
+/* TODO: Update? */
 const char* Doc_Description(void) {
-  return "";
+  return
+    "The `Doc` class can be used to give documentation to a certain class or "
+    "type. This documentation can then be accessed using the `help` function "
+    "or by other tools used to generate documentation in external formats."
+    "\n\n"
+    "Documentation is written in Markdown.";
 }
 
 /* TODO */
@@ -64,6 +68,8 @@ static int Help_Title(var out, int pos, int length, char type) {
   pos += print_to(out, pos, "\n\n");
   return spos - pos;
 }
+
+/* TODO: This should be specific to the type instance of Help */
 
 int help_to(var out, int pos, var self) {
   

@@ -4,14 +4,14 @@ static const char* File_Name(void) {
   return "File";
 }
 
-/* TODO */
 static const char* File_Brief(void) {
-  return "";
+  return "Operating System File";
 }
 
-/* TODO */
 static const char* File_Description(void) {
-  return "";
+  return
+    "The `File` type is a wrapper of the native C `FILE` type representing a "
+    "file in the operating system.";
 }
 
 /* TODO */
@@ -150,14 +150,16 @@ static const char* Process_Name(void) {
   return "Process";
 }
 
-/* TODO */
 static const char* Process_Brief(void) {
-  return "";
+  return "Operating System Process";
 }
 
-/* TODO */
 static const char* Process_Description(void) {
-  return "";
+  return 
+    "The `Process` type is a wrapper for an operating system process as "
+    "constructed by the unix-like call `popen`. In this sense it is much like "
+    "a standard file in the operating system but that instead of writing data "
+    "to a location you are writing it as input to a process.";
 }
 
 /* TODO */

@@ -624,21 +624,6 @@ size_t swrite(var self, var input, var size);
 void ref(var self, var item);
 var deref(var self);
 
-#if defined(CELLO_CLANG)
-
-#define fun(X, A) \
-  struct Function* X = $(Function); \
-  X->func = ^ var (var A)
-
-#else
-
-#define fun(X, A) \
-  auto var __CelloFunction_##X(var); \
-  var X = $(Function, __CelloFunction_##X); \
-  var __CelloFunction_##X(var A)
-  
-#endif
-
 #define call(x, ...) call_with(x, tuple(__VA_ARGS__))
 var call_with(var self, var args);
 
