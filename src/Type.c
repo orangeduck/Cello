@@ -116,7 +116,7 @@ static const char* Type_Methods(void) {
 }
 
 enum {
-  CELLO_NBUILTINS = 2
+  CELLO_NBUILTINS = 2 + (CELLO_CACHE_NUM / 3)
 };
 
 static var Type_Alloc(void) {
@@ -150,8 +150,13 @@ static var Type_New(var self, var args) {
   
   struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
   
-  body[0] = (struct Type){ NULL, "__Name", (var)c_str(name) };
-  body[1] = (struct Type){ NULL, "__Size", (var)c_int(size) };
+  size_t cache_entries = CELLO_CACHE_NUM / 3;
+  for (size_t i = 0; i < cache_entries; i++) {
+    body[i] = (struct Type){ NULL, NULL, NULL };
+  }
+  
+  body[cache_entries+0] = (struct Type){ NULL, "__Name", (var)c_str(name) };
+  body[cache_entries+1] = (struct Type){ NULL, "__Size", (var)c_int(size) };
   
   for(size_t i = 2; i < len(args); i++) {
     var ins = get(args, $I(i));
@@ -165,11 +170,11 @@ static var Type_New(var self, var args) {
 }
 
 static char* Type_Builtin_Name(struct Type* t) {
-  return t[0].inst;
+  return t[(CELLO_CACHE_NUM / 3)+0].inst;
 }
 
 static size_t Type_Builtin_Size(struct Type* t) {
-  return (size_t)t[1].inst;
+  return (size_t)t[(CELLO_CACHE_NUM / 3)+1].inst;
 }
 
 static int Type_Show(var self, var output, int pos) {
@@ -208,7 +213,7 @@ var Type = CelloEmpty(Type,
   Instance(Gen,      Type_Gen),
   Instance(Help,     Type_Help));
 
-static var Type_Instance(var self, var cls) {
+static var Type_Scan(var self, var cls) {
  
  #if CELLO_METHOD_CHECK == 1
   if (type_of(self) isnt Type) {
@@ -235,13 +240,14 @@ static var Type_Instance(var self, var cls) {
 }
 
 static bool Type_Implements(var self, var cls) {
-  return Type_Instance(self, cls) isnt NULL;
+  return Type_Scan(self, cls) isnt NULL;
 }
-
 
 bool type_implements(var self, var cls) {
   return Type_Implements(self, cls);
 }
+
+static var Type_Instance(var self, var cls);
 
 static var Type_Method_At_Offset(
   var self, var cls, size_t offset, const char* method_name) {
@@ -276,7 +282,7 @@ var type_method_at_offset(
 }
 
 static bool Type_Implements_Method_At_Offset(var self, var cls, size_t offset) {
-  var inst = Type_Instance(self, cls);
+  var inst = Type_Scan(self, cls);
   if (inst is NULL) { return false; }
   var meth = *((var*)(((char*)inst) + offset));
   if (meth is NULL) { return false; }
@@ -286,6 +292,34 @@ static bool Type_Implements_Method_At_Offset(var self, var cls, size_t offset) {
 bool type_implements_method_at_offset(var self, var cls, size_t offset) {
   return Type_Implements_Method_At_Offset(self, cls, offset);
 }
+
+#define Type_Cache_Entry(i, lit) \
+  if (cls is lit) { \
+    var inst = ((var*)self)[i]; \
+    if (inst is NULL) { \
+      inst = Type_Scan(self, lit); \
+      ((var*)self)[i] = inst; \
+    } \
+    return inst; \
+  }
+
+static var Type_Instance(var self, var cls) {
+
+#if CELLO_CACHE == 1
+  Type_Cache_Entry( 0, Size);   Type_Cache_Entry( 1, Alloc);
+  Type_Cache_Entry( 2, New);    Type_Cache_Entry( 3, Assign);
+  Type_Cache_Entry( 4, Eq);     Type_Cache_Entry( 5, Ord);
+  Type_Cache_Entry( 6, Hash);   Type_Cache_Entry( 7, Len);
+  Type_Cache_Entry( 8, Iter);   Type_Cache_Entry( 9, Push);
+  Type_Cache_Entry(10, Concat); Type_Cache_Entry(11, Get);
+  Type_Cache_Entry(12, C_Str);  Type_Cache_Entry(13, C_Int);
+  Type_Cache_Entry(14, C_Float);
+#endif
+  
+  return Type_Scan(self, cls);
+}
+
+#undef Type_Cache_Entry
 
 var type_instance(var self, var cls) {
   return Type_Instance(self, cls);

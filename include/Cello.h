@@ -63,6 +63,21 @@
 #define CELLO_MAGIC_HEADER
 #endif
 
+#ifndef CELLO_CACHE
+#define CELLO_CACHE 1
+#define CELLO_CACHE_HEADER \
+  NULL, NULL, NULL, \
+  NULL, NULL, NULL, \
+  NULL, NULL, NULL, \
+  NULL, NULL, NULL, \
+  NULL, NULL, NULL,
+#define CELLO_CACHE_NUM 15
+#else
+#define CELLO_CACHE 0
+#define CELLO_CACHE_HEADER
+#define CELLO_CACHE_NUM 0
+#endif
+
 #if defined(_WIN32)
 #define CELLO_WINDOWS
 #endif
@@ -135,12 +150,13 @@ typedef void* var;
 #define CelloStruct(T, ...) CelloObject(T, sizeof(struct T), ##__VA_ARGS__)
 #define CelloEmpty(T, ...) CelloObject(T, 0, ##__VA_ARGS__)
 #define CelloObject(T, S, ...) (var)((char*)((var[]){ \
-  NULL, (var)CelloStaticAlloc, \
-  CELLO_MAGIC_HEADER \
-  NULL, "__Name",          #T,  \
-  NULL, "__Size",      (var)S,  \
-  ##__VA_ARGS__, \
-  NULL, NULL, NULL}) + \
+  NULL, (var)CelloStaticAlloc,  \
+  CELLO_MAGIC_HEADER       \
+  CELLO_CACHE_HEADER       \
+  NULL, "__Name",     #T,  \
+  NULL, "__Size", (var)S,  \
+  ##__VA_ARGS__,           \
+  NULL, NULL, NULL}) +     \
   sizeof(struct CelloHeader))
 
 #define Instance(I, ...) \

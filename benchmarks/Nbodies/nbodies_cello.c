@@ -67,11 +67,9 @@ static double Bodies_Energy(var bodies) {
   double e = 0.0;
   size_t nbodies = len(bodies);
   
-  struct Get* bget = instance(bodies, Get);
-  
   foreach(i in range($I(nbodies))) {
   
-    struct Body* body0 = bget->get(bodies, i);
+    struct Body* body0 = get(bodies, i);
 
     e += (0.5 * body0->mass * (
         body0->vx * body0->vx +
@@ -80,7 +78,7 @@ static double Bodies_Energy(var bodies) {
 
     foreach(j in range($I(c_int(i)+1), $I(nbodies))) {
       
-      struct Body* body1 = bget->get(bodies, j);
+      struct Body* body1 = get(bodies, j);
 
       dx = body0->x - body1->x;
       dy = body0->y - body1->y;
