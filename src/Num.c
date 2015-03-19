@@ -137,20 +137,16 @@ static bool Int_Eq(var self, var obj) {
   return Int_C_Int(self) is c_int(obj);
 }
 
-static bool Int_Gt(var self, var other) {
-  return Int_C_Int(self) > c_int(other);
+static bool Int_Gt(var self, var obj) {
+  return Int_C_Int(self) > c_int(obj);
 }
 
-static bool Int_Lt(var self, var other) {
-  return Int_C_Int(self) < c_int(other);
+static bool Int_Lt(var self, var obj) {
+  return Int_C_Int(self) < c_int(obj);
 }
 
-static int Int_Cmp(var self, var other) {
-  int64_t i0 = Int_C_Int(self);
-  int64_t i1 = c_int(other);
-  if (i0 < i1) { return -1; }
-  if (i0 > i1) { return  1; }
-  return 0;
+static int Int_Cmp(var self, var obj) {
+  return Int_C_Int(self) - c_int(obj);
 }
 
 static uint64_t Int_Hash(var self) {
@@ -260,12 +256,8 @@ static bool Float_Lt(var self, var obj) {
   return Float_C_Float(self) < c_float(obj);
 }
 
-static int Float_Cmp(var self, var other) {
-  double i0 = Float_C_Float(self);
-  double i1 = c_float(other);
-  if (i0 < i1) { return -1; }
-  if (i0 > i1) { return  1; }
-  return 0;
+static int Float_Cmp(var self, var obj) {
+  return Float_C_Float(self) - c_float(obj);
 }
 
 union interp_cast {
