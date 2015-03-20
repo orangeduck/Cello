@@ -1,17 +1,16 @@
-rb = dofile "/home/dan/Projects/libCello/benchmarks/Map/rb.lua" 
+require 'Map/redblack'
 
-local h = rb.new()
+local h = redblack.newTree()
 local max = 0
 for l in io.lines() do
-	local c = rb.search(h, l)
+	local c = redblack.find(h, l)
 	if (c) then
-	  rb.insert(h, l, c+1)
-	  max = max > c and max or c
+	  -- This Red black doesn't support value types so whatever
+	  redblack.insert(h, l)
+	  -- max = max > c and max or c
 	else
-	  rb.insert(h, l, 1)
+	  redblack.insert(h, l)
   end
 end
-
-rb.delete(h)
 
 -- print(n, max)

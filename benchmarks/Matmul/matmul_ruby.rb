@@ -40,7 +40,7 @@ def matgen(n)
 	return a
 end
 			
-n = 500
+n = 300
 n = n / 2 * 2
 a = matgen(n)
 b = matgen(n)

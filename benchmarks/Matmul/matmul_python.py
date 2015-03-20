@@ -18,7 +18,7 @@ def matmul(a, b): # FIXME: no error checking
 	return d
 	
 def main():
-	n = 500
+	n = 300
 	n = int(float(n)/2) * 2 # FIXME: I am sure there are better ways to do this...
 	tmp = 1. / n / n
 	a = [[tmp * (i - j) * (i + j) for j in range(n)] for i in range(n)]

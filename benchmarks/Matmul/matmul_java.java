@@ -26,7 +26,7 @@ class matmul_java {
 		return x;
 	}
 	public static void main(String[] args) {
-		int n = 500;
+		int n = 300;
 		n = n / 2 * 2;
 		matmul_java m = new matmul_java();
 		double[][] a, b, x;

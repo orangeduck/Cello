@@ -5,7 +5,7 @@ g++ Nbodies/nbodies_cpp.cpp -std=c++11 -O3 -lm -o Nbodies/nbodies_cpp
 gcc Nbodies/nbodies_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -std=gnu99 -pg -O3 -lm -lpthread -o Nbodies/nbodies_cello
 javac Nbodies/nbodies_java.java
 
-#gcc List/list_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o List/list_c
+gcc List/list_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o List/list_c
 g++ List/list_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o List/list_cpp
 gcc List/list_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o List/list_cello
 javac List/list_java.java
@@ -21,20 +21,20 @@ gcc Map/map_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result
 javac Map/map_java.java
 
 gcc Sudoku/sudoku_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Sudoku/sudoku_c
-#g++ Sudoku/sudoku_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Sudoku/sudoku_cpp
+g++ Sudoku/sudoku_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Sudoku/sudoku_cpp
 gcc Sudoku/sudoku_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o Sudoku/sudoku_cello
 javac Sudoku/sudoku_java.java
 
 gcc Matmul/matmul_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o Matmul/matmul_c
-#g++ Matmul/matmul_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Matmul/matmul_cpp
+g++ Matmul/matmul_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Matmul/matmul_cpp
 gcc Matmul/matmul_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o Matmul/matmul_cello
 javac Matmul/matmul_java.java
 
 echo 
 echo "## List"
 echo
-#echo -n "* C: "
-#time -f "%e" ./List/list_c
+echo -n "* C: "
+time -f "%e" ./List/list_c
 echo -n "* C++: "
 time -f "%e" ./List/list_cpp
 echo -n "* Cello: "
@@ -72,10 +72,10 @@ echo -n "* Python: "
 time -f "%e" sh -c './ext/genint | python Map/map_python.py'
 echo -n "* Ruby: "
 time -f "%e" sh -c './ext/genint | ruby Map/map_ruby.rb'
-#echo -n "* Lua: "
-#time -f "%e" sh -c './ext/genint | lua Map/map_lua.lua'
-#echo -n "* Lua JIT: "
-#time -f "%e" sh -c './ext/genint | luajit Map/map_lua.lua'
+echo -n "* Lua: "
+time -f "%e" sh -c './ext/genint | lua Map/map_lua.lua'
+echo -n "* Lua JIT: "
+time -f "%e" sh -c './ext/genint | luajit Map/map_lua.lua'
 
 gprof Map/map_cello > Map/profile.txt
 rm gmon.out
@@ -135,8 +135,8 @@ echo "## Sudoku"
 echo
 echo -n "* C: "
 time -f "%e" sh -c './ext/sudoku | ./Sudoku/sudoku_c'
-#echo -n "* C++: "
-#time -f "%e" sh -c './ext/sudoku | ./Sudoku/sudoku_cpp'
+echo -n "* C++: "
+time -f "%e" sh -c './ext/sudoku | ./Sudoku/sudoku_cpp'
 echo -n "* Cello: "
 time -f "%e" sh -c './ext/sudoku | ./Sudoku/sudoku_cello'
 echo -n "* Java: "
@@ -160,8 +160,8 @@ echo "## Matmul"
 echo
 echo -n "* C: "
 time -f "%e" ./Matmul/matmul_c
-#echo -n "* C++: "
-#time -f "%e" ./Matmul/matmul_cpp
+echo -n "* C++: "
+time -f "%e" ./Matmul/matmul_cpp
 echo -n "* Cello: "
 time -f "%e" ./Matmul/matmul_cello
 echo -n "* Java: "

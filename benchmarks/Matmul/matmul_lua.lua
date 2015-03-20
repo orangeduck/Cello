@@ -39,7 +39,7 @@ function matgen(n)
 	return a;
 end
 
-local n = 500;
+local n = 300;
 n = math.floor(n/2) * 2;
 local a = matrix.mul(matgen(n), matgen(n));
 --print(a[n/2+1][n/2+1]);

@@ -60,7 +60,7 @@ static var Matrix_Mul(var m0, var m1) {
 }
 
 int main(int argc, char *argv[]) {
-	int n = 500;
+	int n = 300;
 	n = (n/2) * 2;
 	var a = Matrix_Gen(n);
 	var b = Matrix_Gen(n);

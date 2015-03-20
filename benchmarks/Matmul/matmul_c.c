@@ -51,7 +51,7 @@ double **mm_mul(int n, double *const *a, double *const *b)
 }
 int main(int argc, char *argv[])
 {
-	int n = 500;
+	int n = 300;
 	double **a, **b, **m;
 	n = (n/2) * 2;
 	a = mm_gen(n); b = mm_gen(n);
