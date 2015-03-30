@@ -5,21 +5,19 @@ struct Matrix {
   double** d;
 };
 
-static var Matrix_New(var self, var args) {
+static void Matrix_New(var self, var args) {
   struct Matrix* m = self;
   m->n = c_int(get(args, $I(0)));
 	m->d = malloc(m->n * sizeof(double*));
 	for (int i = 0; i < m->n; ++i) {
 		m->d[i] = calloc(m->n, sizeof(double));
 	}
-	return m;
 }
 
-static var Matrix_Del(var self) {
+static void Matrix_Del(var self) {
 	struct Matrix* m = self;
 	for (int i = 0; i < m->n; ++i) free(m->d[i]);
 	free(m->d);
-	return self;
 }
 
 static var Matrix = Cello(Matrix, Instance(New, Matrix_New, Matrix_Del));

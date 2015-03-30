@@ -45,7 +45,7 @@ uint64_t hash_data(void* data, size_t size) {
 	const uint64_t * d = (const uint64_t *)data;
 	const uint64_t * end = d + (size/8);
   
-	uint64_t h = CELLO_MAGIC_NUM ^ (size * m);
+	uint64_t h = 0xCe110 ^ (size * m);
 
 	while (d != end) {
 		uint64_t k = *d++;

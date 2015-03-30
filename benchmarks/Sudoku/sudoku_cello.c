@@ -5,7 +5,7 @@ struct Sudoku {
   uint16_t c[729][4];
 };
 
-static var Sudoku_New(var self, var args) {
+static void Sudoku_New(var self, var args) {
 
 	struct Sudoku* a = self;
 	int i, j, k, r, c, c2;
@@ -22,7 +22,6 @@ static var Sudoku_New(var self, var args) {
 	for (r = 0; r < 729; ++r) // generate r[][] from c[][]
 		for (c2 = 0; c2 < 4; ++c2)
 			k = a->c[r][c2], a->r[k][nr[k]++] = r;
-	return a;
 
 }
 

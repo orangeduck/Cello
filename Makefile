@@ -95,6 +95,7 @@ obj/%.o: tests/%.c | obj
 
 # Benchmarks
 
+# Force bench to build with NDEBUG
 bench:
 	cd benchmarks; ./benchmark; cd ../
 
