@@ -4,14 +4,16 @@ static const char* Table_Name(void) {
   return "Table";
 }
 
-/* TODO */
 static const char* Table_Brief(void) {
-  return "";
+  return "Hash table";
 }
 
-/* TODO */
 static const char* Table_Description(void) {
-  return "";
+  return
+    "The `Table` type is a hash table container that maps keys to values. "
+    "It uses an open-addressing robin-hood hashing scheme which requires "
+    "`Hash` and `Eq` to be defined on the key type. Keys and values are copied "
+    "into the collection using the `Assign` class.";
 }
 
 /* TODO */
@@ -102,7 +104,7 @@ static size_t Table_Size_Round(size_t s) {
   return ((s + sizeof(var) - 1) / sizeof(var)) * sizeof(var);
 }
 
-static var Table_New(var self, var args) {
+static void Table_New(var self, var args) {
   
   struct Table* t = self;
   t->ktype = cast(get(args, $(Int, 0)), Type);
@@ -112,7 +114,7 @@ static var Table_New(var self, var args) {
   
   size_t nargs = len(args);
   if (nargs % 2 isnt 0) {
-    return throw(FormatError, 
+    throw(FormatError, 
       "Received non multiple of two argument count to Table constructor.");
   }
   
@@ -121,7 +123,7 @@ static var Table_New(var self, var args) {
   
   if (t->nslots is 0) {
     t->data = NULL;
-    return self;
+    return;
   }
   
   t->data = calloc(t->nslots, Table_Step(t));
@@ -140,10 +142,9 @@ static var Table_New(var self, var args) {
     Table_Set_Move(t, key, val, false);
   }
   
-  return self;
 }
 
-static var Table_Del(var self) {
+static void Table_Del(var self) {
   struct Table* t = self;  
   
   for (size_t i = 0; i < t->nslots; i++) {
@@ -157,7 +158,6 @@ static var Table_Del(var self) {
   free(t->sspace0);
   free(t->sspace1);
   
-  return self;
 }
 
 static var Table_Key_Subtype(var self) {
@@ -188,7 +188,7 @@ static void Table_Clear(var self) {
   
 }
 
-static var Table_Assign(var self, var obj) {
+static void Table_Assign(var self, var obj) {
   struct Table* t = self;  
   Table_Clear(t);
   
@@ -201,7 +201,7 @@ static var Table_Assign(var self, var obj) {
   
   if (t->nslots is 0) {
     t->data = NULL;
-    return self;
+    return;
   }
   
   t->data = calloc(t->nslots, Table_Step(t));
@@ -220,8 +220,6 @@ static var Table_Assign(var self, var obj) {
   foreach(key in obj) {
     Table_Set_Move(t, key, get(obj, key), false);
   }
-  
-  return self;
   
 }
 
@@ -307,8 +305,8 @@ static void Table_Set_Move(var self, var key, var val, bool move) {
       ((char*)t->sspace0 + sizeof(uint64_t) 
       + sizeof(struct CelloHeader) + t->ksize);
     
-    CelloHeader_Init(khead, t->ktype, CelloDataAlloc);
-    CelloHeader_Init(vhead, t->vtype, CelloDataAlloc);
+    header_init(khead, t->ktype, AllocData);
+    header_init(vhead, t->vtype, AllocData);
     
     uint64_t ihash = i+1;
     memcpy((char*)t->sspace0, &ihash, sizeof(uint64_t)); 
@@ -569,23 +567,6 @@ static void Table_Reserve(var self, var amount) {
   Table_Rehash(t, Table_Ideal_Size((size_t)nnslots));
 }
 
-static var Table_Gen(void) {
-  
-  var ktype = gen(Type);
-  var vtype = gen(Type);
-  var t = new(Table, ktype, vtype);
-  
-  size_t n = gen_c_int() % 10;
-  for (size_t i = 0; i < n; i++) {
-    var k = gen(ktype);
-    var v = gen(vtype);
-    set(t, k, v);
-    del(k); del(v);
-  }
-  
-  return t;
-}
-
 static void Table_Traverse(var self, var func) {
   struct Table* t = self;
   for(size_t i = 0; i < t->nslots; i++) {
@@ -611,6 +592,5 @@ var Table = Cello(Table,
   Instance(Clear,    Table_Clear),
   Instance(Iter,     Table_Iter_Init, Table_Iter_Next),
   Instance(Show,     Table_Show, NULL),
-  Instance(Reserve,  Table_Reserve),
-  Instance(Gen,      Table_Gen));
+  Instance(Reserve,  Table_Reserve));
 

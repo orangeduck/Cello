@@ -1,39 +1,18 @@
 #include "Cello.h"
 
-struct CelloHeader* Cello_GetHeader(var self) {
+struct CelloHeader* header(var self) {
   return (struct CelloHeader*)((char*)self - sizeof(struct CelloHeader));
 }
 
-void CelloHeader_SetFlag(struct CelloHeader* head, int flag) {
-  head->flags = (var)(intptr_t)(((int)(intptr_t)head->flags) | flag);
-}
-
-void CelloHeader_RemFlag(struct CelloHeader* head, int flag) {
-  head->flags = (var)(intptr_t)(((int)(intptr_t)head->flags) & (~flag));
-}
-
-var CelloHeader_GetFlag(struct CelloHeader* head, int flag) {
-  return (var)(intptr_t)(((int)(intptr_t)head->flags) & flag);
-}
-
-static var CelloObject_Marked(var self) {
-  return CelloHeader_GetFlag(Cello_GetHeader(self), CelloMarked);
-}
-
-static void CelloObject_Mark(var self) {
-  CelloHeader_SetFlag(Cello_GetHeader(self), CelloMarked);
-}
-
-static void CellObject_Unmark(var self) {
-  CelloHeader_RemFlag(Cello_GetHeader(self), CelloMarked);
-}
-
-var CelloHeader_Init(struct CelloHeader* head, var type, int flags) {
+var header_init(struct CelloHeader* head, var type, int alloc) {
   
   head->type = type;
-  head->flags = (var)(intptr_t)flags;
-
-#if CELLO_MAGIC == 1
+  
+#if CELLO_ALLOC_CHECK == 1
+  head->alloc = (var)(intptr_t)alloc;
+#endif
+  
+#if CELLO_MAGIC_CHECK == 1
   head->magic = (var)CELLO_MAGIC_NUM;
 #endif
 
@@ -54,7 +33,7 @@ static const char* Alloc_Description(void) {
     "given data type. By default memory is allocated using `malloc` along with "
     "the `Size` class to determine the amount of memory to allocate.";
     "\n\n"
-    "A custom allocator should be careful to also intialise the header for the "
+    "A custom allocator should be careful to also initialise the header for the "
     "allocated memory using the function `CelloHeader_Init`. Cello objects "
     "without a header wont be recognised as such as so will throw errors when "
     "used with Cello functions."
@@ -79,7 +58,7 @@ var Alloc = Cello(Alloc, Instance(Doc,
 
 
 var alloc_stk(var type, var head, var data, size_t size) {
-  CelloHeader_Init(head, type, CelloStackAlloc);
+  header_init(head, type, AllocStack);
   memcpy((char*)head + sizeof(struct CelloHeader), data, size);
   var self = (char*)head + sizeof(struct CelloHeader);  
   return self;
@@ -101,7 +80,7 @@ var alloc(var type) {
   }
 #endif
   
-  return CelloHeader_Init(head, type, CelloHeapAlloc);
+  return header_init(head, type, AllocHeap);
 }
 
 void dealloc(var self) {
@@ -120,19 +99,19 @@ void dealloc(var self) {
     throw(ResourceError, "Attempt to deallocate NULL!"); 
   }
 
-  if (((int)(intptr_t)head->flags) & CelloStaticAlloc) {
+  if (header(self)->alloc is (var)AllocStatic) {
     throw(ResourceError,
       "Attempt to deallocate %$ "
       "which was allocated statically!", self); 
   }
   
-  if (((int)(intptr_t)head->flags) & CelloStackAlloc) {
+  if (header(self)->alloc is (var)AllocStack) {
     throw(ResourceError,
       "Attempt to deallocate %$ "
       "which was allocated on the stack!", self); 
   }
   
-  if (((int)(intptr_t)head->flags) & CelloDataAlloc) {
+  if (header(self)->alloc is (var)AllocData) {
     throw(ResourceError,
       "Attempt to deallocate %$ "
       "which was allocated inside a data structure!", self); 
@@ -140,10 +119,7 @@ void dealloc(var self) {
 #endif
   
 #if CELLO_ALLOC_CHECK == 1
-  struct Size* s = instance(self, Size);
-  if (s and s->size) {
-    memset(head, 0, sizeof(struct CelloHeader) + s->size());
-  }
+  //memset(header(self), 0, sizeof(struct CelloHeader) + size(type_of(self)));
 #endif
   
   free(head);
@@ -170,7 +146,7 @@ static const char* New_Description(void) {
     "Garbage Collector but to indicate that it will be manually destructed "
     "with `del` by the user. This should be used for variables that wont be "
     "reachable by the Garbage Collector such as those in the data segment or "
-    "via vanilla C structures."
+    "only accessible via vanilla C structures."
     "\n\n"
     "It is also possible to simply call the `construct` and `destruct` "
     "functions if you wish to construct an already allocated object without "
@@ -194,12 +170,15 @@ static const char* New_Methods(void) {
 }
 
 var New = Cello(New,
-  Instance(Doc, New_Name, New_Brief, New_Description, New_Examples, New_Methods));
+  Instance(Doc, New_Name, New_Brief, 
+    New_Description, New_Examples, New_Methods));
 
 var construct_with(var self, var args) {
   struct New* n = instance(self, New);
   if (n and n->construct_with) {
-    return n->construct_with(self, args);
+    n->construct_with(self, args);
+  } else if (len(args) == 1) {
+    assign(self, get(args, $I(0)));
   }
   return self;
 }
@@ -207,7 +186,7 @@ var construct_with(var self, var args) {
 var destruct(var self) {
   struct New* n = instance(self, New);
   if (n and n->destruct) {
-    return n->destruct(self);
+    n->destruct(self);
   }
   return self;
 }
@@ -217,7 +196,7 @@ var new_with(var type, var args) {
   var self = construct_with(alloc(type), args);
 
 #if CELLO_GC == 1
-  gc_add(self, CelloGCAlloc);
+  gc_add(self, false);
 #endif
 
   return self;
@@ -228,7 +207,7 @@ var new_root_with(var type, var args) {
   var self = construct_with(alloc(type), args);
   
 #if CELLO_GC == 1
-  gc_add(self, CelloHeapAlloc);
+  gc_add(self, true);
 #endif
   
   return self;
@@ -295,7 +274,7 @@ var copy(var self) {
   var obj = assign(alloc(type_of(self)), self);
     
 #if CELLO_GC == 1
-  gc_add(obj, CelloGCAlloc);
+  gc_add(obj, true);
 #endif
     
   return obj;

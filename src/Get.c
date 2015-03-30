@@ -11,7 +11,10 @@ static const char* Get_Brief(void) {
 static const char* Get_Description(void) {
   return
     "The `Get` class provides a method to _get_ or _set_ certain properties "
-    "of an object in a key-value sense.";
+    "of an object using keys and value. Typically it is implemented by "
+    "data lookup structures such as `Table` or `Map` but it is also used "
+    "more generally such as using idices to look up items in `Array`, or "
+    "as thread local storage for the `Thread` object.";
 }
 
 /* TODO */

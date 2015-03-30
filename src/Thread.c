@@ -4,14 +4,19 @@ static const char* Current_Name(void) {
   return "Current";
 }
 
-/* TODO */
 static const char* Current_Brief(void) {
-  return "";
+  return "Implicit Object";
 }
 
-/* TODO */
 static const char* Current_Description(void) {
-  return "";
+  return
+    "The `Current` class can be implemented by types which have implicit "
+    "instances associated with them. For example it can be used to retrieve "
+    "the _current_ `Thread`, or it could be used to get the _current_ Random "
+    "Number generator."
+    "\n\n"
+    "This class may be implemented by types which express the [Singleton "
+    "Design Pattern](http://en.wikipedia.org/wiki/Singleton_pattern)";
 }
 
 /* TODO */
@@ -33,18 +38,21 @@ var current(var type) {
   return type_method(type, Current, current);
 }
 
+/* TODO: Is this better named Wait? */
+
 static const char* Join_Name(void) {
   return "Join";
 }
 
-/* TODO */
 static const char* Join_Brief(void) {
-  return "";
+  return "Wait for object";
 }
 
-/* TODO */
 static const char* Join_Description(void) {
-  return "";
+  return
+    "The `Join` class can be implemented by types which provide a mechanism "
+    "for waiting for them to enter some same state. Primarily it is "
+    "implemented by `Thread`.";
 }
 
 /* TODO */
@@ -92,40 +100,23 @@ struct Thread {
   size_t   exc_depth;
   jmp_buf* exc_buffers[CELLO_EXC_MAX_DEPTH];
   
-#if CELLO_GC == 1
-  var gc_table;
-#endif
+  var tls;
   
 };
-
-static var Thread_Current(void);
-
-#if CELLO_GC == 1
-
-var gc_get_table(void) {
-  struct Thread* t = Thread_Current();
-  return t->gc_table;
-}
-
-void gc_set_table(var table) {
-  struct Thread* t = Thread_Current();
-  t->gc_table = table;
-}
-
-#endif
 
 static const char* Thread_Name(void) {
   return "Thread";
 }
 
-/* TODO */
 static const char* Thread_Brief(void) {
-  return "";
+  return "Concurrent Execution";
 }
 
-/* TODO */
 static const char* Thread_Description(void) {
-  return "";
+  return
+    "The `Thread` type provides a basic primitive for concurrent "
+    "execution. It acts as a basic wrapper around operating system threads, "
+    "using WinThreads on Windows and pthreads otherwise.";
 }
 
 /* TODO */
@@ -138,7 +129,7 @@ static const char* Thread_Methods(void) {
   return "";
 }
 
-static var Thread_New(var self, var args) {
+static void Thread_New(var self, var args) {
   
   struct Thread* t = self;
   
@@ -153,19 +144,21 @@ static var Thread_New(var self, var args) {
   t->exc_obj = NULL;
   t->exc_msg = NULL;
   
-  return t;
+  t->tls = construct(alloc(Table), String, Ref);
+  
 }
 
-static var Thread_Del(var self) {
+static void Thread_Del(var self) {
   struct Thread* t = self;
-  
+
 #ifdef _WIN32
   CloseHandle(t->thread);
 #endif
   
   if (t->args isnt NULL) { dealloc(destruct(t->args)); }
   if (t->exc_msg isnt NULL) { dealloc(destruct(t->exc_msg)); }
-  return t;
+  
+  dealloc(destruct(t->tls));
 }
 
 static uint64_t Thread_Hash(var self) {
@@ -391,7 +384,7 @@ static void Thread_Stop(var self) {
   
 #if defined(__unix__) || defined(__APPLE__)
   int err = pthread_kill(t->thread, SIGINT);
-  if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Kill"); }
+  if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Stop"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
 #elif defined(_WIN32)
   TerminateThread(t->thread, FALSE);
@@ -404,6 +397,21 @@ static bool Thread_Running(var self) {
   return t->is_running;
 }
 
+static var Thread_Get(var self, var key) {
+  struct Thread* t = self;
+  return deref(get(t->tls, key));
+}
+
+static void Thread_Set(var self, var key, var val) {
+  struct Thread* t = self;
+  set(t->tls, key, val);
+}
+
+static bool Thread_Mem(var self, var key) {
+  struct Thread* t = self;
+  return mem(t->tls, key);
+}
+
 var Thread = Cello(Thread,
   Instance(Doc,
     Thread_Name, Thread_Brief, Thread_Description, 
@@ -413,20 +421,22 @@ var Thread = Cello(Thread,
   Instance(Current, Thread_Current),
   Instance(Join,    Thread_Join),
   Instance(Start,   Thread_Start, Thread_Stop, Thread_Running),
-  Instance(C_Int,   Thread_C_Int));
+  Instance(C_Int,   Thread_C_Int),
+  Instance(Get,     Thread_Get, Thread_Set, Thread_Mem));
 
 static const char* Lock_Name(void) {
   return "Lock";
 }
 
-/* TODO */
 static const char* Lock_Brief(void) {
-  return "";
+  return "Exclusive Resource";
 }
 
-/* TODO */
 static const char* Lock_Description(void) {
-  return "";
+  return
+    "The `Lock` class can be implemented by types to limit the access to them. "
+    "For example this class is implemented by the `Mutex` type to provide "
+    "mutual exclusion across Threads.";
 }
 
 /* TODO */
@@ -468,14 +478,14 @@ static const char* Mutex_Name(void) {
   return "Mutex";
 }
 
-/* TODO */
 static const char* Mutex_Brief(void) {
-  return "";
+  return "Mutual Exclusion Lock";
 }
 
-/* TODO */
 static const char* Mutex_Description(void) {
-  return "";
+  return
+    "The `Mutex` type can be used to gain mutual exclusion across Threads for "
+    "access of some resource.";
 }
 
 /* TODO */
@@ -488,37 +498,22 @@ static const char* Mutex_Methods(void) {
   return "";
 }
 
-static var Mutex_New(var self, var args) {
+static void Mutex_New(var self, var args) {
   struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_init(&m->mutex, NULL);
 #elif defined(_WIN32)
   m->mutex = CreateMutex(NULL, false, NULL);
 #endif
-  return m;
 }
 
-static var Mutex_Del(var self) {
+static void Mutex_Del(var self) {
   struct Mutex* m = self;
 #if defined(__unix__) || defined(__APPLE__)
   pthread_mutex_destroy(&m->mutex);
 #elif defined(_WIN32)
   CloseHandle(m->mutex);
 #endif
-  return m;
-}
-
-static var Mutex_Assign(var self, var obj) {
-  struct Mutex* m0 = cast(self, Mutex);
-  struct Mutex* m1 = cast(self, Mutex);
-  m0->mutex = m1->mutex;
-  return self;
-}
-
-static var Mutex_Copy(var self) {
-  var obj = new(Mutex);
-  assign(obj, self);
-  return obj;
 }
 
 static void Mutex_Lock(var self) {
@@ -570,8 +565,6 @@ var Mutex = Cello(Mutex,
   Instance(Doc, 
     Mutex_Name, Mutex_Brief, Mutex_Description, Mutex_Examples, Mutex_Methods),
   Instance(New,    Mutex_New, Mutex_Del),
-  Instance(Assign, Mutex_Assign),
-  Instance(Copy,   Mutex_Copy),
   Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
   Instance(Start,  Mutex_Lock, Mutex_Unlock, NULL));
 

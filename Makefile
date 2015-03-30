@@ -72,7 +72,7 @@ endif
 all: $(DYNAMIC) $(STATIC)
 
 $(DYNAMIC): $(OBJ)
-	$(CC) $(OBJ) -shared $(LFLAGS) -o $@
+	$(CC) $(OBJ) -shared $(LFLAGS) $(LIBS) -o $@
 
 $(STATIC): $(OBJ)
 	$(AR) rcs $@ $(OBJ)

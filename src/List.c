@@ -4,14 +4,15 @@ static const char* List_Name(void) {
   return "List";
 }
 
-/* TODO */
 static const char* List_Brief(void) {
-  return "";
+  return "Linked List";
 }
 
-/* TODO */
+/* TODO: Make better */
 static const char* List_Description(void) {
-  return "";
+  return
+    "The `List` type is a linked list data structure providing all of the "
+    "expected operations.";
 }
 
 /* TODO */
@@ -41,7 +42,8 @@ static var List_Alloc(struct List* l) {
   }
 #endif
   
-  return CelloHeader_Init((struct CelloHeader*)((char*)item + 2 * sizeof(var)), l->type, CelloDataAlloc);
+  return header_init((struct CelloHeader*)(
+    (char*)item + 2 * sizeof(var)), l->type, AllocData);
 }
 
 static void List_Free(struct List* l, var self) {
@@ -83,7 +85,7 @@ static var List_At(struct List* l, int64_t i) {
 static void List_Push(var self, var obj);
 static void List_Rem(var self, var obj);
 
-static var List_New(var self, var args) {
+static void List_New(var self, var args) {
   
   struct List* l = self;
   l->type   = cast(get(args, $I(0)), Type);
@@ -102,7 +104,6 @@ static var List_New(var self, var args) {
     List_Push(self, get(args, $I(i+1)));
   }
   
-  return self;
 }
 
 static var List_Subtype(var self) {
@@ -124,15 +125,14 @@ static void List_Clear(var self) {
   l->nitems = 0;
 }
 
-static var List_Del(var self) {
+static void List_Del(var self) {
   struct List* l = self;
   List_Clear(self);
   List_Free(l, l->head);
   List_Free(l, l->tail);
-  return self;
 }
 
-static var List_Assign(var self, var obj) {
+static void List_Assign(var self, var obj) {
   struct List* l = self;
 
   List_Clear(self);
@@ -153,8 +153,6 @@ static var List_Assign(var self, var obj) {
   for(size_t i = 0; i < nargs; i++) {
     List_Push(self, get(obj, $I(i)));
   }
-  
-  return self;
   
 }
 
@@ -203,7 +201,7 @@ static bool List_Mem(var self, var obj) {
 static void List_Pop_At(var self, var key) {
 
   struct List* l = self;
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
   
   var item = List_At(l, i);
   var prev = *List_Prev(l, item);
@@ -255,7 +253,7 @@ static void List_Push_At(var self, var obj, var key) {
   var item = List_Alloc(l);
   assign(item, obj);
   
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
   var next = List_At(l, i);
   var prev = *List_Prev(l, next);
   *List_Prev(l, next) = item;
@@ -287,14 +285,12 @@ static void List_Pop(var self) {
 
 static var List_Get(var self, var key) {
   struct List* l = self;
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
-  return List_At(l, i);
+  return List_At(l, c_int(key));
 }
 
 static void List_Set(var self, var key, var val) {
   struct List* l = self;
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
-  assign(List_At(l, i), val);
+  assign(List_At(l, c_int(key)), val);
 }
 
 static var List_Iter_Init(var self) {
@@ -374,21 +370,6 @@ static void List_Reserve(var self, var amount) {
   
 }
 
-static var List_Gen(void) {
-  
-  var type = gen(Type);
-  var l = new(List, type);
-  
-  size_t n = gen_c_int() % 1024;
-  for (size_t i = 0; i < n; i++) {
-    var o = gen(type);
-    push(l, o);
-    del(o);
-  }
-  
-  return l;
-}
-
 static void List_Traverse(var self, var func) {
   struct List* l = self;
   var item = *List_Next(l, l->head);
@@ -419,6 +400,5 @@ var List = Cello(List,
   Instance(Reverse,  List_Reverse),
   //Member(Sort,     List_Sort_With),
   Instance(Show,     List_Show, NULL),
-  Instance(Reserve,  List_Reserve),
-  Instance(Gen,      List_Gen));
+  Instance(Reserve,  List_Reserve));
   

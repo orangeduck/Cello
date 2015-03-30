@@ -412,8 +412,8 @@ PT_FUNC(test_stream) {
     
     PT_ASSERT(f);
     
-    swrite(f, $I(1), $I(size(Int)));
-    swrite(f, $I(22), $I(size(Int)));
+    swrite(f, $I(1), size(Int));
+    swrite(f, $I(22), size(Int));
   
   sclose(f);
   
@@ -424,8 +424,8 @@ PT_FUNC(test_stream) {
     var fst = $I(0);
     var snd = $I(0);
     
-    sread(f, fst, $I(size(Int)));
-    sread(f, snd, $I(size(Int)));
+    sread(f, fst, size(Int));
+    sread(f, snd, size(Int));
     
     PT_ASSERT(c_int(fst) is 1);
     PT_ASSERT(c_int(snd) is 22);
@@ -441,15 +441,12 @@ struct TestType {
   int64_t test_data;
 };
 
-static var TestType_New(var self, var args) {
+static void TestType_New(var self, var args) {
   struct TestType* tt = self;
   tt->test_data = c_int(get(args, $I(0)));
-  return self;
 }
 
-static var TestType_Del(var self) {
-  return self;
-}
+static void TestType_Del(var self) {}
 
 static bool TestType_Eq(var self, var obj) {
   struct TestType* lhs = cast(self, TestType);
@@ -503,7 +500,7 @@ PT_FUNC(test_start) {
 
 PT_FUNC(test_type_implements) {
   
-  PT_ASSERT(type_implements(Int, New));
+  PT_ASSERT(type_implements(Int, Assign));
   PT_ASSERT(type_implements(Float, C_Float));
   PT_ASSERT(type_implements(String, Eq));
   

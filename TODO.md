@@ -1,8 +1,16 @@
 Cello 2.0
 =========
 
-* Remove Closures
-* Remove static variables (hash/gen stuff)
+Libraries (for now):
+  * JSON
+  * Quickcheck
+  * Random
+  * Markdown
+  
+* Make allocation not new register with gc and add "root" and "raw" variations
+* Change Traverse Class to something GC specific
+* Update documentation to say how GC is thread local
+* Send/Recv class
 
 * Update examples
 * Update tests

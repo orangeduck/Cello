@@ -49,9 +49,8 @@ bool eq(var self, var obj) {
     return e->eq(self, obj);
   }
   
-  struct Size* s = instance(self, Size);
-  if (type_of(self) is type_of(obj) and s and s->size) {
-    return memcmp(self, obj, s->size()) is 0;
+  if (type_of(self) is type_of(obj)) {
+    return memcmp(self, obj, size(type_of(self))) is 0;
   }
   
   return self is obj;
@@ -100,9 +99,8 @@ bool gt(var self, var obj) {
     return o->gt(self, obj);
   }
   
-  struct Size* s = instance(self, Size);
-  if (type_of(self) is type_of(obj) and s and s->size) {
-    return memcmp(self, obj, s->size()) > 0;
+  if (type_of(self) is type_of(obj)) {
+    return memcmp(self, obj, size(type_of(self))) > 0;
   }
   
   return self > obj;
@@ -116,9 +114,8 @@ bool lt(var self, var obj) {
     return o->lt(self, obj);
   }
   
-  struct Size* s = instance(self, Size);
-  if (type_of(self) is type_of(obj) and s and s->size) {
-    return memcmp(self, obj, s->size()) < 0;
+  if (type_of(self) is type_of(obj)) {
+    return memcmp(self, obj, size(type_of(self))) < 0;
   }
   
   return self < obj;
@@ -135,12 +132,88 @@ int cmp(var self, var obj) {
     return o->cmp(self, obj);
   }
   
-  struct Size* s = instance(self, Size);
-  if (type_of(self) is type_of(obj) and s and s->size) {
-    return memcmp(self, obj, s->size());
+  if (type_of(self) is type_of(obj)) {
+    return memcmp(self, obj, size(type_of(self)));
   }
   
   if (self < obj) { return -1; }
   if (self > obj) { return  1; }
   return 0;
 }
+
+
+const char* Sort_Name(void) {
+  return "Sort";
+}
+
+const char* Sort_Brief(void) {
+  return "Elements can be sorted";
+}
+
+const char* Sort_Description(void) {
+  return
+    "The `Sort` class can be implemented by types which can be sorted in some "
+    "way such as `Array`. By default the sorting function uses the `lt` method "
+    "to compare elements, but a custom function can also be provided.";
+}
+
+/* TODO */
+const char* Sort_Examples(void) {
+  return "";
+}
+
+/* TODO */
+const char* Sort_Methods(void) {
+  return "";
+}
+
+var Sort = Cello(Sort, 
+  Instance(Doc,
+    Sort_Name, Sort_Brief, Sort_Description, 
+    Sort_Examples, Sort_Methods));
+  
+static var Sort_Lt(var args) {
+  return (var)lt(get(args, $I(0)), get(args, $I(1)));
+}
+  
+void sort(var self) {
+  method(self, Sort, sort_with, $(Function, Sort_Lt));
+}
+
+void sort_with(var self, var func) {
+  method(self, Sort, sort_with, func);
+}
+
+const char* Reverse_Name(void) {
+  return "Reverse";
+}
+
+const char* Reverse_Brief(void) {
+  return "Order can be reversed";
+}
+
+const char* Reverse_Description(void) {
+  return
+    "The `Reverse` class can be implemented by types which are reversible in "
+    "some way such as `Array`.";
+}
+
+/* TODO */
+const char* Reverse_Examples(void) {
+  return "";
+}
+
+/* TODO */
+const char* Reverse_Methods(void) {
+  return "";
+}
+
+var Reverse = Cello(Reverse, 
+  Instance(Doc,
+    Reverse_Name, Reverse_Brief, Reverse_Description, 
+    Reverse_Examples, Reverse_Methods));
+  
+void reverse(var self) {
+  method(self, Reverse, reverse);
+}
+

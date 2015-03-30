@@ -4,14 +4,19 @@ static const char* Range_Name(void) {
   return "Range";
 }
 
-/* TODO */
 static const char* Range_Brief(void) {
-  return "";
+  return "A Sequence of Numbers";
 }
 
-/* TODO */
 static const char* Range_Description(void) {
-  return "";
+  return
+    "The `Range` type is a basic iterable type which acts as a virtual "
+    "sequence of numbers, starting from some value, stopping at some value "
+    "and incrementing by some step."
+    "\n\n"
+    "This can be a useful replacement for the standard C `for` loop with "
+    "decent performance but returning a wrapped integer. To range backwards "
+    "`iter_prev` must be defined on the iterable object.";
 }
 
 /* TODO */
@@ -83,4 +88,82 @@ var range_with(var self, var args) {
   
   return self;
 }
+
+
+static const char* Slice_Name(void) {
+  return "Slice";
+}
+
+static const char* Slice_Brief(void) {
+  return "Partial Iterable";
+}
+
+static const char* Slice_Description(void) {
+  return
+    "The `Slice` type is an iterable that allows one to only iterate over "
+    "certain items of another iterable. Given some start, stop and step only "
+    "those entries described by the slice are returned in the iteration."
+    "\n\n"
+    "Under the hood the `Slice` object still iterates over the whole iterable "
+    "but it only returns those values in the range. For this reason there is "
+    "no performance benefit to slicing.";
+}
+
+/* TODO */
+static const char* Slice_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Slice_Methods(void) {
+  return "";
+}
+
+static var Slice_Iter_Init(var self) {
+  struct Slice* s = self;
+  struct Range* r = s->range;
   
+  if (r->step > 0) {
+    var curr = iter_init(s->iter);
+    for(int64_t i = 0; i < r->start; i++) {
+      curr = iter_next(s->iter, curr);
+    }
+    return curr;
+  }
+  
+  if (r->step < 0) {
+    var curr = iter_last(s->iter);
+    for(int64_t i = 0; i < (int64_t)len(s->iter)-r->stop; i++) {
+      curr = iter_prev(s->iter, curr);
+    }
+    return curr;
+  }
+
+  return NULL;
+}
+
+static var Slice_Iter_Next(var self, var curr) {
+  struct Slice* s = self;
+  struct Range* r = s->range;
+  
+  if (r->step > 0) {
+    for (int64_t i = 0; i < r->step; i++) {
+      curr = iter_next(s->iter, curr);
+    }
+  }
+  
+  if (r->step < 0) {
+    for (int64_t i = 0; i < -r->step; i++) {
+      curr = iter_prev(s->iter, curr);
+    }
+  }
+  
+  return curr;
+}
+
+/* TODO: Add extra methods */
+var Slice = Cello(Slice,
+  Instance(Doc,
+    Slice_Name, Slice_Brief, Slice_Description, Slice_Examples, Slice_Methods),
+  Instance(Iter, Slice_Iter_Init, Slice_Iter_Next));
+

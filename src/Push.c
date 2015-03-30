@@ -10,7 +10,7 @@ static const char* Push_Brief(void) {
 
 static const char* Push_Description(void) {
   return ""
-    "The `Push` class provides an interface for the addition and remove of "
+    "The `Push` class provides an interface for the addition and removal of "
     "objects from another in a positional sense."
     "\n\n"
     "`push` can be used to add new objects to a collection and `pop` to remove "

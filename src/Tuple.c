@@ -4,14 +4,25 @@ static const char* Tuple_Name(void) {
   return "Tuple";
 }
 
-/* TODO */
 static const char* Tuple_Brief(void) {
-  return "";
+  return "Basic Stack Based Collection";
 }
 
-/* TODO */
 static const char* Tuple_Description(void) {
-  return "";
+  return
+    "The `Tuple` type provides a basic way to create a simple collection of "
+    "objects. It's main use is the fact that it can be constructed on the "
+    "stack using the `tuple` macro. This makes it suitable for a number of "
+    "purposes such as use in functions that take a variable number of "
+    "arguments."
+    "\n\n"
+    "Tuples can also be constructed on the heap and stored in collections. "
+    "This makes them also useful as a simple _untyped_ list of objects."
+    "\n\n"
+    "Internally Tuples are just a NULL terminated array of pointers. This "
+    "makes positional access and iteration fast, but for Tuples with many "
+    "elements operations that require counting the number of elements can be "
+    "slow.";
 }
 
 /* TODO */
@@ -24,7 +35,7 @@ static const char* Tuple_Methods(void) {
   return "";
 }
 
-static var Tuple_New(var self, var args) {
+static void Tuple_New(var self, var args) {
   struct Tuple* t = self;
   size_t nargs = len(args);
   
@@ -40,31 +51,28 @@ static var Tuple_New(var self, var args) {
     t->items[i] = get(args, $I(i));
   }
   t->items[nargs] = NULL;
-  
-  return t;
 }
 
-static var Tuple_Del(var self) {
+static void Tuple_Del(var self) {
   struct Tuple* t = self;
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
-    throw(ValueError, "Cannot free Tuple, not on heap!");
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
+    throw(ValueError, "Cannot destruct Tuple, not on heap!");
   }
 #endif
   
   free(t->items);
-  return self;
 }
 
-static var Tuple_Assign(var self, var obj) {
+static void Tuple_Assign(var self, var obj) {
   struct Tuple* t = self;
   size_t nargs = len(obj);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -81,12 +89,6 @@ static var Tuple_Assign(var self, var obj) {
     t->items[i] = get(obj, $I(i));
   }
   t->items[nargs] = NULL;
-  
-  return t;
-}
-
-static var Tuple_Copy(var self) {
-  return new_with(Tuple, self);
 }
 
 static size_t Tuple_Len(var self) {
@@ -115,7 +117,7 @@ static var Tuple_Iter_Next(var self, var curr) {
 static var Tuple_Get(var self, var key) {
   struct Tuple* t = self;
 
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
 
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)len(self)) {
@@ -131,7 +133,7 @@ static var Tuple_Get(var self, var key) {
 static void Tuple_Set(var self, var key, var val) {
   struct Tuple* t = self;
 
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
 
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)len(self)) {
@@ -180,8 +182,8 @@ static void Tuple_Push(var self, var obj) {
   size_t nitems = Tuple_Len(t);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -205,8 +207,8 @@ static void Tuple_Pop(var self) {
   size_t nitems = Tuple_Len(t);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -223,8 +225,8 @@ static void Tuple_Push_At(var self, var key, var obj) {
   size_t nitems = Tuple_Len(t);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -237,7 +239,7 @@ static void Tuple_Push_At(var self, var key, var obj) {
   }
 #endif
   
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
 
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)nitems) {
@@ -259,7 +261,7 @@ static void Tuple_Pop_At(var self, var key) {
   struct Tuple* t = self;
   size_t nitems = Tuple_Len(t);
 
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)nitems) {
@@ -273,8 +275,8 @@ static void Tuple_Pop_At(var self, var key) {
           sizeof(var) * (nitems - (size_t)i));
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -290,8 +292,8 @@ static void Tuple_Concat(var self, var obj) {
   size_t objlen = len(obj);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -318,8 +320,8 @@ static void Tuple_Clear(var self) {
   struct Tuple* t = self;
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate Tuple, not on heap!");
   }
 #endif
@@ -341,7 +343,6 @@ var Tuple = Cello(Tuple,
     Tuple_Name, Tuple_Brief, Tuple_Description, Tuple_Examples, Tuple_Methods),
   Instance(New,      Tuple_New, Tuple_Del),
   Instance(Assign,   Tuple_Assign),
-  Instance(Copy,     Tuple_Copy),
   Instance(Len,      Tuple_Len),
   Instance(Get,      Tuple_Get, Tuple_Set, Tuple_Mem, Tuple_Rem),
   Instance(Push,     Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),

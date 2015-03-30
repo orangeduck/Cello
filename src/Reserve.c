@@ -4,14 +4,16 @@ const char* Reserve_Name(void) {
   return "Reserve";
 }
 
-/* TODO */
 const char* Reserve_Brief(void) {
-  return "";
+  return "Resources can be Preallocated";
 }
 
-/* TODO */
 const char* Reserve_Description(void) {
-  return "";
+  return
+    "The `Reserve` class can be implemented by objects which allow for some "
+    "resource or other to be preallocated or reserved. For example this class "
+    "is implemented by `Array` and `Table` to preallocate memory space if it "
+    "is known that many items are going to be added at a later date.";
 }
 
 /* TODO */

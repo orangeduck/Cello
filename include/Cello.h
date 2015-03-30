@@ -53,13 +53,16 @@
 #define CELLO_GC 1
 #endif
 
-#ifndef CELLO_MAGIC
-#define CELLO_MAGIC 1
+#if CELLO_ALLOC_CHECK == 1
+#define CELLO_ALLOC_HEADER (var)AllocStatic,
+#else
+#define CELLO_ALLOC_HEADER
+#endif
+
+#if CELLO_MAGIC_CHECK == 1
 #define CELLO_MAGIC_NUM 0xCe110
 #define CELLO_MAGIC_HEADER ((var)CELLO_MAGIC_NUM),
 #else
-#define CELLO_MAGIC 0
-#define CELLO_MAGIC_NUM 0xCe110
 #define CELLO_MAGIC_HEADER
 #endif
 
@@ -149,8 +152,8 @@ typedef void* var;
 #define Cello(T, ...) CelloStruct(T, ##__VA_ARGS__)
 #define CelloStruct(T, ...) CelloObject(T, sizeof(struct T), ##__VA_ARGS__)
 #define CelloEmpty(T, ...) CelloObject(T, 0, ##__VA_ARGS__)
-#define CelloObject(T, S, ...) (var)((char*)((var[]){ \
-  NULL, (var)CelloStaticAlloc,  \
+#define CelloObject(T, S, ...) (var)((char*)((var[]){ NULL, \
+  CELLO_ALLOC_HEADER       \
   CELLO_MAGIC_HEADER       \
   CELLO_CACHE_HEADER       \
   NULL, "__Name",     #T,  \
@@ -207,19 +210,18 @@ extern var ProgramTerminationError;
 /* Data */
 
 enum {
-  CelloStaticAlloc = 0x01,
-  CelloStackAlloc  = 0x02,
-  CelloHeapAlloc   = 0x04,
-  CelloDataAlloc   = 0x08,
-  CelloGCAlloc     = 0x10,
-  CelloMarked      = 0x20,
-  CelloRed         = 0x40
+  AllocStatic = 0x01,
+  AllocStack  = 0x02,
+  AllocHeap   = 0x03,
+  AllocData   = 0x04
 };
 
 struct CelloHeader {
   var type;
-  var flags;
-#if CELLO_MAGIC == 1
+#if CELLO_ALLOC_CHECK == 1
+  var alloc;
+#endif
+#if CELLO_MAGIC_CHECK == 1
   var magic;
 #endif
 };
@@ -278,7 +280,6 @@ extern var Current;
 extern var Start;
 extern var Join;
 extern var Lock;
-extern var Gen;
 
 /* Signatures */
 
@@ -308,12 +309,12 @@ struct Alloc {
 };
 
 struct New {
-  var (*construct_with)(var, var);
-  var (*destruct)(var);
+  void (*construct_with)(var, var);
+  void (*destruct)(var);
 };
 
 struct Assign {
-  var (*assign)(var, var);
+  void (*assign)(var, var);
 };
 
 struct Copy {
@@ -405,12 +406,12 @@ struct C_Float {
 struct Stream {
   var  (*sopen)(var, var, var);
   void (*sclose)(var);
-  void (*sseek)(var, var, var);
+  void (*sseek)(var, int64_t, int);
   int64_t (*stell)(var);
   void (*sflush)(var);
   bool (*seof)(var);
-  size_t (*sread)(var, var, var);
-  size_t (*swrite)(var, var, var);
+  size_t (*sread)(var, void*, size_t);
+  size_t (*swrite)(var, void*, size_t);
 };
 
 struct Pointer {
@@ -452,11 +453,6 @@ struct Lock {
   bool (*lock_try)(var);
 };
 
-struct Gen {
-  var (*gen)(void);
-  var (*shrink)(var);
-};
-
 /* Functions */
 
 void help(var self);
@@ -489,11 +485,8 @@ bool implements_method_at_offset(var self, var cls, size_t offset);
 var type_method_at_offset(var self, var cls, size_t offset, const char* method);
 bool type_implements_method_at_offset(var self, var cls, size_t offset);
 
-struct CelloHeader* Cello_GetHeader(var self);
-var CelloHeader_Init(struct CelloHeader* head, var type, int flags);
-var CelloHeader_GetFlag(struct CelloHeader* head, int flag);
-void CelloHeader_SetFlag(struct CelloHeader* head, int flag);
-void CelloHeader_RemFlag(struct CelloHeader* head, int flag);
+struct CelloHeader* header(var self);
+var header_init(struct CelloHeader* head, var type, int alloc);
 
 #define $(T, ...) alloc_stk(T, \
   ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){0}), \
@@ -552,10 +545,8 @@ bool ge(var self, var obj);
 bool le(var self, var obj);
 int cmp(var self, var obj);
 
-void hash_init(uint64_t seed);
-uint64_t hash_seed(void);
-uint64_t hash_data(var self, size_t size);
 uint64_t hash(var self);
+uint64_t hash_data(void* data, size_t size);
 
 var iter_init(var self);
 var iter_next(var self, var curr);
@@ -603,14 +594,14 @@ var range_with(var self, var args);
 #define range(...) range_with($(Range, $I(0), 0, 0, 0), tuple(__VA_ARGS__))
 #define slice(I, ...) $(Slice, I, range(__VA_ARGS__))
 
-var sopen(var self, var filename, var access);
+var sopen(var self, var resource, var options);
 void sclose(var self);
-void sseek(var self, var pos, var origin);
+void sseek(var self, int64_t pos, int origin);
 int64_t stell(var self);
 void sflush(var self);
 bool seof(var self);
-size_t sread(var self, var output, var size);
-size_t swrite(var self, var input, var size);
+size_t sread(var self, void* output, size_t size);
+size_t swrite(var self, void* input, size_t size);
 
 void ref(var self, var item);
 var deref(var self);
@@ -669,15 +660,6 @@ void lock(var self);
 bool lock_try(var self);
 void unlock(var self);
 
-void gen_seed(uint64_t seed);
-uint64_t gen_c_int(void);
-double gen_c_float(void);
-var gen(var);
-var shrink(var);
-bool check(var func, var name, var iterations, var types);
-
-#define quickcheck(F, ...) check(F, $S(#F), $I(1000), tuple(__VA_ARGS__))
-
 #define try { jmp_buf __env; exception_try(&__env); if (!setjmp(__env))
 
 #define catch(...) catch_xp(catch_in, (__VA_ARGS__))
@@ -708,11 +690,9 @@ var exception_catch(var args);
 
 void gc_init(var bottom);
 void gc_finish(void);
-void gc_add(var ptr, int flags);
+void gc_add(var ptr, bool root);
 void gc_rem(var ptr);
 void gc_run(void);
-var gc_get_table(void);
-void gc_set_table(var table);
 
 int gc_main(int argc, char** argv);
 

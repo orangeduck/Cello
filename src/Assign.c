@@ -40,11 +40,20 @@ var Assign = Cello(Assign,
     Assign_Examples, Assign_Methods));
 
 var assign(var self, var obj) {
+  
   struct Assign* a = instance(self, Assign);
+  
   if (a and a->assign) {
-    return a->assign(self, obj);
-  } else {
+    a->assign(self, obj);
+    return self;
+  }
+  
+  if (type_of(self) is type_of(obj)) {
     memcpy(self, obj, size(type_of(self)));
     return self;
   }
+  
+  return throw(TypeError,
+    "Cannot assign type %s to type %s", type_of(obj), type_of(self));
+  
 }

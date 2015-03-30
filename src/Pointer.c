@@ -4,14 +4,15 @@ static const char* Pointer_Name(void) {
   return "Pointer";
 }
 
-/* TODO */
 static const char* Pointer_Brief(void) {
-  return "";
+  return "Reference to other object";
 }
 
-/* TODO */
 static const char* Pointer_Description(void) {
-  return "";
+  return
+    "The `Pointer` class is implemented by types which act as references to "
+    "other objects. Primarily this class is implemented by `Ref` and `Box` "
+    "which provide the two main pointer types in Cello.";
 }
 
 /* TODO */
@@ -41,14 +42,16 @@ static const char* Ref_Name(void) {
   return "Ref";
 }
 
-/* TODO */
 static const char* Ref_Brief(void) {
-  return "";
+  return "Shared Pointer";
 }
 
-/* TODO */
 static const char* Ref_Description(void) {
-  return "";
+  return
+    "The `Ref` type is a basic wrapper around a C pointer. It can be used "
+    "as a type argument to collections to allow them to store generic types. "
+    "It may also be useful in various circumstances where another level of "
+    "indirection or mutability is required.";
 }
 
 /* TODO */
@@ -64,20 +67,13 @@ static const char* Ref_Methods(void) {
 static void Ref_Ref(var self, var val);
 static var Ref_Deref(var self);
 
-static var Ref_New(var self, var args) {
-  struct Ref* r = self;
-  r->val = get(args, $I(0));
-  return self;
-}
-
-static var Ref_Assign(var self, var obj) {
+static void Ref_Assign(var self, var obj) {
   struct Pointer* p = instance(obj, Pointer);
   if (p and p->deref) {
     Ref_Ref(self, p->deref(obj));
   } else {
     Ref_Ref(self, obj);
   }
-  return self;
 }
 
 static int Ref_Show(var self, var output, int pos) {
@@ -97,7 +93,6 @@ static var Ref_Deref(var self) {
 var Ref = Cello(Ref,
   Instance(Doc,
     Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, Ref_Methods),
-  Instance(New,      Ref_New, NULL),
   Instance(Assign,   Ref_Assign),
   Instance(Show,     Ref_Show, NULL),
   Instance(Pointer,  Ref_Ref, Ref_Deref));
@@ -107,14 +102,21 @@ static const char* Box_Name(void) {
   return "Box";
 }
 
-/* TODO */
 static const char* Box_Brief(void) {
-  return "";
+  return "Unique Pointer";
 }
 
-/* TODO */
 static const char* Box_Description(void) {
-  return "";
+  return
+    "The `Box` type is another wrapper around a C pointer with one additional "
+    "behaviour as compared to `Ref`. When a `Box` object is deleted it will "
+    "also call `del` on the object it points to. The means a `Box` is "
+    "considered a pointer type that _owns_ the object it points to, and so is "
+    "responsible for it's destruction. "
+    "\n\n"
+    "While this might not seem that useful when there is Garbage Collection "
+    "this can be very useful when Garbage Collection is turned off, and when "
+    "used in conjunction with collections.";
 }
 
 /* TODO */
@@ -130,26 +132,18 @@ static const char* Box_Methods(void) {
 static void Box_Ref(var self, var val);
 static var Box_Deref(var self);
 
-static var Box_New(var self, var args) {
-  struct Box* b = self;
-  b->val = get(args, $I(0));
-  return self;
-}
-
-static var Box_Del(var self) {
+static void Box_Del(var self) {
   del(Box_Deref(self));
   Box_Ref(self, NULL);
-  return self;
 }
 
-static var Box_Assign(var self, var obj) {
+static void Box_Assign(var self, var obj) {
   struct Pointer* p = instance(obj, Pointer);
   if (p and p->deref) {
     Box_Ref(self, p->deref(obj));
   } else {
     Box_Ref(self, obj);
   }
-  return self;
 }
 
 static int Box_Show(var self, var output, int pos) {
@@ -169,7 +163,7 @@ static var Box_Deref(var self) {
 var Box = Cello(Box,
   Instance(Doc,
     Box_Name, Box_Brief, Box_Description, Box_Examples, Box_Methods),
-  Instance(New,      Box_New, Box_Del),
+  Instance(New,      NULL, Box_Del),
   Instance(Assign,   Box_Assign),
   Instance(Show,     Box_Show, NULL),
   Instance(Pointer,  Box_Ref, Box_Deref));

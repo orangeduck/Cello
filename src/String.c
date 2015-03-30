@@ -33,14 +33,17 @@ static const char* String_Name(void) {
   return "String";
 }
 
-/* TODO */
 static const char* String_Brief(void) {
-  return "";
+  return "String Object";
 }
 
-/* TODO */
 static const char* String_Description(void) {
-  return "";
+  return
+    "The `String` type is a wrapper around the native C string type. This "
+    "includes strings that are allocated on either the Stack or the Heap."
+    "\n\n"
+    "For strings allocated on the heap a number of extra operations are "
+    "provided overs standard C strings such as concatenation.";
 }
 
 /* TODO */
@@ -53,32 +56,26 @@ static const char* String_Methods(void) {
   return "";
 }
 
-static var String_New(var self, var args) {
+static void String_Del(var self) {
   struct String* s = self;
-  char* init = c_str(get(args, $(Int, 0)));
-  s->val = malloc(strlen(init) + 1);
-#if CELLO_MEMORY_CHECK == 1
-  if (s->val is NULL) {
-    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
+
+#if CELLO_ALLOC_CHECK == 1
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
+    throw(ValueError, "Cannot destruct String, not on heap!");
   }
 #endif
-  strcpy(s->val, init);
-  return self;
-}
 
-static var String_Del(var self) {
-  struct String* s = self;
   free(s->val);
-  return self;
 }
 
-static var String_Assign(var self, var obj) {
+static void String_Assign(var self, var obj) {
   struct String* s = self;
   char* val = c_str(obj);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -92,7 +89,6 @@ static var String_Assign(var self, var obj) {
 #endif
 
   strcpy(s->val, val);
-  return self;
 }
 
 static char* String_C_Str(var self) {
@@ -125,8 +121,8 @@ static void String_Clear(var self) {
   struct String* s = self;
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -190,8 +186,8 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -215,8 +211,8 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -243,8 +239,8 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   va_end(va_tmp);
   
 #if CELLO_ALLOC_CHECK == 1
-  if (CelloHeader_GetFlag(Cello_GetHeader(self), CelloStackAlloc)
-  or  CelloHeader_GetFlag(Cello_GetHeader(self), CelloStaticAlloc)) {
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
     throw(ValueError, "Cannot reallocate String, not on heap!");
   }
 #endif
@@ -276,29 +272,11 @@ static int String_Look(var self, var input, int pos) {
   return scan_from(input, pos, "\"%[^\"]\"", self);
 }
 
-static var String_Gen(void) {
-  size_t l = gen_c_int() % 10;
-  
-  char characters[62] = 
-    "abcdefghijklmnopqrstuvwxyz"
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "0123456789";
-  
-  char* data = malloc(l+1);
-  for (size_t i = 0; i < l; i++) {
-    data[i] = characters[gen_c_int() % 62];
-  }
-  data[l] = '\0';
-  var x = new(String, $S(data));
-  free(data);
-  return x;
-}
-
 var String = Cello(String,
   Instance(Doc,
     String_Name, String_Brief, String_Description,
     String_Examples, String_Methods),
-  Instance(New,     String_New, String_Del),
+  Instance(New,     NULL, String_Del),
   Instance(Assign,  String_Assign),
   Instance(Eq,      String_Eq),
   Instance(Ord,     String_Gt, String_Lt, String_Cmp),
@@ -309,6 +287,5 @@ var String = Cello(String,
   Instance(Hash,    String_Hash),
   Instance(C_Str,   String_C_Str),
   Instance(Format,  String_Format_To, String_Format_From),
-  Instance(Show,    String_Show, String_Look),
-  Instance(Gen,     String_Gen));
+  Instance(Show,    String_Show, String_Look));
 

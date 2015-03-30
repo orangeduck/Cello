@@ -4,14 +4,15 @@ static const char* Len_Name(void) {
   return "Len";
 }
 
-/* TODO */
 static const char* Len_Brief(void) {
-  return "";
+  return "Has a length";
 }
 
-/* TODO */
 static const char* Len_Description(void) {
-  return "";
+  return
+    "The `Len` class can be implemented by any type that has a length "
+    "associated with it. It is typically implemented by collections "
+    "and is often used in conjunction with `Iter` or `Get`.";
 }
 
 /* TODO */

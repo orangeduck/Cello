@@ -4,14 +4,16 @@ static const char* Cast_Name(void) {
   return "Cast";
 }
 
-/* TODO */
 static const char* Cast_Brief(void) {
-  return "";
+  return "Runtime type checking";
 }
 
-/* TODO */
 static const char* Cast_Description(void) {
-  return "";
+  return
+    "The `Cast` class provides a rudimentary run-time type checking. By "
+    "default it simply checks that the passed in object is of a given type "
+    "but it can be overridden by types which have to do more complex checking "
+    "to ensure the types are correct.";
 }
 
 /* TODO */
@@ -52,20 +54,19 @@ static const char* Type_Brief(void) {
 }
 
 static const char* Type_Description(void) {
-  return ""
-    "`Type` is one of the most important Types in Cello. It provides metadata "
-    "about an object including which classes it implements. One can get the "
-    "type of an object using the `type_of` function."
+  return 
+    "The `Type` type is one of the most important types in Cello. It is the "
+    "object which specifies the meta-data associated with a particular object "
+    "most importantly this says what classes an object implements and what "
+    "their instances are."
+    "\n\n"
+    "One can get the type of an object using the `type_of` function."
     "\n\n"
     "To see if an object implements a class `implements` can be used. To "
     "call a member of a class with an object `method` can be used."
     "\n\n"
     "To see if a type implements a class `type_implements` can be used. To "
-    "call a member of a class, implemented `type_method` can be used."
-    "\n\n"
-    "`cast` can be used to do runtime type checking. It checks a given object "
-    "has a certain type and if so returns the given object, otherwise throws"
-    "an exception.";
+    "call a member of a class, implemented `type_method` can be used.";
 }
 
 /* TODO: Example construction on heap */
@@ -116,12 +117,17 @@ static const char* Type_Methods(void) {
 }
 
 enum {
-  CELLO_NBUILTINS = 2 + (CELLO_CACHE_NUM / 3)
+  CELLO_NBUILTINS = 2 + (CELLO_CACHE_NUM / 3),
+  CELLO_MAX_INSTANCES = 256
 };
 
 static var Type_Alloc(void) {
 
-  struct CelloHeader* head = calloc(1, sizeof(struct CelloHeader));
+  struct CelloHeader* head = calloc(1, 
+    sizeof(struct CelloHeader) +
+    sizeof(struct Type) * 
+    (CELLO_NBUILTINS + 
+     CELLO_MAX_INSTANCES + 1));
   
 #if CELLO_MEMORY_CHECK == 1
   if (head is NULL) {
@@ -129,44 +135,39 @@ static var Type_Alloc(void) {
   }
 #endif
   
-  return CelloHeader_Init(head, Type, CelloHeapAlloc);
+  return header_init(head, Type, AllocHeap);
 }
 
-static var Type_New(var self, var args) {
+static void Type_New(var self, var args) {
   
+  struct Type* t = self;
+
   var name = get(args, $I(0));
   var size = get(args, $I(1));
   
-  var head = ((char*)self) - sizeof(struct CelloHeader);
-  head = realloc(head, 
-    sizeof(struct CelloHeader) + 
-    sizeof(struct Type) * (CELLO_NBUILTINS + len(args) - 2 + 1));
-  
 #if CELLO_MEMORY_CHECK == 1
-  if (head is NULL) {
-    throw(OutOfMemoryError, "Cannot create new 'Type', out of memory!");
+  if (len(args) - 2 > CELLO_MAX_INSTANCES) {
+    throw(OutOfMemoryError,
+      "Cannot construct 'Type' with %i instances, maximum is %i.",
+      $I(len(args)), $I(CELLO_MAX_INSTANCES));
   }
-#endif
-  
-  struct Type* body = CelloHeader_Init(head, Type, CelloHeapAlloc);
+#endif  
   
   size_t cache_entries = CELLO_CACHE_NUM / 3;
   for (size_t i = 0; i < cache_entries; i++) {
-    body[i] = (struct Type){ NULL, NULL, NULL };
+    t[i] = (struct Type){ NULL, NULL, NULL };
   }
   
-  body[cache_entries+0] = (struct Type){ NULL, "__Name", (var)c_str(name) };
-  body[cache_entries+1] = (struct Type){ NULL, "__Size", (var)c_int(size) };
+  t[cache_entries+0] = (struct Type){ NULL, "__Name", (var)c_str(name) };
+  t[cache_entries+1] = (struct Type){ NULL, "__Size", (var)c_int(size) };
   
   for(size_t i = 2; i < len(args); i++) {
     var ins = get(args, $I(i));
-    body[CELLO_NBUILTINS-2+i] = (struct Type){
+    t[CELLO_NBUILTINS-2+i] = (struct Type){
       NULL, (var)c_str(type_of(ins)), ins };
   }
   
-  body[CELLO_NBUILTINS+len(args)-2] = (struct Type){ NULL, NULL, NULL };
-  
-  return body;
+  t[CELLO_NBUILTINS+len(args)-2] = (struct Type){ NULL, NULL, NULL };
 }
 
 static char* Type_Builtin_Name(struct Type* t) {
@@ -196,12 +197,6 @@ static void Type_Help(var self) {
   return;
 }
 
-static var Type_Gen(void) {
-  return (var[3]) {
-    Int, Float, String
-  }[gen_c_int() % 3];
-}
-
 var Type = CelloEmpty(Type,
   Instance(Doc,
     Type_Name, Type_Brief, Type_Description, Type_Examples, Type_Methods),
@@ -210,7 +205,6 @@ var Type = CelloEmpty(Type,
   Instance(Eq,       Type_Eq),
   Instance(Show,     Type_Show, NULL),
   Instance(C_Str,    Type_C_Str),
-  Instance(Gen,      Type_Gen),
   Instance(Help,     Type_Help));
 
 static var Type_Scan(var self, var cls) {
@@ -293,6 +287,31 @@ bool type_implements_method_at_offset(var self, var cls, size_t offset) {
   return Type_Implements_Method_At_Offset(self, cls, offset);
 }
 
+/*
+**  Doing the lookup of a class instances is fairly fast
+**  but still too slow to be done inside a tight inner loop.
+**  This is because there could be any number of instances 
+**  and they could be in any order, so each time a linear 
+**  search must be done to find the correct instance.
+**
+**  We can remove the need for a linear search by placing
+**  some common class instances at known locations. These 
+**  are the _Type Cache Entries_ and are located at some
+**  preallocated space at the beginning of every type object.
+**
+**  The only problem is that these instances are not filled 
+**  at compile type, so we must dynamically fill them if they
+**  are empty. But this can be done with a standard call to 
+**  `Type_Scan` the first time.
+**
+**  The main advantage of this method is that it gives the compiler
+**  a better chance of inlining the code up to the call of the 
+**  instance function pointer, and removes the overhead 
+**  associated with setting up the call to `Type_Scan` which is 
+**  too complex a call to be effectively inlined.
+**
+*/
+
 #define Type_Cache_Entry(i, lit) \
   if (cls is lit) { \
     var inst = ((var*)self)[i]; \
@@ -353,7 +372,7 @@ static var Type_Of(var self) {
       "has bad magic number, it wasn't allocated by Cello.", self);
   }
 #endif
-    
+  
   if (head->type is NULL) { head->type = Type; }
   
   return head->type;
@@ -385,14 +404,19 @@ static const char* Size_Name(void) {
   return "Size";
 }
 
-/* TODO */
 static const char* Size_Brief(void) {
-  return "";
+  return "Object has some Size";
 }
 
-/* TODO */
 static const char* Size_Description(void) {
-  return "";
+  return
+    "The `Size` class is a very important class in Cello because it gives the "
+    "size in bytes you can expect an object of a given type to be. This is "
+    "used by many methods to allocate, assign, or compare various objects."
+    "\n\n"
+    "By default this size is automatically found and recorded by the `Cello` "
+    "macro, but if the type does it's own allocation, or the size cannot be "
+    "found naturally then it may be necessary to override this method.";
 }
 
 /* TODO */

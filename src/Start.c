@@ -4,14 +4,20 @@ const char* Start_Name(void) {
   return "Start";
 }
 
-/* TODO */
 const char* Start_Brief(void) {
-  return "";
+  return "Can be started or stopped";
 }
 
-/* TODO */
 const char* Start_Description(void) {
-  return "";
+  return
+    "The `Start` class can be implemented by types which provide an abstract "
+    "notion of a started and stopped state. This can be real processes such "
+    "as `Thread`, or something like `File` where the on/off correspond to "
+    "if the file is open or not."
+    "\n\n"
+    "The main nicety of the `Start` class is that it allows use of the `with` "
+    "macro which performs the `start` function at the opening of a scope block "
+    "and the `stop` function at the end.";
 }
 
 /* TODO */
@@ -27,7 +33,6 @@ const char* Start_Methods(void) {
 var Start = Cello(Start, Instance(Doc, 
   Start_Name, Start_Brief, Start_Description, Start_Examples, Start_Methods));
 
-
 void start(var self) {
   method(self, Start, start);
 }
@@ -41,12 +46,18 @@ bool running(var self) {
 }
 
 var start_in(var self) {
-  start(self);
+  struct Start* s = instance(self, Start);
+  if (s and s->start) {
+    s->start(self);
+  }
   return self;
 }
 
 var stop_in(var self) {
-  stop(self);
+  struct Start* s = instance(self, Start);
+  if (s and s->stop) {
+    s->stop(self);
+  }
   return NULL;
 }
 

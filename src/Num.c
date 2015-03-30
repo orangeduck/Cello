@@ -59,14 +59,29 @@ var C_Float = Cello(C_Float,
     C_Float_Examples, C_Float_Methods));
 
 char* c_str(var self) {
+  
+  if (type_of(self) is String) {
+    return ((struct String*)self)->val;
+  }
+  
   return method(self, C_Str, c_str);
 }
 
 int64_t c_int(var self) {
+  
+  if (type_of(self) is Int) {
+    return ((struct Int*)self)->val;
+  }
+  
   return method(self, C_Int, c_int);
 }
 
 double c_float(var self) {
+  
+  if (type_of(self) is Float) {
+    return ((struct Float*)self)->val;
+  }
+  
   return method(self, C_Float, c_float);
 }
 
@@ -116,16 +131,9 @@ static const char* Int_Methods(void) {
   return "";
 }
 
-static var Int_New(var self, var args) {
-  struct Int* i = self;
-  i->val = c_int(get(args, $(Int, 0)));
-  return self;
-}
-
-static var Int_Assign(var self, var obj) {
+static void Int_Assign(var self, var obj) {
   struct Int* i = self;
   i->val = c_int(obj);
-  return self;
 }
 
 static int64_t Int_C_Int(var self) {
@@ -165,21 +173,15 @@ static int Int_Look(var self, var input, int pos) {
   return pos + off;
 }
 
-static var Int_Gen(void) {
-  return new(Int, $I(gen_c_int()));
-}
-
 var Int = Cello(Int,
   Instance(Doc,
     Int_Name, Int_Brief, Int_Description, Int_Examples, Int_Methods),
-  Instance(New,     Int_New, NULL),
   Instance(Assign,  Int_Assign),
   Instance(Eq,      Int_Eq),
   Instance(Ord,     Int_Gt, Int_Lt, Int_Cmp),
   Instance(Hash,    Int_Hash),
   Instance(C_Int,   Int_C_Int),
-  Instance(Show,    Int_Show, Int_Look),
-  Instance(Gen,     Int_Gen));
+  Instance(Show,    Int_Show, Int_Look));
 
 static const char* Float_Name(void) {
   return "Float";
@@ -227,16 +229,9 @@ static const char* Float_Methods(void) {
   return "";
 }
 
-static var Float_New(var self, var args) {
-  struct Float* f = self;
-  f->val = c_float(get(args, $(Int, 0)));
-  return self;
-}
-
-static var Float_Assign(var self, var obj) {
+static void Float_Assign(var self, var obj) {
   struct Float* f = self;
   f->val = c_float(obj);
-  return self;
 }
 
 static double Float_C_Float(var self) {
@@ -279,18 +274,12 @@ int Float_Look(var self, var input, int pos) {
   return scan_from(input, pos, "%f", self);
 }
 
-static var Float_Gen(void) {
-  return new(Float, $F(gen_c_float()));
-}
-
 var Float = Cello(Float,
   Instance(Doc,
     Float_Name, Float_Brief, Float_Description, Float_Examples, Float_Methods),
-  Instance(New,     Float_New, NULL),
   Instance(Assign,  Float_Assign),
   Instance(Eq,      Float_Eq),
   Instance(Ord,     Float_Gt, Float_Lt, Float_Cmp),
   Instance(Hash,    Float_Hash),
   Instance(C_Float, Float_C_Float),
-  Instance(Show,    Float_Show, Float_Look),
-  Instance(Gen,     Float_Gen));
+  Instance(Show,    Float_Show, Float_Look));

@@ -4,14 +4,16 @@ static const char* Iter_Name(void) {
   return "Iter";
 }
 
-/* TODO */
 static const char* Iter_Brief(void) {
-  return "";
+  return "Can be looped over";
 }
 
 /* TODO */
 static const char* Iter_Description(void) {
-  return "";
+  return
+    "The `Iter` class is implemented by types which can be looped over. This "
+    "allows them to be used in conjunction with the `foreach` macro as well "
+    "as various other components of Cello.";
 }
 
 /* TODO */

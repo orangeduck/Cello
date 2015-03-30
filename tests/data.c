@@ -972,11 +972,11 @@ PT_FUNC(test_file_stream) {
   var f0 = $(File, NULL);
   
   sopen(f0, $S("test.txt"), $S("w"));
-  swrite(f0, testoutput1, $I(sizeof(testoutput1)));
+  swrite(f0, testoutput1, sizeof(testoutput1));
   sclose(f0);  
   
   sopen(f0, $S("test.txt"), $S("r"));
-  sread(f0, testinput, $I(sizeof(testoutput1)));
+  sread(f0, testinput, sizeof(testoutput1));
   sclose(f0);
   
   PT_ASSERT_STR_EQ(testinput, testoutput1);

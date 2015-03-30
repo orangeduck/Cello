@@ -37,14 +37,16 @@ const char* Help_Name(void) {
   return "Help";
 }
 
-/* TODO */
 const char* Help_Brief(void) {
-  return "";
+  return "Object gives usage information";
 }
 
-/* TODO */
 const char* Help_Description(void) {
-  return "";
+  return
+    "The `Help` class can be implemented to let an object provide helpful "
+    "information about itself. In the standard library this class is "
+    "implemented by `Type` and it prints out the documentation provided "
+    "by the `Doc` class in a friendly way.";
 }
 
 /* TODO */

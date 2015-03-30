@@ -15,7 +15,7 @@ static const char* Array_Description(void) {
     "it contains. It allocates storage for the type specified. It also "
     "deallocates and destroys the objects inside upon destruction."
     "\n\n"
-    "Elements are copied in an Array using `assign` and will initially have "
+    "Elements are copied into an Array using `assign` and will initially have "
     "zero'd memory."
     "\n\n"
     "Elements are ordered linearly. Elements are accessed by their position in "
@@ -23,10 +23,11 @@ static const char* Array_Description(void) {
     "the sequence is fast, with memory movement required for elements in the "
     "middle of the sequence." 
     "\n\n"
-    "The equivalent C++ construct to this is "
+    "This is largely equivalent to the C++ construct "
     "[std::vector](http://www.cplusplus.com/reference/vector/vector/)";
 }
 
+/* TODO */
 static const char* Array_Examples(void) {
   return "";
 }
@@ -57,24 +58,24 @@ static var Array_Item(struct Array* a, size_t i) {
 static void Array_Alloc(struct Array* a, size_t i) {
   memset((char*)a->data + Array_Step(a) * i, 0, Array_Step(a));
   struct CelloHeader* head = (struct CelloHeader*)((char*)a->data + Array_Step(a) * i);
-  CelloHeader_Init(head, a->type, CelloDataAlloc);
+  header_init(head, a->type, AllocData);
 }
 
 static size_t Array_Size_Round(size_t s) {
   return ((s + sizeof(var) - 1) / sizeof(var)) * sizeof(var);
 }
 
-static var Array_New(var self, var args) {
+static void Array_New(var self, var args) {
   
   struct Array* a = self;
-  a->type   = cast(get(args, $(Int, 0)), Type);
+  a->type   = cast(get(args, $I(0)), Type);
   a->tsize  = Array_Size_Round(size(a->type));
   a->nitems = len(args)-1;
   a->nslots = a->nitems;
   
   if (a->nslots is 0) {
     a->data = NULL;
-    return self;
+    return;
   }
   
   a->data = malloc(a->nslots * Array_Step(a));
@@ -89,10 +90,9 @@ static var Array_New(var self, var args) {
   
   for(size_t i = 0; i < a->nitems; i++) {
     Array_Alloc(a, i);
-    assign(Array_Item(a, i), get(args, $(Int, i+1)));  
+    assign(Array_Item(a, i), get(args, $I(i+1)));  
   }
   
-  return self;
 }
 
 static var Array_Subtype(var self) {
@@ -100,9 +100,10 @@ static var Array_Subtype(var self) {
   return a->type;
 }
 
-static var Array_Del(var self) {
+static void Array_Del(var self) {
   
   struct Array* a = self;
+  
   for(size_t i = 0; i < a->nitems; i++) {
     destruct(Array_Item(a, i));
   }
@@ -110,8 +111,6 @@ static var Array_Del(var self) {
   free(a->data);
   free(a->sspace0);
   free(a->sspace1);
-  
-  return self;
   
 }
 
@@ -128,7 +127,7 @@ static void Array_Clear(var self) {
   a->nslots = 0;
 }
 
-static var Array_Assign(var self, var obj) {
+static void Array_Assign(var self, var obj) {
   struct Array* a = self;
 
   Array_Clear(self);
@@ -140,7 +139,7 @@ static var Array_Assign(var self, var obj) {
   
   if (a->nslots is 0) {
     a->data = NULL;
-    return self;
+    return;
   }
   
   a->data = malloc(a->nslots * Array_Step(a));
@@ -155,10 +154,8 @@ static var Array_Assign(var self, var obj) {
   
   for(size_t i = 0; i < a->nitems; i++) {
     Array_Alloc(a, i);
-    assign(Array_Item(a, i), get(obj, $(Int, i)));  
+    assign(Array_Item(a, i), get(obj, $I(i)));  
   }
-  
-  return self;
   
 }
 
@@ -207,7 +204,7 @@ static bool Array_Eq(var self, var obj) {
   if (a->nitems isnt len(obj)) { return false; }
   
   for(size_t i = 0; i < a->nitems; i++) {
-    if (neq(Array_Item(a, i), get(obj, $(Int, i)))) {
+    if (neq(Array_Item(a, i), get(obj, $I(i)))) {
       return false;
     }
   }
@@ -240,12 +237,12 @@ static void Array_Reserve_Less(struct Array* a) {
 static void Array_Pop_At(var self, var key) {
 
   struct Array* a = self;
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {
     throw(IndexOutOfBoundsError,
-      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+      "Index '%i' out of bounds for Array of size %i.", key, $I(a->nitems));
     return;
   }
 #endif
@@ -264,7 +261,7 @@ static void Array_Rem(var self, var obj) {
   struct Array* a = self;
   for(size_t i = 0; i < a->nitems; i++) {
     if (eq(Array_Item(a, i), obj)) {
-      Array_Pop_At(a, $(Int, i));
+      Array_Pop_At(a, $I(i));
       return;
     }
   }
@@ -284,12 +281,12 @@ static void Array_Push_At(var self, var obj, var key) {
   a->nitems++;
   Array_Reserve_More(a);
   
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {
     throw(IndexOutOfBoundsError,
-      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+      "Index '%i' out of bounds for Array of size %i.", key, $I(a->nitems));
     return;
   }
 #endif
@@ -322,12 +319,12 @@ static void Array_Pop(var self) {
 static var Array_Get(var self, var key) {
 
   struct Array* a = self;
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {
     return throw(IndexOutOfBoundsError,
-      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+      "Index '%i' out of bounds for Array of size %i.", key, $I(a->nitems));
   }
 #endif
   
@@ -337,12 +334,12 @@ static var Array_Get(var self, var key) {
 static void Array_Set(var self, var key, var val) {
 
   struct Array* a = self;
-  int64_t i = type_of(key) is Int ? ((struct Int*)key)->val : c_int(key);
+  int64_t i = c_int(key);
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {
     throw(IndexOutOfBoundsError, 
-      "Index '%i' out of bounds for Array of size %i.", key, $(Int, a->nitems));
+      "Index '%i' out of bounds for Array of size %i.", key, $I(a->nitems));
     return;
   }
 #endif
@@ -391,7 +388,7 @@ static size_t Array_Sort_Partition(
   int64_t s = l;
   for (int64_t i = l; i < r; i++) {
     if (call(f, 
-      Array_Get(a, $(Int, i)), 
+      Array_Get(a, $I(i)), 
       (char*)a->sspace1 + sizeof(struct CelloHeader))) {
       Array_Swap(a, i, s);
       s++;
@@ -448,21 +445,6 @@ static void Array_Reserve(var self, var amount) {
 
 }
 
-static var Array_Gen(void) {
-  
-  var type = gen(Type);
-  var a = new(Array, type);
-  
-  size_t n = gen_c_int() % 1024;
-  for (size_t i = 0; i < n; i++) {
-    var o = gen(type);
-    push(a, o);
-    del(o);
-  }
-  
-  return a;
-}
-
 static void Array_Traverse(var self, var func) {
   struct Array* a = self;
   for (size_t i = 0; i < a->nitems; i++) {
@@ -491,7 +473,6 @@ var Array = Cello(Array,
   Instance(Reverse,  Array_Reverse),
   Instance(Sort,     Array_Sort_With),
   Instance(Show,     Array_Show, NULL),
-  Instance(Reserve,  Array_Reserve),
-  Instance(Gen,      Array_Gen));
+  Instance(Reserve,  Array_Reserve));
 
   

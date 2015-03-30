@@ -58,10 +58,9 @@ static const char* Function_Methods(void) {
   return "";
 }
 
-static var Function_New(var self, var args) {
+static void Function_New(var self, var args) {
   struct Function* f = self;
   f->func = get(args, $I(0));
-  return self;
 }
 
 static var Function_Call(var self, var args) {

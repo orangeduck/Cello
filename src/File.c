@@ -1,5 +1,67 @@
 #include "Cello.h"
 
+static const char* Stream_Name(void) {
+  return "Stream";
+}
+
+static const char* Stream_Brief(void) {
+  return "File-like";
+
+}
+
+static const char* Stream_Description(void) {
+  return 
+    "The `Stream` class represents an abstract set of operations that can be "
+    "performed on File-like objects.";
+}
+
+/* TODO */
+static const char* Stream_Examples(void) {
+  return "";
+}
+
+/* TODO */
+static const char* Stream_Methods(void) {
+  return "";
+}
+
+var Stream = Cello(Stream,
+  Instance(Doc, 
+    Stream_Name, Stream_Brief, Stream_Description,
+    Stream_Examples, Stream_Methods));
+
+var sopen(var self, var resource, var options) {
+  return method(self, Stream, sopen, resource, options);
+}
+
+void sclose(var self) {
+  method(self, Stream, sclose);
+}
+
+void sseek(var self, int64_t pos, int origin) {
+  method(self, Stream, sseek, pos, origin);
+}
+
+int64_t stell(var self) {
+  return method(self, Stream, stell);
+}
+
+void sflush(var self) {
+  method(self, Stream, sflush);
+}
+
+bool seof(var self) {
+  return method(self, Stream, seof);
+}
+
+size_t sread(var self, void* output, size_t size) {
+  return method(self, Stream, sread, output, size);
+}
+
+size_t swrite(var self, void* input, size_t size) {
+  return method(self, Stream, swrite, input, size);
+}
+
 static const char* File_Name(void) {
   return "File";
 }
@@ -27,16 +89,16 @@ static const char* File_Methods(void) {
 static var File_Open(var self, var filename, var access);
 static void File_Close(var self);
 
-static var File_New(var self, var args) {
+static void File_New(var self, var args) {
   struct File* f = self;
-  File_Open(self, get(args, $I(0)), get(args, $I(1)));
-  return self;
+  if (len(args) > 0) {
+    File_Open(self, get(args, $I(0)), get(args, $I(1)));
+  }
 }
 
-static var File_Del(var self) {
+static void File_Del(var self) {
   struct File* f = self;
   if (f->file isnt NULL) { File_Close(self); }
-  return self;
 }
 
 static var File_Open(var self, var filename, var access) {
@@ -64,12 +126,14 @@ static void File_Close(var self) {
   f->file = NULL;
 }
 
-static void File_Seek(var self, var pos, var origin) {
+static void File_Seek(var self, int64_t pos, int origin) {
   struct File* f = self;
   
-  /* TODO: Check file isnt NULL, also for other functions */
+  if (f->file is NULL) {
+    throw(IOError, "Cannot seek file - no file open.");
+  }
   
-  int err = fseek(f->file, (long)c_int(pos), (int)c_int(origin));
+  int err = fseek(f->file, pos, origin);
   if (err != 0) {
     throw(IOError, "Failed to seek in file: %i", $I(err));
   }
@@ -78,6 +142,10 @@ static void File_Seek(var self, var pos, var origin) {
 
 static int64_t File_Tell(var self) {
   struct File* f = self;
+  
+  if (f->file is NULL) {
+    throw(IOError, "Cannot tell file - no file open.");
+  }
   
   int64_t i = ftell(f->file);
   if (i == -1) {
@@ -90,6 +158,10 @@ static int64_t File_Tell(var self) {
 static void File_Flush(var self) {
   struct File* f = self;
   
+  if (f->file is NULL) {
+    throw(IOError, "Cannot flush file - no file open.");
+  }
+  
   int err = fflush(f->file);
   if (err != 0) {
     throw(IOError, "Failed to flush file: %i", $I(err));
@@ -99,14 +171,23 @@ static void File_Flush(var self) {
 
 static bool File_EOF(var self) {
   struct File* f = self;
+  
+  if (f->file is NULL) {
+    throw(IOError, "Cannot eof file - no file open.");
+  }
+  
   return feof(f->file);
 }
 
-static size_t File_Read(var self, var output, var size) {
+static size_t File_Read(var self, void* output, size_t size) {
   struct File* f = self;
   
-  size_t num = fread(output, c_int(size), 1, f->file);
-  if (num isnt 1 and c_int(size) isnt 0) {
+  if (f->file is NULL) {
+    throw(IOError, "Cannot read file - no file open.");
+  }
+  
+  size_t num = fread(output, size, 1, f->file);
+  if (num isnt 1 and size isnt 0) {
     throw(IOError, "Failed to read from file: %i", $I(num));
     return num;
   }
@@ -114,11 +195,15 @@ static size_t File_Read(var self, var output, var size) {
   return num;
 }
 
-static size_t File_Write(var self, var input, var size) {
+static size_t File_Write(var self, void* input, size_t size) {
   struct File* f = self;
   
-  size_t num = fwrite(input, c_int(size), 1, f->file);
-  if (num isnt 1 and c_int(size) isnt 0) {
+  if (f->file is NULL) {
+    throw(IOError, "Cannot write file - no file open.");
+  }
+  
+  size_t num = fwrite(input, size, 1, f->file);
+  if (num isnt 1 and size isnt 0) {
     throw(IOError, "Failed to write to file: %i", $I(num));
   }
   
@@ -127,11 +212,21 @@ static size_t File_Write(var self, var input, var size) {
 
 static int File_Format_To(var self, int pos, const char* fmt, va_list va) {
   struct File* f = self;
+  
+  if (f->file is NULL) {
+    throw(IOError, "Cannot format to file - no file open.");
+  }
+  
   return vfprintf(f->file, fmt, va);
 }
 
 static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
   struct File* f = self;
+  
+  if (f->file is NULL) {
+    throw(IOError, "Cannot format from file - no file open.");
+  }
+  
   return vfscanf(f->file, fmt, va);
 }
 
@@ -175,17 +270,15 @@ static const char* Process_Methods(void) {
 static var Process_Open(var self, var filename, var access);
 static void Process_Close(var self);
 
-static var Process_New(var self, var args) {
+static void Process_New(var self, var args) {
   struct Process* p = self;
   p->proc = NULL;
   Process_Open(self, get(args, $I(0)), get(args, $I(1)));
-  return self;
 }
 
-static var Process_Del(var self) {
+static void Process_Del(var self) {
   struct Process* p = self;
   if (p->proc isnt NULL) { Process_Close(self); }
-  return self;
 }
 
 static var Process_Open(var self, var filename, var access) {
@@ -213,10 +306,14 @@ static void Process_Close(var self) {
   p->proc = NULL;
 }
 
-static void Process_Seek(var self, var pos, var origin) {
+static void Process_Seek(var self, int64_t pos, int origin) {
   struct Process* p = self;
   
-  int err = fseek(p->proc, (long)c_int(pos), (int)c_int(origin));
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot seek process - no process open.");
+  }
+  
+  int err = fseek(p->proc, pos, origin);
   if (err != 0) {
     throw(IOError, "Failed to seek in process: %i", $I(err));
   }
@@ -225,6 +322,10 @@ static void Process_Seek(var self, var pos, var origin) {
 
 static int64_t Process_Tell(var self) {
   struct Process* p = self;
+  
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot tell process - no process open.");
+  }
   
   int64_t i = ftell(p->proc);
   if (i == -1) {
@@ -237,6 +338,10 @@ static int64_t Process_Tell(var self) {
 static void Process_Flush(var self) {
   struct Process* p = self;
   
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot flush process - no process open.");
+  }
+  
   int err = fflush(p->proc);
   if (err != 0) {
     throw(IOError, "Failed to flush process: %i", $I(err));
@@ -246,14 +351,23 @@ static void Process_Flush(var self) {
 
 static bool Process_EOF(var self) {
   struct Process* p = self;
+  
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot eof process - no process open.");
+  }
+  
   return feof(p->proc);
 }
 
-static size_t Process_Read(var self, var output, var size) {
+static size_t Process_Read(var self, void* output, size_t size) {
   struct Process* p = self;
   
-  size_t num = fread(output, c_int(size), 1, p->proc);
-  if (num isnt 1 and c_int(size) isnt 0) {
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot read process - no process open.");
+  }
+  
+  size_t num = fread(output, size, 1, p->proc);
+  if (num isnt 1 and size isnt 0) {
     throw(IOError, "Failed to read from process: %i", $I(num));
     return num;
   }
@@ -261,11 +375,15 @@ static size_t Process_Read(var self, var output, var size) {
   return num;
 }
 
-static size_t Process_Write(var self, var input, var size) {
+static size_t Process_Write(var self, void* input, size_t size) {
   struct Process* p = self;
   
-  size_t num = fwrite(input, c_int(size), 1, p->proc);
-  if (num isnt 1 and c_int(size) isnt 0) {
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot write process - no process open.");
+  }
+  
+  size_t num = fwrite(input, size, 1, p->proc);
+  if (num isnt 1 and size isnt 0) {
     throw(IOError, "Failed to write to process: %i", $I(num));
   }
   
@@ -274,11 +392,21 @@ static size_t Process_Write(var self, var input, var size) {
 
 static int Process_Format_To(var self, int pos, const char* fmt, va_list va) {
   struct Process* p = self;
+  
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot format to process - no process open.");
+  }
+  
   return vfprintf(p->proc, fmt, va);
 }
 
 static int Process_Format_From(var self, int pos, const char* fmt, va_list va) {
   struct Process* p = self;
+  
+  if (p->proc is NULL) {
+    throw(IOError, "Cannot format from process - no process open.");
+  }
+  
   return vfscanf(p->proc, fmt, va);
 }
 

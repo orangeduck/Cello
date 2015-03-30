@@ -4,14 +4,15 @@ static const char* Subtype_Name(void) {
   return "Subtype";
 }
 
-/* TODO */
 static const char* Subtype_Brief(void) {
-  return "";
+  return "Contains elements of some Subtype";
 }
 
-/* TODO */
 static const char* Subtype_Description(void) {
-  return "";
+  return
+    "The `Subtype` class can be used to find the type of elements contained "
+    "within another class. For example if an `Array` of a particular type is "
+    "created, this class can be used to find what type that was.";
 }
 
 /* TODO */

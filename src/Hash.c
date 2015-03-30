@@ -37,29 +37,18 @@ static const char* Hash_Methods(void) {
 var Hash = Cello(Hash,
   Instance(Doc,
     Hash_Name, Hash_Brief, Hash_Description, Hash_Examples, Hash_Methods));
-
-/* TODO: Make non-static */
-static uint64_t seed = CELLO_MAGIC_NUM;
-
-void hash_init(uint64_t s) {
-  seed = s;
-}
-
-uint64_t hash_seed(void) {
-  return seed;
-}
-
-uint64_t hash_data(var self, size_t size) {
+    
+uint64_t hash_data(void* data, size_t size) {
   
   const uint64_t m = 0xc6a4a7935bd1e995;
 	const int r = 47;
-	const uint64_t * data = (const uint64_t *)self;
-	const uint64_t * end = data + (size/8);
+	const uint64_t * d = (const uint64_t *)data;
+	const uint64_t * end = d + (size/8);
   
-	uint64_t h = seed ^ (size * m);
+	uint64_t h = CELLO_MAGIC_NUM ^ (size * m);
 
-	while (data != end) {
-		uint64_t k = *data++;
+	while (d != end) {
+		uint64_t k = *d++;
 		k *= m; 
 		k ^= k >> r; 
 		k *= m; 
@@ -67,7 +56,7 @@ uint64_t hash_data(var self, size_t size) {
 		h *= m; 
 	}
 
-	const unsigned char * data2 = (const unsigned char*)data;
+	const unsigned char * data2 = (const unsigned char*)d;
 
 	switch (size & 7) {
     case 7: h ^= (uint64_t)(data2[6]) << 48;
@@ -95,6 +84,6 @@ uint64_t hash(var self) {
     return h->hash(self);
   }
   
-  return hash_data(self, size(self));
+  return hash_data(self, size(type_of(self)));
 }
 
