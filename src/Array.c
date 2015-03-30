@@ -291,7 +291,7 @@ static void Array_Push_At(var self, var obj, var key) {
   }
 #endif
   
-  memmove((char*)a->data + Array_Step(a) * (i + 1),
+  memmove((char*)a->data + Array_Step(a) * (i+1),
           (char*)a->data + Array_Step(a) * (i+0), 
           Array_Step(a) * ((a->nitems-1) - i));
   

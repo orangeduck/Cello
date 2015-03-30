@@ -37,7 +37,7 @@ function matgen(n) {
 	return a;
 }
 
-var n = 500;
+var n = 300;
 var a = matgen(n);
 var b = matgen(n);
 var c = Math.m.mul(a, b);
