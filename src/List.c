@@ -34,7 +34,7 @@ struct List {
 };
 
 static var List_Alloc(struct List* l) {
-  var item = calloc(1, 2 * sizeof(var) + sizeof(struct CelloHeader) + l->tsize);
+  var item = calloc(1, 2 * sizeof(var) + sizeof(struct Header) + l->tsize);
   
 #if CELLO_MEMORY_CHECK == 1
   if (item is NULL) {
@@ -42,20 +42,20 @@ static var List_Alloc(struct List* l) {
   }
 #endif
   
-  return header_init((struct CelloHeader*)(
+  return header_init((struct Header*)(
     (char*)item + 2 * sizeof(var)), l->type, AllocData);
 }
 
 static void List_Free(struct List* l, var self) {
-  free((char*)self - sizeof(struct CelloHeader) - 2 * sizeof(var));
+  free((char*)self - sizeof(struct Header) - 2 * sizeof(var));
 }
 
 static var* List_Next(struct List* l, var self) {
-  return (var*)((char*)self - sizeof(struct CelloHeader) - 1 * sizeof(var));
+  return (var*)((char*)self - sizeof(struct Header) - 1 * sizeof(var));
 }
 
 static var* List_Prev(struct List* l, var self) {
-  return (var*)((char*)self - sizeof(struct CelloHeader) - 2 * sizeof(var));
+  return (var*)((char*)self - sizeof(struct Header) - 2 * sizeof(var));
 }
 
 static var List_At(struct List* l, int64_t i) {
@@ -370,11 +370,11 @@ static void List_Reserve(var self, var amount) {
   
 }
 
-static void List_Traverse(var self, var func) {
+static void List_Mark(var self, var gc, void(*mark)(var,void*)) {
   struct List* l = self;
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
-    call_with(func, item);
+    mark(gc, item);
     item = *List_Next(l, item);
   }
 }
@@ -384,21 +384,21 @@ var List = Cello(List,
     List_Name,        List_Brief,
     List_Description, List_Examples,
     List_Methods),
-  Instance(New,      List_New, List_Del),
-  Instance(Subtype,  List_Subtype, NULL, NULL),
-  Instance(Assign,   List_Assign),
-  Instance(Copy,     List_Copy),
-  Instance(Traverse, List_Traverse),
-  Instance(Eq,       List_Eq),
-  Instance(Clear,    List_Clear),
+  Instance(New,     List_New, List_Del),
+  Instance(Subtype, List_Subtype, NULL, NULL),
+  Instance(Assign,  List_Assign),
+  Instance(Copy,    List_Copy),
+  Instance(Mark,    List_Mark),
+  Instance(Eq,      List_Eq),
+  Instance(Clear,   List_Clear),
   Instance(Push,
-    List_Push,       List_Pop,
-    List_Push_At,    List_Pop_At),
-  Instance(Len,      List_Len),
-  Instance(Get,      List_Get, List_Set, List_Mem, List_Rem),
-  Instance(Iter,     List_Iter_Init, List_Iter_Next),
-  Instance(Reverse,  List_Reverse),
-  //Member(Sort,     List_Sort_With),
-  Instance(Show,     List_Show, NULL),
-  Instance(Reserve,  List_Reserve));
+    List_Push,      List_Pop,
+    List_Push_At,   List_Pop_At),
+  Instance(Len,     List_Len),
+  Instance(Get,     List_Get, List_Set, List_Mem, List_Rem),
+  Instance(Iter,    List_Iter_Init, List_Iter_Next),
+  Instance(Reverse, List_Reverse),
+  //Member(Sort,    List_Sort_With),
+  Instance(Show,    List_Show, NULL),
+  Instance(Reserve, List_Reserve));
   

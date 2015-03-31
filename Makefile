@@ -18,7 +18,7 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -O3 -Wall -Werror -Wno-unused -g -ggdb
+CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -g -ggdb
 LFLAGS = -g -ggdb
 
 PLATFORM := $(shell uname)

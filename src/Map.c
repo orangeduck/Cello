@@ -56,13 +56,13 @@ static void Map_Set_Parent(struct Map* m, var node, var ptr) {
 }
 
 static var Map_Key(struct Map* m, var node) {
-  return (char*)node + 3 * sizeof(var) + sizeof(struct CelloHeader);
+  return (char*)node + 3 * sizeof(var) + sizeof(struct Header);
 }
 
 static var Map_Val(struct Map* m, var node) {
   return (char*)node + 3 * sizeof(var) +
-    sizeof(struct CelloHeader) + m->ksize +
-    sizeof(struct CelloHeader);
+    sizeof(struct Header) + m->ksize +
+    sizeof(struct Header);
 }
 
 static void Map_Set_Color(struct Map* m, var node, bool col) {
@@ -98,8 +98,8 @@ static bool Map_Is_Black(struct Map* m, var node) {
 
 static var Map_Alloc(struct Map* m) {
   var node = calloc(1, 3 * sizeof(var) + 
-    sizeof(struct CelloHeader) + m->ksize + 
-    sizeof(struct CelloHeader) + m->vsize);
+    sizeof(struct Header) + m->ksize + 
+    sizeof(struct Header) + m->vsize);
   
 #if CELLO_MEMORY_CHECK == 1
   if (node is NULL) {
@@ -107,11 +107,11 @@ static var Map_Alloc(struct Map* m) {
   }
 #endif
   
-  var key = header_init((struct CelloHeader*)(
+  var key = header_init((struct Header*)(
     (char*)node + 3 * sizeof(var)), m->ktype, AllocData);
-  var val = header_init((struct CelloHeader*)(
+  var val = header_init((struct Header*)(
     (char*)node + 3 * sizeof(var) +
-    sizeof(struct CelloHeader) + m->ksize), m->vtype, AllocData);
+    sizeof(struct Header) + m->ksize), m->vtype, AllocData);
   
   *Map_Left(m, node) = NULL;
   *Map_Right(m, node) = NULL;
@@ -200,7 +200,7 @@ static var Map_Copy(var self) {
   
   var curr = Map_Iter_Init(self);
   while (curr isnt NULL) {
-    var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
+    var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
     set(r, Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
   }
@@ -547,8 +547,8 @@ static void Map_Rem(var self, var key) {
     var pred = Map_Maximum(m, *Map_Left(m, node));
     bool ncol = Map_Get_Color(m, node);
     memcpy((char*)node + 3 * sizeof(var), (char*)pred + 3 * sizeof(var),
-      sizeof(struct CelloHeader) + m->ksize +
-      sizeof(struct CelloHeader) + m->vsize);
+      sizeof(struct Header) + m->ksize +
+      sizeof(struct Header) + m->vsize);
     Map_Set_Color(m, node, ncol);
     node = pred;
   }
@@ -586,7 +586,7 @@ static var Map_Iter_Init(var self) {
 static var Map_Iter_Next(var self, var curr) {
   struct Map* m = self;
   
-  var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
+  var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
   var prnt = Map_Get_Parent(m, node);
   
   if (*Map_Right(m, node) isnt NULL) {
@@ -617,7 +617,7 @@ static int Map_Show(var self, var output, int pos) {
   var curr = Map_Iter_Init(self);
   
   while (curr isnt NULL) {
-    var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
+    var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
     pos = print_to(output, pos, "%$:%$",
       Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
@@ -629,15 +629,15 @@ static int Map_Show(var self, var output, int pos) {
   return pos;
 }
 
-static void Map_Traverse(var self, var func) {  
+static void Map_Mark(var self, var gc, void(*mark)(var,void*)) {  
   struct Map* m = self;
 
   var curr = Map_Iter_Init(self);
   
   while (curr isnt NULL) {
-    var node = (char*)curr - sizeof(struct CelloHeader) - 3 * sizeof(var);
-    call_with(func, Map_Key(m, node));
-    call_with(func, Map_Val(m, node));
+    var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
+    mark(gc, Map_Key(m, node));
+    mark(gc, Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
   }
   
@@ -647,16 +647,16 @@ var Map = Cello(Map,
   Instance(Doc,
     Map_Name, Map_Brief, Map_Description,
     Map_Examples, Map_Methods),
-  Instance(New,      Map_New, Map_Del),
-  Instance(Subtype,  Map_Key_Subtype, Map_Key_Subtype, Map_Val_Subtype),
-  Instance(Assign,   Map_Assign),
-  Instance(Copy,     Map_Copy),
-  Instance(Traverse, Map_Traverse),
-  Instance(Eq,       Map_Eq),
-  Instance(Len,      Map_Len),
-  Instance(Get,      Map_Get, Map_Set, Map_Mem, Map_Rem),
-  Instance(Clear,    Map_Clear),
-  Instance(Iter,     Map_Iter_Init, Map_Iter_Next),
-  Instance(Show,     Map_Show, NULL));
+  Instance(New,     Map_New, Map_Del),
+  Instance(Subtype, Map_Key_Subtype, Map_Key_Subtype, Map_Val_Subtype),
+  Instance(Assign,  Map_Assign),
+  Instance(Copy,    Map_Copy),
+  Instance(Mark,    Map_Mark),
+  Instance(Eq,      Map_Eq),
+  Instance(Len,     Map_Len),
+  Instance(Get,     Map_Get, Map_Set, Map_Mem, Map_Rem),
+  Instance(Clear,   Map_Clear),
+  Instance(Iter,    Map_Iter_Init, Map_Iter_Next),
+  Instance(Show,    Map_Show, NULL));
 
 

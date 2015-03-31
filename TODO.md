@@ -11,6 +11,10 @@ Libraries (for now):
 * Change Traverse Class to something GC specific
 * Update documentation to say how GC is thread local
 * Send/Recv class
+* CELLO_NSTRACE flag
+* CELLO_NGC flag
+* memset with 0xDeadCe110
+* Make GC disable/enableable
 
 * Update examples
 * Update tests

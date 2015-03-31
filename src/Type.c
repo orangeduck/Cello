@@ -123,8 +123,8 @@ enum {
 
 static var Type_Alloc(void) {
 
-  struct CelloHeader* head = calloc(1, 
-    sizeof(struct CelloHeader) +
+  struct Header* head = calloc(1, 
+    sizeof(struct Header) +
     sizeof(struct Type) * 
     (CELLO_NBUILTINS + 
      CELLO_MAX_INSTANCES + 1));
@@ -363,8 +363,8 @@ static var Type_Of(var self) {
     }
 #endif
   
-  struct CelloHeader* head = 
-    (struct CelloHeader*)((char*)self - sizeof(struct CelloHeader));
+  struct Header* head = 
+    (struct Header*)((char*)self - sizeof(struct Header));
 
 #if CELLO_MAGIC_CHECK == 1
   if (head->magic isnt ((var)CELLO_MAGIC_NUM)) {

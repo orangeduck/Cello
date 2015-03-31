@@ -478,7 +478,7 @@ PT_FUNC(test_type_new) {
   del(test_obj2);
   del(test_obj3);
   
-  del(TestType);
+  del_root(TestType);
   
 }
 

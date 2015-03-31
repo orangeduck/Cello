@@ -144,7 +144,7 @@ static void Thread_New(var self, var args) {
   t->exc_obj = NULL;
   t->exc_msg = NULL;
   
-  t->tls = construct(alloc(Table), String, Ref);
+  t->tls = new_raw(Table, String, Ref);
   
 }
 
@@ -155,10 +155,10 @@ static void Thread_Del(var self) {
   CloseHandle(t->thread);
 #endif
   
-  if (t->args isnt NULL) { dealloc(destruct(t->args)); }
-  if (t->exc_msg isnt NULL) { dealloc(destruct(t->exc_msg)); }
+  if (t->args    isnt NULL) { del_raw(t->args); }
+  if (t->exc_msg isnt NULL) { del_raw(t->exc_msg); }
   
-  dealloc(destruct(t->tls));
+  del_raw(t->tls);
 }
 
 static uint64_t Thread_Hash(var self) {
@@ -217,7 +217,7 @@ static var Thread_Init_Run(var self) {
 #endif
   
   var x = call_with(t->func, t->args);
-  dealloc(destruct(t->args));
+  del_raw(t->args);
   t->args = NULL;
   
 #if CELLO_GC == 1
@@ -250,7 +250,7 @@ static DWORD Thread_Init_Run(var self) {
 #endif
   
   call_with(t->func, t->args);
-  dealloc(destruct(t->args));
+  del_raw(t->args);
   t->args = NULL;
   
 #if CELLO_GC == 1
@@ -274,7 +274,7 @@ static var Thread_Call(var self, var args) {
     atexit(Thread_TLS_Key_Delete);
   }
   
-  t->args = assign(alloc(type_of(args)), args);  
+  t->args = assign(alloc_raw(type_of(args)), args);  
   
   /* Call Init Thread & Run */
   
@@ -312,7 +312,7 @@ static var Thread_Call(var self, var args) {
 static var Thread_Main = NULL;
 
 static void Thread_Main_Del(void) {
-  dealloc(destruct(Thread_Main));
+  del_raw(Thread_Main);
 }
 
 static var Thread_Current(void) {
@@ -339,7 +339,7 @@ static var Thread_Current(void) {
   if (wrapper is NULL) {
   
     if (Thread_Main is NULL) {
-      Thread_Main = construct(alloc(Thread));
+      Thread_Main = new_raw(Thread);
       atexit(Thread_Main_Del);
     }
     
@@ -827,7 +827,7 @@ var exception_throw(var obj, const char* fmt, var args) {
   t->exc_obj = obj;
   
   if (t->exc_msg is NULL) {
-    t->exc_msg = construct(alloc(String), $S(""));
+    t->exc_msg = new_raw(String);
   }
   
   print_to_with(t->exc_msg, 0, fmt, args);

@@ -48,16 +48,16 @@ struct Array {
 };
 
 static size_t Array_Step(struct Array* a) {
-  return a->tsize + sizeof(struct CelloHeader);
+  return a->tsize + sizeof(struct Header);
 }
 
 static var Array_Item(struct Array* a, size_t i) {
-  return (char*)a->data + Array_Step(a) * i + sizeof(struct CelloHeader);
+  return (char*)a->data + Array_Step(a) * i + sizeof(struct Header);
 }
 
 static void Array_Alloc(struct Array* a, size_t i) {
   memset((char*)a->data + Array_Step(a) * i, 0, Array_Step(a));
-  struct CelloHeader* head = (struct CelloHeader*)((char*)a->data + Array_Step(a) * i);
+  struct Header* head = (struct Header*)((char*)a->data + Array_Step(a) * i);
   header_init(head, a->type, AllocData);
 }
 
@@ -389,7 +389,7 @@ static size_t Array_Sort_Partition(
   for (int64_t i = l; i < r; i++) {
     if (call(f, 
       Array_Get(a, $I(i)), 
-      (char*)a->sspace1 + sizeof(struct CelloHeader))) {
+      (char*)a->sspace1 + sizeof(struct Header))) {
       Array_Swap(a, i, s);
       s++;
     }
@@ -445,10 +445,10 @@ static void Array_Reserve(var self, var amount) {
 
 }
 
-static void Array_Traverse(var self, var func) {
+static void Array_Mark(var self, var gc, void(*mark)(var,void*)) {
   struct Array* a = self;
   for (size_t i = 0; i < a->nitems; i++) {
-    call_with(func, Array_Item(a, i));
+    mark(gc, Array_Item(a, i));
   }
 }
 
@@ -457,22 +457,22 @@ var Array = Cello(Array,
     Array_Name,        Array_Brief,
     Array_Description, Array_Examples,
     Array_Methods),
-  Instance(New,      Array_New, Array_Del),
-  Instance(Subtype,  Array_Subtype, NULL, NULL),
-  Instance(Assign,   Array_Assign),
-  Instance(Copy,     Array_Copy),
-  Instance(Traverse, Array_Traverse),
-  Instance(Eq,       Array_Eq),
-  Instance(Clear,    Array_Clear),
+  Instance(New,     Array_New, Array_Del),
+  Instance(Subtype, Array_Subtype, NULL, NULL),
+  Instance(Assign,  Array_Assign),
+  Instance(Copy,    Array_Copy),
+  Instance(Mark,    Array_Mark),
+  Instance(Eq,      Array_Eq),
+  Instance(Clear,   Array_Clear),
   Instance(Push,
-    Array_Push,      Array_Pop,
-    Array_Push_At,   Array_Pop_At),
-  Instance(Len,      Array_Len),
-  Instance(Get,      Array_Get, Array_Set, Array_Mem, Array_Rem),
-  Instance(Iter,     Array_Iter_Init, Array_Iter_Next),
-  Instance(Reverse,  Array_Reverse),
-  Instance(Sort,     Array_Sort_With),
-  Instance(Show,     Array_Show, NULL),
-  Instance(Reserve,  Array_Reserve));
+    Array_Push,     Array_Pop,
+    Array_Push_At,  Array_Pop_At),
+  Instance(Len,     Array_Len),
+  Instance(Get,     Array_Get, Array_Set, Array_Mem, Array_Rem),
+  Instance(Iter,    Array_Iter_Init, Array_Iter_Next),
+  Instance(Reverse, Array_Reverse),
+  Instance(Sort,    Array_Sort_With),
+  Instance(Show,    Array_Show, NULL),
+  Instance(Reserve, Array_Reserve));
 
   

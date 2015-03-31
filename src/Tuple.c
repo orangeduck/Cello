@@ -330,11 +330,11 @@ static void Tuple_Clear(var self) {
   t->items[0] = NULL;
 }
 
-static void Tuple_Traverse(var self, var func) {
+static void Tuple_Mark(var self, var gc, void(*mark)(var,void*)) {
   struct Tuple* t = self;
   size_t i = 0;
   while (t->items[i] isnt NULL) {
-    call_with(func, t->items[i]); i++;
+    mark(gc, t->items[i]); i++;
   }
 }
 
@@ -349,6 +349,6 @@ var Tuple = Cello(Tuple,
   Instance(Concat,   Tuple_Concat, Tuple_Push),
   Instance(Clear,    Tuple_Clear),
   Instance(Iter,     Tuple_Iter_Init, Tuple_Iter_Next),
-  Instance(Traverse, Tuple_Traverse),
+  Instance(Mark,     Tuple_Mark),
   Instance(Show,     Tuple_Show, NULL));
 

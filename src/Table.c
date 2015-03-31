@@ -67,8 +67,8 @@ static size_t Table_Ideal_Size(size_t size) {
 static size_t Table_Step(struct Table* t) {
   return
     sizeof(uint64_t) + 
-    sizeof(struct CelloHeader) + t->ksize + 
-    sizeof(struct CelloHeader) + t->vsize;
+    sizeof(struct Header) + t->ksize + 
+    sizeof(struct Header) + t->vsize;
 }
 
 static uint64_t Table_Key_Hash(struct Table* t, uint64_t i) {
@@ -78,15 +78,15 @@ static uint64_t Table_Key_Hash(struct Table* t, uint64_t i) {
 static var Table_Key(struct Table* t, uint64_t i) {
   return (char*)t->data + i * Table_Step(t) +
     sizeof(uint64_t) + 
-    sizeof(struct CelloHeader);  
+    sizeof(struct Header);  
 }
 
 static var Table_Val(struct Table* t, uint64_t i) {
   return (char*)t->data + i * Table_Step(t) +
     sizeof(uint64_t) + 
-    sizeof(struct CelloHeader) + 
+    sizeof(struct Header) + 
     t->ksize + 
-    sizeof(struct CelloHeader);  
+    sizeof(struct Header);  
 }
 
 static uint64_t Table_Probe(struct Table* t, uint64_t i, uint64_t h) {
@@ -265,12 +265,12 @@ static uint64_t Table_Swapspace_Hash(struct Table* t, var space) {
 }
 
 static var Table_Swapspace_Key(struct Table* t, var space) {
-  return (char*)space + sizeof(uint64_t) + sizeof(struct CelloHeader);
+  return (char*)space + sizeof(uint64_t) + sizeof(struct Header);
 }
 
 static var Table_Swapspace_Val(struct Table* t, var space) {
-  return (char*)space + sizeof(uint64_t) + sizeof(struct CelloHeader) +
-    t->ksize + sizeof(struct CelloHeader); 
+  return (char*)space + sizeof(uint64_t) + sizeof(struct Header) +
+    t->ksize + sizeof(struct Header); 
 }
 
 static void Table_Set_Move(var self, var key, var val, bool move) {
@@ -290,29 +290,29 @@ static void Table_Set_Move(var self, var key, var val, bool move) {
     uint64_t ihash = i+1;
     memcpy((char*)t->sspace0, &ihash, sizeof(uint64_t));
     memcpy((char*)t->sspace0 + sizeof(uint64_t),
-      (char*)key - sizeof(struct CelloHeader),
-      t->ksize + sizeof(struct CelloHeader));
+      (char*)key - sizeof(struct Header),
+      t->ksize + sizeof(struct Header));
     memcpy((char*)t->sspace0 + sizeof(uint64_t) +
-      sizeof(struct CelloHeader) + t->ksize, 
-      (char*)val - sizeof(struct CelloHeader),
-      t->vsize + sizeof(struct CelloHeader));
+      sizeof(struct Header) + t->ksize, 
+      (char*)val - sizeof(struct Header),
+      t->vsize + sizeof(struct Header));
   
   } else {
         
-    struct CelloHeader* khead = (struct CelloHeader*)
+    struct Header* khead = (struct Header*)
       ((char*)t->sspace0 + sizeof(uint64_t));
-    struct CelloHeader* vhead = (struct CelloHeader*)
+    struct Header* vhead = (struct Header*)
       ((char*)t->sspace0 + sizeof(uint64_t) 
-      + sizeof(struct CelloHeader) + t->ksize);
+      + sizeof(struct Header) + t->ksize);
     
     header_init(khead, t->ktype, AllocData);
     header_init(vhead, t->vtype, AllocData);
     
     uint64_t ihash = i+1;
     memcpy((char*)t->sspace0, &ihash, sizeof(uint64_t)); 
-    assign((char*)t->sspace0 + sizeof(uint64_t) + sizeof(struct CelloHeader), key);
-    assign((char*)t->sspace0 + sizeof(uint64_t) + sizeof(struct CelloHeader)
-      + t->ksize + sizeof(struct CelloHeader), val);
+    assign((char*)t->sspace0 + sizeof(uint64_t) + sizeof(struct Header), key);
+    assign((char*)t->sspace0 + sizeof(uint64_t) + sizeof(struct Header)
+      + t->ksize + sizeof(struct Header), val);
   }
   
   while (true) {
@@ -366,10 +366,10 @@ static void Table_Rehash(struct Table* t, size_t new_size) {
     
     if (h isnt 0) {
       var key = (char*)old_data + i * Table_Step(t) +
-        sizeof(uint64_t) + sizeof(struct CelloHeader);
+        sizeof(uint64_t) + sizeof(struct Header);
       var val = (char*)old_data + i * Table_Step(t) +
-        sizeof(uint64_t) + sizeof(struct CelloHeader) + 
-        t->ksize + sizeof(struct CelloHeader);
+        sizeof(uint64_t) + sizeof(struct Header) + 
+        t->ksize + sizeof(struct Header);
       Table_Set_Move(t, key, val, true);
     }
     
@@ -524,7 +524,7 @@ static var Table_Iter_Next(var self, var curr) {
       return NULL;
     }
 
-    uint64_t h = *(uint64_t*)((char*)curr - sizeof(struct CelloHeader) - sizeof(uint64_t));
+    uint64_t h = *(uint64_t*)((char*)curr - sizeof(struct Header) - sizeof(uint64_t));
     if (h isnt 0) { return curr; }
     
     curr = (char*)curr + Table_Step(t);
@@ -567,12 +567,12 @@ static void Table_Reserve(var self, var amount) {
   Table_Rehash(t, Table_Ideal_Size((size_t)nnslots));
 }
 
-static void Table_Traverse(var self, var func) {
+static void Table_Mark(var self, var gc, void(*mark)(var,void*)) {
   struct Table* t = self;
   for(size_t i = 0; i < t->nslots; i++) {
     if (Table_Key_Hash(t, i) isnt 0) {
-      call_with(func, Table_Key(t, i));
-      call_with(func, Table_Val(t, i));
+      mark(gc, Table_Key(t, i));
+      mark(gc, Table_Val(t, i));
     }
   }
 }
@@ -585,7 +585,7 @@ var Table = Cello(Table,
   Instance(Subtype,  Table_Key_Subtype, Table_Key_Subtype, Table_Val_Subtype),
   Instance(Assign,   Table_Assign),
   Instance(Copy,     Table_Copy),
-  Instance(Traverse, Table_Traverse),
+  Instance(Mark,     Table_Mark),
   Instance(Eq,       Table_Eq),
   Instance(Len,      Table_Len),
   Instance(Get,      Table_Get, Table_Set, Table_Mem, Table_Rem),

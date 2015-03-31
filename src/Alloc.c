@@ -1,22 +1,24 @@
 #include "Cello.h"
 
-struct CelloHeader* header(var self) {
-  return (struct CelloHeader*)((char*)self - sizeof(struct CelloHeader));
+struct Header* header(var self) {
+  return (struct Header*)((char*)self - sizeof(struct Header));
 }
 
-var header_init(struct CelloHeader* head, var type, int alloc) {
+var header_init(var head, var type, int alloc) {
   
-  head->type = type;
+  struct Header* self = head;
+  
+  self->type = type;
   
 #if CELLO_ALLOC_CHECK == 1
-  head->alloc = (var)(intptr_t)alloc;
+  self->alloc = (var)(intptr_t)alloc;
 #endif
   
 #if CELLO_MAGIC_CHECK == 1
-  head->magic = (var)CELLO_MAGIC_NUM;
+  self->magic = (var)CELLO_MAGIC_NUM;
 #endif
 
-  return ((char*)head) + sizeof(struct CelloHeader);
+  return ((char*)self) + sizeof(struct Header);
 }
 
 static const char* Alloc_Name(void) {
@@ -34,7 +36,7 @@ static const char* Alloc_Description(void) {
     "the `Size` class to determine the amount of memory to allocate.";
     "\n\n"
     "A custom allocator should be careful to also initialise the header for the "
-    "allocated memory using the function `CelloHeader_Init`. Cello objects "
+    "allocated memory using the function `Header_Init`. Cello objects "
     "without a header wont be recognised as such as so will throw errors when "
     "used with Cello functions."
     "\n\n"
@@ -56,23 +58,12 @@ static const char* Alloc_Methods(void) {
 var Alloc = Cello(Alloc, Instance(Doc, 
   Alloc_Name, Alloc_Brief, Alloc_Description, Alloc_Examples, Alloc_Methods));
 
-
-var alloc_stk(var type, var head, var data, size_t size) {
-  header_init(head, type, AllocStack);
-  memcpy((char*)head + sizeof(struct CelloHeader), data, size);
-  var self = (char*)head + sizeof(struct CelloHeader);  
-  return self;
-}
-
-var alloc(var type) {
+static var alloc_by(var type, int method) {
   
   struct Alloc* a = type_instance(type, Alloc);
-  if (a and a->alloc) {
-    return a->alloc();
-  }
-  
-  struct CelloHeader* head = calloc(1,
-    sizeof(struct CelloHeader) + size(type));
+  struct Header* head = a and a->alloc 
+    ? a->alloc() 
+    : calloc(1, sizeof(struct Header) + size(type));
   
 #if CELLO_MEMORY_CHECK == 1
   if (head is NULL) {
@@ -80,19 +71,45 @@ var alloc(var type) {
   }
 #endif
   
-  return header_init(head, type, AllocHeap);
+  var self = header_init(head, type, AllocHeap);
+  
+  switch (method) {
+    case 0:
+#if CELLO_GC == 1
+  gc_add(self, false);
+#endif
+    break;
+    case 1: break;
+    case 2:
+#if CELLO_GC == 1
+  gc_add(self, true);
+#endif
+    break;
+  }
+  
+  return self;
 }
 
-void dealloc(var self) {
+var alloc(var type)      { return alloc_by(type, 0); }
+var alloc_raw(var type)  { return alloc_by(type, 1); }
+var alloc_root(var type) { return alloc_by(type, 2); }
+
+static void dealloc_by(var self, int method) {
+
+  switch (method) {
+    case 0:
+#if CELLO_GC == 1
+  gc_rem(self);
+#endif
+    break;
+    case 1: break;
+  }
 
   struct Alloc* a = instance(self, Alloc);
   if (a and a->dealloc) {
     a->dealloc(self);
     return;
   }
-
-  struct CelloHeader* head = (struct CelloHeader*)(
-    (char*)self - sizeof(struct CelloHeader));
 
 #if CELLO_ALLOC_CHECK == 1
   if (self is NULL) {
@@ -119,12 +136,16 @@ void dealloc(var self) {
 #endif
   
 #if CELLO_ALLOC_CHECK == 1
-  //memset(header(self), 0, sizeof(struct CelloHeader) + size(type_of(self)));
+  //memset(header(self), 0, sizeof(struct Header) + size(type_of(self)));
 #endif
   
-  free(head);
+  free((char*)self - sizeof(struct Header));
   
 }
+
+void dealloc(var self)      { dealloc_by(self, 0); }
+void dealloc_raw(var self)  { dealloc_by(self, 1); }
+void dealloc_root(var self) { dealloc_by(self, 0); }
 
 static const char* New_Name(void) {
   return "New";
@@ -192,35 +213,28 @@ var destruct(var self) {
 }
 
 var new_with(var type, var args) { 
-  
-  var self = construct_with(alloc(type), args);
+  return construct_with(alloc(type), args);
+}
 
-#if CELLO_GC == 1
-  gc_add(self, false);
-#endif
-
-  return self;
+var new_raw_with(var type, var args) { 
+  return construct_with(alloc_raw(type), args);
 }
 
 var new_root_with(var type, var args) { 
-  
-  var self = construct_with(alloc(type), args);
-  
-#if CELLO_GC == 1
-  gc_add(self, true);
-#endif
-  
-  return self;
+  return construct_with(alloc_root(type), args);
 }
 
 void del(var self) {
   dealloc(destruct(self));
-
-#if CELLO_GC == 1
-  gc_rem(self);
-#endif
 }
 
+void del_raw(var self) {
+  dealloc_raw(destruct(self));
+}
+
+void del_root(var self) {
+  dealloc_root(destruct(self));
+}
 
 static const char* Copy_Name(void) {
   return "Copy";
@@ -271,13 +285,7 @@ var copy(var self) {
     return c->copy(self); 
   }
   
-  var obj = assign(alloc(type_of(self)), self);
-    
-#if CELLO_GC == 1
-  gc_add(obj, true);
-#endif
-    
-  return obj;
+  return assign(alloc(type_of(self)), self);
   
 }
 

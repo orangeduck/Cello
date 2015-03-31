@@ -160,7 +160,7 @@ typedef void* var;
   NULL, "__Size", (var)S,  \
   ##__VA_ARGS__,           \
   NULL, NULL, NULL}) +     \
-  sizeof(struct CelloHeader))
+  sizeof(struct Header))
 
 #define Instance(I, ...) \
   NULL, #I, &((struct I){__VA_ARGS__})
@@ -207,6 +207,8 @@ extern var IllegalInstructionError;
 extern var ProgramInterruptedError;
 extern var ProgramTerminationError;
 
+extern var GC;
+
 /* Data */
 
 enum {
@@ -216,7 +218,7 @@ enum {
   AllocData   = 0x04
 };
 
-struct CelloHeader {
+struct Header {
   var type;
 #if CELLO_ALLOC_CHECK == 1
   var alloc;
@@ -254,7 +256,6 @@ extern var Alloc;
 extern var New;
 extern var Assign;
 extern var Copy;
-extern var Traverse;
 extern var Subtype;
 extern var Eq;
 extern var Ord;
@@ -280,6 +281,7 @@ extern var Current;
 extern var Start;
 extern var Join;
 extern var Lock;
+extern var Mark;
 
 /* Signatures */
 
@@ -319,10 +321,6 @@ struct Assign {
 
 struct Copy {
   var (*copy)(var);
-};
-
-struct Traverse {
-  void (*traverse)(var, var);
 };
 
 struct Subtype {
@@ -453,6 +451,10 @@ struct Lock {
   bool (*lock_try)(var);
 };
 
+struct Mark {
+  void (*mark)(var, var, void(*)(var,void*));
+};
+
 /* Functions */
 
 void help(var self);
@@ -485,12 +487,28 @@ bool implements_method_at_offset(var self, var cls, size_t offset);
 var type_method_at_offset(var self, var cls, size_t offset, const char* method);
 bool type_implements_method_at_offset(var self, var cls, size_t offset);
 
-struct CelloHeader* header(var self);
-var header_init(struct CelloHeader* head, var type, int alloc);
+struct Header* header(var self);
+var header_init(var head, var type, int alloc);
 
-#define $(T, ...) alloc_stk(T, \
-  ((char[sizeof(struct CelloHeader) + sizeof(struct T)]){0}), \
-  &((struct T){__VA_ARGS__}), sizeof(struct T))
+size_t size(var type);
+
+var alloc(var type);
+var alloc_raw(var type);
+var alloc_root(var type);
+
+#define alloc_stack(T) header_init( \
+  (char[sizeof(struct Header) + sizeof(struct T)]){0}, T, AllocStack)
+
+void dealloc(var self);
+void dealloc_raw(var self);
+void dealloc_root(var self);
+
+#define construct(self, ...) construct_with(self, tuple(__VA_ARGS__))
+var construct_with(var self, var args);
+var destruct(var self);
+
+#define $(T, ...) \
+  memcpy(alloc_stack(T), &((struct T){__VA_ARGS__}), sizeof(struct T))
 
 #define $I(X) $(Int, X)
 #define $F(X) $(Float, X)
@@ -498,39 +516,31 @@ var header_init(struct CelloHeader* head, var type, int alloc);
 #define $R(X) $(Ref, X)
 #define $B(X) $(Box, X)
 
-var alloc_stk(var type, var mem, var data, size_t size);
-
-size_t size(var type);
-
-var alloc(var type);
-void dealloc(var self);
-
-#define construct(self, ...) construct_with(self, tuple(__VA_ARGS__))
-var construct_with(var self, var args);
-var destruct(var self);
+#define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, NULL))
+#define tuple_xp(X, A) X A
+#define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
 
 #define new(T, ...) new_with(T, tuple(__VA_ARGS__))
+#define new_raw(T, ...) new_raw_with(T, tuple(__VA_ARGS__))
 #define new_root(T, ...) new_root_with(T, tuple(__VA_ARGS__))
-#define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
 
+#define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
 #define new_$I(X) new_$(Int, X)
 #define new_$F(X) new_$(Float, X)
 #define new_$S(X) new_$(String, X)
 #define new_$R(X) new_$(Ref, X)
 #define new_$B(X) new_$(Box, X)
 
-#define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, NULL))
-#define tuple_xp(X, A) X A
-#define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
-
 var new_with(var type, var args);
+var new_raw_with(var type, var args);
 var new_root_with(var type, var args);
+
 void del(var self);
+void del_raw(var self);
+void del_root(var self);
 
 var assign(var self, var obj);
 var copy(var obj);
-
-void traverse(var self, var func);
 
 var subtype(var self);
 var key_subtype(var self);
