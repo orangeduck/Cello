@@ -61,28 +61,31 @@ var Alloc = Cello(Alloc, Instance(Doc,
 static var alloc_by(var type, int method) {
   
   struct Alloc* a = type_instance(type, Alloc);
-  struct Header* head = a and a->alloc 
-    ? a->alloc() 
-    : calloc(1, sizeof(struct Header) + size(type));
-  
+  var self;
+  if (a and a->alloc) {
+    self = a->alloc();
+  } else {
+    struct Header* head = calloc(1, sizeof(struct Header) + size(type));  
+
 #if CELLO_MEMORY_CHECK == 1
-  if (head is NULL) {
-    throw(OutOfMemoryError, "Cannot create new '%s', out of memory!", type);
-  }
+    if (head is NULL) {
+      throw(OutOfMemoryError, "Cannot create new '%s', out of memory!", type);
+    }
 #endif
-  
-  var self = header_init(head, type, AllocHeap);
-  
+    
+    self = header_init(head, type, AllocHeap);
+  }
+
   switch (method) {
     case 0:
 #if CELLO_GC == 1
-  gc_add(self, false);
+  set(current(GC), self, $I(0));
 #endif
     break;
     case 1: break;
     case 2:
 #if CELLO_GC == 1
-  gc_add(self, true);
+  set(current(GC), self, $I(1));
 #endif
     break;
   }
@@ -99,7 +102,7 @@ static void dealloc_by(var self, int method) {
   switch (method) {
     case 0:
 #if CELLO_GC == 1
-  gc_rem(self);
+  rem(current(GC), self);
 #endif
     break;
     case 1: break;
@@ -139,7 +142,7 @@ static void dealloc_by(var self, int method) {
   //memset(header(self), 0, sizeof(struct Header) + size(type_of(self)));
 #endif
   
-  free((char*)self - sizeof(struct Header));
+  free(((char*)self) - sizeof(struct Header));
   
 }
 

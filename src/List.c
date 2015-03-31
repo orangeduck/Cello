@@ -372,6 +372,7 @@ static void List_Reserve(var self, var amount) {
 
 static void List_Mark(var self, var gc, void(*mark)(var,void*)) {
   struct List* l = self;
+  if (l->head is NULL) { return; }
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
     mark(gc, item);

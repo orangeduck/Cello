@@ -213,7 +213,7 @@ static var Thread_Init_Run(var self) {
   
 #if CELLO_GC == 1
   var bottom = NULL;
-  gc_init(&bottom);
+  var gc = new_raw(GC, $R(&bottom));
 #endif
   
   var x = call_with(t->func, t->args);
@@ -221,7 +221,7 @@ static var Thread_Init_Run(var self) {
   t->args = NULL;
   
 #if CELLO_GC == 1
-  gc_finish();
+  del_raw(gc);
 #endif
   
   return x;
@@ -246,7 +246,7 @@ static DWORD Thread_Init_Run(var self) {
   
 #if CELLO_GC == 1
   var bottom = NULL;
-  gc_init(&bottom);
+  var gc = new_raw(GC, $R(&bottom));
 #endif
   
   call_with(t->func, t->args);
@@ -254,7 +254,7 @@ static DWORD Thread_Init_Run(var self) {
   t->args = NULL;
   
 #if CELLO_GC == 1
-  gc_finish();
+  del_raw(gc);
 #endif
   
   return 0;

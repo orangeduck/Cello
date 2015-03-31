@@ -83,6 +83,7 @@ struct GC {
   uintptr_t maxptr;
   uintptr_t minptr;
   var bottom;
+  bool running;
 };
 
 static uint64_t GC_Probe(struct GC* gc, uint64_t i, uint64_t h) {
@@ -106,7 +107,7 @@ static size_t GC_Ideal_Size(size_t size) {
   }
 }
 
-static void GC_Set(struct GC* gc, var ptr, bool root);
+static void GC_Set_Ptr(struct GC* gc, var ptr, bool root);
 
 static void GC_Rehash(struct GC* gc, size_t new_size) {
 
@@ -125,7 +126,7 @@ static void GC_Rehash(struct GC* gc, size_t new_size) {
   
   for (size_t i = 0; i < old_size; i++) {
     if (old_entries[i].hash isnt 0) {
-      GC_Set(gc, old_entries[i].ptr, old_entries[i].root);
+      GC_Set_Ptr(gc, old_entries[i].ptr, old_entries[i].root);
     }
   }
   
@@ -149,7 +150,7 @@ static uint64_t GC_Hash(var ptr) {
   return ((uintptr_t)ptr) >> 3;
 }
 
-static void GC_Set(struct GC* gc, var ptr, bool root) {
+static void GC_Set_Ptr(struct GC* gc, var ptr, bool root) {
   
   uint64_t i = GC_Hash(ptr) % gc->nslots;
   uint64_t j = 0;
@@ -176,7 +177,23 @@ static void GC_Set(struct GC* gc, var ptr, bool root) {
   
 }
 
-static void GC_Rem(struct GC* gc, var ptr) {
+static bool GC_Mem_Ptr(struct GC* gc, var ptr) {
+
+  if (gc->nslots is 0) { return false; }
+  
+  uint64_t i = GC_Hash(ptr) % gc->nslots;
+  uint64_t j = 0;
+  
+  while (true) {
+    uint64_t h = gc->entries[i].hash;
+    if (h is 0 or j > GC_Probe(gc, i, h)) { return false; }
+    if (gc->entries[i].ptr == ptr) { return true; }
+    i = (i+1) % gc->nslots; j++;
+  }
+
+}
+
+static void GC_Rem_Ptr(struct GC* gc, var ptr) {
   
   if (gc->nslots is 0) { return; }
   
@@ -403,58 +420,71 @@ static var GC_Current(void) {
 }
 
 static void GC_New(var self, var args) {
-  
-}
-
-static void GC_Del(var self) {
-  
-}
-
-var GC = Cello(GC,
-  Instance(Doc, GC_Name, GC_Brief, GC_Description, GC_Examples, GC_Methods),
-  Instance(Current, GC_Current));
-
-void gc_finish(void) {
-  struct GC* gc = current(GC);
-  GC_Sweep(gc);
-  free(gc->entries);
-  dealloc_raw(gc);
-}
-
-void gc_init(var bottom) {
-  struct GC* gc = alloc_raw(GC);
-  gc->bottom = bottom;
+  struct GC* gc = self;
+  struct Ref* bt = cast(get(args, $I(0)), Ref);
+  gc->bottom = bt->val;
   gc->maxptr = 0;
   gc->minptr = UINTPTR_MAX;
+  gc->running = true;
   set(current(Thread), $S(GC_TLS_KEY), $R(gc));
 }
 
-void gc_add(var ptr, bool root) {
-  struct GC* gc = current(GC);
+static void GC_Del(var self) {
+  struct GC* gc = self;
+  GC_Sweep(gc);
+  free(gc->entries);
+}
+
+static void GC_Set(var self, var key, var val) {
+  struct GC* gc = self;
+  if (not gc->running) { return; }
   gc->nitems++;
-  gc->maxptr = (uintptr_t)ptr > gc->maxptr ? (uintptr_t)ptr : gc->maxptr;
-  gc->minptr = (uintptr_t)ptr < gc->minptr ? (uintptr_t)ptr : gc->minptr;
+  gc->maxptr = (uintptr_t)key > gc->maxptr ? (uintptr_t)key : gc->maxptr;
+  gc->minptr = (uintptr_t)key < gc->minptr ? (uintptr_t)key : gc->minptr;
   GC_Resize_More(gc);
-  GC_Set(gc, ptr, root);
+  GC_Set_Ptr(gc, key, (bool)c_int(val));
   if (gc->nitems > gc->mitems) {
     GC_Mark(gc);
     GC_Sweep(gc);
   }
-  //GC_Mark(gc);
-  //GC_Sweep(gc);
 }
 
-void gc_rem(var ptr) {
-  struct GC* gc = current(GC);
-  GC_Rem(gc, ptr);
+static void GC_Rem(var self, var key) {
+  struct GC* gc = self;
+  if (not gc->running) { return; }
+  GC_Rem_Ptr(gc, key);
   GC_Resize_Less(gc);
   gc->mitems = gc->nitems + gc->nitems / 2 + 1;
 }
 
-void gc_run(void) {
-  struct GC* gc = current(GC);
-  GC_Mark(gc);
-  GC_Sweep(gc);
+static bool GC_Mem(var self, var key) {
+  return GC_Mem_Ptr(self, key);
+}
+
+static void GC_Start(var self) {
+  struct GC* gc = self;
+  gc->running = true;
+}
+
+static void GC_Stop(var self) {
+  struct GC* gc = self;
+  gc->running = false;
+}
+
+static bool GC_Running(var self) {
+  struct GC* gc = self;
+  return gc->running;
+}
+
+var GC = Cello(GC,
+  Instance(Doc, GC_Name, GC_Brief, GC_Description, GC_Examples, GC_Methods),
+  Instance(New, GC_New, GC_Del),
+  Instance(Get, NULL, GC_Set, GC_Mem, GC_Rem),
+  Instance(Start, GC_Start, GC_Stop, GC_Running),
+  Instance(Current, GC_Current));
+
+void main_exit_gc(void) {
+  del_raw(current(GC));
 }
 
 #endif

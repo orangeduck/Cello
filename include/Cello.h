@@ -69,10 +69,8 @@
 #ifndef CELLO_CACHE
 #define CELLO_CACHE 1
 #define CELLO_CACHE_HEADER \
-  NULL, NULL, NULL, \
-  NULL, NULL, NULL, \
-  NULL, NULL, NULL, \
-  NULL, NULL, NULL, \
+  NULL, NULL, NULL, NULL, NULL, NULL, \
+  NULL, NULL, NULL, NULL, NULL, NULL, \
   NULL, NULL, NULL,
 #define CELLO_CACHE_NUM 15
 #else
@@ -207,8 +205,6 @@ extern var IllegalInstructionError;
 extern var ProgramInterruptedError;
 extern var ProgramTerminationError;
 
-extern var GC;
-
 /* Data */
 
 enum {
@@ -281,7 +277,6 @@ extern var Current;
 extern var Start;
 extern var Join;
 extern var Lock;
-extern var Mark;
 
 /* Signatures */
 
@@ -449,10 +444,6 @@ struct Lock {
   void (*lock)(var);
   void (*unlock)(var);
   bool (*lock_try)(var);
-};
-
-struct Mark {
-  void (*mark)(var, var, void(*)(var,void*));
 };
 
 /* Functions */
@@ -698,22 +689,24 @@ var exception_catch(var args);
 
 #if CELLO_GC == 1
 
-void gc_init(var bottom);
-void gc_finish(void);
-void gc_add(var ptr, bool root);
-void gc_rem(var ptr);
-void gc_run(void);
+extern var GC;
+extern var Mark;
 
-int gc_main(int argc, char** argv);
+struct Mark {
+  void (*mark)(var, var, void(*)(var,void*));
+};
+
+int main_gc(int argc, char** argv);
+void main_exit_gc(void);
 
 #define main(...) \
   main(int argc, char** argv) { \
     var bottom = NULL; \
-    gc_init(&bottom); \
-    atexit(gc_finish); \
-    return gc_main(argc, argv); \
+    new_raw(GC, $R(&bottom)); \
+    atexit(main_exit_gc); \
+    return main_gc(argc, argv); \
   }; \
-  int gc_main(__VA_ARGS__)
+  int main_gc(__VA_ARGS__)
 
 #endif
   
