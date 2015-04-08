@@ -16,20 +16,25 @@ const char* Reserve_Description(void) {
     "is known that many items are going to be added at a later date.";
 }
 
-/* TODO */
-const char* Reserve_Examples(void) {
-  return "";
+static struct DocMethod* Reserve_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "reserve", 
+      "void reserve(var self, var amount);",
+      "Reserve some `amount` of resource for object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-const char* Reserve_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Reserve = Cello(Reserve, 
   Instance(Doc,
     Reserve_Name, Reserve_Brief, Reserve_Description, 
-    Reserve_Examples, Reserve_Methods));
+    NULL, Reserve_Methods));
   
 void reserve(var self, var amount) {
   method(self, Reserve, reserve, amount);

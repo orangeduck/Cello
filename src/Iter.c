@@ -16,19 +16,31 @@ static const char* Iter_Description(void) {
     "as various other components of Cello.";
 }
 
-/* TODO */
-static const char* Iter_Examples(void) {
-  return "";
+static struct DocMethod* Iter_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "iter_init", 
+      "var iter_init(var self);\n    "
+      "var iter_last(var self);",
+      "Return the initial item (or final item) in the iteration over `self`."
+    }, {
+      "iter_next", 
+      "var iter_next(var self, var curr);\n    "
+      "var iter_prev(var self, var curr);",
+      "Given the current item `curr`, return the next (or previous) item in "
+      "the iteration over `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Iter_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Iter = Cello(Iter,
   Instance(Doc,
-    Iter_Name, Iter_Brief, Iter_Description, Iter_Examples, Iter_Methods));
+    Iter_Name, Iter_Brief, Iter_Description, NULL, Iter_Methods));
 
 var iter_init(var self) {
   return method(self, Iter, iter_init);

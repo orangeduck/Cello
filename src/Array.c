@@ -27,15 +27,7 @@ static const char* Array_Description(void) {
     "[std::vector](http://www.cplusplus.com/reference/vector/vector/)";
 }
 
-/* TODO */
-static const char* Array_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Array_Methods(void) {
-  return "";
-};
+/* TODO: Examples */
 
 struct Array {
   var type;
@@ -414,13 +406,14 @@ static void Array_Sort_With(var self, var f) {
 
 static int Array_Show(var self, var output, int pos) {
   struct Array* a = self;
-  pos = print_to(output, pos, "<'Array' At 0x%p [", self);
+  int ipos = pos;
+  pos += print_to(output, pos, "<'Array' At 0x%p [", self);
   for(size_t i = 0; i < a->nitems; i++) {
-    pos = print_to(output, pos, "%$", Array_Item(a, i));
-    if (i < a->nitems-1) { pos = print_to(output, pos, ", "); }
+    pos += print_to(output, pos, "%$", Array_Item(a, i));
+    if (i < a->nitems-1) { pos += print_to(output, pos, ", "); }
   }
-  pos = print_to(output, pos, "]>");
-  return pos;
+  pos += print_to(output, pos, "]>");
+  return pos - ipos;
 }
 
 static void Array_Reserve(var self, var amount) {
@@ -445,18 +438,18 @@ static void Array_Reserve(var self, var amount) {
 
 }
 
-static void Array_Mark(var self, var gc, void(*mark)(var,void*)) {
+static void Array_Mark(var self, var gc, void(*f)(var,void*)) {
   struct Array* a = self;
   for (size_t i = 0; i < a->nitems; i++) {
-    mark(gc, Array_Item(a, i));
+    f(gc, Array_Item(a, i));
   }
 }
 
 var Array = Cello(Array,
   Instance(Doc,
     Array_Name,        Array_Brief,
-    Array_Description, Array_Examples,
-    Array_Methods),
+    Array_Description, NULL,
+    NULL),
   Instance(New,     Array_New, Array_Del),
   Instance(Subtype, Array_Subtype, NULL, NULL),
   Instance(Assign,  Array_Assign),

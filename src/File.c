@@ -15,20 +15,53 @@ static const char* Stream_Description(void) {
     "performed on File-like objects.";
 }
 
-/* TODO */
-static const char* Stream_Examples(void) {
-  return "";
+static struct DocMethod* Stream_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "sopen", 
+      "var sopen(var self, var resource, var options);",
+      "Open the stream `self` with a given `resource` and `options`."
+    }, {
+      "sclose", 
+      "void sclose(var self);",
+      "Close the stream `self`."
+    }, {
+      "sseek", 
+      "void sseek(var self, int64_t pos, int origin);",
+      "Seek to the position `pos` from some `origin` in the stream `self`."
+    }, {
+      "stell", 
+      "int64_t stell(var self);",
+      "Return the current position of the stream `stell`."
+    }, {
+      "sflush", 
+      "void sflush(var self);",
+      "Flush the buffered contents of stream `self`."
+    }, {
+      "seof", 
+      "bool seof(var self);",
+      "Returns true if there is no more information in the stream."
+    }, {
+      "sread", 
+      "size_t sread(var self, void* output, size_t size);",
+      "Read `size` bytes from the stream `self` and write them to `output`."
+    }, {
+      "swrite", 
+      "size_t swrite(var self, void* input, size_t size);",
+      "Write `size` bytes to the stream `self` and read them from `input`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Stream_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Stream = Cello(Stream,
   Instance(Doc, 
     Stream_Name, Stream_Brief, Stream_Description,
-    Stream_Examples, Stream_Methods));
+    NULL, Stream_Methods));
 
 var sopen(var self, var resource, var options) {
   return method(self, Stream, sopen, resource, options);
@@ -76,15 +109,7 @@ static const char* File_Description(void) {
     "file in the operating system.";
 }
 
-/* TODO */
-static const char* File_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* File_Methods(void) {
-  return "";
-}
+/* TODO: Examples Methods */
 
 static var File_Open(var self, var filename, var access);
 static void File_Close(var self);
@@ -232,7 +257,7 @@ static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
 
 var File = Cello(File,
   Instance(Doc,
-    File_Name, File_Brief, File_Description, File_Examples, File_Methods),
+    File_Name, File_Brief, File_Description, NULL, NULL),
   Instance(New, File_New, File_Del),
   Instance(Start, NULL, File_Close, NULL),
   Instance(Stream,
@@ -257,15 +282,7 @@ static const char* Process_Description(void) {
     "to a location you are writing it as input to a process.";
 }
 
-/* TODO */
-static const char* Process_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Process_Methods(void) {
-  return "";
-}
+/* TODO: Examples Methods */
 
 static var Process_Open(var self, var filename, var access);
 static void Process_Close(var self);
@@ -413,7 +430,7 @@ static int Process_Format_From(var self, int pos, const char* fmt, va_list va) {
 var Process = Cello(Process,
   Instance(Doc,
     Process_Name, Process_Brief, Process_Description, 
-    Process_Examples, Process_Methods),
+    NULL, NULL),
   Instance(New,  Process_New, Process_Del),
   Instance(Start, NULL, Process_Close, NULL),
   Instance(Stream,

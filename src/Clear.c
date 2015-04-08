@@ -14,20 +14,25 @@ const char* Clear_Description(void) {
     "object, such as to remove all of the items from an `Array` or `Table`.";
 }
 
-/* TODO */
-const char* Clear_Examples(void) {
-  return "";
+static struct DocMethod* Clear_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "clear", 
+      "void clear(var self);",
+      "Clear the object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-const char* Clear_Methods(void) {
-  return "";
-}
+/* TODO: Examples, Methods */
 
 var Clear = Cello(Clear, 
   Instance(Doc,
     Clear_Name, Clear_Brief, Clear_Description, 
-    Clear_Examples, Clear_Methods));
+    NULL, Clear_Methods));
   
 void clear(var self) {
   method(self, Clear, clear);

@@ -19,26 +19,31 @@ static const char* Current_Description(void) {
     "Design Pattern](http://en.wikipedia.org/wiki/Singleton_pattern)";
 }
 
-/* TODO */
-static const char* Current_Examples(void) {
-  return "";
+static struct DocMethod* Current_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "current", 
+      "var current(var type);",
+      "Returns the current active object of the given `type`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Current_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Current = Cello(Current,
   Instance(Doc,
     Current_Name, Current_Brief, Current_Description,
-    Current_Examples, Current_Methods));
+    NULL, Current_Methods));
 
 var current(var type) {
   return type_method(type, Current, current);
 }
 
-/* TODO: Is this better named Wait? */
+/* TODO: Is this better named Wait? Could it become part of `Start`? */
 
 static const char* Join_Name(void) {
   return "Join";
@@ -55,20 +60,25 @@ static const char* Join_Description(void) {
     "implemented by `Thread`.";
 }
 
-/* TODO */
-static const char* Join_Examples(void) {
-  return "";
+static struct DocMethod* Join_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "join", 
+      "void join(var self);",
+      "Wait for the object `self` to enter some state."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Join_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Join = Cello(Join,
   Instance(Doc,
     Join_Name, Join_Brief, Join_Description,
-    Join_Examples, Join_Methods));
+    NULL, Join_Methods));
 
 void join(var self) {
   method(self, Join, join);
@@ -119,15 +129,7 @@ static const char* Thread_Description(void) {
     "using WinThreads on Windows and pthreads otherwise.";
 }
 
-/* TODO */
-static const char* Thread_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Thread_Methods(void) {
-  return "";
-}
+/* TODO: Examples Methods */
 
 static void Thread_New(var self, var args) {
   
@@ -412,14 +414,20 @@ static bool Thread_Mem(var self, var key) {
   return mem(t->tls, key);
 }
 
+static void Thread_Mark(var self, var gc, void(*f)(var,void*)) {
+  struct Thread* t = self;
+  mark(t->tls, gc, f);
+}
+
 var Thread = Cello(Thread,
   Instance(Doc,
     Thread_Name, Thread_Brief, Thread_Description, 
-    Thread_Examples, Thread_Methods),
+    NULL, NULL),
   Instance(New,     Thread_New, Thread_Del),
   Instance(Call,    Thread_Call),
   Instance(Current, Thread_Current),
   Instance(Join,    Thread_Join),
+  Instance(Mark,    Thread_Mark),
   Instance(Start,   Thread_Start, Thread_Stop, Thread_Running),
   Instance(C_Int,   Thread_C_Int),
   Instance(Get,     Thread_Get, Thread_Set, Thread_Mem));
@@ -439,20 +447,34 @@ static const char* Lock_Description(void) {
     "mutual exclusion across Threads.";
 }
 
-/* TODO */
-static const char* Lock_Examples(void) {
-  return "";
+static struct DocMethod* Lock_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "lock", 
+      "void lock(var self);",
+      "Wait until a lock can be aquired on object `self`."
+    }, {
+      "lock_try", 
+      "bool lock_try(var self);",
+      "Try to acquire a lock on object `self`. Returns `true` on success and "
+      "`false` if the resource is busy."
+    }, {
+      "unlock", 
+      "void unlock(var self);",
+      "Release lock on object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Lock_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Lock = Cello(Lock,
   Instance(Doc,
     Lock_Name, Lock_Brief, Lock_Description,
-    Lock_Examples, Lock_Methods));
+    NULL, Lock_Methods));
 
 void lock(var self) {
   method(self, Lock, lock);
@@ -488,15 +510,7 @@ static const char* Mutex_Description(void) {
     "access of some resource.";
 }
 
-/* TODO */
-static const char* Mutex_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Mutex_Methods(void) {
-  return "";
-}
+/* TODO: Examples Methods */
 
 static void Mutex_New(var self, var args) {
   struct Mutex* m = self;
@@ -563,7 +577,7 @@ static void Mutex_Unlock(var self) {
 
 var Mutex = Cello(Mutex,
   Instance(Doc, 
-    Mutex_Name, Mutex_Brief, Mutex_Description, Mutex_Examples, Mutex_Methods),
+    Mutex_Name, Mutex_Brief, Mutex_Description, NULL, NULL),
   Instance(New,    Mutex_New, Mutex_Del),
   Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
   Instance(Start,  Mutex_Lock, Mutex_Unlock, NULL));
@@ -670,6 +684,7 @@ size_t exception_depth(void) {
   return t->exc_depth;
 }
 
+#ifndef CELLO_NSTRACE
 #if defined(__unix__) || defined(__APPLE__)
 
 static void Exception_Backtrace(void) {
@@ -801,6 +816,12 @@ static void Exception_Backtrace(void) {
 
 static void Exception_Backtrace(void) {}
 
+#endif
+
+#else
+
+static void Exception_Backtrace(void) {}
+  
 #endif
 
 static void Exception_Error(void)  {

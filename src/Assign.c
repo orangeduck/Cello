@@ -24,20 +24,26 @@ static const char* Assign_Description(void) {
     "memory.";
 }
 
-/* TODO */
-static const char* Assign_Examples(void) {
-  return "";
+static struct DocMethod* Assign_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "assign", 
+      "var assign(var self, var obj);",
+      "Assign the object `obj` to the object `self`. The assigned object "
+      "`self` is returned."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Assign_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Assign = Cello(Assign,
   Instance(Doc,
     Assign_Name, Assign_Brief, Assign_Description,
-    Assign_Examples, Assign_Methods));
+    NULL, Assign_Methods));
 
 var assign(var self, var obj) {
   
@@ -48,9 +54,9 @@ var assign(var self, var obj) {
     return self;
   }
   
-  if (type_of(self) is type_of(obj)) {
-    memcpy(self, obj, size(type_of(self)));
-    return self;
+  size_t s = size(type_of(self));
+  if (type_of(self) is type_of(obj) and s) {
+    return memcpy(self, obj, s);
   }
   
   return throw(TypeError,

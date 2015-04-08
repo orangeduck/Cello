@@ -14,21 +14,35 @@ static const char* C_Str_Description(void) {
     "as a C style String.";
 }
 
-/* TODO */
-static const char* C_Str_Examples(void) {
-  return "";
+static struct DocMethod* C_Str_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "c_str", 
+      "char* c_str(var self);",
+      "Returns the object `self` represented as a `char*`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* C_Str_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var C_Str = Cello(C_Str,
   Instance(Doc,
     C_Str_Name, C_Str_Brief, C_Str_Description, 
-    C_Str_Examples, C_Str_Methods));
+    NULL, C_Str_Methods));
 
+char* c_str(var self) {
+  
+  if (type_of(self) is String) {
+    return ((struct String*)self)->val;
+  }
+  
+  return method(self, C_Str, c_str);
+}
+    
 static const char* String_Name(void) {
   return "String";
 }
@@ -44,16 +58,6 @@ static const char* String_Description(void) {
     "\n\n"
     "For strings allocated on the heap a number of extra operations are "
     "provided overs standard C strings such as concatenation.";
-}
-
-/* TODO */
-static const char* String_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* String_Methods(void) {
-  return "";
 }
 
 static void String_Del(var self) {
@@ -275,7 +279,7 @@ static int String_Look(var self, var input, int pos) {
 var String = Cello(String,
   Instance(Doc,
     String_Name, String_Brief, String_Description,
-    String_Examples, String_Methods),
+    NULL, NULL),
   Instance(New,     NULL, String_Del),
   Instance(Assign,  String_Assign),
   Instance(Eq,      String_Eq),

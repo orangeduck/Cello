@@ -18,20 +18,45 @@ const char* Doc_Description(void) {
     "Documentation is written in Markdown.";
 }
 
-/* TODO */
-const char* Doc_Examples(void) {
-  return "";
+static struct DocMethod* Doc_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "name", 
+      "const char* name(var type);",
+      "Return the name of a given `type`."
+    }, {
+      "brief", 
+      "const char* brief(var type);",
+      "Return a brief description of a given `type`."
+    }, {
+      "description", 
+      "const char* description(var type);",
+      "Return a longer description of a given `type`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-const char* Doc_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Doc = Cello(Doc,
   Instance(Doc,
     Doc_Name, Doc_Brief, Doc_Description,
-    Doc_Examples, Doc_Methods));
+    NULL, Doc_Methods));
+    
+const char* name(var type) {
+  return type_method(type, Doc, name);
+}
+  
+const char* brief(var type) {
+  return type_method(type, Doc, brief);
+}
+
+const char* description(var type) {
+  return type_method(type, Doc, description);
+}
     
 const char* Help_Name(void) {
   return "Help";
@@ -49,20 +74,27 @@ const char* Help_Description(void) {
     "by the `Doc` class in a friendly way.";
 }
 
-/* TODO */
-const char* Help_Examples(void) {
-  return "";
+static struct DocMethod* Help_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "help", 
+      "void help(var self);\n    "
+      "int help_to(var out, int pos, var self);",
+      "Print help information about the object `self` either to `stdout` or "
+      "to the object `out` at some position `pos`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-const char* Help_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Help = Cello(Help,
   Instance(Doc,
     Help_Name, Help_Brief, Help_Description,
-    Help_Examples, Help_Methods));
+    NULL, Help_Methods));
     
 static int Help_Title(var out, int pos, int length, char type) {
   int spos = pos;

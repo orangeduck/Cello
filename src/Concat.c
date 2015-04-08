@@ -15,25 +15,34 @@ static const char* Concat_Description(void) {
     "collections or strings.";
 }
 
-/* TODO */
-static const char* Concat_Examples(void) {
-  return "";
+static struct DocMethod* Concat_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "append", 
+      "void append(var self, var obj);",
+      "Append the object `obj` to the object `self`."
+    }, {
+      "concat", 
+      "void concat(var self, var obj);",
+      "Concatenate the object `obj` to the object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Concat_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Concat = Cello(Concat,
   Instance(Doc,
     Concat_Name, Concat_Brief, Concat_Description,
-    Concat_Examples, Concat_Methods));
+    NULL, Concat_Methods));
 
 void append(var self, var obj) {
-  return method(self, Concat, append, obj);
+  method(self, Concat, append, obj);
 }
 
 void concat(var self, var obj) {
-  return method(self, Concat, concat, obj);
+  method(self, Concat, concat, obj);
 }

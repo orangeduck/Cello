@@ -15,16 +15,6 @@ static const char* List_Description(void) {
     "expected operations.";
 }
 
-/* TODO */
-static const char* List_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* List_Methods(void) {
-  return "";
-};
-
 struct List {
   var type;
   var head;
@@ -338,15 +328,16 @@ static void List_Reverse(var self) {
 
 static int List_Show(var self, var output, int pos) {
   struct List* l = self;
-  pos = print_to(output, pos, "<'List' At 0x%p [", self);
+  int ipos = pos;
+  pos += print_to(output, pos, "<'List' At 0x%p [", self);
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
-    pos = print_to(output, pos, "%$", item);
+    pos += print_to(output, pos, "%$", item);
     item = *List_Next(l, item);
-    if (item isnt l->tail) { pos = print_to(output, pos, ", "); }
+    if (item isnt l->tail) { pos += print_to(output, pos, ", "); }
   }
-  pos = print_to(output, pos, "]>");
-  return pos;
+  pos += print_to(output, pos, "]>");
+  return pos - ipos;
 }
 
 static void List_Reserve(var self, var amount) {
@@ -370,12 +361,12 @@ static void List_Reserve(var self, var amount) {
   
 }
 
-static void List_Mark(var self, var gc, void(*mark)(var,void*)) {
+static void List_Mark(var self, var gc, void(*f)(var,void*)) {
   struct List* l = self;
   if (l->head is NULL) { return; }
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
-    mark(gc, item);
+    f(gc, item);
     item = *List_Next(l, item);
   }
 }
@@ -383,8 +374,8 @@ static void List_Mark(var self, var gc, void(*mark)(var,void*)) {
 var List = Cello(List,
   Instance(Doc,
     List_Name,        List_Brief,
-    List_Description, List_Examples,
-    List_Methods),
+    List_Description, NULL,
+    NULL),
   Instance(New,     List_New, List_Del),
   Instance(Subtype, List_Subtype, NULL, NULL),
   Instance(Assign,  List_Assign),

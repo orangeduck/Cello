@@ -16,16 +16,6 @@ static const char* Table_Description(void) {
     "into the collection using the `Assign` class.";
 }
 
-/* TODO */
-static const char* Table_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Table_Methods(void) {
-  return "";
-}
-
 struct Table {
   var data;
   var ktype;
@@ -535,22 +525,23 @@ static var Table_Iter_Next(var self, var curr) {
 
 static int Table_Show(var self, var output, int pos) {
   struct Table* t = self;
+  int ipos = pos;
   
-  pos = print_to(output, pos, "<'Table' At 0x%p {", self);
+  pos += print_to(output, pos, "<'Table' At 0x%p {", self);
   
   size_t j =0;
   for(size_t i = 0; i < t->nslots; i++) {
     if (Table_Key_Hash(t, i) isnt 0) {
-      pos = print_to(output, pos, "%$:%$",
+      pos += print_to(output, pos, "%$:%$",
         Table_Key(t, i), Table_Val(t, i));
-      if (j < Table_Len(t)-1) { pos = print_to(output, pos, ", "); }
+      if (j < Table_Len(t)-1) { pos += print_to(output, pos, ", "); }
       j++;
     }
   }
   
-  pos = print_to(output, pos, "}>");
+  pos += print_to(output, pos, "}>");
   
-  return pos;
+  return pos - ipos;
 }
 
 static void Table_Reserve(var self, var amount) {
@@ -567,12 +558,12 @@ static void Table_Reserve(var self, var amount) {
   Table_Rehash(t, Table_Ideal_Size((size_t)nnslots));
 }
 
-static void Table_Mark(var self, var gc, void(*mark)(var,void*)) {
+static void Table_Mark(var self, var gc, void(*f)(var,void*)) {
   struct Table* t = self;
   for(size_t i = 0; i < t->nslots; i++) {
     if (Table_Key_Hash(t, i) isnt 0) {
-      mark(gc, Table_Key(t, i));
-      mark(gc, Table_Val(t, i));
+      f(gc, Table_Key(t, i));
+      f(gc, Table_Val(t, i));
     }
   }
 }
@@ -580,7 +571,7 @@ static void Table_Mark(var self, var gc, void(*mark)(var,void*)) {
 var Table = Cello(Table,
   Instance(Doc,
     Table_Name, Table_Brief, Table_Description,
-    Table_Examples,  Table_Methods),
+    NULL,  NULL),
   Instance(New,      Table_New, Table_Del),
   Instance(Subtype,  Table_Key_Subtype, Table_Key_Subtype, Table_Val_Subtype),
   Instance(Assign,   Table_Assign),

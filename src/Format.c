@@ -22,20 +22,31 @@ static const char* Format_Description(void) {
     "function from `Show` must be passed only `var` objects.";
 }
 
-/* TODO */
-static const char* Format_Examples(void) {
-  return "";
+static struct DocMethod* Format_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "format_to", 
+      "int format_to(var self, int pos, const char* fmt, ...);\n    "
+      "int format_to_va(var self, int pos, const char* fmt, va_list va);",
+      "Write a formatted string `fmt` to the object `self` at position `pos`."
+    }, {
+      "format_from", 
+      "int format_from(var self, int pos, const char* fmt, ...);\n    "
+      "int format_from_va(var self, int pos, const char* fmt, va_list va);",
+      "Read a formatted string `fmt` from the object `self` at position `pos`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Format_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Format = Cello(Format,
   Instance(Doc, 
     Format_Name, Format_Brief, Format_Description,
-    Format_Examples, Format_Methods));
+    NULL, Format_Methods));
 
 int format_to_va(var self, int pos, const char* fmt, va_list va) {
   return method(self, Format, format_to, pos, fmt, va);
@@ -92,20 +103,77 @@ static const char* Show_Description(void) {
     "See `printf` for more information on format specifiers.";
 }
 
-/* TODO */
-static const char* Show_Examples(void) {
-  return "";
+/*
+int show(var self);
+int show_to(var self, var out, int pos);
+
+#define print(fmt, ...) print_with(fmt, tuple(__VA_ARGS__))
+#define println(fmt, ...) println_with(fmt, tuple(__VA_ARGS__))
+#define print_to(out, pos, fmt, ...) \
+  print_to_with(out, pos, fmt, tuple(__VA_ARGS__))
+
+int print_with(const char* fmt, var args);
+int println_with(const char* fmt, var args);
+int print_to_with(var out, int pos, const char* fmt, var args);
+
+int look(var self);
+int look_from(var self, var input, int pos);
+
+#define scan(fmt, ...) scan_with(fmt, tuple(__VA_ARGS__))
+#define scanln(fmt, ...) scanln_with(fmt, tuple(__VA_ARGS__))
+#define scan_from(input, pos, fmt, ...) \
+  scan_from_with(input, pos, fmt, tuple(__VA_ARGS__))
+
+int scan_with(const char* fmt, var args);
+int scanln_with(const char* fmt, var args);
+int scan_from_with(var input, int pos, const char* fmt, var args);
+*/
+
+static struct DocMethod* Show_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "show", 
+      "int show(var self);\n    "
+      "int show_to(var self, var out, int pos);",
+      "Show the object `self` either to `stdout` or to the object `output`."
+    }, {
+      "look", 
+      "int look(var self);\n    "
+      "int look_from(var self, var input, int pos);",
+      "Read the object `self` either from `stdout` or from the object `input`."
+    }, {
+      "print", 
+      "#define print(fmt, ...)\n    "
+      "#define println(fmt, ...)\n    "
+      "#define print_to(out, pos, fmt, ...)\n    "
+      "int print_with(const char* fmt, var args);\n    "
+      "int println_with(const char* fmt, var args);\n    "
+      "int print_to_with(var out, int pos, const char* fmt, var args);",
+      "Print the format string `fmt` either to `stdout` or to the object `out` "
+      "at positions `pos`."
+    }, {
+      "scan", 
+      "#define scan(fmt, ...)\n    "
+      "#define scanln(fmt, ...)\n    "
+      "#define scan_from(input, pos, fmt, ...)\n    "
+      "int scan_with(const char* fmt, var args);\n    "
+      "int scanln_with(const char* fmt, var args);\n    "
+      "int scan_from_with(var input, int pos, const char* fmt, var args);",
+      "Scan the format string `fmt` either from `stdout` or from the object "
+      "`input` at position `pos`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Show_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Show = Cello(Show,
   Instance(Doc, 
     Show_Name, Show_Brief, Show_Description,
-    Show_Examples, Show_Methods));
+    NULL, Show_Methods));
 
 int show(var self) {
   return show_to(self, $(File, stdout), 0);

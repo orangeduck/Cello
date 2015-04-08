@@ -24,19 +24,28 @@ static const char* Hash_Description(void) {
     "only override `Hash` and `Eq` in conjunction.";
 }
 
-/* TODO */
-static const char* Hash_Examples(void) {
-  return "";
+static struct DocMethod* Hash_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "hash", 
+      "uint64_t hash(var self);",
+      "Get the hash value for the object `self`."
+    }, {
+      "hash_data", 
+      "uint64_t hash_data(void* data, size_t size);",
+      "Hash `size` bytes pointed to by `data` using Murmurhash."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Hash_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Hash = Cello(Hash,
   Instance(Doc,
-    Hash_Name, Hash_Brief, Hash_Description, Hash_Examples, Hash_Methods));
+    Hash_Name, Hash_Brief, Hash_Description, NULL, Hash_Methods));
     
 uint64_t hash_data(void* data, size_t size) {
   

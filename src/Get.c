@@ -17,19 +17,36 @@ static const char* Get_Description(void) {
     "as thread local storage for the `Thread` object.";
 }
 
-/* TODO */
-static const char* Get_Examples(void) {
-  return "";
+static struct DocMethod* Get_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "get", 
+      "var get(var self, var key);",
+      "Get the value at a given `key` for object `self`."
+    }, {
+      "set", 
+      "void set(var self, var key, var val);",
+      "Set the value at a given `key` for object `self`."
+    }, {
+      "mem", 
+      "bool mem(var self, var key);",
+      "Returns true if `key` is a member of the object `self`."
+    }, {
+      "rem", 
+      "void rem(var self, var key);",
+      "Removes the `key` from object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Get_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Get = Cello(Get,
   Instance(Doc,
-    Get_Name, Get_Brief, Get_Description, Get_Examples, Get_Methods));
+    Get_Name, Get_Brief, Get_Description, NULL, Get_Methods));
 
 var get(var self, var key) {
   return method(self, Get, get, key);

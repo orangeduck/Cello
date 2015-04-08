@@ -17,19 +17,36 @@ static const char* Push_Description(void) {
     "them. Usage of `push` can require `assign` to be defined on the argument.";
 }
 
-/* TODO */
-static const char* Push_Examples(void) {
-  return "";
+static struct DocMethod* Push_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "push", 
+      "void push(var self, var obj);",
+      "Push the object `obj` onto the top of object `self`."
+    }, {
+      "pop", 
+      "void pop(var self);",
+      "Pop the top item from the object `self`."
+    }, {
+      "push_at", 
+      "void push_at(var self, var obj, var key);",
+      "Push the object `obj` onto the object `self` at a given `key`."
+    }, {
+      "pop_at", 
+      "void pop_at(var self, var key);",
+      "Pop the object from the object `self` at a given `key`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Push_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Push = Cello(Push,
   Instance(Doc,
-    Push_Name, Push_Brief, Push_Description, Push_Examples, Push_Methods));
+    Push_Name, Push_Brief, Push_Description, NULL, Push_Methods));
 
 void push(var self, var val) { method(self, Push, push, val); }
 void push_at(var self, var val, var i) { method(self, Push, push_at, val, i); }

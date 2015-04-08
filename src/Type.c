@@ -16,18 +16,24 @@ static const char* Cast_Description(void) {
     "to ensure the types are correct.";
 }
 
-/* TODO */
-static const char* Cast_Examples(void) {
-  return "";
+static struct DocMethod* Cast_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "cast", 
+      "var cast(var self, var type);",
+      "Ensures the object `self` is of the given `type` and returns it if it "
+      "is."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Cast_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Cast = Cello(Cast, Instance(Doc, 
-  Cast_Name, Cast_Brief, Cast_Description, Cast_Examples, Cast_Methods));
+  Cast_Name, Cast_Brief, Cast_Description, NULL, Cast_Methods));
 
 var cast(var self, var type) {
   
@@ -69,52 +75,7 @@ static const char* Type_Description(void) {
     "call a member of a class, implemented `type_method` can be used.";
 }
 
-/* TODO: Example construction on heap */
-/* TODO: Example construction statically */
-/* TODO: Example using object functions */
-static const char* Type_Examples(void) {
-  return ""
-    "__Usage__\n"
-    "    \n"
-    "    var t = type_of($(Int, 5));\n"
-    "    show(t); /* Int */\n"
-    "    \n"
-    "    show(type_implements(t, New));  /* True  */\n"
-    "    show(type_implements(t, Eq));   /* True  */\n"
-    "    show(type_implements(t, Ord));  /* True  */\n"
-    "    show(type_implements(t, Push)); /* False */\n"
-    "    \n"
-    "    show(type_method(t, Eq, eq, $(Int, 5), $(Int, 6))); /* False */\n"
-    "    \n"
-    "    \n"
-    "__Casting__\n"
-    "    \n"
-    "    var x = $(Int, 10);\n"
-    "    \n"
-    "    x = cast(x, Int); /* Success */\n"
-    "    x = cast(x, Real); /* Throws Exception */\n";
-}
-
-/* TODO: Finish */
-static const char* Type_Methods(void) {
-  return ""
-    "\n"
-    "    var type_of(var self);\n"
-    "\n"
-    "__Arguments__\n"
-    "* `self` object to find type of\n"
-    "\n"
-    "__Returns__\n"
-    "* Type of object `self`\n"
-    "\n"
-    "    var cast(var self, var type);\n"
-    "__Arguments__\n"
-    "* `self` object to check type of\n"
-    "* `type` type to assert object is\n"
-    "\n"
-    "__Returns__\n"
-    "* `self` if type is correct\n";
-}
+/* TODO: Examples Methods */
 
 enum {
   CELLO_NBUILTINS = 2 + (CELLO_CACHE_NUM / 3),
@@ -199,7 +160,7 @@ static void Type_Help(var self) {
 
 var Type = CelloEmpty(Type,
   Instance(Doc,
-    Type_Name, Type_Brief, Type_Description, Type_Examples, Type_Methods),
+    Type_Name, Type_Brief, Type_Description, NULL, NULL),
   Instance(Alloc,    Type_Alloc, NULL),
   Instance(New,      Type_New, NULL),
   Instance(Eq,       Type_Eq),
@@ -367,9 +328,14 @@ static var Type_Of(var self) {
     (struct Header*)((char*)self - sizeof(struct Header));
 
 #if CELLO_MAGIC_CHECK == 1
+  if (head->magic is (var)0xDeadCe110) {
+    throw(ValueError, "Pointer '%p' passed to 'type_of' "
+      "has bad magic number, it looks like it was already deallocated.", self);    
+  }
+
   if (head->magic isnt ((var)CELLO_MAGIC_NUM)) {
     throw(ValueError, "Pointer '%p' passed to 'type_of' "
-      "has bad magic number, it wasn't allocated by Cello.", self);
+      "has bad magic number, perhaps it wasn't allocated by Cello.", self);
   }
 #endif
   
@@ -419,18 +385,23 @@ static const char* Size_Description(void) {
     "found naturally then it may be necessary to override this method.";
 }
 
-/* TODO */
-static const char* Size_Examples(void) {
-  return "";
+static struct DocMethod* Size_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "size", 
+      "size_t size(var type);",
+      "Returns the associated size of a given `type` in bytes."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Size_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Size = Cello(Size, Instance(Doc, 
-  Size_Name, Size_Brief, Size_Description, Size_Examples, Size_Methods));
+  Size_Name, Size_Brief, Size_Description, NULL, Size_Methods));
 
 size_t size(var type) {
 
@@ -439,14 +410,6 @@ size_t size(var type) {
     return s->size();
   }
   
-  size_t builtinsize = Type_Builtin_Size(type);
-  
-#if CELLO_ALLOC_CHECK == 1
-  if (builtinsize is 0) {
-    throw(TypeError, "Type %s is an empty type and so has no size.", type);
-  }
-#endif
-  
-  return builtinsize;
+  return Type_Builtin_Size(type);
 }
   

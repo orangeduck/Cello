@@ -15,19 +15,24 @@ static const char* Len_Description(void) {
     "and is often used in conjunction with `Iter` or `Get`.";
 }
 
-/* TODO */
-static const char* Len_Examples(void) {
-  return "";
+static struct DocMethod* Len_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "len", 
+      "size_t len(var self);",
+      "Returns the length of object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Len_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Len = Cello(Len,
   Instance(Doc,
-    Len_Name, Len_Brief, Len_Description, Len_Examples, Len_Methods));
+    Len_Name, Len_Brief, Len_Description, NULL, Len_Methods));
 
 size_t len(var self) {
   return method(self, Len, len);

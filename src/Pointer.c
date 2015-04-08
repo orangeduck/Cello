@@ -15,20 +15,32 @@ static const char* Pointer_Description(void) {
     "which provide the two main pointer types in Cello.";
 }
 
-/* TODO */
-static const char* Pointer_Examples(void) {
-  return "";
+// void ref(var self, var item);
+// var deref(var self);
+
+static struct DocMethod* Pointer_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "ref", 
+      "void ref(var self, var item);",
+      "Set the object `self` to reference the object `item`."
+    }, {
+      "deref", 
+      "var deref(var self);",
+      "Get the object referenced by `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Pointer_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Pointer = Cello(Pointer,
   Instance(Doc,
     Pointer_Name, Pointer_Brief, Pointer_Description, 
-    Pointer_Examples, Pointer_Methods));
+    NULL, Pointer_Methods));
 
 void ref(var self, var item) {
   method(self, Pointer, ref, item);
@@ -54,15 +66,7 @@ static const char* Ref_Description(void) {
     "indirection or mutability is required.";
 }
 
-/* TODO */
-static const char* Ref_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Ref_Methods(void) {
-  return "";
-}
+/* TODO: Examples Methods */
 
 static void Ref_Ref(var self, var val);
 static var Ref_Deref(var self);
@@ -92,7 +96,7 @@ static var Ref_Deref(var self) {
 
 var Ref = Cello(Ref,
   Instance(Doc,
-    Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, Ref_Methods),
+    Ref_Name, Ref_Brief, Ref_Description, NULL, NULL),
   Instance(Assign,   Ref_Assign),
   Instance(Show,     Ref_Show, NULL),
   Instance(Pointer,  Ref_Ref, Ref_Deref));
@@ -119,15 +123,7 @@ static const char* Box_Description(void) {
     "used in conjunction with collections.";
 }
 
-/* TODO */
-static const char* Box_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Box_Methods(void) {
-  return "";
-}
+/* TODO: Examples Methods */
 
 static void Box_Ref(var self, var val);
 static var Box_Deref(var self);
@@ -162,7 +158,7 @@ static var Box_Deref(var self) {
 
 var Box = Cello(Box,
   Instance(Doc,
-    Box_Name, Box_Brief, Box_Description, Box_Examples, Box_Methods),
+    Box_Name, Box_Brief, Box_Description, NULL, NULL),
   Instance(New,      NULL, Box_Del),
   Instance(Assign,   Box_Assign),
   Instance(Show,     Box_Show, NULL),

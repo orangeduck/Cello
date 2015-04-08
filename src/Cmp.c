@@ -28,19 +28,28 @@ static const char* Eq_Description(void) {
     "the same object in memory.";
 }
 
-/* TODO */
-static const char* Eq_Examples(void) {
-  return "";
+static struct DocMethod* Eq_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "eq", 
+      "bool eq(var self, var obj);",
+      "Returns true if the object `self` is equal to the object `obj`."
+    }, {
+      "neq", 
+      "bool neq(var self, var obj);",
+      "Returns false if the object `self` is equal to the object `obj`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Eq_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Eq = Cello(Eq,
   Instance(Doc,
-    Eq_Name, Eq_Brief, Eq_Description, Eq_Examples, Eq_Methods));
+    Eq_Name, Eq_Brief, Eq_Description, NULL, Eq_Methods));
 
 bool eq(var self, var obj) {
   
@@ -49,11 +58,15 @@ bool eq(var self, var obj) {
     return e->eq(self, obj);
   }
   
-  if (type_of(self) is type_of(obj)) {
-    return memcmp(self, obj, size(type_of(self))) is 0;
+  size_t s = size(type_of(self));
+  if (type_of(self) is type_of(obj) and s) {
+    return memcmp(self, obj, s) is 0;
   }
   
-  return self is obj;
+  throw(TypeError,
+    "Cannot compare type %s to type %s", type_of(obj), type_of(self));
+  
+  return false;
 }
 
 bool neq(var self, var obj) { return not eq(self, obj); }
@@ -78,19 +91,43 @@ static const char* Ord_Description(void) {
     "be overridden.";
 }
 
-/* TODO */
-static const char* Ord_Examples(void) {
-  return "";
+static struct DocMethod* Ord_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "gt", 
+      "bool gt(var self, var obj);",
+      "Returns true if the object `self` is greater than the object `obj`."
+    }, {
+      "lt", 
+      "bool lt(var self, var obj);",
+      "Returns false if the object `self` is less than the object `obj`."
+    }, {
+      "ge", 
+      "bool ge(var self, var obj);",
+      "Returns false if the object `self` is greater than or equal to the "
+      "object `obj`."
+    }, {
+      "le", 
+      "bool le(var self, var obj);",
+      "Returns false if the object `self` is less than or equal to the "
+      "object `obj`."
+    }, {
+      "cmp", 
+      "int cmp(var self, var obj);",
+      "The return value of `cmp` is `< 0` if `self` is less than `obj`, `> 0` "
+      "if `self` is greater than `obj` and `0` if they are equal."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Ord_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Ord = Cello(Ord,
   Instance(Doc,
-    Ord_Name, Ord_Brief, Ord_Description, Ord_Examples, Ord_Methods));
+    Ord_Name, Ord_Brief, Ord_Description, NULL, Ord_Methods));
 
 bool gt(var self, var obj) {
 
@@ -99,11 +136,15 @@ bool gt(var self, var obj) {
     return o->gt(self, obj);
   }
   
-  if (type_of(self) is type_of(obj)) {
-    return memcmp(self, obj, size(type_of(self))) > 0;
+  size_t s = size(type_of(self));
+  if (type_of(self) is type_of(obj) and s) {
+    return memcmp(self, obj, s) > 0;
   }
   
-  return self > obj;
+  throw(TypeError,
+    "Cannot compare type %s to type %s", type_of(obj), type_of(self));
+  
+  return false;
   
 }
 
@@ -114,12 +155,15 @@ bool lt(var self, var obj) {
     return o->lt(self, obj);
   }
   
-  if (type_of(self) is type_of(obj)) {
-    return memcmp(self, obj, size(type_of(self))) < 0;
+  size_t s = size(type_of(self));
+  if (type_of(self) is type_of(obj) and s) {
+    return memcmp(self, obj, s) < 0;
   }
   
-  return self < obj;
+  throw(TypeError,
+    "Cannot compare type %s to type %s", type_of(obj), type_of(self));
   
+  return false;  
 }
 
 bool ge(var self, var obj) { return not lt(self, obj); }
@@ -132,13 +176,15 @@ int cmp(var self, var obj) {
     return o->cmp(self, obj);
   }
   
-  if (type_of(self) is type_of(obj)) {
-    return memcmp(self, obj, size(type_of(self)));
+  size_t s = size(type_of(self));
+  if (type_of(self) is type_of(obj) and s) {
+    return memcmp(self, obj, s);
   }
   
-  if (self < obj) { return -1; }
-  if (self > obj) { return  1; }
-  return 0;
+  throw(TypeError,
+    "Cannot compare type %s to type %s", type_of(obj), type_of(self));
+  
+  return false;
 }
 
 
@@ -157,20 +203,29 @@ const char* Sort_Description(void) {
     "to compare elements, but a custom function can also be provided.";
 }
 
-/* TODO */
-const char* Sort_Examples(void) {
-  return "";
+static struct DocMethod* Sort_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "sort", 
+      "void sort(var self);",
+      "Sorts the object `self`."
+    }, {
+      "sort_with", 
+      "void sort_with(var self, var func);",
+      "Sorts the object `self` using the function `func`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-const char* Sort_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Sort = Cello(Sort, 
   Instance(Doc,
     Sort_Name, Sort_Brief, Sort_Description, 
-    Sort_Examples, Sort_Methods));
+    NULL, Sort_Methods));
   
 static var Sort_Lt(var args) {
   return (var)lt(get(args, $I(0)), get(args, $I(1)));
@@ -198,20 +253,25 @@ const char* Reverse_Description(void) {
     "some way such as `Array`.";
 }
 
-/* TODO */
-const char* Reverse_Examples(void) {
-  return "";
+static struct DocMethod* Reverse_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "reverse", 
+      "void reverse(var self);",
+      "The order of the object `self` is reversed."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-const char* Reverse_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Reverse = Cello(Reverse, 
   Instance(Doc,
     Reverse_Name, Reverse_Brief, Reverse_Description, 
-    Reverse_Examples, Reverse_Methods));
+    NULL, Reverse_Methods));
   
 void reverse(var self) {
   method(self, Reverse, reverse);

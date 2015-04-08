@@ -14,20 +14,25 @@ static const char* C_Int_Description(void) {
     "as a C style Integer of the type `int64_t`.";
 }
 
-/* TODO */
-static const char* C_Int_Examples(void) {
-  return "";
+static struct DocMethod* C_Int_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "c_int", 
+      "int64_t c_int(var self);",
+      "Returns the object `self` represented as a `int64_t`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* C_Int_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var C_Int = Cello(C_Int,
   Instance(Doc,
     C_Int_Name, C_Int_Brief, C_Int_Description, 
-    C_Int_Examples, C_Int_Methods));
+    NULL, C_Int_Methods));
     
 static const char* C_Float_Name(void) {
   return "C_Float";
@@ -43,29 +48,25 @@ static const char* C_Float_Description(void) {
     "as a C style Float of the type `double`.";
 }
 
-/* TODO */
-static const char* C_Float_Examples(void) {
-  return "";
+static struct DocMethod* C_Float_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "c_float", 
+      "double c_float(var self);",
+      "Returns the object `self` represented as a `double`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* C_Float_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var C_Float = Cello(C_Float,
   Instance(Doc,
     C_Float_Name, C_Float_Brief, C_Float_Description, 
-    C_Float_Examples, C_Float_Methods));
-
-char* c_str(var self) {
-  
-  if (type_of(self) is String) {
-    return ((struct String*)self)->val;
-  }
-  
-  return method(self, C_Str, c_str);
-}
+    NULL, C_Float_Methods));
 
 int64_t c_int(var self) {
   
@@ -94,41 +95,7 @@ static const char* Int_Brief(void) {
 }
 
 static const char* Int_Description(void) {
-  return "64-bit unsigned integer Object.";
-}
-
-static const char* Int_Examples(void) {
-  return ""
-    "__Usage__\n"
-    "    \n"
-    "    var i0 = $(Int, 1);\n"
-    "    var i1 = new$(Int, 24313);\n"
-    "    var i2 = copy(i0);\n"
-    "    \n"
-    "    show(i0); /* 1 */\n"
-    "    show(i1); /* 24313 */\n"
-    "    show(i2); /* 1 */\n"
-    "    \n"
-    "    del(i1);\n"
-    "    del(i2);\n"
-    "    \n"
-    "__Maths__\n"
-    "    \n"
-    "    var i0 = $(Int, 0);\n"
-    "    \n"
-    "    show(i0); /* 0 */\n"
-    "    \n"
-    "    madd(i0, $(Int, 10)); /* 10 */\n"
-    "    mmul(i0, $(Int, 3));  /* 30 */\n"
-    "    mdiv(i0, $(Int, 2));  /* 15 */\n"
-    "    \n"
-    "    if_gt(i0, $(Int, 10)) {\n"
-    "        print(\"%i is greater than 10!\", i0);\n"
-    "    }\n";
-}
-
-static const char* Int_Methods(void) {
-  return "";
+  return "64-bit signed integer Object.";
 }
 
 static void Int_Assign(var self, var obj) {
@@ -154,7 +121,9 @@ static bool Int_Lt(var self, var obj) {
 }
 
 static int Int_Cmp(var self, var obj) {
-  return Int_C_Int(self) - c_int(obj);
+  int64_t fst = Int_C_Int(self);
+  int64_t snd = c_int(obj);
+  return fst > snd ? 1 : fst < snd ? -1 : 0;
 }
 
 static uint64_t Int_Hash(var self) {
@@ -175,7 +144,7 @@ static int Int_Look(var self, var input, int pos) {
 
 var Int = Cello(Int,
   Instance(Doc,
-    Int_Name, Int_Brief, Int_Description, Int_Examples, Int_Methods),
+    Int_Name, Int_Brief, Int_Description, NULL, NULL),
   Instance(Assign,  Int_Assign),
   Instance(Eq,      Int_Eq),
   Instance(Ord,     Int_Gt, Int_Lt, Int_Cmp),
@@ -193,40 +162,6 @@ static const char* Float_Brief(void) {
 
 static const char* Float_Description(void) {
   return "64-bit double precision float point Object.";
-}
-
-static const char* Float_Examples(void) {
-  return ""
-    "__Usage__"
-    "    "
-    "    var f0 = $(Float, 1.0);\n"
-    "    var f1 = new$(Float, 24.313);\n"
-    "    var f2 = copy(f0);\n"
-    "    \n"
-    "    show(f0); /* 1.0 */\n"
-    "    show(f1); /* 24.313 */\n"
-    "    show(f2); /* 1.0 */\n"
-    "    \n"
-    "    del(f1);\n"
-    "    del(f2);\n"
-    "    \n"
-    "__Maths__\n"
-    "    \n"
-    "    var f0 = $(Float, 0.0);\n"
-    "    \n"
-    "    show(f0); /* 0 */\n"
-    "    \n"
-    "    add(f0, $(Float, 10.1)); /* 10.1 */\n"
-    "    mul(f0, $(Float, 3.5));  /* 35.35 */\n"
-    "    div(f0, $(Float, 2.0));  /* 17.675 */\n"
-    "    \n"
-    "    if_gt(f0, $(Float, 11.1)) {\n"
-    "        print(\"%f is greater than 11.1!\", i0);\n"
-    "    }\n";
-}
-
-static const char* Float_Methods(void) {
-  return "";
 }
 
 static void Float_Assign(var self, var obj) {
@@ -252,7 +187,8 @@ static bool Float_Lt(var self, var obj) {
 }
 
 static int Float_Cmp(var self, var obj) {
-  return Float_C_Float(self) - c_float(obj);
+  double fst = Float_C_Float(self), snd = c_float(obj);
+  return fst > snd ? 1 : fst < snd ? -1 : 0;
 }
 
 union interp_cast {
@@ -276,7 +212,7 @@ int Float_Look(var self, var input, int pos) {
 
 var Float = Cello(Float,
   Instance(Doc,
-    Float_Name, Float_Brief, Float_Description, Float_Examples, Float_Methods),
+    Float_Name, Float_Brief, Float_Description, NULL, NULL),
   Instance(Assign,  Float_Assign),
   Instance(Eq,      Float_Eq),
   Instance(Ord,     Float_Gt, Float_Lt, Float_Cmp),

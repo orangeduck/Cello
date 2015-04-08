@@ -49,10 +49,6 @@
 #define CELLO_MEMORY_CHECK 1
 #endif
 
-#ifndef CELLO_GC
-#define CELLO_GC 1
-#endif
-
 #if CELLO_ALLOC_CHECK == 1
 #define CELLO_ALLOC_HEADER (var)AllocStatic,
 #else
@@ -105,8 +101,10 @@
 #define CELLO_MSC
 #define popen _popen
 #define pclose _pclose
-#define __func__ __FUNCTION__ 
+#define __func__ __FUNCTION__
+#ifndef CELLO_NSTRACE 
 #pragma comment(lib, "DbgHelp.lib")
+#endif
 #endif
 
 /* Includes */
@@ -126,12 +124,16 @@
 
 #ifdef CELLO_WINDOWS
 #include <windows.h>
+#ifndef CELLO_NSTRACE
 #include <DbgHelp.h>
+#endif
 #endif
 
 #ifdef CELLO_UNIX
 #include <pthread.h>
+#ifndef CELLO_NSTRACE
 #include <execinfo.h>
+#endif
 #endif
 
 /* Syntax */
@@ -160,9 +162,8 @@ typedef void* var;
   NULL, NULL, NULL}) +     \
   sizeof(struct Header))
 
-#define Instance(I, ...) \
-  NULL, #I, &((struct I){__VA_ARGS__})
-  
+#define Instance(I, ...) NULL, #I, &((struct I){__VA_ARGS__})
+
 /* Types */
 
 extern var Type;
@@ -208,10 +209,8 @@ extern var ProgramTerminationError;
 /* Data */
 
 enum {
-  AllocStatic = 0x01,
-  AllocStack  = 0x02,
-  AllocHeap   = 0x03,
-  AllocData   = 0x04
+  AllocStatic = 0x01, AllocStack = 0x02,
+  AllocHeap   = 0x03, AllocData  = 0x04
 };
 
 struct Header {
@@ -224,12 +223,7 @@ struct Header {
 #endif
 };
 
-struct Type {
-  var cls;
-  var name;
-  var inst;
-};
-
+struct Type { var cls; var name; var inst; };
 struct Ref { var val; };
 struct Box { var val; };
 struct Int { int64_t val; };
@@ -241,7 +235,7 @@ struct Slice { var iter; var range; };
 struct File { FILE* file; };
 struct Process { FILE* proc; };
 struct Function { var (*func)(var); };
-  
+
 /* Classes */
 
 extern var Doc;
@@ -277,15 +271,27 @@ extern var Current;
 extern var Start;
 extern var Join;
 extern var Lock;
+extern var Mark;
 
 /* Signatures */
+
+struct DocExample {
+  const char* name;
+  const char* body;
+};
+
+struct DocMethod {
+  const char* name;
+  const char* definition;
+  const char* description;
+};
 
 struct Doc {
   const char* (*name)(void);
   const char* (*brief)(void);
   const char* (*description)(void);
-  const char* (*examples)(void);
-  const char* (*methods)(void);
+  struct DocExample* (*examples)(void);
+  struct DocMethod* (*methods)(void);
 };
 
 struct Help {
@@ -446,7 +452,15 @@ struct Lock {
   bool (*lock_try)(var);
 };
 
+struct Mark {
+  void (*mark)(var, var, void(*)(var,void*));
+};
+
 /* Functions */
+
+const char* name(var type);
+const char* brief(var type);
+const char* description(var type);
 
 void help(var self);
 int help_to(var out, int pos, var self);
@@ -494,10 +508,6 @@ void dealloc(var self);
 void dealloc_raw(var self);
 void dealloc_root(var self);
 
-#define construct(self, ...) construct_with(self, tuple(__VA_ARGS__))
-var construct_with(var self, var args);
-var destruct(var self);
-
 #define $(T, ...) \
   memcpy(alloc_stack(T), &((struct T){__VA_ARGS__}), sizeof(struct T))
 
@@ -511,16 +521,13 @@ var destruct(var self);
 #define tuple_xp(X, A) X A
 #define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
 
+#define construct(self, ...) construct_with(self, tuple(__VA_ARGS__))
+var construct_with(var self, var args);
+var destruct(var self);
+
 #define new(T, ...) new_with(T, tuple(__VA_ARGS__))
 #define new_raw(T, ...) new_raw_with(T, tuple(__VA_ARGS__))
 #define new_root(T, ...) new_root_with(T, tuple(__VA_ARGS__))
-
-#define new_$(T, ...) new(T, $(T, ##__VA_ARGS__))
-#define new_$I(X) new_$(Int, X)
-#define new_$F(X) new_$(Float, X)
-#define new_$S(X) new_$(String, X)
-#define new_$R(X) new_$(Ref, X)
-#define new_$B(X) new_$(Box, X)
 
 var new_with(var type, var args);
 var new_raw_with(var type, var args);
@@ -531,7 +538,7 @@ void del_raw(var self);
 void del_root(var self);
 
 var assign(var self, var obj);
-var copy(var obj);
+var copy(var self);
 
 var subtype(var self);
 var key_subtype(var self);
@@ -572,8 +579,8 @@ void reverse(var self);
 void sort(var self);
 void sort_with(var self, var func);
 
-void concat(var self, var obj);
 void append(var self, var obj);
+void concat(var self, var obj);
 
 var  get(var self, var key);
 void set(var self, var key, var val);
@@ -607,7 +614,7 @@ size_t swrite(var self, void* input, size_t size);
 void ref(var self, var item);
 var deref(var self);
 
-#define call(x, ...) call_with(x, tuple(__VA_ARGS__))
+#define call(self, ...) call_with(self, tuple(__VA_ARGS__))
 var call_with(var self, var args);
 
 void map(var self, var func);
@@ -687,14 +694,11 @@ jmp_buf* exception_buffer(void);
 var exception_throw(var obj, const char* fmt, var args);
 var exception_catch(var args);
 
-#if CELLO_GC == 1
+void mark(var self, var gc, void(*f)(var,void*));
+
+#ifndef CELLO_NGC
 
 extern var GC;
-extern var Mark;
-
-struct Mark {
-  void (*mark)(var, var, void(*)(var,void*));
-};
 
 int main_gc(int argc, char** argv);
 void main_exit_gc(void);

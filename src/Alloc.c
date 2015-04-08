@@ -32,32 +32,89 @@ static const char* Alloc_Brief(void) {
 static const char* Alloc_Description(void) {
   return
     "The `Alloc` class can be used to override how memory is allocated for a "
-    "given data type. By default memory is allocated using `malloc` along with "
-    "the `Size` class to determine the amount of memory to allocate.";
+    "given data type. By default memory is allocated using `calloc` along with "
+    "the `Size` class to determine the amount of memory to allocate."
     "\n\n"
-    "A custom allocator should be careful to also initialise the header for the "
-    "allocated memory using the function `Header_Init`. Cello objects "
+    "A custom allocator should be careful to also initialise the header for "
+    "the allocated memory using the function `header_init`. Cello objects "
     "without a header wont be recognised as such as so will throw errors when "
     "used with Cello functions."
     "\n\n"
-    "Allocating memory via `alloc` avoids the garbage collector and so much be "
-    "manually freed using `dealloc`."
+    "Allocated memory is automatically registered with the garbage collector "
+    "unless the functions `alloc_raw` and `dealloc_raw` are used."
   ;
 }
 
-/* TODO */
-static const char* Alloc_Examples(void) {
-  return "";
+static struct DocExample* Alloc_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+     "Usage",
+     "/* Allocation deallocated by Garbage Collector */\n"
+     "var x = alloc(Int);\n"
+     "construct(x, $I(10));\n",
+    }, {
+     "Avoid Garbage Collection",
+     "/* Allocation must be manually deallocated */\n"
+     "var x = alloc_raw(Int);\n"
+     "construct(x, $I(10));\n"
+     "destruct(x);\n"
+     "dealloc_raw(x);\n",
+    }, {NULL, NULL}
+  };
+  
+  return examples;
 }
 
-/* TODO */
-static const char* Alloc_Methods(void) {
-  return "";
+static struct DocMethod* Alloc_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "$",
+      "#define $(T, ...)\n    "
+      "#define $I(X)\n    "
+      "#define $F(X)\n    "
+      "#define $S(X)\n    "
+      "#define $R(X)\n    "
+      "#define $B(X)",
+      "Allocate memory for the given type `T` on the stack and copy in the "
+      "given arguments `...` as struct members. Shorthand constructors exist "
+      "for native types:\n\n* `$I -> Int` `$F -> Float` `$S -> String`\n*"
+      " `$R -> Ref` `$B -> Box`\n\n"
+    }, {
+      "alloc", 
+      "#define alloc_stack(T)\n    "
+      "var alloc(var type);\n    "
+      "var alloc_raw(var type);\n    "
+      "var alloc_root(var type);",
+      "Allocate memory for a given `type`. To avoid the Garbage Collector "
+      "completely use `alloc_raw`, to register the allocation as a root use "
+      "`alloc_root`. In the case of raw or root allocations the corresponding "
+      "`dealloc` function should be used when done. Memory allocated with "
+      "`alloc_stack` is not managed by the Garbage Collector."
+    }, {
+      "dealloc",
+      "void dealloc(var self);\n    "
+      "void dealloc_raw(var self);\n    "
+      "void dealloc_root(var self);",
+      "Deallocate memory for object `self` manually. If registered with the "
+      "Garbage Collector then entry will be removed. If the `raw` variation is "
+      "used memory will be deallocated without going via the Garbage Collector." 
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
 var Alloc = Cello(Alloc, Instance(Doc, 
   Alloc_Name, Alloc_Brief, Alloc_Description, Alloc_Examples, Alloc_Methods));
 
+enum {
+  ALLOC_STANDARD,
+  ALLOC_RAW,
+  ALLOC_ROOT
+};
+  
 static var alloc_by(var type, int method) {
   
   struct Alloc* a = type_instance(type, Alloc);
@@ -77,13 +134,13 @@ static var alloc_by(var type, int method) {
   }
 
   switch (method) {
-    case 0:
+    case ALLOC_STANDARD:
 #if CELLO_GC == 1
   set(current(GC), self, $I(0));
 #endif
     break;
-    case 1: break;
-    case 2:
+    case ALLOC_RAW: break;
+    case ALLOC_ROOT:
 #if CELLO_GC == 1
   set(current(GC), self, $I(1));
 #endif
@@ -93,19 +150,20 @@ static var alloc_by(var type, int method) {
   return self;
 }
 
-var alloc(var type)      { return alloc_by(type, 0); }
-var alloc_raw(var type)  { return alloc_by(type, 1); }
-var alloc_root(var type) { return alloc_by(type, 2); }
+var alloc(var type)      { return alloc_by(type, ALLOC_STANDARD); }
+var alloc_raw(var type)  { return alloc_by(type, ALLOC_RAW); }
+var alloc_root(var type) { return alloc_by(type, ALLOC_ROOT); }
 
 static void dealloc_by(var self, int method) {
 
   switch (method) {
-    case 0:
+    case ALLOC_STANDARD:
+    case ALLOC_ROOT:
 #if CELLO_GC == 1
   rem(current(GC), self);
 #endif
     break;
-    case 1: break;
+    case ALLOC_RAW: break;
   }
 
   struct Alloc* a = instance(self, Alloc);
@@ -139,16 +197,19 @@ static void dealloc_by(var self, int method) {
 #endif
   
 #if CELLO_ALLOC_CHECK == 1
-  //memset(header(self), 0, sizeof(struct Header) + size(type_of(self)));
+  size_t s = size(type_of(self));
+  for (size_t i = 0; i < (sizeof(struct Header) + s) / sizeof(var); i++) {
+    ((var*)header(self))[i] = (var)0xDeadCe110;
+  }
 #endif
   
   free(((char*)self) - sizeof(struct Header));
   
 }
 
-void dealloc(var self)      { dealloc_by(self, 0); }
-void dealloc_raw(var self)  { dealloc_by(self, 1); }
-void dealloc_root(var self) { dealloc_by(self, 0); }
+void dealloc(var self)      { dealloc_by(self, ALLOC_STANDARD); }
+void dealloc_raw(var self)  { dealloc_by(self, ALLOC_RAW); }
+void dealloc_root(var self) { dealloc_by(self, ALLOC_ROOT); }
 
 static const char* New_Name(void) {
   return "New";
@@ -168,34 +229,65 @@ static const char* New_Description(void) {
     "\n\n"
     "The `new_root` function can be called to register a variable with the "
     "Garbage Collector but to indicate that it will be manually destructed "
-    "with `del` by the user. This should be used for variables that wont be "
-    "reachable by the Garbage Collector such as those in the data segment or "
-    "only accessible via vanilla C structures."
+    "with `del_root` by the user. This should be used for variables that wont "
+    "be reachable by the Garbage Collector such as those in the data segment "
+    "or only accessible via vanilla C structures."
+    "\n\n"
+    "The `new_raw` and `del_raw` functions can be called to construct and "
+    "destruct objects without going via the Garbage Collector."
     "\n\n"
     "It is also possible to simply call the `construct` and `destruct` "
-    "functions if you wish to construct an already allocated object without "
-    "interacting with the Garbage Collector."
+    "functions if you wish to construct an already allocated object."
     "\n\n"
     "Constructors should assume that memory is zero'd for an object but "
     "nothing else."
-    "\n\n"
-    "The `new` function takes a list of `var` as it's arguments. This means "
-    "if you want to pass it native C types you should wrap them using `$`.";
+  ;
 }
 
-/* TODO */
-static const char* New_Examples(void) {
-  return "";
+static struct DocMethod* New_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "new", 
+      "#define new(T, ...)\n    "
+      "#define new_raw(T, ...)\n    "
+      "#define new_root(T, ...)\n    "
+      "var new_with(var type, var args);\n    "
+      "var new_raw_with(var type, var args);\n    "
+      "var new_root_with(var type, var args);",
+      "Construct a new object of a given `type`. Use `new_raw` to avoid the "
+      "Garbage Collector completely, and `new_root` to register the allocation "
+      "as a Garbage Collection root. In the case of raw and root allocations "
+      "they must be destructed with the corresponding deletion functions."
+    }, {
+      "del",
+      "void del(var self);\n    "
+      "void del_raw(var self);\n    "
+      "void del_root(var self);",
+      "Destruct the object `self` manually. If registered with the "
+      "Garbage Collector then entry will be removed. If `del_raw` is used then"
+      "the destruction will be done without going via the Garbage Collector."
+    }, {
+      "construct",
+      "#define construct(self, ...)\n    "
+      "var construct_with(var self, var args);",
+      "Call the constructor on object `self` which has already been allocated."
+    }, {
+      "destruct",
+      "var destruct(var self);",
+      "Call the destructor on object `self` without deallocating the memory "
+      "for it."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* New_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var New = Cello(New,
   Instance(Doc, New_Name, New_Brief, 
-    New_Description, New_Examples, New_Methods));
+    New_Description, NULL, New_Methods));
 
 var construct_with(var self, var args) {
   struct New* n = instance(self, New);
@@ -256,7 +348,7 @@ static const char* Copy_Description(void) {
     "had been constructed with `new`. This means when using manual memory "
     "management a copy must be deleted manually."
     "\n\n"
-    "If the `copy` class is overridden then the implementor may manually have "
+    "If the `copy` class is overridden then the implementer may manually have "
     "to register the object with the Garbage Collector if they wish for it to "
     "be tracked. For this they should call `gc_add` with the new object."
     "\n\n"
@@ -266,20 +358,25 @@ static const char* Copy_Description(void) {
     "could vary depending on the type's overridden behaviours.";
 }
 
-/* TODO */
-static const char* Copy_Examples(void) {
-  return "";
+static struct DocMethod* Copy_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "copy", 
+      "var copy(var self);",
+      "Make a copy of the object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Copy_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Copy = Cello(Copy,
   Instance(Doc,
     Copy_Name, Copy_Brief, Copy_Description, 
-    Copy_Examples, Copy_Methods));
+    NULL, Copy_Methods));
 
 var copy(var self) {
   

@@ -20,18 +20,37 @@ const char* Start_Description(void) {
     "and the `stop` function at the end.";
 }
 
-/* TODO */
-const char* Start_Examples(void) {
-  return "";
+/*
+void start(var self);
+void stop(var self);
+bool running(var self);
+*/
+
+static struct DocMethod* Start_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "start", 
+      "void start(var self);",
+      "Start the object `self`."
+    }, {
+      "stop", 
+      "void stop(var self);",
+      "Stop the object `self`."
+    }, {
+      "running", 
+      "bool running(var self);",
+      "Check if the object `self` is running."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-const char* Start_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Start = Cello(Start, Instance(Doc, 
-  Start_Name, Start_Brief, Start_Description, Start_Examples, Start_Methods));
+  Start_Name, Start_Brief, Start_Description, NULL, Start_Methods));
 
 void start(var self) {
   method(self, Start, start);

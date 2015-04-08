@@ -4,32 +4,49 @@ static const char* Mark_Name(void) {
   return "Mark";
 }
 
-/* TODO */
 static const char* Mark_Brief(void) {
-  return "";
+  return "Markable by GC";
 }
 
-/* TODO */
 static const char* Mark_Description(void) {
-  return "";
+  return
+    "The `Mark` class can be overridden to customize the behaviour of the "
+    "Cello Garbage Collector on encountering a given type. By default the "
+    "allocated memory for a structure is scanned for pointers to other Cello "
+    "objects, but if a type does its own memory allocation it may store "
+    "pointers to Cello objects in other locations."
+    "\n\n"
+    "If this is the case the `Mark` class can be overridden and the callback "
+    "function `f` must be called on all pointers which might be Cello objects "
+    "which are managed by the class. Alternately the `mark` function can be "
+    "called on any sub object to start a chain of recursive marking.";
 }
 
-/* TODO */
-static const char* Mark_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Mark_Methods(void) {
-  return "";
+static struct DocMethod* Mark_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "mark", 
+      "void mark(var self, var gc, void(*f)(var,void*));",
+      "Mark the object `self` with the Garbage Collector `gc` and the callback "
+      "function `f`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
 var Mark = Cello(Mark, Instance(Doc, 
   Mark_Name, Mark_Brief, Mark_Description, 
-  Mark_Examples, Mark_Methods));
+  NULL, Mark_Methods));
   
-#if CELLO_GC == 1
-
+void mark(var self, var gc, void(*f)(var,void*)) {
+  struct Mark* m = instance(self, Mark);
+  if (m and m->mark) { m->mark(self, gc, f); }
+}
+  
+#ifndef CELLO_NGC
+  
 #define GC_TLS_KEY "__GC"
 
 enum {
@@ -55,16 +72,6 @@ static const char* GC_Brief(void) {
 
 /* TODO */
 static const char* GC_Description(void) {
-  return "";
-}
-
-/* TODO */
-static const char* GC_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* GC_Methods(void) {
   return "";
 }
 
@@ -314,10 +321,12 @@ static void GC_Mark_Stack_Fake(struct GC* gc) { }
 
 void GC_Mark(struct GC* gc) {
   
-  /* TODO: Mark Thread Local Storage */
-  
   if (gc is NULL or gc->nitems is 0) { return; }
   
+  /* Mark Thread Local Storage */
+  mark(current(Thread), gc, (void(*)(var,void*))GC_Mark_Item);
+  
+  /* Mark Roots */
   for (size_t i = 0; i < gc->nslots; i++) {
     if (gc->entries[i].hash is 0) { continue; }
     if (gc->entries[i].marked) { continue; }
@@ -340,23 +349,33 @@ void GC_Mark(struct GC* gc) {
   void (*mark_stack)(struct GC* gc) = noinline
     ? GC_Mark_Stack
     : (void(*)(struct GC* gc))(NULL);
-
+  
+  /* Mark Stack */
   mark_stack(gc);
   
 }
 
-static void GC_Print(struct GC* gc) {
+static int GC_Show(var self, var out, int pos) {
  
-  printf("| GC TABLE\n");
+  struct GC* gc = self;
+  int ipos = pos;
+ 
+  pos += print_to(out, pos, "\n");
+  pos += print_to(out, pos, "| GC TABLE\n");
   for (size_t i = 0; i < gc->nslots; i++) {
-    if (gc->entries[i].hash is 0) { printf("| %i : ---\n", (int)i); continue; }
-    printf("| %i : %p %i %i\n", 
-      (int)i, gc->entries[i].ptr, 
-      (int)gc->entries[i].root,
-      (int)gc->entries[i].marked);
+    if (gc->entries[i].hash is 0) {
+      pos += print_to(out, pos, "| %i : ---\n", $I(i));
+      continue;
+    }
+    pos += print_to(out, pos, "| %i : %p %i %i\n", 
+      $I(i), $R(gc->entries[i].ptr), 
+      $I(gc->entries[i].root),
+      $I(gc->entries[i].marked));
   }
-  printf("|======\n");
   
+  pos += print_to(out, pos, "|======\n");
+  
+  return pos - ipos;
 }
 
 void GC_Sweep(struct GC* gc) {
@@ -477,10 +496,12 @@ static bool GC_Running(var self) {
 }
 
 var GC = Cello(GC,
-  Instance(Doc, GC_Name, GC_Brief, GC_Description, GC_Examples, GC_Methods),
-  Instance(New, GC_New, GC_Del),
-  Instance(Get, NULL, GC_Set, GC_Mem, GC_Rem),
-  Instance(Start, GC_Start, GC_Stop, GC_Running),
+  Instance(Doc,     GC_Name, GC_Brief, GC_Description, 
+                    NULL, NULL),
+  Instance(New,     GC_New, GC_Del),
+  Instance(Get,     NULL, GC_Set, GC_Mem, GC_Rem),
+  Instance(Start,   GC_Start, GC_Stop, GC_Running),
+  Instance(Show,    GC_Show, NULL),
   Instance(Current, GC_Current));
 
 void main_exit_gc(void) {

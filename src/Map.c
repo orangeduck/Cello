@@ -13,16 +13,6 @@ static const char* Map_Description(void) {
   return "";
 }
 
-/* TODO */
-static const char* Map_Examples(void) {
-  return "";
-}
-
-/* TODO */
-static const char* Map_Methods(void) {
-  return "";
-}
-
 struct Map {
   var root;
   var ktype;
@@ -611,33 +601,34 @@ static var Map_Iter_Next(var self, var curr) {
 
 static int Map_Show(var self, var output, int pos) {
   struct Map* m = self;
+  int ipos = pos;
   
-  pos = print_to(output, pos, "<'Map' At 0x%p {", self);
+  pos += print_to(output, pos, "<'Map' At 0x%p {", self);
   
   var curr = Map_Iter_Init(self);
   
   while (curr isnt NULL) {
     var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
-    pos = print_to(output, pos, "%$:%$",
+    pos += print_to(output, pos, "%$:%$",
       Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
-    if (curr isnt NULL) { pos = print_to(output, pos, ", "); }
+    if (curr isnt NULL) { pos += print_to(output, pos, ", "); }
   }
   
-  pos = print_to(output, pos, "}>");
+  pos += print_to(output, pos, "}>");
   
-  return pos;
+  return pos - ipos;
 }
 
-static void Map_Mark(var self, var gc, void(*mark)(var,void*)) {  
+static void Map_Mark(var self, var gc, void(*f)(var,void*)) {  
   struct Map* m = self;
 
   var curr = Map_Iter_Init(self);
   
   while (curr isnt NULL) {
     var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
-    mark(gc, Map_Key(m, node));
-    mark(gc, Map_Val(m, node));
+    f(gc, Map_Key(m, node));
+    f(gc, Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
   }
   
@@ -646,7 +637,7 @@ static void Map_Mark(var self, var gc, void(*mark)(var,void*)) {
 var Map = Cello(Map,
   Instance(Doc,
     Map_Name, Map_Brief, Map_Description,
-    Map_Examples, Map_Methods),
+    NULL, NULL),
   Instance(New,     Map_New, Map_Del),
   Instance(Subtype, Map_Key_Subtype, Map_Key_Subtype, Map_Val_Subtype),
   Instance(Assign,  Map_Assign),

@@ -15,20 +15,33 @@ static const char* Subtype_Description(void) {
     "created, this class can be used to find what type that was.";
 }
 
-/* TODO */
-static const char* Subtype_Examples(void) {
-  return "";
+static struct DocMethod* Subtype_Methods(void) {
+  
+  static struct DocMethod methods[] = {
+    {
+      "subtype", 
+      "var subtype(var self);",
+      "Returns the subtype of object `self`."
+    }, {
+      "key_subtype", 
+      "var key_subtype(var self);",
+      "Returns the key subtype of object `self`."
+    }, {
+      "val_subtype", 
+      "var val_subtype(var self);",
+      "Returns the value subtype of object `self`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
 }
 
-/* TODO */
-static const char* Subtype_Methods(void) {
-  return "";
-}
+/* TODO: Examples */
 
 var Subtype = Cello(Subtype,
   Instance(Doc,
     Subtype_Name, Subtype_Brief, Subtype_Description, 
-    Subtype_Examples, Subtype_Methods));
+    NULL, Subtype_Methods));
 
 var subtype(var self) {
   return method(self, Subtype, subtype);
