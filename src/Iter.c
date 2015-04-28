@@ -15,9 +15,19 @@ static const char* Iter_Description(void) {
     "as various other components of Cello.";
 }
 
-static struct DocExample* Iter_Examples(void) {
+static const char* Iter_Definition(void) {
+  return
+    "struct Iter {\n"
+    "  var (*iter_init)(var);\n"
+    "  var (*iter_next)(var, var);\n"
+    "  var (*iter_prev)(var, var);\n"
+    "  var (*iter_last)(var);\n"
+    "};\n";
+}
+
+static struct Example* Iter_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Array, Int, $I(1), $I(2), $I(5));\n"
@@ -43,17 +53,17 @@ static struct DocExample* Iter_Examples(void) {
   
 }
 
-static struct DocMethod* Iter_Methods(void) {
+static struct Method* Iter_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "iter_init", 
-      "var iter_init(var self);\n    "
+      "var iter_init(var self);\n"
       "var iter_last(var self);",
       "Return the initial item (or final item) in the iteration over `self`."
     }, {
       "iter_next", 
-      "var iter_next(var self, var curr);\n    "
+      "var iter_next(var self, var curr);\n"
       "var iter_prev(var self, var curr);",
       "Given the current item `curr`, return the next (or previous) item in "
       "the iteration over `self`."
@@ -65,7 +75,8 @@ static struct DocMethod* Iter_Methods(void) {
 
 var Iter = Cello(Iter,
   Instance(Doc,
-    Iter_Name, Iter_Brief, Iter_Description, Iter_Examples, Iter_Methods));
+    Iter_Name,       Iter_Brief,    Iter_Description, 
+    Iter_Definition, Iter_Examples, Iter_Methods));
 
 var iter_init(var self) {
   return method(self, Iter, iter_init);

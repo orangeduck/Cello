@@ -17,9 +17,19 @@ static const char* Get_Description(void) {
     "as thread local storage for the `Thread` object.";
 }
 
-static struct DocExample* Get_Examples(void) {
+static const char* Get_Definition(void) {
+  return
+    "struct Get {\n"
+    "  var  (*get)(var, var);\n"
+    "  void (*set)(var, var, var);\n"
+    "  bool (*mem)(var, var);\n"
+    "  void (*rem)(var, var);\n"
+    "};\n";
+}
+
+static struct Example* Get_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage 1",
       "var x = new(Array, String, \n"
@@ -50,9 +60,9 @@ static struct DocExample* Get_Examples(void) {
   
 }
 
-static struct DocMethod* Get_Methods(void) {
+static struct Method* Get_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "get", 
       "var get(var self, var key);",
@@ -77,7 +87,8 @@ static struct DocMethod* Get_Methods(void) {
 
 var Get = Cello(Get,
   Instance(Doc,
-    Get_Name, Get_Brief, Get_Description, Get_Examples, Get_Methods));
+    Get_Name,       Get_Brief,    Get_Description, 
+    Get_Definition, Get_Examples, Get_Methods));
 
 var get(var self, var key) {
   return method(self, Get, get, key);

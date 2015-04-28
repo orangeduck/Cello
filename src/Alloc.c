@@ -45,9 +45,17 @@ static const char* Alloc_Description(void) {
   ;
 }
 
-static struct DocExample* Alloc_Examples(void) {
+static const char* Alloc_Definition(void) {
+  return
+    "struct Alloc {\n"
+    "  var (*alloc)(void);\n"
+    "  void (*dealloc)(var);\n"
+    "};";
+}
+
+static struct Example* Alloc_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
      "Usage",
      "/* Allocation deallocated by Garbage Collector */\n"
@@ -66,16 +74,16 @@ static struct DocExample* Alloc_Examples(void) {
   return examples;
 }
 
-static struct DocMethod* Alloc_Methods(void) {
+static struct Method* Alloc_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "$",
-      "#define $(T, ...)\n    "
-      "#define $I(X)\n    "
-      "#define $F(X)\n    "
-      "#define $S(X)\n    "
-      "#define $R(X)\n    "
+      "#define $(T, ...)\n"
+      "#define $I(X)\n"
+      "#define $F(X)\n"
+      "#define $S(X)\n"
+      "#define $R(X)\n"
       "#define $B(X)",
       "Allocate memory for the given type `T` on the stack and copy in the "
       "given arguments `...` as struct members. Shorthand constructors exist "
@@ -83,9 +91,9 @@ static struct DocMethod* Alloc_Methods(void) {
       " `$R -> Ref` `$B -> Box`\n\n"
     }, {
       "alloc", 
-      "#define alloc_stack(T)\n    "
-      "var alloc(var type);\n    "
-      "var alloc_raw(var type);\n    "
+      "#define alloc_stack(T)\n"
+      "var alloc(var type);\n"
+      "var alloc_raw(var type);\n"
       "var alloc_root(var type);",
       "Allocate memory for a given `type`. To avoid the Garbage Collector "
       "completely use `alloc_raw`, to register the allocation as a root use "
@@ -94,8 +102,8 @@ static struct DocMethod* Alloc_Methods(void) {
       "`alloc_stack` is not managed by the Garbage Collector."
     }, {
       "dealloc",
-      "void dealloc(var self);\n    "
-      "void dealloc_raw(var self);\n    "
+      "void dealloc(var self);\n"
+      "void dealloc_raw(var self);\n"
       "void dealloc_root(var self);",
       "Deallocate memory for object `self` manually. If registered with the "
       "Garbage Collector then entry will be removed. If the `raw` variation is "
@@ -107,7 +115,8 @@ static struct DocMethod* Alloc_Methods(void) {
 }
 
 var Alloc = Cello(Alloc, Instance(Doc, 
-  Alloc_Name, Alloc_Brief, Alloc_Description, Alloc_Examples, Alloc_Methods));
+  Alloc_Name,       Alloc_Brief,    Alloc_Description, 
+  Alloc_Definition, Alloc_Examples, Alloc_Methods));
 
 enum {
   ALLOC_STANDARD,
@@ -244,9 +253,18 @@ static const char* New_Description(void) {
   ;
 }
 
-static struct DocExample* New_Examples(void) {
+static const char* New_Definition(void) {
+  return
+    "struct New {\n"
+    "  void (*construct_with)(var, var);\n"
+    "  void (*destruct)(var);\n"
+    "};\n";
+}
+
+
+static struct Example* New_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Int, $I(1));\n"
@@ -263,16 +281,16 @@ static struct DocExample* New_Examples(void) {
   return examples;
 }
 
-static struct DocMethod* New_Methods(void) {
+static struct Method* New_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "new", 
-      "#define new(T, ...)\n    "
-      "#define new_raw(T, ...)\n    "
-      "#define new_root(T, ...)\n    "
-      "var new_with(var type, var args);\n    "
-      "var new_raw_with(var type, var args);\n    "
+      "#define new(T, ...)\n"
+      "#define new_raw(T, ...)\n"
+      "#define new_root(T, ...)\n"
+      "var new_with(var type, var args);\n"
+      "var new_raw_with(var type, var args);\n"
       "var new_root_with(var type, var args);",
       "Construct a new object of a given `type`. Use `new_raw` to avoid the "
       "Garbage Collector completely, and `new_root` to register the allocation "
@@ -280,15 +298,15 @@ static struct DocMethod* New_Methods(void) {
       "they must be destructed with the corresponding deletion functions."
     }, {
       "del",
-      "void del(var self);\n    "
-      "void del_raw(var self);\n    "
+      "void del(var self);\n"
+      "void del_raw(var self);\n"
       "void del_root(var self);",
       "Destruct the object `self` manually. If registered with the "
       "Garbage Collector then entry will be removed. If `del_raw` is used then"
       "the destruction will be done without going via the Garbage Collector."
     }, {
       "construct",
-      "#define construct(self, ...)\n    "
+      "#define construct(self, ...)\n"
       "var construct_with(var self, var args);",
       "Call the constructor on object `self` which has already been allocated."
     }, {
@@ -303,8 +321,9 @@ static struct DocMethod* New_Methods(void) {
 }
 
 var New = Cello(New,
-  Instance(Doc, New_Name, New_Brief, 
-    New_Description, New_Examples, New_Methods));
+  Instance(Doc,
+    New_Name,       New_Brief,    New_Description, 
+    New_Definition, New_Examples, New_Methods));
 
 var construct_with(var self, var args) {
   struct New* n = instance(self, New);
@@ -375,9 +394,16 @@ static const char* Copy_Description(void) {
     "could vary depending on the type's overridden behaviours.";
 }
 
-static struct DocExample* Copy_Examples(void) {
+static const char* Copy_Definition(void) {
+  return
+    "struct Copy {\n"
+    "  var (*copy)(var);\n"
+    "};\n";
+}
+
+static struct Example* Copy_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(String, $S(\"Hello\"));\n"
@@ -392,9 +418,9 @@ static struct DocExample* Copy_Examples(void) {
   return examples;
 }
 
-static struct DocMethod* Copy_Methods(void) {
+static struct Method* Copy_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "copy", 
       "var copy(var self);",
@@ -407,8 +433,8 @@ static struct DocMethod* Copy_Methods(void) {
 
 var Copy = Cello(Copy,
   Instance(Doc,
-    Copy_Name, Copy_Brief, Copy_Description, 
-    Copy_Examples, Copy_Methods));
+    Copy_Name,       Copy_Brief,    Copy_Description, 
+    Copy_Definition, Copy_Examples, Copy_Methods));
 
 var copy(var self) {
   

@@ -25,9 +25,15 @@ static const char* Tuple_Description(void) {
     "slow.";
 }
 
-static struct DocExample* Tuple_Examples(void) {
+/* TODO: Add methods second for creation macros */
+
+static const char* Tuple_Definition(void) {
+  return "struct Tuple { var* items; };";
+}
+
+static struct Example* Tuple_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = tuple($I(100), $I(200), $S(\"Hello\"));\n"
@@ -424,7 +430,8 @@ static uint64_t Tuple_Hash(var self) {
 
 var Tuple = Cello(Tuple,
   Instance(Doc,
-    Tuple_Name, Tuple_Brief, Tuple_Description, Tuple_Examples, NULL),
+    Tuple_Name,       Tuple_Brief,    Tuple_Description, 
+    Tuple_Definition, Tuple_Examples, NULL),
   Instance(New,      Tuple_New, Tuple_Del),
   Instance(Assign,   Tuple_Assign),
   Instance(Cmp,      Tuple_Cmp),

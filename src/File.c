@@ -6,7 +6,6 @@ static const char* Stream_Name(void) {
 
 static const char* Stream_Brief(void) {
   return "File-like";
-
 }
 
 static const char* Stream_Description(void) {
@@ -15,9 +14,23 @@ static const char* Stream_Description(void) {
     "performed on File-like objects.";
 }
 
-static struct DocExample* Stream_Examples(void) {
+static const char* Stream_Definition(void) {
+  return
+    "struct Stream {\n"
+    "  var  (*sopen)(var,var,var);\n"
+    "  void (*sclose)(var);\n"
+    "  void (*sseek)(var,int64_t,int);\n"
+    "  int64_t (*stell)(var);\n"
+    "  void (*sflush)(var);\n"
+    "  bool (*seof)(var);\n"
+    "  size_t (*sread)(var,void*,size_t);\n"
+    "  size_t (*swrite)(var,void*,size_t);\n"
+    "};\n";
+}
+
+static struct Example* Stream_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var f = sopen($(File, NULL), $S(\"test.bin\"), $S(\"r\"));\n"
@@ -36,9 +49,9 @@ static struct DocExample* Stream_Examples(void) {
   
 }
 
-static struct DocMethod* Stream_Methods(void) {
+static struct Method* Stream_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "sopen", 
       "var sopen(var self, var resource, var options);",
@@ -79,8 +92,8 @@ static struct DocMethod* Stream_Methods(void) {
 
 var Stream = Cello(Stream,
   Instance(Doc, 
-    Stream_Name, Stream_Brief, Stream_Description,
-    Stream_Examples, Stream_Methods));
+    Stream_Name,       Stream_Brief,    Stream_Description,
+    Stream_Definition, Stream_Examples, Stream_Methods));
 
 var sopen(var self, var resource, var options) {
   return method(self, Stream, sopen, resource, options);
@@ -128,9 +141,13 @@ static const char* File_Description(void) {
     "file in the operating system.";
 }
 
-static struct DocExample* File_Examples(void) {
+static const char* File_Definition(void) {
+  return "struct File { FILE* file; };";
+}
+
+static struct Example* File_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(File, $S(\"test.bin\"), $S(\"wb\"));\n"
@@ -307,7 +324,8 @@ static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
 
 var File = Cello(File,
   Instance(Doc,
-    File_Name, File_Brief, File_Description, File_Examples, NULL),
+    File_Name,       File_Brief,    File_Description, 
+    File_Definition, File_Examples, NULL),
   Instance(New, File_New, File_Del),
   Instance(Start, NULL, File_Close, NULL),
   Instance(Stream,
@@ -332,9 +350,13 @@ static const char* Process_Description(void) {
     "to a location you are writing it as input to a process.";
 }
 
-static struct DocExample* Process_Examples(void) {
+static const char* Process_Definition(void) {
+  return "struct Process { FILE* proc; };";
+}
+
+static struct Example* Process_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Process, $S(\"ls\"), $S(\"r\"));\n"
@@ -494,8 +516,8 @@ static int Process_Format_From(var self, int pos, const char* fmt, va_list va) {
 
 var Process = Cello(Process,
   Instance(Doc,
-    Process_Name, Process_Brief, Process_Description, 
-    Process_Examples, NULL),
+    Process_Name,       Process_Brief,    Process_Description, 
+    Process_Definition, Process_Examples, NULL),
   Instance(New,  Process_New, Process_Del),
   Instance(Start, NULL, Process_Close, NULL),
   Instance(Stream,

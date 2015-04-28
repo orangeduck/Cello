@@ -32,9 +32,16 @@ static const char* Cmp_Description(void) {
     "the same object in memory.";
 }
 
-static struct DocExample* Cmp_Examples(void) {
+static const char* Cmp_Definition(void) {
+  return
+    "struct Cmp {\n"
+    "  int (*cmp)(var, var);\n"
+    "};\n";
+}
+
+static struct Example* Cmp_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage 1",
       "show($I( eq($I(1), $I( 1)))); /* 1 */\n"
@@ -65,9 +72,9 @@ static struct DocExample* Cmp_Examples(void) {
   return examples;
 }
 
-static struct DocMethod* Cmp_Methods(void) {
+static struct Method* Cmp_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "cmp", 
       "int cmp(var self, var obj);",
@@ -107,7 +114,8 @@ static struct DocMethod* Cmp_Methods(void) {
 
 var Cmp = Cello(Cmp,
   Instance(Doc,
-    Cmp_Name, Cmp_Brief, Cmp_Description, Cmp_Examples, Cmp_Methods));
+    Cmp_Name,       Cmp_Brief,    Cmp_Description, 
+    Cmp_Definition, Cmp_Examples, Cmp_Methods));
 
 int cmp(var self, var obj) {
   
@@ -130,24 +138,31 @@ bool  lt(var self, var obj) { return cmp(self, obj) < 0; }
 bool  ge(var self, var obj) { return not lt(self, obj); }
 bool  le(var self, var obj) { return not gt(self, obj); }
 
-const char* Sort_Name(void) {
+static const char* Sort_Name(void) {
   return "Sort";
 }
 
-const char* Sort_Brief(void) {
+static const char* Sort_Brief(void) {
   return "Elements can be sorted";
 }
 
-const char* Sort_Description(void) {
+static const char* Sort_Description(void) {
   return
     "The `Sort` class can be implemented by types which can be sorted in some "
     "way such as `Array`. By default the sorting function uses the `lt` method "
     "to compare elements, but a custom function can also be provided.";
 }
 
-static struct DocExample* Sort_Examples(void) {
+static const char* Sort_Definition(void) {
+  return
+    "struct Sort {\n"
+    "  void (*sort_by)(var,bool(*f)(var,var));\n"
+    "};";
+}
+
+static struct Example* Sort_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Array, Float, \n"
@@ -162,9 +177,9 @@ static struct DocExample* Sort_Examples(void) {
   return examples;
 }
 
-static struct DocMethod* Sort_Methods(void) {
+static struct Method* Sort_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "sort", 
       "void sort(var self);",
@@ -181,8 +196,8 @@ static struct DocMethod* Sort_Methods(void) {
 
 var Sort = Cello(Sort, 
   Instance(Doc,
-    Sort_Name, Sort_Brief, Sort_Description, 
-    Sort_Examples, Sort_Methods));
+    Sort_Name,       Sort_Brief,    Sort_Description, 
+    Sort_Definition, Sort_Examples, Sort_Methods));
   
 void sort(var self) {
   method(self, Sort, sort_by, lt);
@@ -192,23 +207,30 @@ void sort_by(var self, bool(*f)(var,var)) {
   method(self, Sort, sort_by, f);
 }
 
-const char* Reverse_Name(void) {
+static const char* Reverse_Name(void) {
   return "Reverse";
 }
 
-const char* Reverse_Brief(void) {
+static const char* Reverse_Brief(void) {
   return "Order can be reversed";
 }
 
-const char* Reverse_Description(void) {
+static const char* Reverse_Description(void) {
   return
     "The `Reverse` class can be implemented by types which are reversible in "
     "some way such as `Array`.";
 }
 
-static struct DocExample* Reverse_Examples(void) {
+static const char* Reverse_Definition(void) {
+  return
+    "struct Reverse {\n"
+    "  void (*reverse)(var);\n"
+    "};\n";
+}
+
+static struct Example* Reverse_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Array, Float, \n"
@@ -223,9 +245,9 @@ static struct DocExample* Reverse_Examples(void) {
   return examples;
 }
 
-static struct DocMethod* Reverse_Methods(void) {
+static struct Method* Reverse_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "reverse", 
       "void reverse(var self);",
@@ -238,8 +260,8 @@ static struct DocMethod* Reverse_Methods(void) {
 
 var Reverse = Cello(Reverse, 
   Instance(Doc,
-    Reverse_Name, Reverse_Brief, Reverse_Description, 
-    Reverse_Examples, Reverse_Methods));
+    Reverse_Name,       Reverse_Brief,    Reverse_Description, 
+    Reverse_Definition, Reverse_Examples, Reverse_Methods));
   
 void reverse(var self) {
   method(self, Reverse, reverse);

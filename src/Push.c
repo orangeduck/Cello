@@ -17,9 +17,19 @@ static const char* Push_Description(void) {
     "them. Usage of `push` can require `assign` to be defined on the argument.";
 }
 
-static struct DocExample* Push_Examples(void) {
+static const char* Push_Definition(void) {
+  return
+    "struct Push {\n"
+    "  void (*push)(var, var);\n"
+    "  void (*pop)(var);\n"
+    "  void (*push_at)(var, var, var);\n"
+    "  void (*pop_at)(var, var);\n"
+    "};\n";
+}
+
+static struct Example* Push_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Array, Int);\n"
@@ -43,9 +53,9 @@ static struct DocExample* Push_Examples(void) {
   
 }
 
-static struct DocMethod* Push_Methods(void) {
+static struct Method* Push_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "push", 
       "void push(var self, var obj);",
@@ -70,7 +80,8 @@ static struct DocMethod* Push_Methods(void) {
 
 var Push = Cello(Push,
   Instance(Doc,
-    Push_Name, Push_Brief, Push_Description, Push_Examples, Push_Methods));
+    Push_Name,       Push_Brief,    Push_Description, 
+    Push_Definition, Push_Examples, Push_Methods));
 
 void push(var self, var val) { method(self, Push, push, val); }
 void push_at(var self, var val, var i) { method(self, Push, push_at, val, i); }

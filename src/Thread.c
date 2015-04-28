@@ -19,9 +19,16 @@ static const char* Current_Description(void) {
     "Design Pattern](http://en.wikipedia.org/wiki/Singleton_pattern)";
 }
 
-static struct DocExample* Current_Examples(void) {
+static const char* Current_Definition(void) {
+  return
+    "struct Current {\n"
+    "  var (*current)(void);\n"
+    "};\n";
+}
+
+static struct Example* Current_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var gc = current(GC);\n"
@@ -35,9 +42,9 @@ static struct DocExample* Current_Examples(void) {
   
 }
 
-static struct DocMethod* Current_Methods(void) {
+static struct Method* Current_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "current", 
       "var current(var type);",
@@ -50,8 +57,8 @@ static struct DocMethod* Current_Methods(void) {
 
 var Current = Cello(Current,
   Instance(Doc,
-    Current_Name, Current_Brief, Current_Description,
-    Current_Examples, Current_Methods));
+    Current_Name,       Current_Brief,    Current_Description,
+    Current_Definition, Current_Examples, Current_Methods));
 
 var current(var type) {
   return type_method(type, Current, current);
@@ -74,9 +81,16 @@ static const char* Join_Description(void) {
     "implemented by `Thread`.";
 }
 
-static struct DocMethod* Join_Methods(void) {
+static const char* Join_Definition(void) {
+  return
+    "struct Join {\n"
+    "  void (*join)(var);\n"
+    "};\n";
+}
+
+static struct Method* Join_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "join", 
       "void join(var self);",
@@ -91,8 +105,8 @@ static struct DocMethod* Join_Methods(void) {
 
 var Join = Cello(Join,
   Instance(Doc,
-    Join_Name, Join_Brief, Join_Description,
-    NULL, Join_Methods));
+    Join_Name,       Join_Brief, Join_Description,
+    Join_Definition, NULL,       Join_Methods));
 
 void join(var self) {
   method(self, Join, join);
@@ -177,10 +191,6 @@ static void Thread_Del(var self) {
   del_raw(t->tls);
 }
 
-static uint64_t Thread_Hash(var self) {
-  return c_int(self);
-}
-
 static int64_t Thread_C_Int(var self) {
   struct Thread* t = self;
   
@@ -196,16 +206,12 @@ static int64_t Thread_C_Int(var self) {
   
 }
 
-static bool Thread_Eq(var self, var obj) {
-  return Thread_C_Int(self) == c_int(obj);
+static int Thread_Cmp(var self, var obj) {
+  return Thread_C_Int(self) - c_int(obj);
 }
 
-static bool Thread_Gt(var self, var obj) {
-  return Thread_C_Int(self) > c_int(obj);
-}
-
-static bool Thread_Lt(var self, var obj) {
-  return Thread_C_Int(self) < c_int(obj);
+static uint64_t Thread_Hash(var self) {
+  return Thread_C_Int(self);
 }
 
 static bool Thread_TLS_Key_Created = false;
@@ -436,8 +442,10 @@ static void Thread_Mark(var self, var gc, void(*f)(var,void*)) {
 var Thread = Cello(Thread,
   Instance(Doc,
     Thread_Name, Thread_Brief, Thread_Description, 
-    NULL, NULL),
+    NULL, NULL, NULL),
   Instance(New,     Thread_New, Thread_Del),
+  Instance(Cmp,     Thread_Cmp),
+  Instance(Hash,    Thread_Hash),
   Instance(Call,    Thread_Call),
   Instance(Current, Thread_Current),
   Instance(Join,    Thread_Join),
@@ -461,9 +469,18 @@ static const char* Lock_Description(void) {
     "mutual exclusion across Threads.";
 }
 
-static struct DocMethod* Lock_Methods(void) {
+static const char* Lock_Definition(void) {
+  return
+    "struct Lock {\n"
+    "  void (*lock)(var);\n"
+    "  void (*unlock)(var);\n"
+    "  bool (*lock_try)(var);\n"
+    "};\n";
+}
+
+static struct Method* Lock_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "lock", 
       "void lock(var self);",
@@ -487,8 +504,8 @@ static struct DocMethod* Lock_Methods(void) {
 
 var Lock = Cello(Lock,
   Instance(Doc,
-    Lock_Name, Lock_Brief, Lock_Description,
-    NULL, Lock_Methods));
+    Lock_Name,       Lock_Brief, Lock_Description,
+    Lock_Definition, NULL,       Lock_Methods));
 
 void lock(var self) {
   method(self, Lock, lock);
@@ -591,7 +608,7 @@ static void Mutex_Unlock(var self) {
 
 var Mutex = Cello(Mutex,
   Instance(Doc, 
-    Mutex_Name, Mutex_Brief, Mutex_Description, NULL, NULL),
+    Mutex_Name, Mutex_Brief, Mutex_Description, NULL, NULL, NULL),
   Instance(New,    Mutex_New, Mutex_Del),
   Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
   Instance(Start,  Mutex_Lock, Mutex_Unlock, NULL));

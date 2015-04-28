@@ -14,9 +14,16 @@ static const char* C_Int_Description(void) {
     "as a C style Integer of the type `int64_t`.";
 }
 
-static struct DocExample* C_Int_Examples(void) {
+static const char* C_Int_Definition(void) {
+  return
+    "struct C_Int {\n"
+    "  int64_t (*c_int)(var);\n"
+    "};\n";
+}
+
+static struct Example* C_Int_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "printf(\"%li\", c_int($I(5))); /* 5 */\n"
@@ -28,9 +35,9 @@ static struct DocExample* C_Int_Examples(void) {
   
 }
 
-static struct DocMethod* C_Int_Methods(void) {
+static struct Method* C_Int_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "c_int", 
       "int64_t c_int(var self);",
@@ -43,8 +50,8 @@ static struct DocMethod* C_Int_Methods(void) {
 
 var C_Int = Cello(C_Int,
   Instance(Doc,
-    C_Int_Name, C_Int_Brief, C_Int_Description, 
-    C_Int_Examples, C_Int_Methods));
+    C_Int_Name,       C_Int_Brief,    C_Int_Description, 
+    C_Int_Definition, C_Int_Examples, C_Int_Methods));
     
 static const char* C_Float_Name(void) {
   return "C_Float";
@@ -60,9 +67,16 @@ static const char* C_Float_Description(void) {
     "as a C style Float of the type `double`.";
 }
 
-static struct DocExample* C_Float_Examples(void) {
+static const char* C_Float_Definition(void) {
+  return
+    "struct C_Float {\n"
+    "  double (*c_float)(var);\n"
+    "};\n";
+}
+
+static struct Example* C_Float_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "printf(\"%f\", c_float($F(5.1))); /* 5.1 */\n"
@@ -74,9 +88,9 @@ static struct DocExample* C_Float_Examples(void) {
   
 }
 
-static struct DocMethod* C_Float_Methods(void) {
+static struct Method* C_Float_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "c_float", 
       "double c_float(var self);",
@@ -89,8 +103,8 @@ static struct DocMethod* C_Float_Methods(void) {
 
 var C_Float = Cello(C_Float,
   Instance(Doc,
-    C_Float_Name, C_Float_Brief, C_Float_Description, 
-    C_Float_Examples, C_Float_Methods));
+    C_Float_Name,       C_Float_Brief,    C_Float_Description, 
+    C_Float_Definition, C_Float_Examples, C_Float_Methods));
 
 int64_t c_int(var self) {
   
@@ -122,9 +136,13 @@ static const char* Int_Description(void) {
   return "64-bit signed integer Object.";
 }
 
-static struct DocExample* Int_Examples(void) {
+static const char* Int_Definition(void) {
+  return "struct Int { int64_t val; };";
+}
+
+static struct Example* Int_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var i0 = $(Int, 1);\n"
@@ -169,7 +187,7 @@ static int Int_Look(var self, var input, int pos) {
 
 var Int = Cello(Int,
   Instance(Doc,
-    Int_Name, Int_Brief, Int_Description, Int_Examples, NULL),
+    Int_Name, Int_Brief, Int_Description, Int_Definition, Int_Examples, NULL),
   Instance(Assign,  Int_Assign),
   Instance(Cmp,     Int_Cmp),
   Instance(Hash,    Int_Hash),
@@ -188,9 +206,13 @@ static const char* Float_Description(void) {
   return "64-bit double precision float point Object.";
 }
 
-static struct DocExample* Float_Examples(void) {
+static const char* Float_Definition(void) {
+  return "struct Float { double val; };";
+}
+
+static struct Example* Float_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var f0 = $(Float, 1.0);\n"
@@ -243,7 +265,8 @@ int Float_Look(var self, var input, int pos) {
 
 var Float = Cello(Float,
   Instance(Doc,
-    Float_Name, Float_Brief, Float_Description, Float_Examples, NULL),
+    Float_Name,       Float_Brief,    Float_Description, 
+    Float_Definition, Float_Examples, NULL),
   Instance(Assign,  Float_Assign),
   Instance(Cmp,     Float_Cmp),
   Instance(Hash,    Float_Hash),

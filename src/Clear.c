@@ -14,9 +14,16 @@ const char* Clear_Description(void) {
     "object, such as to remove all of the items from an `Array` or `Table`.";
 }
 
-static struct DocExample* Clear_Examples(void) {
+const char* Clear_Definition(void) {
+  return
+    "struct Clear {\n"
+    "  void (*clear)(var);\n"  
+    "};\n";
+}
+
+static struct Example* Clear_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Array, Int, $I(10), $I(20));\n"
@@ -29,9 +36,9 @@ static struct DocExample* Clear_Examples(void) {
   return examples;
 }
 
-static struct DocMethod* Clear_Methods(void) {
+static struct Method* Clear_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "clear", 
       "void clear(var self);",
@@ -44,8 +51,8 @@ static struct DocMethod* Clear_Methods(void) {
 
 var Clear = Cello(Clear, 
   Instance(Doc,
-    Clear_Name, Clear_Brief, Clear_Description, 
-    Clear_Examples, Clear_Methods));
+    Clear_Name,       Clear_Brief,    Clear_Description, 
+    Clear_Definition, Clear_Examples, Clear_Methods));
   
 void clear(var self) {
   method(self, Clear, clear);

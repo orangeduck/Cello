@@ -12,7 +12,7 @@ static const char* Hash_Description(void) {
   return
     "The `Hash` class provides a mechanism for hashing an object. This hash "
     "value should remain the same across objects that are also considered "
-    "equal by the `Eq` class. For objects that are not considered equal this "
+    "equal by the `Cmp` class. For objects that are not considered equal this "
     "value should aim to be evenly distributed across integers."
     "\n\n"
     "This is not a cryptographic hash. It is used for various objects or "
@@ -21,12 +21,19 @@ static const char* Hash_Description(void) {
     "\n\n"
     "By default an object is hashed by using its raw memory in the "
     "Murmurhash algorithm. Due to the link between them it is recommended to "
-    "only override `Hash` and `Eq` in conjunction.";
+    "only override `Hash` and `Cmp` in conjunction.";
 }
 
-static struct DocExample* Hash_Examples(void) {
+static const char* Hash_Definition(void) {
+  return
+    "struct Hash {\n"
+    "  uint64_t (*hash)(var);\n"
+    "};\n";
+}
+
+static struct Example* Hash_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "show($I(hash($I(  1)))); /* 1   */\n"
@@ -43,9 +50,9 @@ static struct DocExample* Hash_Examples(void) {
   
 }
 
-static struct DocMethod* Hash_Methods(void) {
+static struct Method* Hash_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "hash", 
       "uint64_t hash(var self);",
@@ -60,11 +67,10 @@ static struct DocMethod* Hash_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Hash = Cello(Hash,
   Instance(Doc,
-    Hash_Name, Hash_Brief, Hash_Description, Hash_Examples, Hash_Methods));
+    Hash_Name,       Hash_Brief,    Hash_Description, 
+    Hash_Definition, Hash_Examples, Hash_Methods));
     
 uint64_t hash_data(void* data, size_t size) {
   
@@ -113,5 +119,6 @@ uint64_t hash(var self) {
   }
   
   return hash_data(self, size(type_of(self)));
+  
 }
 

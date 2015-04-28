@@ -27,9 +27,9 @@ static const char* Array_Description(void) {
     "[std::vector](http://www.cplusplus.com/reference/vector/vector/)";
 }
 
-static struct DocExample* Array_Examples(void) {
+static struct Example* Array_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Construction & Deletion",
       "var x = new(Array, Int);\n"
@@ -496,9 +496,8 @@ static void Array_Mark(var self, var gc, void(*f)(var,void*)) {
 
 var Array = Cello(Array,
   Instance(Doc,
-    Array_Name,        Array_Brief,
-    Array_Description, Array_Examples,
-    NULL),
+    Array_Name, Array_Brief,    Array_Description, 
+    NULL,       Array_Examples, NULL),
   Instance(New,     Array_New, Array_Del),
   Instance(Subtype, Array_Subtype, NULL, NULL),
   Instance(Assign,  Array_Assign),

@@ -1,14 +1,14 @@
 #include "Cello.h" 
 
-const char* Reserve_Name(void) {
+static const char* Reserve_Name(void) {
   return "Reserve";
 }
 
-const char* Reserve_Brief(void) {
+static const char* Reserve_Brief(void) {
   return "Resources can be Preallocated";
 }
 
-const char* Reserve_Description(void) {
+static const char* Reserve_Description(void) {
   return
     "The `Reserve` class can be implemented by objects which allow for some "
     "resource or other to be preallocated or reserved. For example this class "
@@ -16,9 +16,16 @@ const char* Reserve_Description(void) {
     "is known that many items are going to be added at a later date.";
 }
 
-static struct DocMethod* Reserve_Methods(void) {
+static const char* Reserve_Definition(void) {
+  return
+    "struct Reserve {\n"
+    "  void (*reserve)(var, var);\n"
+    "};\n";
+}
+
+static struct Method* Reserve_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "reserve", 
       "void reserve(var self, var amount);",
@@ -29,9 +36,9 @@ static struct DocMethod* Reserve_Methods(void) {
   return methods;
 }
 
-static struct DocExample* Reserve_Examples(void) {
+static struct Example* Reserve_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Array, Int);\n"
@@ -48,8 +55,8 @@ static struct DocExample* Reserve_Examples(void) {
 
 var Reserve = Cello(Reserve, 
   Instance(Doc,
-    Reserve_Name, Reserve_Brief, Reserve_Description, 
-    Reserve_Examples, Reserve_Methods));
+    Reserve_Name,       Reserve_Brief,    Reserve_Description, 
+    Reserve_Definition, Reserve_Examples, Reserve_Methods));
   
 void reserve(var self, var amount) {
   method(self, Reserve, reserve, amount);

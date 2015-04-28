@@ -641,7 +641,7 @@ static void Map_Mark(var self, var gc, void(*f)(var,void*)) {
 var Map = Cello(Map,
   Instance(Doc,
     Map_Name, Map_Brief, Map_Description,
-    NULL, NULL),
+    NULL, NULL, NULL),
   Instance(New,     Map_New, Map_Del),
   Instance(Subtype, Map_Key_Subtype, Map_Key_Subtype, Map_Val_Subtype),
   Instance(Assign,  Map_Assign),

@@ -274,12 +274,12 @@ extern var Mark;
 
 /* Signatures */
 
-struct DocExample {
+struct Example {
   const char* name;
   const char* body;
 };
 
-struct DocMethod {
+struct Method {
   const char* name;
   const char* definition;
   const char* description;
@@ -289,8 +289,9 @@ struct Doc {
   const char* (*name)(void);
   const char* (*brief)(void);
   const char* (*description)(void);
-  struct DocExample* (*examples)(void);
-  struct DocMethod* (*methods)(void);
+  const char* (*definition)(void);
+  struct Example* (*examples)(void);
+  struct Method* (*methods)(void);
 };
 
 struct Help {
@@ -396,14 +397,14 @@ struct C_Float {
 };
 
 struct Stream {
-  var  (*sopen)(var, var, var);
+  var  (*sopen)(var,var,var);
   void (*sclose)(var);
-  void (*sseek)(var, int64_t, int);
+  void (*sseek)(var,int64_t,int);
   int64_t (*stell)(var);
   void (*sflush)(var);
   bool (*seof)(var);
-  size_t (*sread)(var, void*, size_t);
-  size_t (*swrite)(var, void*, size_t);
+  size_t (*sread)(var,void*,size_t);
+  size_t (*swrite)(var,void*,size_t);
 };
 
 struct Pointer {
@@ -416,8 +417,8 @@ struct Call {
 };
 
 struct Format {
-  int (*format_to)(var, int, const char*, va_list);
-  int (*format_from)(var, int, const char*, va_list);
+  int (*format_to)(var,int,const char*,va_list);
+  int (*format_from)(var,int,const char*,va_list);
 };
 
 struct Show {
@@ -454,6 +455,7 @@ struct Mark {
 const char* name(var type);
 const char* brief(var type);
 const char* description(var type);
+const char* definition(var type);
 
 void help(var self);
 int help_to(var out, int pos, var self);

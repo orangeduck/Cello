@@ -19,6 +19,16 @@ static const char* Range_Description(void) {
     "`iter_prev` must be defined on the iterable object.";
 }
 
+static const char* Range_Definition(void) {
+  return
+    "struct Range {\n"
+    "  var iter;\n"
+    "  int64_t start;\n"
+    "  int64_t stop;\n"
+    "  int64_t step;\n"
+    "};\n";
+}
+
 /* TODO: Examples Methods */
 
 static var Range_Iter_Init(var self) {
@@ -45,7 +55,7 @@ static var Range_Iter_Next(var self, var curr) {
 /* TODO: Add extra methods */
 var Range = Cello(Range,
   Instance(Doc,
-    Range_Name, Range_Brief, Range_Description, NULL, NULL),
+    Range_Name, Range_Brief, Range_Description, Range_Definition, NULL, NULL),
   Instance(Iter, Range_Iter_Init, Range_Iter_Next));
   
 /* TODO: Make this `New` and just get macro to call constructor */
@@ -101,6 +111,10 @@ static const char* Slice_Description(void) {
     "no performance benefit to slicing.";
 }
 
+static const char* Slice_Definition(void) {
+  return "struct Slice { var iter; var range; };";
+}
+
 /* TODO: Examples Methods */
 
 static var Slice_Iter_Init(var self) {
@@ -148,6 +162,6 @@ static var Slice_Iter_Next(var self, var curr) {
 /* TODO: Add extra methods */
 var Slice = Cello(Slice,
   Instance(Doc,
-    Slice_Name, Slice_Brief, Slice_Description, NULL, NULL),
+    Slice_Name, Slice_Brief, Slice_Description, Slice_Definition, NULL, NULL),
   Instance(Iter, Slice_Iter_Init, Slice_Iter_Next));
 

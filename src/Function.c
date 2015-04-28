@@ -13,12 +13,20 @@ static const char* Call_Description(void) {
     "The `Call` class is used by types which can be called as functions.";
 }
 
-static struct DocMethod* Call_Methods(void) {
+static const char* Call_Definition(void) {
+  return
+    "struct Call {\n"
+    "  var (*call_with)(var, var);\n"
+    "};\n";
+}
+
+static struct Method* Call_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "call", 
-      "#define call(self, ...)\n    var call_with(var self, var args);",
+      "#define call(self, ...)\n"
+      "var call_with(var self, var args);",
       "Call the object `self` with arguments `args`."
     }, {NULL, NULL, NULL}
   };
@@ -30,7 +38,8 @@ static struct DocMethod* Call_Methods(void) {
 
 var Call = Cello(Call,
   Instance(Doc,
-    Call_Name, Call_Brief, Call_Description, NULL, Call_Methods));
+    Call_Name,       Call_Brief, Call_Description, 
+    Call_Definition, NULL,       Call_Methods));
 
 var call_with(var self, var args) {
   return method(self, Call, call_with, args);
@@ -53,6 +62,10 @@ static const char* Function_Description(void) {
     "as the first argument, typically in the form of a `tuple`.";
 }
 
+static const char* Function_Definition(void) {
+  return "struct Function { var(*func)(var); };";
+}
+
 static void Function_New(var self, var args) {
   struct Function* f = self;
   f->func = get(args, $I(0));
@@ -63,15 +76,13 @@ static var Function_Call(var self, var args) {
   return f->func(args);
 }
 
+/* TODO: Examples */
+
 var Function = Cello(Function,
   Instance(Doc,
-    Function_Name, Function_Brief, Function_Description,
-    NULL, NULL),
+    Function_Name,       Function_Brief, Function_Description,
+    Function_Definition, NULL,           NULL),
   Instance(New, Function_New, NULL),
   Instance(Call, Function_Call));
 
-void map(var self, var func) {
-  foreach(item in self) {
-    call(func, item);
-  }
-}
+

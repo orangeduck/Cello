@@ -1,14 +1,14 @@
 #include "Cello.h"
 
-const char* Start_Name(void) {
+static const char* Start_Name(void) {
   return "Start";
 }
 
-const char* Start_Brief(void) {
+static const char* Start_Brief(void) {
   return "Can be started or stopped";
 }
 
-const char* Start_Description(void) {
+static const char* Start_Description(void) {
   return
     "The `Start` class can be implemented by types which provide an abstract "
     "notion of a started and stopped state. This can be real processes such "
@@ -20,9 +20,18 @@ const char* Start_Description(void) {
     "and the `stop` function at the end.";
 }
 
-static struct DocExample* Start_Examples(void) {
+static const char* Start_Definition(void) {
+  return
+    "struct Start {\n"
+    "  void (*start)(var);\n"
+    "  void (*stop)(var);\n"
+    "  bool (*running)(var);\n"
+    "};\n";
+}
+
+static struct Example* Start_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Mutex);\n"
@@ -42,9 +51,9 @@ static struct DocExample* Start_Examples(void) {
   
 }
 
-static struct DocMethod* Start_Methods(void) {
+static struct Method* Start_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "start", 
       "void start(var self);",
@@ -64,7 +73,8 @@ static struct DocMethod* Start_Methods(void) {
 }
 
 var Start = Cello(Start, Instance(Doc, 
-  Start_Name, Start_Brief, Start_Description, Start_Examples, Start_Methods));
+  Start_Name,       Start_Brief,    Start_Description, 
+  Start_Definition, Start_Examples, Start_Methods));
 
 void start(var self) {
   method(self, Start, start);

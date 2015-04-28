@@ -14,9 +14,16 @@ static const char* C_Str_Description(void) {
     "as a C style String.";
 }
 
-static struct DocExample* C_Str_Examples(void) {
+static const char* C_Str_Definition(void) {
+  return
+    "struct C_Str {\n"
+    "  char* (*c_str)(var);\n"
+    "};\n";
+}
+
+static struct Example* C_Str_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "puts(c_str($S(\"Hello\"))); /* Hello */\n"
@@ -28,9 +35,9 @@ static struct DocExample* C_Str_Examples(void) {
   
 }
 
-static struct DocMethod* C_Str_Methods(void) {
+static struct Method* C_Str_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "c_str", 
       "char* c_str(var self);",
@@ -43,8 +50,8 @@ static struct DocMethod* C_Str_Methods(void) {
 
 var C_Str = Cello(C_Str,
   Instance(Doc,
-    C_Str_Name, C_Str_Brief, C_Str_Description, 
-    C_Str_Examples, C_Str_Methods));
+    C_Str_Name,       C_Str_Brief,    C_Str_Description, 
+    C_Str_Definition, C_Str_Examples, C_Str_Methods));
 
 char* c_str(var self) {
   
@@ -72,9 +79,13 @@ static const char* String_Description(void) {
     "provided overs standard C strings such as concatenation.";
 }
 
-static struct DocExample* String_Examples(void) {
+static const char* String_Definition(void) {
+  return "struct String { char* val; };";
+}
+
+static struct Example* String_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var s0 = $(String, \"Hello\");\n"
@@ -443,8 +454,8 @@ static int String_Look(var self, var input, int pos) {
 
 var String = Cello(String,
   Instance(Doc,
-    String_Name, String_Brief, String_Description,
-    String_Examples, NULL),
+    String_Name,       String_Brief,    String_Description,
+    String_Definition, String_Examples, NULL),
   Instance(New,     String_New, String_Del),
   Instance(Assign,  String_Assign),
   Instance(Cmp,     String_Cmp),

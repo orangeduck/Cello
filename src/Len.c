@@ -15,9 +15,16 @@ static const char* Len_Description(void) {
     "and is often used in conjunction with `Iter` or `Get`.";
 }
 
-static struct DocExample* Len_Examples(void) {
+static const char* Len_Definition(void) {
+  return
+    "struct Len {\n"
+    "  size_t (*len)(var);\n"
+    "};\n";
+}
+
+static struct Example* Len_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var x = new(Array, Int, $I(1), $I(2), $I(5));\n"
@@ -31,9 +38,9 @@ static struct DocExample* Len_Examples(void) {
   
 }
 
-static struct DocMethod* Len_Methods(void) {
+static struct Method* Len_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "len", 
       "size_t len(var self);",
@@ -46,7 +53,8 @@ static struct DocMethod* Len_Methods(void) {
 
 var Len = Cello(Len,
   Instance(Doc,
-    Len_Name, Len_Brief, Len_Description, Len_Examples, Len_Methods));
+    Len_Name,       Len_Brief,    Len_Description, 
+    Len_Definition, Len_Examples, Len_Methods));
 
 size_t len(var self) {
   return method(self, Len, len);

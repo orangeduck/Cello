@@ -16,9 +16,9 @@ static const char* Table_Description(void) {
     "into the collection using the `Assign` class.";
 }
 
-static struct DocExample* Table_Examples(void) {
+static struct Example* Table_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var prices = new(Table, String, Int);\n"
@@ -616,8 +616,8 @@ static void Table_Mark(var self, var gc, void(*f)(var,void*)) {
 
 var Table = Cello(Table,
   Instance(Doc,
-    Table_Name, Table_Brief, Table_Description,
-    Table_Examples,  NULL),
+    Table_Name, Table_Brief,    Table_Description,
+    NULL,       Table_Examples, NULL),
   Instance(New,      Table_New, Table_Del),
   Instance(Subtype,  Table_Key_Subtype, Table_Key_Subtype, Table_Val_Subtype),
   Instance(Assign,   Table_Assign),

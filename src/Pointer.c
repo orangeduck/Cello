@@ -15,9 +15,17 @@ static const char* Pointer_Description(void) {
     "which provide the two main pointer types in Cello.";
 }
 
-static struct DocExample* Pointer_Examples(void) {
+static const char* Pointer_Definition(void) {
+  return
+    "struct Pointer {\n"
+    "  void (*ref)(var, var);\n"
+    "  var (*deref)(var);\n"
+    "};\n";
+}
+
+static struct Example* Pointer_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var obj0 = $F(1.0), obj1 = $F(2.0);\n"
@@ -35,9 +43,9 @@ static struct DocExample* Pointer_Examples(void) {
   
 }
 
-static struct DocMethod* Pointer_Methods(void) {
+static struct Method* Pointer_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "ref", 
       "void ref(var self, var item);",
@@ -54,8 +62,8 @@ static struct DocMethod* Pointer_Methods(void) {
 
 var Pointer = Cello(Pointer,
   Instance(Doc,
-    Pointer_Name, Pointer_Brief, Pointer_Description, 
-    Pointer_Examples, Pointer_Methods));
+    Pointer_Name,       Pointer_Brief,    Pointer_Description, 
+    Pointer_Definition, Pointer_Examples, Pointer_Methods));
 
 void ref(var self, var item) {
   method(self, Pointer, ref, item);
@@ -81,9 +89,13 @@ static const char* Ref_Description(void) {
     "indirection or mutability is required.";
 }
 
-static struct DocExample* Ref_Examples(void) {
+static const char* Ref_Definition(void) {
+  return "struct Ref { var val; };";
+}
+
+static struct Example* Ref_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var obj0 = $F(1.0), obj1 = $F(2.0);\n"
@@ -138,7 +150,7 @@ static var Ref_Deref(var self) {
 
 var Ref = Cello(Ref,
   Instance(Doc,
-    Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, NULL),
+    Ref_Name, Ref_Brief, Ref_Description, Ref_Definition, Ref_Examples, NULL),
   Instance(Assign,   Ref_Assign),
   Instance(Show,     Ref_Show, NULL),
   Instance(Pointer,  Ref_Ref, Ref_Deref));
@@ -165,9 +177,13 @@ static const char* Box_Description(void) {
     "used in conjunction with collections.";
 }
 
-static struct DocExample* Box_Examples(void) {
+static const char* Box_Definition(void) {
+  return "struct Box { var val; };";
+}
+
+static struct Example* Box_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Usage",
       "var obj0 = $F(1.0), obj1 = $F(2.0);\n"
@@ -239,7 +255,7 @@ static var Box_Deref(var self) {
 
 var Box = Cello(Box,
   Instance(Doc,
-    Box_Name, Box_Brief, Box_Description, Box_Examples, NULL),
+    Box_Name, Box_Brief, Box_Description, Box_Definition, Box_Examples, NULL),
   Instance(New,      NULL, Box_Del),
   Instance(Assign,   Box_Assign),
   Instance(Show,     Box_Show, NULL),

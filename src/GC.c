@@ -22,9 +22,16 @@ static const char* Mark_Description(void) {
     "called on any sub object to start a chain of recursive marking.";
 }
 
-static struct DocMethod* Mark_Methods(void) {
+static const char* Mark_Definition(void) {
+  return
+    "struct Mark {\n"
+    "  void (*mark)(var, var, void(*)(var,void*));\n"
+    "};\n";
+}
+
+static struct Method* Mark_Methods(void) {
   
-  static struct DocMethod methods[] = {
+  static struct Method methods[] = {
     {
       "mark", 
       "void mark(var self, var gc, void(*f)(var,void*));",
@@ -37,8 +44,8 @@ static struct DocMethod* Mark_Methods(void) {
 }
 
 var Mark = Cello(Mark, Instance(Doc, 
-  Mark_Name, Mark_Brief, Mark_Description, 
-  NULL, Mark_Methods));
+  Mark_Name,       Mark_Brief, Mark_Description, 
+  Mark_Definition, NULL,       Mark_Methods));
   
 void mark(var self, var gc, void(*f)(var,void*)) {
   struct Mark* m = instance(self, Mark);
@@ -79,9 +86,9 @@ static const char* GC_Description(void) {
     "the Garbage Collector using `set` and `rem`.";
 }
 
-static struct DocExample* GC_Examples(void) {
+static struct Example* GC_Examples(void) {
   
-  static struct DocExample examples[] = {
+  static struct Example examples[] = {
     {
       "Starting & Stopping",
       "var gc = current(GC);\n"
@@ -518,8 +525,9 @@ static bool GC_Running(var self) {
 }
 
 var GC = Cello(GC,
-  Instance(Doc,     GC_Name, GC_Brief, GC_Description, 
-                    GC_Examples, NULL),
+  Instance(Doc,
+    GC_Name, GC_Brief,    GC_Description, 
+    NULL,    GC_Examples, NULL),
   Instance(New,     GC_New, GC_Del),
   Instance(Get,     NULL, GC_Set, GC_Mem, GC_Rem),
   Instance(Start,   GC_Start, GC_Stop, GC_Running),
