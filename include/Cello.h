@@ -234,7 +234,7 @@ struct Range { var iter; int64_t start; int64_t stop; int64_t step; };
 struct Slice { var iter; var range; };
 struct File { FILE* file; };
 struct Process { FILE* proc; };
-struct Function { var (*func)(var); };
+struct Function { var(*func)(var); };
 
 /* Classes */
 
@@ -247,8 +247,7 @@ extern var New;
 extern var Assign;
 extern var Copy;
 extern var Subtype;
-extern var Eq;
-extern var Ord;
+extern var Cmp;
 extern var Hash;
 extern var Len;
 extern var Iter;
@@ -330,13 +329,7 @@ struct Subtype {
   var (*val_subtype)(var);
 };
 
-struct Eq {
-  bool (*eq)(var, var);
-};
-
-struct Ord {
-  bool (*gt)(var, var);
-  bool (*lt)(var, var);
+struct Cmp {
   int (*cmp)(var, var);
 };
 
@@ -379,7 +372,7 @@ struct Reverse {
 };
 
 struct Sort {
-  void (*sort_with)(var,var);
+  void (*sort_by)(var,bool(*f)(var,var));
 };
 
 struct Clear {
@@ -544,14 +537,13 @@ var subtype(var self);
 var key_subtype(var self);
 var val_subtype(var self);
 
+int cmp(var self, var obj);
 bool eq(var self, var obj);
 bool neq(var self, var obj);
-
 bool gt(var self, var obj);
 bool lt(var self, var obj);
 bool ge(var self, var obj);
 bool le(var self, var obj);
-int cmp(var self, var obj);
 
 uint64_t hash(var self);
 uint64_t hash_data(void* data, size_t size);
@@ -577,7 +569,7 @@ void pop_at(var self, var key);
 
 void reverse(var self);
 void sort(var self);
-void sort_with(var self, var func);
+void sort_by(var self, bool(*f)(var,var));
 
 void append(var self, var obj);
 void concat(var self, var obj);
@@ -616,8 +608,6 @@ var deref(var self);
 
 #define call(self, ...) call_with(self, tuple(__VA_ARGS__))
 var call_with(var self, var args);
-
-void map(var self, var func);
 
 int format_to_va(var self, int pos, const char* fmt, va_list va);
 int format_from_va(var self, int pos, const char* fmt, va_list va);

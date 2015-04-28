@@ -9,11 +9,10 @@ struct Body {
   double mass;
 };
 
-static void Body_Offset_Momentum(var self, double px, double py, double pz) {
-  struct Body* b = self;
-  b->vx = -px / solar_mass;
-  b->vy = -py / solar_mass;
-  b->vz = -pz / solar_mass;
+static void Body_Offset_Momentum(struct Body* self, double px, double py, double pz) {
+  self->vx = -px / solar_mass;
+  self->vy = -py / solar_mass;
+  self->vz = -pz / solar_mass;
 }
 
 var Body = Cello(Body);
@@ -21,24 +20,22 @@ var Body = Cello(Body);
 static void Bodies_Advance(var bodies, double dt) {
   
   
-  struct Get* bget = instance(bodies, Get);
   size_t nbodies = len(bodies);
   
   foreach(i in range($I(nbodies))) {
 
-    struct Body* body0 = bget->get(bodies, i);
+    struct Body* body0 = get(bodies, i);
 
     foreach(j in range($I(c_int(i)+1), $I(nbodies))) {
 
-      struct Body* body1 = bget->get(bodies, j);
+      struct Body* body1 = get(bodies, j);
 
       double dx = body0->x - body1->x;
       double dy = body0->y - body1->y;
       double dz = body0->z - body1->z;
 
       double dsquared = dx * dx + dy * dy + dz * dz;
-      double distance = sqrt(dsquared);
-      double mag = dt / (dsquared * distance);
+      double mag = dt / (dsquared * sqrt(dsquared));
 
       body0->vx -= dx * body1->mass * mag;
       body0->vy -= dy * body1->mass * mag;

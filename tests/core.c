@@ -28,7 +28,7 @@ PT_FUNC(test_cast) {
 
 PT_FUNC(test_new) {
   
-  var x = new_$I(1);
+  var x = new(Int, $I(1));
   
   PT_ASSERT(x);
   PT_ASSERT(type_of(x) is Int);
@@ -67,8 +67,8 @@ PT_FUNC(test_assign) {
   del(x);
   del(y);
   
-  var xs = new_$S("Hello");
-  var ys = new_$S("There");
+  var xs = new(String, $S("Hello"));
+  var ys = new(String, $S("There"));
   
   PT_ASSERT_STR_EQ(c_str(xs), "Hello");
   PT_ASSERT_STR_EQ(c_str(ys), "There");
@@ -448,17 +448,17 @@ static void TestType_New(var self, var args) {
 
 static void TestType_Del(var self) {}
 
-static bool TestType_Eq(var self, var obj) {
+static int TestType_Cmp(var self, var obj) {
   struct TestType* lhs = cast(self, TestType);
   struct TestType* rhs = cast(obj, TestType);
-  return lhs->test_data == rhs->test_data;
+  return lhs->test_data - rhs->test_data;
 }
 
 PT_FUNC(test_type_new) {
  
   TestType = new_root(Type, $S("TestType"), $I(sizeof(struct TestType)),
     $(New, TestType_New, TestType_Del),
-    $(Eq, TestType_Eq));
+    $(Cmp, TestType_Cmp));
   
   PT_ASSERT(TestType);
   PT_ASSERT_STR_EQ(c_str(TestType), "TestType");
@@ -502,9 +502,9 @@ PT_FUNC(test_type_implements) {
   
   PT_ASSERT(type_implements(Int, Assign));
   PT_ASSERT(type_implements(Float, C_Float));
-  PT_ASSERT(type_implements(String, Eq));
+  PT_ASSERT(type_implements(String, Cmp));
   
-  PT_ASSERT(type_instance(Int, Ord));
+  PT_ASSERT(type_instance(Int, Cmp));
   PT_ASSERT(type_instance(Array, Get));
   PT_ASSERT(type_instance(Type, C_Str));
   
@@ -525,11 +525,7 @@ PT_FUNC(test_show) {
 
 PT_FUNC(test_look) {
   
-  var x = $I(0); 
-  var y = $I(0); 
-  var z = $I(0);
-  var w = $I(0);
-  
+  var x = $I(0), y = $I(0), z = $I(0), w = $I(0);
   scan_from($S("5 10 1 0"), 0, "%i %i %i %i", x, y, z, w);
   
   PT_ASSERT(eq(x, $I(5)));

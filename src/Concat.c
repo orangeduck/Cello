@@ -15,6 +15,27 @@ static const char* Concat_Description(void) {
     "collections or strings.";
 }
 
+static struct DocExample* Concat_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(Array, Float, $F(9.9), $F(2.8));\n"
+      "var y = new(Array, Float, $F(1.1), $F(6.5));\n"
+      "\n"
+      "show(x); /* <'Array' At 0x0000000000414603 [9.9, 2.8]> */\n"
+      "show(y); /* <'Array' At 0x0000000000414603 [1.1, 6.5]> */\n"
+      "append(x, $F(2.5));\n"
+      "show(x); /* <'Array' At 0x0000000000414603 [9.9, 2.8, 2.5]> */\n"
+      "concat(x, y);\n"
+      "show(x); /* <'Array' At 0x0000000000414603 [9.9, 2.8, 2.5, 1.1, 6.5]> */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Concat_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -32,12 +53,10 @@ static struct DocMethod* Concat_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Concat = Cello(Concat,
   Instance(Doc,
     Concat_Name, Concat_Brief, Concat_Description,
-    NULL, Concat_Methods));
+    Concat_Examples, Concat_Methods));
 
 void append(var self, var obj) {
   method(self, Concat, append, obj);

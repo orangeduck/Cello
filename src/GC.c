@@ -70,9 +70,31 @@ static const char* GC_Brief(void) {
   return "Garbage Collector";
 }
 
-/* TODO */
 static const char* GC_Description(void) {
-  return "";
+  return
+    "The `GC` type provides an interface to the Cello Garbage Collector. One "
+    "instance of this class is created for each thread and can be retrieved "
+    "using the `current` function. The Garbage Collector can be stopped and "
+    "started using `start` and `stop` and objects can be added or removed from "
+    "the Garbage Collector using `set` and `rem`.";
+}
+
+static struct DocExample* GC_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Starting & Stopping",
+      "var gc = current(GC);\n"
+      "stop(gc);\n"
+      "var x = new(Int, $I(10)); /* Not added to GC */\n"
+      "show($I(running(gc))); /* 0 */\n"
+      "del(x); /* Must be deleted when done */\n"
+      "start(gc);\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
 }
 
 struct GCEntry {
@@ -497,7 +519,7 @@ static bool GC_Running(var self) {
 
 var GC = Cello(GC,
   Instance(Doc,     GC_Name, GC_Brief, GC_Description, 
-                    NULL, NULL),
+                    GC_Examples, NULL),
   Instance(New,     GC_New, GC_Del),
   Instance(Get,     NULL, GC_Set, GC_Mem, GC_Rem),
   Instance(Start,   GC_Start, GC_Stop, GC_Running),

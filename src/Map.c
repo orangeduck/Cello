@@ -183,37 +183,44 @@ static void Map_Assign(var self, var obj) {
 static var Map_Iter_Init(var self);
 static var Map_Iter_Next(var self, var curr);
 
-static var Map_Copy(var self) {
+static bool Map_Mem(var self, var key);
+static var Map_Get(var self, var key);
+
+static int Map_Cmp(var self, var obj) {
   struct Map* m = self;
   
-  var r = new(Map, m->ktype, m->vtype);
+  int c = m->nitems - len(obj);
+  if (c isnt 0) { return c; }
+  
+  var curr = Map_Iter_Init(self);
+  foreach (key in obj) {
+    var val = get(obj, key);
+    var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
+    c = cmp(key, Map_Key(m, node));
+    if (c < 0) { return -1; }
+    if (c > 0) { return  1; }
+    c = cmp(val, Map_Val(m, node));
+    if (c < 0) { return -1; }
+    if (c > 0) { return  1; }
+    curr = Map_Iter_Next(self, curr);
+  }
+  
+  return 0;
+  
+}
+
+static uint64_t Map_Hash(var self) {
+  struct Map* m = self;
+  uint64_t h = 0;
   
   var curr = Map_Iter_Init(self);
   while (curr isnt NULL) {
     var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
-    set(r, Map_Key(m, node), Map_Val(m, node));
+    h = h ^ hash(Map_Key(m, node)) ^ hash(Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
   }
   
-  return r;
-}
-
-static bool Map_Mem(var self, var key);
-static var Map_Get(var self, var key);
-
-static bool Map_Eq(var self, var obj) {
-  
-  foreach (key in obj) {
-    if (not Map_Mem(self, key)) { return false; }
-    if (neq(get(obj, key), Map_Get(self, key))) { return false; }
-  }
-	
-  foreach (key in self) {
-    if (not mem(obj, key)) { return false; }
-    if (neq(get(obj, key), Map_Get(self, key))) { return false; }
-  }
-	
-  return true;
+  return h;
 }
 
 static size_t Map_Len(var self) {
@@ -600,24 +607,21 @@ static var Map_Iter_Next(var self, var curr) {
 }
 
 static int Map_Show(var self, var output, int pos) {
-  struct Map* m = self;
-  int ipos = pos;
+  struct Map* m = self;  
   
-  pos += print_to(output, pos, "<'Map' At 0x%p {", self);
+  pos = print_to(output, pos, "<'Map' At 0x%p {", self);
   
   var curr = Map_Iter_Init(self);
   
   while (curr isnt NULL) {
     var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
-    pos += print_to(output, pos, "%$:%$",
+    pos = print_to(output, pos, "%$:%$",
       Map_Key(m, node), Map_Val(m, node));
     curr = Map_Iter_Next(self, curr);
-    if (curr isnt NULL) { pos += print_to(output, pos, ", "); }
+    if (curr isnt NULL) { pos = print_to(output, pos, ", "); }
   }
   
-  pos += print_to(output, pos, "}>");
-  
-  return pos - ipos;
+  return print_to(output, pos, "}>");
 }
 
 static void Map_Mark(var self, var gc, void(*f)(var,void*)) {  
@@ -641,9 +645,9 @@ var Map = Cello(Map,
   Instance(New,     Map_New, Map_Del),
   Instance(Subtype, Map_Key_Subtype, Map_Key_Subtype, Map_Val_Subtype),
   Instance(Assign,  Map_Assign),
-  Instance(Copy,    Map_Copy),
   Instance(Mark,    Map_Mark),
-  Instance(Eq,      Map_Eq),
+  Instance(Cmp,     Map_Cmp),
+  Instance(Hash,    Map_Hash),
   Instance(Len,     Map_Len),
   Instance(Get,     Map_Get, Map_Set, Map_Mem, Map_Rem),
   Instance(Clear,   Map_Clear),

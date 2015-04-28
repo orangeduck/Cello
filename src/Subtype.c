@@ -15,6 +15,23 @@ static const char* Subtype_Description(void) {
     "created, this class can be used to find what type that was.";
 }
 
+static struct DocExample* Subtype_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(Array, Int);\n"
+      "show(subtype(x)); /* Int */\n"
+      "var y = new(Table, String, Int);\n"
+      "show(key_subtype(y)); /* String */\n"
+      "show(val_subtype(y)); /* Int */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Subtype_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -36,12 +53,10 @@ static struct DocMethod* Subtype_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Subtype = Cello(Subtype,
   Instance(Doc,
     Subtype_Name, Subtype_Brief, Subtype_Description, 
-    NULL, Subtype_Methods));
+    Subtype_Examples, Subtype_Methods));
 
 var subtype(var self) {
   return method(self, Subtype, subtype);

@@ -24,6 +24,28 @@ static const char* Assign_Description(void) {
     "memory.";
 }
 
+
+static struct DocExample* Assign_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(Int, $I(10));\n"
+      "var y = new(Int, $I(20));\n"
+      "\n"
+      "show(x); /* 10 */\n"
+      "show(y); /* 20 */\n"
+      "\n"
+      "assign(x, y);\n"
+      "\n"
+      "show(x); /* 20 */\n"
+      "show(y); /* 20 */\n"
+    }, {NULL, NULL}
+  };
+  
+  return examples;
+}
+
 static struct DocMethod* Assign_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -38,12 +60,10 @@ static struct DocMethod* Assign_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Assign = Cello(Assign,
   Instance(Doc,
     Assign_Name, Assign_Brief, Assign_Description,
-    NULL, Assign_Methods));
+    Assign_Examples, Assign_Methods));
 
 var assign(var self, var obj) {
   

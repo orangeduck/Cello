@@ -244,6 +244,25 @@ static const char* New_Description(void) {
   ;
 }
 
+static struct DocExample* New_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(Int, $I(1));\n"
+      "show(x); /* 1 */\n"
+      "show(type_of(x)); /* Int */\n"
+      "\n"
+      "var y = alloc(Float);\n"
+      "construct(y, $F(1.0));\n"
+      "show(y); /* 1.0 */\n"
+      "destruct(y);\n"
+    }, {NULL, NULL}
+  };
+  
+  return examples;
+}
+
 static struct DocMethod* New_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -283,11 +302,9 @@ static struct DocMethod* New_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var New = Cello(New,
   Instance(Doc, New_Name, New_Brief, 
-    New_Description, NULL, New_Methods));
+    New_Description, New_Examples, New_Methods));
 
 var construct_with(var self, var args) {
   struct New* n = instance(self, New);
@@ -358,6 +375,23 @@ static const char* Copy_Description(void) {
     "could vary depending on the type's overridden behaviours.";
 }
 
+static struct DocExample* Copy_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(String, $S(\"Hello\"));\n"
+      "var y = copy(x);\n"
+      "show(x); /* Hello */\n"
+      "show(y); /* Hello */\n"
+      "show($I(eq(x, y))); /* 1 */\n"
+      "show($I(x is y)); /* 0 */\n"
+    }, {NULL, NULL}
+  };
+  
+  return examples;
+}
+
 static struct DocMethod* Copy_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -371,12 +405,10 @@ static struct DocMethod* Copy_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Copy = Cello(Copy,
   Instance(Doc,
     Copy_Name, Copy_Brief, Copy_Description, 
-    NULL, Copy_Methods));
+    Copy_Examples, Copy_Methods));
 
 var copy(var self) {
   

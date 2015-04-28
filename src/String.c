@@ -14,6 +14,20 @@ static const char* C_Str_Description(void) {
     "as a C style String.";
 }
 
+static struct DocExample* C_Str_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "puts(c_str($S(\"Hello\"))); /* Hello */\n"
+      "puts(c_str($S(\"There\"))); /* There */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* C_Str_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -27,12 +41,10 @@ static struct DocMethod* C_Str_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var C_Str = Cello(C_Str,
   Instance(Doc,
     C_Str_Name, C_Str_Brief, C_Str_Description, 
-    NULL, C_Str_Methods));
+    C_Str_Examples, C_Str_Methods));
 
 char* c_str(var self) {
   
@@ -58,6 +70,58 @@ static const char* String_Description(void) {
     "\n\n"
     "For strings allocated on the heap a number of extra operations are "
     "provided overs standard C strings such as concatenation.";
+}
+
+static struct DocExample* String_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var s0 = $(String, \"Hello\");\n"
+      "var s1 = new(String, $S(\"Hello\"));\n"
+      "append(s1, $S(\" There\"));\n"
+      "show(s0); /* Hello */\n"
+      "show(s1); /* Hello There */\n"
+    }, {
+      "Manipulation",
+      "var s0 = new(String, $S(\"Balloons\"));\n"
+      "\n"
+      "show($I(len(s0))); /* 8 */\n"
+      "show($I(mem(s0, $S(\"Ball\"))));     /* 1 */\n"
+      "show($I(mem(s0, $S(\"oon\"))));      /* 1 */\n"
+      "show($I(mem(s0, $S(\"Balloons\")))); /* 1 */\n"
+      "show($I(mem(s0, $S(\"l\"))));        /* 1 */\n"
+      "\n"
+      "rem(s0, $S(\"oons\"));\n"
+      "\n"
+      "show($I(eq(s0, $S(\"Ball\")))); /* 1 */\n"
+      "\n"
+      "clear(s0);\n"
+      "\n"
+      "show($I(len(s0))); /* 0 */\n"
+      "show($I(eq(s0, $S(\"\")))); /* 1 */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
+static void String_Assign(var self, var obj);
+
+static void String_New(var self, var args) {
+  struct String* s = self;
+  if (len(args) > 0) {
+    String_Assign(self, get(args, $I(0)));
+  } else {
+    s->val = calloc(1, 1);
+  }
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is NULL) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
+  }
+#endif
 }
 
 static void String_Del(var self) {
@@ -98,18 +162,6 @@ static void String_Assign(var self, var obj) {
 static char* String_C_Str(var self) {
   struct String* s = self;
   return s->val;
-}
-
-static bool String_Eq(var self, var obj) {
-  return strcmp(String_C_Str(self), c_str(obj)) is 0;
-}
-
-static bool String_Gt(var self, var obj) {
-  return strcmp(String_C_Str(self), c_str(obj)) > 0;
-}
-
-static bool String_Lt(var self, var obj) {
-  return strcmp(String_C_Str(self), c_str(obj)) < 0;
 }
 
 static int String_Cmp(var self, var obj) {
@@ -176,6 +228,57 @@ static void String_Reverse(var self) {
     s->val[i] = s->val[strlen(s->val)-1-i];
     s->val[strlen(s->val)-1-i] = temp;
   }
+}
+
+static void String_Concat(var self, var obj) {
+  struct String* s = self;
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
+    throw(ValueError, "Cannot reallocate String, not on heap!");
+  }
+#endif
+  
+  s->val = realloc(s->val, strlen(s->val) + strlen(c_str(obj)) + 1);
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is NULL) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
+  }
+#endif
+  
+  strcat(s->val, c_str(obj));
+}
+
+static void String_Reserve(var self, var amount) {
+  struct String* s = self;
+  
+#if CELLO_ALLOC_CHECK == 1
+  if (header(self)->alloc is (var)AllocStack
+  or  header(self)->alloc is (var)AllocStatic) {
+    throw(ValueError, "Cannot reallocate String, not on heap!");
+  }
+#endif
+  
+  int64_t x = c_int(amount);
+  
+#if CELLO_BOUND_CHECK == 1
+  if (x <= strlen(s->val)) {
+    throw(IndexOutOfBoundsError, 
+      "String already has %li characters, cannot reserve %li", 
+      $I(strlen(s->val)), amount);
+  }
+#endif
+
+  s->val = realloc(s->val, x);
+  
+#if CELLO_MEMORY_CHECK == 1
+  if (s->val is NULL) {
+    throw(OutOfMemoryError, "Cannot allocate String, out of memory!");
+  }
+#endif
+  
 }
 
 static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
@@ -269,26 +372,89 @@ static int String_Format_From(var self, int pos, const char* fmt, va_list va) {
 }
 
 static int String_Show(var self, var out, int pos) {
-  return print_to(out, pos, "\"%s\"", self);
+  struct String* s = self;
+  pos = print_to(out, pos, "\"", self);
+  char* v = s->val;
+  while (*v) {
+    switch (*v) {
+      case '\a': pos = print_to(out, pos, "\\a"); break;
+      case '\b': pos = print_to(out, pos, "\\b"); break;
+      case '\f': pos = print_to(out, pos, "\\f"); break;
+      case '\n': pos = print_to(out, pos, "\\n"); break;
+      case '\r': pos = print_to(out, pos, "\\r"); break;
+      case '\t': pos = print_to(out, pos, "\\t"); break;
+      case '\v': pos = print_to(out, pos, "\\v"); break;
+      case '\\': pos = print_to(out, pos, "\\\\"); break;
+      case '\'': pos = print_to(out, pos, "\\'"); break;
+      case '\"': pos = print_to(out, pos, "\\\""); break;
+      case '\?': pos = print_to(out, pos, "\\?"); break;
+      default:   pos = print_to(out, pos, "%c", $I(*v));
+    }
+    v++;
+  }
+  return print_to(out, pos, "\"", self);
 }
 
 static int String_Look(var self, var input, int pos) {
-  return scan_from(input, pos, "\"%[^\"]\"", self);
+  
+  String_Clear(self);
+  
+  var chr = $I(0);
+  pos = scan_from(input, pos, "%c", chr);
+  
+  if (c_int(chr) isnt '\"') {
+    throw(FormatError, 
+      "String literal does not start with quotation marks!");
+  }
+  
+  while (true) {
+    
+    pos = scan_from(input, pos, "%c", chr);
+    
+    if (c_int(chr) == '"') { break; }
+    
+    if (c_int(chr) == '\\') {
+      pos = scan_from(input, pos, "%c", chr);
+      switch (c_int(chr)) {
+        case 'a':  String_Concat(self, $S("\a")); break;
+        case 'b':  String_Concat(self, $S("\b")); break;
+        case 'f':  String_Concat(self, $S("\f")); break;
+        case 'n':  String_Concat(self, $S("\n")); break;
+        case 'r':  String_Concat(self, $S("\r")); break;
+        case 't':  String_Concat(self, $S("\t")); break;
+        case 'v':  String_Concat(self, $S("\v")); break;
+        case '\\': String_Concat(self, $S("\\")); break;
+        case '\'': String_Concat(self, $S("\'")); break;
+        case '"':  String_Concat(self, $S("\"")); break;
+        case '?':  String_Concat(self, $S("\?")); break;
+        default: throw(FormatError, "Unknown Escape Sequence '\\%c'!", chr);
+      }
+    }
+    
+    char buffer[2];
+    buffer[0] = (char)c_int(chr);
+    buffer[1] = '\0';
+    
+    String_Concat(self, $S(buffer));
+  }
+  
+  return pos;
 }
 
 var String = Cello(String,
   Instance(Doc,
     String_Name, String_Brief, String_Description,
-    NULL, NULL),
-  Instance(New,     NULL, String_Del),
+    String_Examples, NULL),
+  Instance(New,     String_New, String_Del),
   Instance(Assign,  String_Assign),
-  Instance(Eq,      String_Eq),
-  Instance(Ord,     String_Gt, String_Lt, String_Cmp),
+  Instance(Cmp,     String_Cmp),
+  Instance(Hash,    String_Hash),
   Instance(Len,     String_Len),
   Instance(Get,     NULL, NULL, String_Mem, String_Rem),
   Instance(Clear,   String_Clear),
   Instance(Reverse, String_Reverse),
-  Instance(Hash,    String_Hash),
+  Instance(Reserve, String_Reserve),
+  Instance(Concat,  String_Concat, String_Concat),
   Instance(C_Str,   String_C_Str),
   Instance(Format,  String_Format_To, String_Format_From),
   Instance(Show,    String_Show, String_Look));

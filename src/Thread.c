@@ -19,6 +19,22 @@ static const char* Current_Description(void) {
     "Design Pattern](http://en.wikipedia.org/wiki/Singleton_pattern)";
 }
 
+static struct DocExample* Current_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var gc = current(GC);\n"
+      "show(gc);\n"
+      "var thread = current(Thread);\n"
+      "show(thread);\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Current_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -32,12 +48,10 @@ static struct DocMethod* Current_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Current = Cello(Current,
   Instance(Doc,
     Current_Name, Current_Brief, Current_Description,
-    NULL, Current_Methods));
+    Current_Examples, Current_Methods));
 
 var current(var type) {
   return type_method(type, Current, current);

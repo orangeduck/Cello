@@ -15,6 +15,27 @@ static const char* Stream_Description(void) {
     "performed on File-like objects.";
 }
 
+static struct DocExample* Stream_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var f = sopen($(File, NULL), $S(\"test.bin\"), $S(\"r\"));\n"
+      "\n"
+      "char c;\n"
+      "while (!seof(f)) {\n"
+      "  sread(f, &c, 1);\n"
+      "  putc(c, stdout);\n"
+      "}\n"
+      "\n"
+      "sclose(f);\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Stream_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -56,12 +77,10 @@ static struct DocMethod* Stream_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Stream = Cello(Stream,
   Instance(Doc, 
     Stream_Name, Stream_Brief, Stream_Description,
-    NULL, Stream_Methods));
+    Stream_Examples, Stream_Methods));
 
 var sopen(var self, var resource, var options) {
   return method(self, Stream, sopen, resource, options);
@@ -109,7 +128,38 @@ static const char* File_Description(void) {
     "file in the operating system.";
 }
 
-/* TODO: Examples Methods */
+static struct DocExample* File_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(File, $S(\"test.bin\"), $S(\"wb\"));\n"
+      "char* data = \"hello\";\n"
+      "swrite(x, data, 5);\n"
+      "sclose(x);\n"
+    }, {
+      "Formatted Printing",
+      "var x = $(File, NULL);\n"
+      "sopen(x, $S(\"test.txt\"), $S(\"w\"));\n"
+      "print_to(x, 0, \"%$ is %$ \", $S(\"Dan\"), $I(23));\n"
+      "print_to(x, 0, \"%$ is %$ \", $S(\"Chess\"), $I(24));\n"
+      "sclose(x);\n"
+    }, {
+      "Automatic Closing",
+      "with(f in new(File, $S(\"test.txt\"), $S(\"r\"))) {\n"
+      "  var k = new(String); reserve(k, $I(100));\n"
+      "  var v = new(Int, $I(0));\n"
+      "  foreach (i in range($I(2))) {\n"
+      "    scan_from(f, 0, \"%$ is %$ \", k, v);\n"
+      "    show(k); show(v);\n"
+      "  }\n"
+      "}\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static var File_Open(var self, var filename, var access);
 static void File_Close(var self);
@@ -212,7 +262,7 @@ static size_t File_Read(var self, void* output, size_t size) {
   }
   
   size_t num = fread(output, size, 1, f->file);
-  if (num isnt 1 and size isnt 0) {
+  if (num isnt 1 and size isnt 0 and not feof(f->file)) {
     throw(IOError, "Failed to read from file: %i", $I(num));
     return num;
   }
@@ -257,7 +307,7 @@ static int File_Format_From(var self, int pos, const char* fmt, va_list va) {
 
 var File = Cello(File,
   Instance(Doc,
-    File_Name, File_Brief, File_Description, NULL, NULL),
+    File_Name, File_Brief, File_Description, File_Examples, NULL),
   Instance(New, File_New, File_Del),
   Instance(Start, NULL, File_Close, NULL),
   Instance(Stream,
@@ -282,7 +332,22 @@ static const char* Process_Description(void) {
     "to a location you are writing it as input to a process.";
 }
 
-/* TODO: Examples Methods */
+static struct DocExample* Process_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(Process, $S(\"ls\"), $S(\"r\"));\n"
+      "var o = new(String);\n"
+      "scan_from(x, 0, \"%s\", o);\n"
+      "show(o);\n"
+      "sclose(x);\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static var Process_Open(var self, var filename, var access);
 static void Process_Close(var self);
@@ -430,7 +495,7 @@ static int Process_Format_From(var self, int pos, const char* fmt, va_list va) {
 var Process = Cello(Process,
   Instance(Doc,
     Process_Name, Process_Brief, Process_Description, 
-    NULL, NULL),
+    Process_Examples, NULL),
   Instance(New,  Process_New, Process_Del),
   Instance(Start, NULL, Process_Close, NULL),
   Instance(Stream,

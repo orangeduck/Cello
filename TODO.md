@@ -4,7 +4,6 @@ Cello 2.0
 * Update tests
   - Add test for array alignment
 * Update Documentation
-* Update examples
 * Update README
 * Update INSTALL
 
@@ -16,13 +15,15 @@ Cello 2.0
 * Update Syntax def for gedit
 
 * Passing empty string to `print_to` gives weird results
-* Array/List etc should implement hash, ord
-* Change sort callback to not be `Function` type.
 * Swap class
 * TODO: Break/Continue in with
 * Remove leading spaces from methods documentation
 * Rename `DocMethods` and `DocExamples` to `Methods` and `Examples`.
 * Rename Format.c to Show.c
+* Binary read/write
+* Index array with iterable/slice
+* get/set for Types?
+* Definition field in documentation
 
 ----------------
 

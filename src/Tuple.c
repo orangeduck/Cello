@@ -25,7 +25,26 @@ static const char* Tuple_Description(void) {
     "slow.";
 }
 
-/* TODO: Examples Methods */
+static struct DocExample* Tuple_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = tuple($I(100), $I(200), $S(\"Hello\"));\n"
+      "show(x);\n"
+      "var y = tuple(Int, $I(10), $I(20));\n"
+      "var z = new_with(Array, y);\n"
+      "show(z);\n"
+      "\n"
+      "foreach (item in x) {\n"
+      "  println(\"%$\", item);\n"
+      "}\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static void Tuple_New(var self, var args) {
   struct Tuple* t = self;
@@ -159,14 +178,12 @@ static void Tuple_Rem(var self, var item) {
 }
 
 static int Tuple_Show(var self, var output, int pos) {
-  int ipos = pos;
-  pos += print_to(output, pos, "<'Tuple' At 0x%p (", self);
+  pos = print_to(output, pos, "<'Tuple' At 0x%p (", self);
   for(size_t i = 0; i < len(self); i++) {
-    pos += print_to(output, pos, "%$", get(self, $I(i)));
-    if (i < len(self)-1) { pos += print_to(output, pos, ", "); }
+    pos = print_to(output, pos, "%$", get(self, $I(i)));
+    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
   }
-  pos += print_to(output, pos, ")>");
-  return pos - ipos;
+  return print_to(output, pos, ")>");
 }
 
 static void Tuple_Push(var self, var obj) {
@@ -346,7 +363,7 @@ static void Tuple_Reverse(var self) {
 }
 
 static size_t Tuple_Sort_Partition(
-  struct Tuple* t, int64_t l, int64_t r, var f) {
+  struct Tuple* t, int64_t l, int64_t r, bool(*f)(var,var)) {
   
   int64_t p = l + (r - l) / 2;
   var tmp = t->items[p];
@@ -354,7 +371,7 @@ static size_t Tuple_Sort_Partition(
   
   int64_t s = l;
   for (int64_t i = l; i < r; i++) {
-    if (call(f, t->items[i], tmp)) {
+    if (f(t->items[i], tmp)) {
       Tuple_Swap(t, i, s);
       s++;
     }
@@ -364,7 +381,8 @@ static size_t Tuple_Sort_Partition(
   return s;
 }
 
-static void Tuple_Sort_Part(struct Tuple* t, int64_t l, int64_t r, var f) {
+static void Tuple_Sort_Part(
+  struct Tuple* t, int64_t l, int64_t r, bool(*f)(var,var)) {
   if (l < r) {
     int64_t s = Tuple_Sort_Partition(t, l, r, f);
     Tuple_Sort_Part(t, l, s-1, f);
@@ -372,15 +390,45 @@ static void Tuple_Sort_Part(struct Tuple* t, int64_t l, int64_t r, var f) {
   }
 }
 
-static void Tuple_Sort_With(var self, var f) {
+static void Tuple_Sort_By(var self, bool(*f)(var,var)) {
   Tuple_Sort_Part(self, 0, Tuple_Len(self)-1, f);
+}
+
+static int Tuple_Cmp(var self, var obj) {
+  struct Tuple* t = self;
+  
+  size_t n = Tuple_Len(self);
+  int c = n - len(obj);
+  if (c isnt 0) { return c; }
+  
+  for (size_t i = 0; i < n; i++) {
+    c = cmp(t->items[i], get(obj, $I(i)));
+    if (c < 0) { return -1; }
+    if (c > 0) { return  1; }
+  }
+  
+  return 0;
+}
+
+static uint64_t Tuple_Hash(var self) {
+  struct Tuple* t = self;
+  uint64_t h = 0;
+  
+  size_t n = Tuple_Len(self);
+  for (size_t i = 0; i < n; i++) {
+    h ^= hash(t->items[i]);
+  }
+  
+  return h;
 }
 
 var Tuple = Cello(Tuple,
   Instance(Doc,
-    Tuple_Name, Tuple_Brief, Tuple_Description, NULL, NULL),
+    Tuple_Name, Tuple_Brief, Tuple_Description, Tuple_Examples, NULL),
   Instance(New,      Tuple_New, Tuple_Del),
   Instance(Assign,   Tuple_Assign),
+  Instance(Cmp,      Tuple_Cmp),
+  Instance(Hash,     Tuple_Hash),
   Instance(Len,      Tuple_Len),
   Instance(Get,      Tuple_Get, Tuple_Set, Tuple_Mem, Tuple_Rem),
   Instance(Push,     Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),
@@ -389,6 +437,6 @@ var Tuple = Cello(Tuple,
   Instance(Iter,     Tuple_Iter_Init, Tuple_Iter_Next),
   Instance(Mark,     Tuple_Mark),
   Instance(Reverse,  Tuple_Reverse),
-  Instance(Sort,     Tuple_Sort_With),
+  Instance(Sort,     Tuple_Sort_By),
   Instance(Show,     Tuple_Show, NULL));
 

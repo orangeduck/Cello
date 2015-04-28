@@ -24,6 +24,25 @@ static const char* Hash_Description(void) {
     "only override `Hash` and `Eq` in conjunction.";
 }
 
+static struct DocExample* Hash_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "show($I(hash($I(  1)))); /* 1   */\n"
+      "show($I(hash($I(123)))); /* 123 */\n"
+      "show($I(hash_data($I(123), size(Int))));\n"
+      "\n"
+      "show($I(hash($S(\"Hello\"))));  /* 511 */\n"
+      "show($I(hash($S(\"There\"))));  /* 515 */\n"
+      "show($I(hash($S(\"People\")))); /* 629 */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Hash_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -45,7 +64,7 @@ static struct DocMethod* Hash_Methods(void) {
 
 var Hash = Cello(Hash,
   Instance(Doc,
-    Hash_Name, Hash_Brief, Hash_Description, NULL, Hash_Methods));
+    Hash_Name, Hash_Brief, Hash_Description, Hash_Examples, Hash_Methods));
     
 uint64_t hash_data(void* data, size_t size) {
   

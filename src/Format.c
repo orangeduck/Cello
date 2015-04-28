@@ -22,6 +22,21 @@ static const char* Format_Description(void) {
     "function from `Show` must be passed only `var` objects.";
 }
 
+static struct DocExample* Format_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "/* printf(\"Hello my name is %s, I am %i\n\", \"Dan\", 23); */\n"
+      "format_to($(File, stdout), 0, \n"
+      "  \"Hello my name is %s, I am %i\\n\", \"Dan\", 23);\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Format_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -41,12 +56,10 @@ static struct DocMethod* Format_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Format = Cello(Format,
   Instance(Doc, 
     Format_Name, Format_Brief, Format_Description,
-    NULL, Format_Methods));
+    Format_Examples, Format_Methods));
 
 int format_to_va(var self, int pos, const char* fmt, va_list va) {
   return method(self, Format, format_to, pos, fmt, va);
@@ -103,31 +116,42 @@ static const char* Show_Description(void) {
     "See `printf` for more information on format specifiers.";
 }
 
-/*
-int show(var self);
-int show_to(var self, var out, int pos);
+static struct DocExample* Show_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Hello World",
+      "println(\"Hello %s!\", $S(\"World\"));\n"
+    }, {
+      "File Writing",
+      "with(f in sopen($(File, NULL), $S(\"prices.txt\"), $S(\"wb\"))) {\n"
+      "  print_to(f, 0, \"%$ :: %$\\n\", $S(\"Banana\"), $I(57));\n"
+      "  print_to(f, 0, \"%$ :: %$\\n\", $S(\"Apple\"),  $I(22));\n"
+      "  print_to(f, 0, \"%$ :: %$\\n\", $S(\"Pear\"),   $I(16));\n"
+      "}\n"
+    }, {
+      "String Scanning",
+      "var input = $S(\"1 and 52 then 78\");\n"
+      "\n"
+      "var i0 = $I(0), i1 = $I(0), i2 = $I(0);\n"
+      "scan_from(input, 0, \"%i and %i then %i\", i0, i1, i2);\n"
+      "\n"
+      "/* i0: 1, i1: 52, i2: 78 */\n"
+      "println(\"i0: %$, i1: %$, i2: %$\", i0, i1, i2);\n"
+    }, {
+      "String Printing",
+      "var greeting = new(String);\n"
+      "print_to(greeting, 0, \"Hello %s %s, %s?\", \n"
+      "  $S(\"Mr\"), $S(\"Johnson\"), $S(\"how are you?\"));\n"
+      "\n"
+      "/* Hello Mr Johnson, how are you? */\n"
+      "show(greeting);\n"
+    }, {NULL, NULL}
+  };
 
-#define print(fmt, ...) print_with(fmt, tuple(__VA_ARGS__))
-#define println(fmt, ...) println_with(fmt, tuple(__VA_ARGS__))
-#define print_to(out, pos, fmt, ...) \
-  print_to_with(out, pos, fmt, tuple(__VA_ARGS__))
-
-int print_with(const char* fmt, var args);
-int println_with(const char* fmt, var args);
-int print_to_with(var out, int pos, const char* fmt, var args);
-
-int look(var self);
-int look_from(var self, var input, int pos);
-
-#define scan(fmt, ...) scan_with(fmt, tuple(__VA_ARGS__))
-#define scanln(fmt, ...) scanln_with(fmt, tuple(__VA_ARGS__))
-#define scan_from(input, pos, fmt, ...) \
-  scan_from_with(input, pos, fmt, tuple(__VA_ARGS__))
-
-int scan_with(const char* fmt, var args);
-int scanln_with(const char* fmt, var args);
-int scan_from_with(var input, int pos, const char* fmt, var args);
-*/
+  return examples;
+  
+}
 
 static struct DocMethod* Show_Methods(void) {
   
@@ -168,12 +192,10 @@ static struct DocMethod* Show_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Show = Cello(Show,
   Instance(Doc, 
     Show_Name, Show_Brief, Show_Description,
-    NULL, Show_Methods));
+    Show_Examples, Show_Methods));
 
 int show(var self) {
   return show_to(self, $(File, stdout), 0);
@@ -202,22 +224,22 @@ int println_with(const char* fmt, var args) {
 }
 
 int print_to_with(var out, int pos, const char* fmt, var args) {
-
+  
   char* fmt_buf = malloc(strlen(fmt)+1); 
   size_t index = 0;
   
-  while(true) {
+  while (true) {
     
-    if (*fmt == '\0') { break; }
+    if (*fmt is '\0') { break; }
     
     const char* start = fmt;
     
     /* Match String */
-    while(!strchr("%\0", *fmt)) { fmt++; }
+    while(*fmt isnt '\0' and *fmt isnt '%') { fmt++; }
     
-    if (start != fmt) {
-      strncpy(fmt_buf, start, (fmt - start));
-      fmt_buf[(fmt - start)] = '\0';
+    if (start isnt fmt) {
+      memcpy(fmt_buf, start, fmt - start);
+      fmt_buf[fmt - start] = '\0';
       int off = format_to(out, pos, fmt_buf);
       if (off < 0) { throw(FormatError, "Unable to output format!"); }
       pos += off;
@@ -225,7 +247,7 @@ int print_to_with(var out, int pos, const char* fmt, var args) {
     }
     
     /* Match %% */
-    if (*fmt == '%' && *(fmt+1) == '%') {
+    if (*fmt is '%' && *(fmt+1) is '%') {
       int off = format_to(out, pos, "%%");
       if (off < 0) { throw(FormatError, "Unable to output '%%%%'!"); }
       pos += off;
@@ -234,12 +256,12 @@ int print_to_with(var out, int pos, const char* fmt, var args) {
     }
     
     /* Match Format Specifier */
-    while(!strchr("diuoxXfFeEgGaAxcsp$\0", *fmt)) { fmt++; }
+    while(not strchr("diuoxXfFeEgGaAxcsp$", *fmt)) { fmt++; }
     
-    if (start != fmt) {
+    if (start isnt fmt) {
     
-      strncpy(fmt_buf, start, (fmt - start)+1);
-      fmt_buf[(fmt - start)+1] = '\0';
+      memcpy(fmt_buf, start, fmt - start + 1);
+      fmt_buf[fmt - start + 1] = '\0';
       
       if (index >= len(args)) {
         throw(FormatError, "Not enough arguments to Format String!");
@@ -247,9 +269,9 @@ int print_to_with(var out, int pos, const char* fmt, var args) {
       
       var a = get(args, $I(index)); index++;
       
-      if (*fmt == '$') { pos = show_to(a, out, pos); }
+      if (*fmt is '$') { pos = show_to(a, out, pos); }
       
-      if (*fmt == 's') {      
+      if (*fmt is 's') {      
         int off = format_to(out, pos, fmt_buf, c_str(a));
         if (off < 0) { throw(FormatError, "Unable to output String!"); }
         pos += off;
@@ -267,13 +289,13 @@ int print_to_with(var out, int pos, const char* fmt, var args) {
         pos += off;
       }
       
-      if (*fmt == 'c') {
+      if (*fmt is 'c') {
         int off = format_to(out, pos, fmt_buf, c_int(a));
         if (off < 0) { throw(FormatError, "Unable to output Char!"); }
         pos += off;
       }
       
-      if (*fmt == 'p') {
+      if (*fmt is 'p') {
         int off = format_to(out, pos, fmt_buf, a);
         if (off < 0) { throw(FormatError, "Unable to output Object!"); }
         pos += off;
@@ -312,118 +334,115 @@ int scanln_with(const char* fmt, var args) {
 }
 
 int scan_from_with(var input, int pos, const char* fmt, var args) {
-
-  char* fmt_buf = malloc(strlen(fmt)+1);
+  
+  char* fmt_buf = malloc(strlen(fmt)+4);
   size_t index = 0;
   
-  while(true) {
+  while (true) {
     
-    if (*fmt == '\0') { break; }
+    if (*fmt is '\0') { break; }
     
     const char* start = fmt;
     
     /* Match String */
-    while(!strchr("%\0", *fmt)) { fmt++; }
+    while (*fmt isnt '\0' and *fmt isnt '%') { fmt++; }
     
-    if (start != fmt) {
-      
-      strncpy(fmt_buf, start, (fmt - start));
-      fmt_buf[(fmt - start)+0] = '\0';
-      fmt_buf[(fmt - start)+1] = '%';
-      fmt_buf[(fmt - start)+2] = 'n';
-      
-      int off = 0;
-      int err = format_from(input, pos, fmt_buf, &off);
-      if (err < 0) { throw(FormatError, "Unable to input format!"); }
-      
-      pos += off;
+    if (start isnt fmt) {  
+      memcpy(fmt_buf, start, fmt - start);
+      fmt_buf[fmt - start] = '\0';
+      format_from(input, pos, fmt_buf);
+      pos += fmt - start;
       continue;
     }
     
     /* Match %% */
-    if (*fmt == '%' && *(fmt+1) == '%') {
-      
+    if (*fmt is '%' and *(fmt+1) is '%') {
       int err = format_from(input, pos, "%%");
       if (err < 0) { throw(FormatError, "Unable to input '%%%%'!"); }
-      
       pos += 2;
       fmt += 2;
       continue;
     }
     
     /* Match Format Specifier */
-    while(!strchr("diuoxXfFeEgGaAxcsp$\0", *fmt)) { fmt++; }
+    while (not strchr("diuoxXfFeEgGaAxcsp$[^]", *fmt)) { fmt++; }
     
-    if (start != fmt) {
-    
-      strncpy(fmt_buf, start, (fmt - start)+1);
-      fmt_buf[(fmt - start)+1] = '\0';
+    if (start isnt fmt) {
       
+      int off = 0;
+      memcpy(fmt_buf, start, fmt - start + 1);
+      fmt_buf[fmt - start + 1] = '\0';
+      strcat(fmt_buf, "%n");
+
       if (index >= len(args)) {
         throw(FormatError, "Not enough arguments to Format String!");
       }
       
       var a = get(args, $I(index)); index++;
       
-      if (*fmt == '$') { pos = look_from(a, input, pos); }
+      if (*fmt is '$') { pos = look_from(a, input, pos); }
       
-      fmt_buf[(fmt - start)+1] = '%';
-      fmt_buf[(fmt - start)+2] = 'n';
-      fmt_buf[(fmt - start)+3] = '\0';
-      
-      int off = 0;
-      
-      if (*fmt == 's') {      
+      else if (*fmt is 's') {
         int err = format_from(input, pos, fmt_buf, c_str(a), &off);
         if (err < 1) { throw(FormatError, "Unable to input String!"); }
         pos += off;
       }
       
-      if (strchr("diouxX", *fmt)) {
+      /* TODO: Test */
+      else if (*fmt is ']') {
+        int err = format_from(input, pos, fmt_buf, c_str(a), &off);
+        if (err < 1) { throw(FormatError, "Unable to input Scanset!"); }
+        pos += off;
+      }
+      
+      else if (strchr("diouxX", *fmt)) {
         long tmp = 0;
         int err = format_from(input, pos, fmt_buf, &tmp, &off);
         if (err < 1) { throw(FormatError, "Unable to input Int!"); }
         pos += off;
-        assign(a, $(Int, tmp));
+        assign(a, $I(tmp));
       }
       
-      if (strchr("fFeEgGaA", *fmt)) {
+      else if (strchr("fFeEgGaA", *fmt)) {
         if (strchr(fmt_buf, 'l')) {
           double tmp = 0;
           int err = format_from(input, pos, fmt_buf, &tmp, &off);
           if (err < 1) { throw(FormatError, "Unable to input Float!"); }
           pos += off;
-          assign(a, $(Float, tmp));
+          assign(a, $F(tmp));
         } else {
           float tmp = 0;
           int err = format_from(input, pos, fmt_buf, &tmp, &off);
           if (err < 1) { throw(FormatError, "Unable to input Float!"); }
           pos += off;
-          assign(a, $(Float, tmp));
+          assign(a, $F(tmp));
         }
       }
       
-      if (*fmt == 'c') {
+      else if (*fmt is 'c') {
         char tmp = '\0';
         int err = format_from(input, pos, fmt_buf, &tmp, &off);
         if (err < 1) { throw(FormatError, "Unable to input Char!"); }
         pos += off;
-        assign(a, $(Int, tmp));
+        assign(a, $I(tmp));
       }
       
-      if (*fmt == 'p') {
+      else if (*fmt is 'p') {
         void* tmp = NULL;
         int err = format_from(input, pos, fmt_buf, &tmp, &off);
         if (err < 1) { throw(FormatError, "Unable to input Ref!"); }
         pos += off;
-        assign(a, $(Ref, tmp));
+        assign(a, $R(tmp));
+      }
+      
+      else {
+        /* TODO: Report Better */
+        throw(FormatError, "Invalid Format Specifier!");
       }
 
       fmt++;
       continue;
     }
-    
-    throw(FormatError, "Invalid Format String!");
   }
 
   free(fmt_buf);

@@ -16,6 +16,47 @@ static const char* Table_Description(void) {
     "into the collection using the `Assign` class.";
 }
 
+static struct DocExample* Table_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var prices = new(Table, String, Int);\n"
+      "set(prices, $S(\"Apple\"),  $I(12));\n"
+      "set(prices, $S(\"Banana\"), $I( 6));\n"
+      "set(prices, $S(\"Pear\"),   $I(55));\n"
+      "\n"
+      "foreach (key in prices) {\n"
+      "  var price = get(prices, key);\n"
+      "  println(\"Price of %$ is %$\", key, price);\n"
+      "}\n"
+    }, {
+      "Manipulation",
+      "var t = new(Table, String, Int);\n"
+      "set(t, $S(\"Hello\"), $I(2));\n"
+      "set(t, $S(\"There\"), $I(5));\n"
+      "\n"
+      "show($I(len(t))); /* 2 */\n"
+      "show($I(mem(t, $S(\"Hello\")))); /* 1 */\n"
+      "\n"
+      "rem(t, $S(\"Hello\"));\n"
+      "\n"
+      "show($I(len(t))); /* 1 */\n"
+      "show($I(mem(t, $S(\"Hello\")))); /* 0 */\n"
+      "show($I(mem(t, $S(\"There\")))); /* 1 */\n"
+      "\n"
+      "clear(t);\n"
+      "\n"
+      "show($I(len(t))); /* 0 */\n"
+      "show($I(mem(t, $S(\"Hello\")))); /* 0 */\n"
+      "show($I(mem(t, $S(\"There\")))); /* 0 */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 struct Table {
   var data;
   var ktype;
@@ -213,36 +254,47 @@ static void Table_Assign(var self, var obj) {
   
 }
 
-static var Table_Copy(var self) {
-  struct Table* t = self;
-  
-  var r = new(Table, t->ktype, t->vtype);
-  
-  for (size_t i = 0; i < t->nslots; i++) {
-    if (Table_Key_Hash(t, i) isnt 0) {
-      Table_Set(r, Table_Key(t, i), Table_Val(t, i));
-    }
-  }
-  
-  return r;
-}
+static var Table_Iter_Init(var self);
+static var Table_Iter_Next(var self, var curr);
 
 static bool Table_Mem(var self, var key);
 static var Table_Get(var self, var key);
 
-static bool Table_Eq(var self, var obj) {
+static int Table_Cmp(var self, var obj) {
+  struct Table* t = self;
   
+  int c = t->nitems - len(obj);
+  if (c isnt 0) { return c; }
+  
+  var curr = Table_Iter_Init(self);
   foreach (key in obj) {
-    if (not Table_Mem(self, key)) { return false; }
-    if (neq(get(obj, key), Table_Get(self, key))) { return false; }
+    var val = get(obj, key);
+    var vurr = (char*)curr + t->ksize + sizeof(struct Header);
+    c = cmp(key, curr);
+    if (c < 0) { return -1; }
+    if (c > 0) { return  1; }
+    c = cmp(val, vurr);
+    if (c < 0) { return -1; }
+    if (c > 0) { return  1; }
+    curr = Table_Iter_Next(self, curr);
   }
-	
-  foreach (key in self) {
-    if (not mem(obj, key)) { return false; }
-    if (neq(get(obj, key), Table_Get(self, key))) { return false; }
+  
+  return 0;
+  
+}
+
+static uint64_t Table_Hash(var self) {
+  struct Table* t = self;
+  uint64_t h = 0;
+  
+  var curr = Table_Iter_Init(self);
+  while (curr isnt NULL) {
+    var vurr = (char*)curr + t->ksize + sizeof(struct Header);
+    h = h ^ hash(curr) ^ hash(vurr);
+    curr = Table_Iter_Next(self, curr);
   }
-	
-  return true;
+  
+  return h;
 }
 
 static size_t Table_Len(var self) {
@@ -510,13 +562,10 @@ static var Table_Iter_Next(var self, var curr) {
   
   while (true) {
 
-    if (curr > Table_Key(t, t->nslots-1)) {
-      return NULL;
-    }
-
-    uint64_t h = *(uint64_t*)((char*)curr - sizeof(struct Header) - sizeof(uint64_t));
+    if (curr > Table_Key(t, t->nslots-1)) { return NULL;}
+    uint64_t h = *(uint64_t*)((char*)curr - 
+      sizeof(struct Header) - sizeof(uint64_t));
     if (h isnt 0) { return curr; }
-    
     curr = (char*)curr + Table_Step(t);
   }
   
@@ -525,23 +574,20 @@ static var Table_Iter_Next(var self, var curr) {
 
 static int Table_Show(var self, var output, int pos) {
   struct Table* t = self;
-  int ipos = pos;
   
-  pos += print_to(output, pos, "<'Table' At 0x%p {", self);
+  pos = print_to(output, pos, "<'Table' At 0x%p {", self);
   
   size_t j =0;
   for(size_t i = 0; i < t->nslots; i++) {
     if (Table_Key_Hash(t, i) isnt 0) {
-      pos += print_to(output, pos, "%$:%$",
+      pos = print_to(output, pos, "%$:%$",
         Table_Key(t, i), Table_Val(t, i));
-      if (j < Table_Len(t)-1) { pos += print_to(output, pos, ", "); }
+      if (j < Table_Len(t)-1) { pos = print_to(output, pos, ", "); }
       j++;
     }
   }
   
-  pos += print_to(output, pos, "}>");
-  
-  return pos - ipos;
+  return print_to(output, pos, "}>");
 }
 
 static void Table_Reserve(var self, var amount) {
@@ -571,13 +617,13 @@ static void Table_Mark(var self, var gc, void(*f)(var,void*)) {
 var Table = Cello(Table,
   Instance(Doc,
     Table_Name, Table_Brief, Table_Description,
-    NULL,  NULL),
+    Table_Examples,  NULL),
   Instance(New,      Table_New, Table_Del),
   Instance(Subtype,  Table_Key_Subtype, Table_Key_Subtype, Table_Val_Subtype),
   Instance(Assign,   Table_Assign),
-  Instance(Copy,     Table_Copy),
   Instance(Mark,     Table_Mark),
-  Instance(Eq,       Table_Eq),
+  Instance(Cmp,      Table_Cmp),
+  Instance(Hash,     Table_Hash),
   Instance(Len,      Table_Len),
   Instance(Get,      Table_Get, Table_Set, Table_Mem, Table_Rem),
   Instance(Clear,    Table_Clear),

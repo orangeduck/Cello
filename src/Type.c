@@ -16,6 +16,21 @@ static const char* Cast_Description(void) {
     "to ensure the types are correct.";
 }
 
+static struct DocExample* Cast_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = $I(100);\n"
+      "struct Int* y = cast(x, Int);\n"
+      "show(y);\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Cast_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -30,10 +45,8 @@ static struct DocMethod* Cast_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Cast = Cello(Cast, Instance(Doc, 
-  Cast_Name, Cast_Brief, Cast_Description, NULL, Cast_Methods));
+  Cast_Name, Cast_Brief, Cast_Description, Cast_Examples, Cast_Methods));
 
 var cast(var self, var type) {
   
@@ -75,7 +88,25 @@ static const char* Type_Description(void) {
     "call a member of a class, implemented `type_method` can be used.";
 }
 
-/* TODO: Examples Methods */
+static struct DocExample* Type_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var t = type_of($I(5));\n"
+      "show(t); /* Int */\n"
+      "\n"
+      "show($I(type_implements(t, New))); /* 1 */\n"
+      "show($I(type_implements(t, Eq)));  /* 1 */\n"
+      "show($I(type_implements(t, Ord))); /* 1 */\n"
+      "\n"
+      "show($I(type_method(t, Eq, eq, $I(5), $I(6)))); /* 0 */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 enum {
   CELLO_NBUILTINS = 2 + (CELLO_CACHE_NUM / 3),
@@ -143,11 +174,13 @@ static int Type_Show(var self, var output, int pos) {
   return format_to(output, pos, "%s", Type_Builtin_Name(self));
 }
 
-static bool Type_Eq(var self, var obj) {
-  return self is obj;
+static int Type_Cmp(var self, var obj) {
+  return (intptr_t)self - (intptr_t)obj;
 }
 
-/* TODO: Type Hash */
+static uint64_t Type_Hash(var self) {
+  return (uint64_t)(uintptr_t)self;
+}
 
 static char* Type_C_Str(var self) {
   return Type_Builtin_Name(self);
@@ -160,10 +193,11 @@ static void Type_Help(var self) {
 
 var Type = CelloEmpty(Type,
   Instance(Doc,
-    Type_Name, Type_Brief, Type_Description, NULL, NULL),
+    Type_Name, Type_Brief, Type_Description, Type_Examples, NULL),
   Instance(Alloc,    Type_Alloc, NULL),
   Instance(New,      Type_New, NULL),
-  Instance(Eq,       Type_Eq),
+  Instance(Cmp,      Type_Cmp),
+  Instance(Hash,     Type_Hash),
   Instance(Show,     Type_Show, NULL),
   Instance(C_Str,    Type_C_Str),
   Instance(Help,     Type_Help));
@@ -288,7 +322,7 @@ static var Type_Instance(var self, var cls) {
 #if CELLO_CACHE == 1
   Type_Cache_Entry( 0, Size);   Type_Cache_Entry( 1, Alloc);
   Type_Cache_Entry( 2, New);    Type_Cache_Entry( 3, Assign);
-  Type_Cache_Entry( 4, Eq);     Type_Cache_Entry( 5, Ord);
+  Type_Cache_Entry( 4, Cmp);    Type_Cache_Entry( 5, Mark);
   Type_Cache_Entry( 6, Hash);   Type_Cache_Entry( 7, Len);
   Type_Cache_Entry( 8, Iter);   Type_Cache_Entry( 9, Push);
   Type_Cache_Entry(10, Concat); Type_Cache_Entry(11, Get);
@@ -385,6 +419,21 @@ static const char* Size_Description(void) {
     "found naturally then it may be necessary to override this method.";
 }
 
+static struct DocExample* Size_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "show($I(size(Int)));\n"
+      "show($I(size(Float)));\n"
+      "show($I(size(Array)));\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
+
 static struct DocMethod* Size_Methods(void) {
   
   static struct DocMethod methods[] = {
@@ -398,10 +447,8 @@ static struct DocMethod* Size_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Size = Cello(Size, Instance(Doc, 
-  Size_Name, Size_Brief, Size_Description, NULL, Size_Methods));
+  Size_Name, Size_Brief, Size_Description, Size_Examples, Size_Methods));
 
 size_t size(var type) {
 

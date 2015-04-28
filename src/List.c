@@ -124,10 +124,12 @@ static void List_Del(var self) {
 
 static void List_Assign(var self, var obj) {
   struct List* l = self;
-
-  List_Clear(self);
-  if (l->head isnt NULL) { List_Free(l, l->head); }
-  if (l->head isnt NULL) { List_Free(l, l->tail); }
+  
+  if (l->head isnt NULL) {
+    List_Clear(self);
+    List_Free(l, l->head);
+    List_Free(l, l->tail);
+  }
   
   l->type = subtype(obj);
   l->tsize = size(l->type);
@@ -152,25 +154,34 @@ static void List_Concat(var self, var obj) {
   }
 }
 
-static var List_Copy(var self) { 
-  struct List* a = self;
-  var b = new(List, a->type);
-  List_Concat(b, self);
-  return b;
-}
-
-static bool List_Eq(var self, var obj) {
-  
+static int List_Cmp(var self, var obj) {
   struct List* l = self;
-  if (l->nitems isnt len(obj)) { return false; }
+  
+  int c = l->nitems - len(obj);
+  if (c isnt 0) { return c; }
   
   var item = *List_Next(l, l->head);
   foreach (oitem in obj) {
-    if (neq(item, oitem)) { return false; }
+    c = cmp(item, oitem);
+    if (c < 0) { return -1; }
+    if (c > 0) { return  1; }
     item = *List_Next(l, item);
   }
   
-  return true;
+  return 0;
+}
+
+static uint64_t List_Hash(var self) {
+  struct List* l = self;
+  uint64_t h = 0;
+  
+  var item = *List_Next(l, l->head);
+  for (size_t i = 0; i < l->nitems; i++) {
+    h ^= hash(item);
+    item = *List_Next(l, item);
+  }
+  
+  return h;
 }
 
 static size_t List_Len(var self) {
@@ -328,16 +339,14 @@ static void List_Reverse(var self) {
 
 static int List_Show(var self, var output, int pos) {
   struct List* l = self;
-  int ipos = pos;
-  pos += print_to(output, pos, "<'List' At 0x%p [", self);
+  pos = print_to(output, pos, "<'List' At 0x%p [", self);
   var item = *List_Next(l, l->head);
   while (item isnt l->tail) {
-    pos += print_to(output, pos, "%$", item);
+    pos = print_to(output, pos, "%$", item);
     item = *List_Next(l, item);
-    if (item isnt l->tail) { pos += print_to(output, pos, ", "); }
+    if (item isnt l->tail) { pos = print_to(output, pos, ", "); }
   }
-  pos += print_to(output, pos, "]>");
-  return pos - ipos;
+  return print_to(output, pos, "]>");
 }
 
 static void List_Reserve(var self, var amount) {
@@ -379,9 +388,9 @@ var List = Cello(List,
   Instance(New,     List_New, List_Del),
   Instance(Subtype, List_Subtype, NULL, NULL),
   Instance(Assign,  List_Assign),
-  Instance(Copy,    List_Copy),
   Instance(Mark,    List_Mark),
-  Instance(Eq,      List_Eq),
+  Instance(Cmp,     List_Cmp),
+  Instance(Hash,    List_Hash),
   Instance(Clear,   List_Clear),
   Instance(Push,
     List_Push,      List_Pop,

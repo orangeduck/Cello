@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include "Cello.h" 
 
 const char* Reserve_Name(void) {
   return "Reserve";
@@ -29,12 +29,27 @@ static struct DocMethod* Reserve_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
+static struct DocExample* Reserve_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(Array, Int);\n"
+      "reserve(x, $I(10000)); /* Reserve space in Array */ \n"
+      "for (size_t i = 0; i < 10000; i++) {\n"
+      "  push(x, $I(i));\n"
+      "}\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 var Reserve = Cello(Reserve, 
   Instance(Doc,
     Reserve_Name, Reserve_Brief, Reserve_Description, 
-    NULL, Reserve_Methods));
+    Reserve_Examples, Reserve_Methods));
   
 void reserve(var self, var amount) {
   method(self, Reserve, reserve, amount);

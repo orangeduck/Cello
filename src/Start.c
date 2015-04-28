@@ -20,11 +20,27 @@ const char* Start_Description(void) {
     "and the `stop` function at the end.";
 }
 
-/*
-void start(var self);
-void stop(var self);
-bool running(var self);
-*/
+static struct DocExample* Start_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var x = new(Mutex);\n"
+      "start(x); /* Lock Mutex */ \n"
+      "print(\"Inside Mutex!\\n\");\n"
+      "stop(x); /* unlock Mutex */"
+    }, {
+      "Scoped",
+      "var x = new(Mutex);\n"
+      "with(mut in x) { /* Lock Mutex */ \n"
+      "  print(\"Inside Mutex!\\n\");\n"
+      "} /* unlock Mutex */"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static struct DocMethod* Start_Methods(void) {
   
@@ -47,10 +63,8 @@ static struct DocMethod* Start_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Start = Cello(Start, Instance(Doc, 
-  Start_Name, Start_Brief, Start_Description, NULL, Start_Methods));
+  Start_Name, Start_Brief, Start_Description, Start_Examples, Start_Methods));
 
 void start(var self) {
   method(self, Start, start);

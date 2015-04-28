@@ -15,8 +15,25 @@ static const char* Pointer_Description(void) {
     "which provide the two main pointer types in Cello.";
 }
 
-// void ref(var self, var item);
-// var deref(var self);
+static struct DocExample* Pointer_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var obj0 = $F(1.0), obj1 = $F(2.0);\n"
+      "var r = $(Ref, obj0);\n"
+      "show(r);\n"
+      "show(deref(r)); /* 1.0 */\n"
+      "ref(r, obj1);\n"
+      "show(deref(r)); /* 2.0 */\n"
+      "assign(r, obj0);\n"
+      "show(deref(r)); /* 1.0 */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static struct DocMethod* Pointer_Methods(void) {
   
@@ -35,12 +52,10 @@ static struct DocMethod* Pointer_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Pointer = Cello(Pointer,
   Instance(Doc,
     Pointer_Name, Pointer_Brief, Pointer_Description, 
-    NULL, Pointer_Methods));
+    Pointer_Examples, Pointer_Methods));
 
 void ref(var self, var item) {
   method(self, Pointer, ref, item);
@@ -66,7 +81,34 @@ static const char* Ref_Description(void) {
     "indirection or mutability is required.";
 }
 
-/* TODO: Examples Methods */
+static struct DocExample* Ref_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var obj0 = $F(1.0), obj1 = $F(2.0);\n"
+      "var r = $(Ref, obj0);\n"
+      "show(r);\n"
+      "show(deref(r)); /* 1.0 */\n"
+      "ref(r, obj1);\n"
+      "show(deref(r)); /* 2.0 */\n"
+      "assign(r, obj0);\n"
+      "show(deref(r)); /* 1.0 */\n"
+    }, {
+      "Collections",
+      "var i0 = new(Int, $I(100));\n"
+      "var i1 = new(Int, $I(200));\n"
+      "var x = new(Array, Ref, i0, i1);\n"
+      "\n"
+      "print(deref(get(x, $I(0)))); /* 100 */"
+      "\n"
+      "del(x); /* Contents of `x` still alive */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static void Ref_Ref(var self, var val);
 static var Ref_Deref(var self);
@@ -96,7 +138,7 @@ static var Ref_Deref(var self) {
 
 var Ref = Cello(Ref,
   Instance(Doc,
-    Ref_Name, Ref_Brief, Ref_Description, NULL, NULL),
+    Ref_Name, Ref_Brief, Ref_Description, Ref_Examples, NULL),
   Instance(Assign,   Ref_Assign),
   Instance(Show,     Ref_Show, NULL),
   Instance(Pointer,  Ref_Ref, Ref_Deref));
@@ -123,7 +165,46 @@ static const char* Box_Description(void) {
     "used in conjunction with collections.";
 }
 
-/* TODO: Examples Methods */
+static struct DocExample* Box_Examples(void) {
+  
+  static struct DocExample examples[] = {
+    {
+      "Usage",
+      "var obj0 = $F(1.0), obj1 = $F(2.0);\n"
+      "var r = $(Box, obj0);\n"
+      "show(r);\n"
+      "show(deref(r)); /* 1.0 */\n"
+      "ref(r, obj1);\n"
+      "show(deref(r)); /* 2.0 */\n"
+      "assign(r, obj0);\n"
+      "show(deref(r)); /* 1.0 */\n"
+    }, {
+      "Lifetimes",
+      "var quote = $S(\"Life is long\");\n"
+      "\n"
+      "with(r in $B(new(String, quote))) {\n"
+      "  println(\"This reference is: %$\", r);\n"
+      "  println(\"This string is alive: '%s'\", deref(r));\n"
+      "}\n"
+      "\n"
+      "print(\"Now it has been cleared up!\\n\");\n"
+    }, {
+      "Collection",
+      "/* Multiple Types in one Collection */\n"
+      "var x = new(Array, Box, \n"
+      "  new(String, $S(\"Hello\")), \n"
+      "  new(String, $S(\"There\")), \n"
+      "  new(Int, $I(10)));\n"
+      "\n"
+      "print(deref(get(x, $I(0)))); /* Hello */ \n"
+      "\n"
+      "del(x); /* Contents of `x` deleted with it */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static void Box_Ref(var self, var val);
 static var Box_Deref(var self);
@@ -158,7 +239,7 @@ static var Box_Deref(var self) {
 
 var Box = Cello(Box,
   Instance(Doc,
-    Box_Name, Box_Brief, Box_Description, NULL, NULL),
+    Box_Name, Box_Brief, Box_Description, Box_Examples, NULL),
   Instance(New,      NULL, Box_Del),
   Instance(Assign,   Box_Assign),
   Instance(Show,     Box_Show, NULL),
