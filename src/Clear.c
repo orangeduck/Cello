@@ -5,7 +5,7 @@ const char* Clear_Name(void) {
 }
 
 const char* Clear_Brief(void) {
-  return "Object can be Emptied";
+  return "Clearable";
 }
 
 const char* Clear_Description(void) {

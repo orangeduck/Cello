@@ -10,10 +10,10 @@ static const char* Array_Brief(void) {
 
 static const char* Array_Description(void) {
   return ""
-    "Array is data structure containing a sequence of a single type of object. "
-    "It can dynamically grow and shrink in size depending on how many elements "
-    "it contains. It allocates storage for the type specified. It also "
-    "deallocates and destroys the objects inside upon destruction."
+    "The `Array` type is data structure containing a sequence of a single type "
+    "of object. It can dynamically grow and shrink in size depending on how "
+    "many elements it contains. It allocates storage for the type specified. "
+    "It also deallocates and destroys the objects inside upon destruction."
     "\n\n"
     "Elements are copied into an Array using `assign` and will initially have "
     "zero'd memory."

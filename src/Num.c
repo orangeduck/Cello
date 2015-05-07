@@ -137,7 +137,10 @@ static const char* Int_Description(void) {
 }
 
 static const char* Int_Definition(void) {
-  return "struct Int { int64_t val; };";
+  return
+    "struct Int {\n"
+    "  int64_t val;\n"
+    "};\n";
 }
 
 static struct Example* Int_Examples(void) {
@@ -199,7 +202,7 @@ static const char* Float_Name(void) {
 }
 
 static const char* Float_Brief(void) {
-  return "Float Point Object";
+  return "Floating Point Object";
 }
 
 static const char* Float_Description(void) {
@@ -207,7 +210,10 @@ static const char* Float_Description(void) {
 }
 
 static const char* Float_Definition(void) {
-  return "struct Float { double val; };";
+  return
+    "struct Float {\n"
+    "  double val;\n"
+    "};\n";  
 }
 
 static struct Example* Float_Examples(void) {

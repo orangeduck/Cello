@@ -10,10 +10,17 @@ static const char* Table_Brief(void) {
 
 static const char* Table_Description(void) {
   return
-    "The `Table` type is a hash table container that maps keys to values. "
+    "The `Table` type is a hash table data structure that maps keys to values. "
     "It uses an open-addressing robin-hood hashing scheme which requires "
-    "`Hash` and `Eq` to be defined on the key type. Keys and values are copied "
-    "into the collection using the `Assign` class.";
+    "`Hash` and `Cmp` to be defined on the key type. Keys and values are "
+    "copied into the collection using the `Assign` class and intially have "
+    "zero'd memory."
+    "\n\n"
+    "Hash tables provide `O(1)` lookup, insertion and removal can but require "
+    "long pauses when the table must be _rehashed_ and all entries processed."
+    "\n\n"
+    "This is largely equivalent to the C++ construct "
+    "[std::unordered_map](http://www.cplusplus.com/reference/unordered_map/unordered_map/)";
 }
 
 static struct Example* Table_Examples(void) {

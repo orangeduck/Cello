@@ -206,10 +206,16 @@ static void dealloc_by(var self, int method) {
 #endif
   
 #if CELLO_ALLOC_CHECK == 1
-  size_t s = size(type_of(self));
-  for (size_t i = 0; i < (sizeof(struct Header) + s) / sizeof(var); i++) {
-    ((var*)header(self))[i] = (var)0xDeadCe110;
-  }
+  /*
+  ** Some objects throw exceptions when you try to get their size.
+  ** For this reason this section must be wrapped in a try block
+  */
+  try {
+    size_t s = size(type_of(self));
+    for (size_t i = 0; i < (sizeof(struct Header) + s) / sizeof(var); i++) {
+      ((var*)header(self))[i] = (var)0xDeadCe110;
+    }
+  } catch (e) {}
 #endif
   
   free(((char*)self) - sizeof(struct Header));
@@ -386,7 +392,7 @@ static const char* Copy_Description(void) {
     "\n\n"
     "If the `copy` class is overridden then the implementer may manually have "
     "to register the object with the Garbage Collector if they wish for it to "
-    "be tracked. For this they should call `gc_add` with the new object."
+    "be tracked."
     "\n\n"
     "By convention `copy` follows the semantics of `Assign`, which typically "
     "means a _deep copy_ should be made, and that an object will create a "

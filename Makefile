@@ -86,9 +86,9 @@ obj:
 # Tests
 
 check: $(TESTS_OBJ) $(STATIC)
-	$(CC) $(TESTS_OBJ) $(STATIC) $(LIBS) $(LFLAGS) -o test
-	./test
-	rm -f test.bin test.txt
+	$(CC) $(TESTS_OBJ) $(STATIC) $(LIBS) $(LFLAGS) -o ./tests/test
+	./tests/test
+	rm -f ./tests/test.bin ./tests/test.txt
 
 obj/%.o: tests/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@

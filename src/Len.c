@@ -28,9 +28,9 @@ static struct Example* Len_Examples(void) {
     {
       "Usage",
       "var x = new(Array, Int, $I(1), $I(2), $I(5));\n"
-      "show($I(len(x)));\n"
+      "show($I(len(x))); /* 3 */\n"
       "var y = $S(\"Test\");\n"
-      "show($I(len(y)));\n"
+      "show($I(len(y))); /* 4 */\n"
     }, {NULL, NULL}
   };
 

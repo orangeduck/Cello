@@ -5,7 +5,7 @@ static const char* Call_Name(void) {
 }
 
 static const char* Call_Brief(void) {
-  return "Callable like a Function";
+  return "Callable";
 }
 
 static const char* Call_Description(void) {
@@ -63,12 +63,10 @@ static const char* Function_Description(void) {
 }
 
 static const char* Function_Definition(void) {
-  return "struct Function { var(*func)(var); };";
-}
-
-static void Function_New(var self, var args) {
-  struct Function* f = self;
-  f->func = get(args, $I(0));
+  return
+    "struct Function {\n"
+    "  var (*func)(var);\n"
+    "};\n";
 }
 
 static var Function_Call(var self, var args) {
@@ -82,7 +80,6 @@ var Function = Cello(Function,
   Instance(Doc,
     Function_Name,       Function_Brief, Function_Description,
     Function_Definition, NULL,           NULL),
-  Instance(New, Function_New, NULL),
   Instance(Call, Function_Call));
 
 

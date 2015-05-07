@@ -5,7 +5,7 @@ static const char* Assign_Name(void) {
 }
 
 static const char* Assign_Brief(void) {
-  return "Construction from Object";
+  return "Assignment";
 }
 
 static const char* Assign_Description(void) {
@@ -20,8 +20,9 @@ static const char* Assign_Description(void) {
     "their own behaviours and state this may need to be overridden."
     "\n\n"
     "The most important thing about the `Assign` class is that it must work on "
-    "the assumption that the target object could be uninitialised with zero'd "
-    "memory.";
+    "the assumption that the target object may not have had it's constructor "
+    "called and could be uninitialised with just zero'd memory. This is often "
+    "the case when copying contents into containers.";
 }
 
 static const char* Assign_Definition(void) {

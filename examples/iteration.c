@@ -15,9 +15,7 @@ int main(int argc, char** argv) {
     print("Object %$ is of type %$\n",
       item, type_of(item));
   }
-
-  del(items);
-
+  
   return 0;
 }
 

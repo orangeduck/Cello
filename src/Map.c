@@ -8,9 +8,60 @@ static const char* Map_Brief(void) {
   return "Balanced Binary Tree";
 }
 
-/* TODO */
 static const char* Map_Description(void) {
-  return "";
+  return
+    "The `Map` type is a self balancing binary tree implemented as a red-black "
+    "tree. It provides key-value access and requires the `Cmp` class to be "
+    "defined on the key type."
+    "\n\n"
+    "Element lookup and insertion are provided as an `O(log(n))` operation. "
+    "This means in general a `Map` is slower than a `Table` but it has several "
+    "other nice properties such as being able to iterate over the items in "
+    "order and not having large pauses for rehashing on some insertions."
+    "\n\n"
+    "This is largely equivalent to the C++ construct "
+    "[std::map](http://www.cplusplus.com/reference/map/map/)";
+}
+
+static struct Example* Map_Examples(void) {
+  
+  static struct Example examples[] = {
+    {
+      "Usage",
+      "var prices = new(Map, String, Int);\n"
+      "set(prices, $S(\"Apple\"),  $I(12));\n"
+      "set(prices, $S(\"Banana\"), $I( 6));\n"
+      "set(prices, $S(\"Pear\"),   $I(55));\n"
+      "\n"
+      "foreach (key in prices) {\n"
+      "  var price = get(prices, key);\n"
+      "  println(\"Price of %$ is %$\", key, price);\n"
+      "}\n"
+    }, {
+      "Manipulation",
+      "var t = new(Map, String, Int);\n"
+      "set(t, $S(\"Hello\"), $I(2));\n"
+      "set(t, $S(\"There\"), $I(5));\n"
+      "\n"
+      "show($I(len(t))); /* 2 */\n"
+      "show($I(mem(t, $S(\"Hello\")))); /* 1 */\n"
+      "\n"
+      "rem(t, $S(\"Hello\"));\n"
+      "\n"
+      "show($I(len(t))); /* 1 */\n"
+      "show($I(mem(t, $S(\"Hello\")))); /* 0 */\n"
+      "show($I(mem(t, $S(\"There\")))); /* 1 */\n"
+      "\n"
+      "clear(t);\n"
+      "\n"
+      "show($I(len(t))); /* 0 */\n"
+      "show($I(mem(t, $S(\"Hello\")))); /* 0 */\n"
+      "show($I(mem(t, $S(\"There\")))); /* 0 */\n"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
 }
 
 struct Map {
@@ -640,8 +691,8 @@ static void Map_Mark(var self, var gc, void(*f)(var,void*)) {
 
 var Map = Cello(Map,
   Instance(Doc,
-    Map_Name, Map_Brief, Map_Description,
-    NULL, NULL, NULL),
+    Map_Name, Map_Brief,    Map_Description,
+    NULL,     Map_Examples, NULL),
   Instance(New,     Map_New, Map_Del),
   Instance(Subtype, Map_Key_Subtype, Map_Key_Subtype, Map_Val_Subtype),
   Instance(Assign,  Map_Assign),

@@ -19,9 +19,10 @@ static const char* Hash_Description(void) {
     "data structures that require fast hashing such as the `Table` type. Due "
     "to this it should not be used for cryptography or security."
     "\n\n"
-    "By default an object is hashed by using its raw memory in the "
-    "Murmurhash algorithm. Due to the link between them it is recommended to "
-    "only override `Hash` and `Cmp` in conjunction.";
+    "By default an object is hashed by using its raw memory with the "
+    "[Murmurhash](http://en.wikipedia.org/wiki/MurmurHash) algorithm. Due to "
+    "the link between them it is recommended to only override `Hash` and "
+    "`Cmp` in conjunction.";
 }
 
 static const char* Hash_Definition(void) {
@@ -36,13 +37,15 @@ static struct Example* Hash_Examples(void) {
   static struct Example examples[] = {
     {
       "Usage",
-      "show($I(hash($I(  1)))); /* 1   */\n"
-      "show($I(hash($I(123)))); /* 123 */\n"
-      "show($I(hash_data($I(123), size(Int))));\n"
+      "println(\"%li\", $I(hash($I(  1)))); /*   1 */\n"
+      "println(\"%li\", $I(hash($I(123)))); /* 123 */\n"
       "\n"
-      "show($I(hash($S(\"Hello\"))));  /* 511 */\n"
-      "show($I(hash($S(\"There\"))));  /* 515 */\n"
-      "show($I(hash($S(\"People\")))); /* 629 */\n"
+      "/* 866003103 */\n"
+      "println(\"%li\", $I(hash_data($I(123), size(Int))));\n"
+      "\n"
+      "println(\"%li\", $I(hash($S(\"Hello\"))));  /* -1838682532 */\n"
+      "println(\"%li\", $I(hash($S(\"There\"))));  /*   961387266 */\n"
+      "println(\"%li\", $I(hash($S(\"People\")))); /*   697467069 */\n"
     }, {NULL, NULL}
   };
 
@@ -59,8 +62,9 @@ static struct Method* Hash_Methods(void) {
       "Get the hash value for the object `self`."
     }, {
       "hash_data", 
-      "uint64_t hash_data(void* data, size_t size);",
-      "Hash `size` bytes pointed to by `data` using Murmurhash."
+      "uint64_t hash_data(void* data, size_t num);",
+      "Hash `num` bytes pointed to by `data` using "
+      "[Murmurhash](http://en.wikipedia.org/wiki/MurmurHash)."
     }, {NULL, NULL, NULL}
   };
   
@@ -72,11 +76,11 @@ var Hash = Cello(Hash,
     Hash_Name,       Hash_Brief,    Hash_Description, 
     Hash_Definition, Hash_Examples, Hash_Methods));
     
-uint64_t hash_data(void* data, size_t size) {
+uint64_t hash_data(const void* data, size_t size) {
   
   const uint64_t m = 0xc6a4a7935bd1e995;
 	const int r = 47;
-	const uint64_t * d = (const uint64_t *)data;
+	const uint64_t * d = (const uint64_t*)data;
 	const uint64_t * end = d + (size/8);
   
 	uint64_t h = 0xCe110 ^ (size * m);

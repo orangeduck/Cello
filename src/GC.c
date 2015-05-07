@@ -474,7 +474,7 @@ static void GC_New(var self, var args) {
   gc->maxptr = 0;
   gc->minptr = UINTPTR_MAX;
   gc->running = true;
-  set(current(Thread), $S(GC_TLS_KEY), $R(gc));
+  set(current(Thread), $S(GC_TLS_KEY), gc);
 }
 
 static void GC_Del(var self) {
@@ -530,7 +530,7 @@ var GC = Cello(GC,
     NULL,    GC_Examples, NULL),
   Instance(New,     GC_New, GC_Del),
   Instance(Get,     NULL, GC_Set, GC_Mem, GC_Rem),
-  Instance(Start,   GC_Start, GC_Stop, GC_Running),
+  Instance(Start,   GC_Start, GC_Stop, NULL, GC_Running),
   Instance(Show,    GC_Show, NULL),
   Instance(Current, GC_Current));
 

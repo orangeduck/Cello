@@ -12,8 +12,8 @@ static const char* Current_Description(void) {
   return
     "The `Current` class can be implemented by types which have implicit "
     "instances associated with them. For example it can be used to retrieve "
-    "the _current_ `Thread`, or it could be used to get the _current_ Random "
-    "Number generator."
+    "the _current_ `Thread`, or it could be used to get the _current_ Garbage "
+    "Collector."
     "\n\n"
     "This class may be implemented by types which express the [Singleton "
     "Design Pattern](http://en.wikipedia.org/wiki/Singleton_pattern)";
@@ -64,54 +64,6 @@ var current(var type) {
   return type_method(type, Current, current);
 }
 
-/* TODO: Is this better named Wait? Could it become part of `Start`? */
-
-static const char* Join_Name(void) {
-  return "Join";
-}
-
-static const char* Join_Brief(void) {
-  return "Wait for object";
-}
-
-static const char* Join_Description(void) {
-  return
-    "The `Join` class can be implemented by types which provide a mechanism "
-    "for waiting for them to enter some same state. Primarily it is "
-    "implemented by `Thread`.";
-}
-
-static const char* Join_Definition(void) {
-  return
-    "struct Join {\n"
-    "  void (*join)(var);\n"
-    "};\n";
-}
-
-static struct Method* Join_Methods(void) {
-  
-  static struct Method methods[] = {
-    {
-      "join", 
-      "void join(var self);",
-      "Wait for the object `self` to enter some state."
-    }, {NULL, NULL, NULL}
-  };
-  
-  return methods;
-}
-
-/* TODO: Examples */
-
-var Join = Cello(Join,
-  Instance(Doc,
-    Join_Name,       Join_Brief, Join_Description,
-    Join_Definition, NULL,       Join_Methods));
-
-void join(var self) {
-  method(self, Join, join);
-}
-
 enum {
   CELLO_EXC_MAX_DEPTH  = 2048,
   CELLO_EXC_MAX_STRACE = 25
@@ -156,8 +108,6 @@ static const char* Thread_Description(void) {
     "execution. It acts as a basic wrapper around operating system threads, "
     "using WinThreads on Windows and pthreads otherwise.";
 }
-
-/* TODO: Examples Methods */
 
 static void Thread_New(var self, var args) {
   
@@ -382,20 +332,6 @@ static var Thread_Current(void) {
   
 }
 
-static void Thread_Join(var self) {
-  struct Thread* t = self;
-  if (not t->thread) { return; }
-  
-#if defined(__unix__) || defined(__APPLE__)
-  int err = pthread_join(t->thread, NULL);
-  if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Join"); }
-  if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
-#elif defined(_WIN32)
-  WaitForSingleObject(t->thread, INFINITE);
-#endif
-  
-}
-
 static void Thread_Start(var self) {
   call(self);
 }
@@ -414,6 +350,20 @@ static void Thread_Stop(var self) {
   
 }
 
+static void Thread_Wait(var self) {
+  struct Thread* t = self;
+  if (not t->thread) { return; }
+  
+#if defined(__unix__) || defined(__APPLE__)
+  int err = pthread_join(t->thread, NULL);
+  if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Join"); }
+  if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
+#elif defined(_WIN32)
+  WaitForSingleObject(t->thread, INFINITE);
+#endif
+  
+}
+
 static bool Thread_Running(var self) {
   struct Thread* t = self;
   return t->is_running;
@@ -426,12 +376,17 @@ static var Thread_Get(var self, var key) {
 
 static void Thread_Set(var self, var key, var val) {
   struct Thread* t = self;
-  set(t->tls, key, val);
+  set(t->tls, key, $R(val));
 }
 
 static bool Thread_Mem(var self, var key) {
   struct Thread* t = self;
   return mem(t->tls, key);
+}
+
+static void Thread_Rem(var self, var key) {
+  struct Thread* t = self;
+  rem(t->tls, key);
 }
 
 static void Thread_Mark(var self, var gc, void(*f)(var,void*)) {
@@ -448,11 +403,10 @@ var Thread = Cello(Thread,
   Instance(Hash,    Thread_Hash),
   Instance(Call,    Thread_Call),
   Instance(Current, Thread_Current),
-  Instance(Join,    Thread_Join),
   Instance(Mark,    Thread_Mark),
-  Instance(Start,   Thread_Start, Thread_Stop, Thread_Running),
+  Instance(Start,   Thread_Start, Thread_Stop, Thread_Wait, Thread_Running),
   Instance(C_Int,   Thread_C_Int),
-  Instance(Get,     Thread_Get, Thread_Set, Thread_Mem));
+  Instance(Get,     Thread_Get, Thread_Set, Thread_Mem, Thread_Rem));
 
 static const char* Lock_Name(void) {
   return "Lock";
@@ -538,10 +492,24 @@ static const char* Mutex_Brief(void) {
 static const char* Mutex_Description(void) {
   return
     "The `Mutex` type can be used to gain mutual exclusion across Threads for "
-    "access of some resource.";
+    "access to some resource.";
 }
 
-/* TODO: Examples Methods */
+static struct Example* Mutex_Examples(void) {
+  
+  static struct Example examples[] = {
+    {
+      "Usage",
+      "var x = new(Mutex);\n"
+      "with (mut in x) { /* Lock Mutex */ \n"
+      "  print(\"Inside Mutex!\\n\");\n"
+      "} /* Unlock Mutex */"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 static void Mutex_New(var self, var args) {
   struct Mutex* m = self;
@@ -608,7 +576,7 @@ static void Mutex_Unlock(var self) {
 
 var Mutex = Cello(Mutex,
   Instance(Doc, 
-    Mutex_Name, Mutex_Brief, Mutex_Description, NULL, NULL, NULL),
+    Mutex_Name, Mutex_Brief, Mutex_Description, NULL, Mutex_Examples, NULL),
   Instance(New,    Mutex_New, Mutex_Del),
   Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
   Instance(Start,  Mutex_Lock, Mutex_Unlock, NULL));

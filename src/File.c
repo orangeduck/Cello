@@ -142,7 +142,10 @@ static const char* File_Description(void) {
 }
 
 static const char* File_Definition(void) {
-  return "struct File { FILE* file; };";
+  return
+    "struct File {\n"
+    "  FILE* file;\n"
+    "};\n";
 }
 
 static struct Example* File_Examples(void) {
@@ -152,7 +155,7 @@ static struct Example* File_Examples(void) {
       "Usage",
       "var x = new(File, $S(\"test.bin\"), $S(\"wb\"));\n"
       "char* data = \"hello\";\n"
-      "swrite(x, data, 5);\n"
+      "swrite(x, data, strlen(data));\n"
       "sclose(x);\n"
     }, {
       "Formatted Printing",
@@ -351,7 +354,10 @@ static const char* Process_Description(void) {
 }
 
 static const char* Process_Definition(void) {
-  return "struct Process { FILE* proc; };";
+  return
+    "struct Process {\n"
+    "  FILE* proc;\n"
+    "};\n";
 }
 
 static struct Example* Process_Examples(void) {
@@ -360,9 +366,11 @@ static struct Example* Process_Examples(void) {
     {
       "Usage",
       "var x = new(Process, $S(\"ls\"), $S(\"r\"));\n"
-      "var o = new(String);\n"
-      "scan_from(x, 0, \"%s\", o);\n"
-      "show(o);\n"
+      "char c;\n"
+      "while (not seof(x)) {\n"
+      "  sread(x, &c, 1);\n"
+      "  print(\"%c\", $I(c));\n"
+      "};\n"
       "sclose(x);\n"
     }, {NULL, NULL}
   };
@@ -471,7 +479,7 @@ static size_t Process_Read(var self, void* output, size_t size) {
   }
   
   size_t num = fread(output, size, 1, p->proc);
-  if (num isnt 1 and size isnt 0) {
+  if (num isnt 1 and size isnt 0 and not feof(p->proc)) {
     throw(IOError, "Failed to read from process: %i", $I(num));
     return num;
   }

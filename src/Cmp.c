@@ -20,7 +20,7 @@ static const char* Cmp_Description(void) {
     "\n\n"
     "To implement this class a `cmp` function must be provided which returns "
     "`< 0` if the first object is _less than_ the second, `> 0` if the first "
-    "object is greater than the second, and `0` if they are equal. "
+    "object is _greater than_ the second, and `0` if they are _equal_. "
     "\n\n"
     "For objects that manage their own data this class may need to be "
     "overridden to ensure that objects of the same _value_ are still treated "
@@ -143,7 +143,7 @@ static const char* Sort_Name(void) {
 }
 
 static const char* Sort_Brief(void) {
-  return "Elements can be sorted";
+  return "Sortable";
 }
 
 static const char* Sort_Description(void) {
@@ -166,11 +166,11 @@ static struct Example* Sort_Examples(void) {
     {
       "Usage",
       "var x = new(Array, Float, \n"
-      "  $F(5.2), $F(7.1), $F(2.2), $F(1.1));\n"
+      "  $F(5.2), $F(7.1), $F(2.2));\n"
       "\n"
-      "show(x); /* <'Array' At 0x0000000000414603 [5.2, 7.1, 2.2, 1.1]> */\n"
+      "show(x); /* <'Array' At 0x00414603 [5.2, 7.1, 2.2]> */\n"
       "sort(x);\n"
-      "show(x); /* <'Array' At 0x0000000000414603 [1.1, 2.2, 5.2, 7.1]> */\n"
+      "show(x); /* <'Array' At 0x00414603 [2.2, 5.2, 7.1]> */\n"
     }, {NULL, NULL}
   };
   
@@ -234,11 +234,11 @@ static struct Example* Reverse_Examples(void) {
     {
       "Usage",
       "var x = new(Array, Float, \n"
-      "  $F(5.2), $F(7.1), $F(2.2), $F(1.1));\n"
+      "  $F(5.2), $F(7.1), $F(2.2));\n"
       "\n"
-      "show(x); /* <'Array' At 0x0000000000414603 [5.2, 7.1, 2.2, 1.1]> */\n"
+      "show(x); /* <'Array' At 0x00414603 [5.2, 7.1, 2.2]> */\n"
       "reverse(x);\n"
-      "show(x); /* <'Array' At 0x0000000000414603 [1.1, 2.2, 7.1, 5.2]> */\n"
+      "show(x); /* <'Array' At 0x00414603 [2.2, 7.1, 5.2]> */\n"
     }, {NULL, NULL}
   };
   

@@ -25,6 +25,7 @@ static const char* Start_Definition(void) {
     "struct Start {\n"
     "  void (*start)(var);\n"
     "  void (*stop)(var);\n"
+    "  void (*wait)(var);\n"
     "  bool (*running)(var);\n"
     "};\n";
 }
@@ -41,7 +42,7 @@ static struct Example* Start_Examples(void) {
     }, {
       "Scoped",
       "var x = new(Mutex);\n"
-      "with(mut in x) { /* Lock Mutex */ \n"
+      "with (mut in x) { /* Lock Mutex */ \n"
       "  print(\"Inside Mutex!\\n\");\n"
       "} /* unlock Mutex */"
     }, {NULL, NULL}
@@ -55,6 +56,10 @@ static struct Method* Start_Methods(void) {
   
   static struct Method methods[] = {
     {
+      "with", 
+      "#define with(...)",
+      "Perform operations in between `start` and `stop`."
+    }, {
       "start", 
       "void start(var self);",
       "Start the object `self`."
@@ -62,6 +67,10 @@ static struct Method* Start_Methods(void) {
       "stop", 
       "void stop(var self);",
       "Stop the object `self`."
+    }, {
+      "wait", 
+      "void wait(var self);",
+      "Block and wait for the object `self` to stop."
     }, {
       "running", 
       "bool running(var self);",
@@ -84,6 +93,10 @@ void stop(var self) {
   method(self, Start, stop);
 }
 
+void wait(var self) {
+  method(self, Start, wait);
+}
+
 bool running(var self) {
   return method(self, Start, running);
 }
@@ -103,4 +116,3 @@ var stop_in(var self) {
   }
   return NULL;
 }
-

@@ -8,12 +8,74 @@ static const char* List_Brief(void) {
   return "Linked List";
 }
 
-/* TODO: Make better */
 static const char* List_Description(void) {
   return
-    "The `List` type is a linked list data structure providing all of the "
-    "expected operations.";
+    "The `List` type is a linked list data structure. Elements can be added "
+    "and removed from the list and their memory is allocated and deallocated "
+    "by the structure. Additionally destructors will be called on objects "
+    "once removed."
+    "\n\n"
+    "Elements are copied into the List using `assign` and will initially have "
+    "zero'd memory."
+    "\n\n"
+    "Lists can provide fast insertion and removal at arbitrary locations "
+    "although most other operations will be slow due to having to traverse "
+    "the linked list data structure."
+    "\n\n"
+    "This is largely equivalent to the C++ construct "
+    "[std::list](http://www.cplusplus.com/reference/list/list/)";
 }
+
+static struct Example* List_Examples(void) {
+  
+  static struct Example examples[] = {
+    {
+      "Construction & Deletion",
+      "var x = new(List, Int);\n"
+      "push(x, $I(32));\n"
+      "push(x, $I(6));\n"
+      "\n"
+      "/* <'List' At 0x0000000000414603 [32, 6]> */\n"
+      "show(x);\n",
+    }, {
+      "Element Access",
+      "var x = new(List, Float, $F(0.01), $F(5.12));\n"
+      "\n"
+      "show(get(x, $I(0))); /* 0.01 */\n"
+      "show(get(x, $I(1))); /* 5.12 */\n"
+      "\n"
+      "set(x, $I(0), $F(500.1));\n"
+      "show(get(x, $I(0))); /* 500.1 */\n",
+    }, {
+      "Membership",
+      "var x = new(List, Int, $I(1), $I(2), $I(3), $I(4));\n"
+      "\n"
+      "show($I(mem(x, $I(1)))); /* 1 */\n"
+      "show($I(len(x)));        /* 4 */\n"
+      "\n"
+      "rem(x, $I(3));\n"
+      "\n"
+      "show($I(mem(x, $I(3)))); /* 0 */\n"
+      "show($I(len(x)));        /* 3 */\n"
+      "show($I(empty(x)));      /* 0 */\n"
+      "\n"
+      "clear(x);\n"
+      "\n"
+      "show($I(empty(x)));      /* 1 */\n",
+    }, {
+      "Iteration",
+      "var greetings = new(List, String, \n"
+      "  $S(\"Hello\"), $S(\"Bonjour\"), $S(\"Hej\"));\n"
+      "\n"
+      "foreach(greet in greetings) {\n"
+      "  show(greet);\n"
+      "}\n",
+    }, {NULL, NULL}
+  };
+  
+  return examples;
+}
+
 
 struct List {
   var type;
@@ -61,11 +123,11 @@ static var List_At(struct List* l, int64_t i) {
   var item;
   
   if (i <= (int64_t)(l->nitems / 2)) {
-    item = *List_Next(l, l->head);
+    item = l->head;
     while (i) { item = *List_Next(l, item); i--; }
   } else {
     i = l->nitems-i-1;
-    item = *List_Prev(l, l->tail);
+    item = l->tail;
     while (i) { item = *List_Prev(l, item); i--; }
   }
   
@@ -81,13 +143,8 @@ static void List_New(var self, var args) {
   l->type   = cast(get(args, $I(0)), Type);
   l->tsize  = size(l->type);
   l->nitems = 0;
-  l->head = List_Alloc(l);
-  l->tail = List_Alloc(l);
-  
-  *List_Next(l, l->head) = l->tail;
-  *List_Prev(l, l->head) = NULL;
-  *List_Next(l, l->tail) = NULL;
-  *List_Prev(l, l->tail) = l->head;
+  l->head = NULL;
+  l->tail = NULL;
   
   size_t nargs = len(args);
   for(size_t i = 0; i < nargs-1; i++) {
@@ -103,43 +160,30 @@ static var List_Subtype(var self) {
 
 static void List_Clear(var self) {
   struct List* l = self;
-  var item = *List_Next(l, l->head);
-  while (item isnt l->tail) {
+  var item = l->head;
+  while (item) {
     var next = *List_Next(l, item);
 	  destruct(item);
     List_Free(l, item);
     item = next;
   }
-  *List_Next(l, l->head) = l->tail;
-  *List_Prev(l, l->tail) = l->head;
+  l->tail = NULL;
+  l->head = NULL;
   l->nitems = 0;
 }
 
 static void List_Del(var self) {
   struct List* l = self;
   List_Clear(self);
-  List_Free(l, l->head);
-  List_Free(l, l->tail);
 }
 
 static void List_Assign(var self, var obj) {
   struct List* l = self;
   
-  if (l->head isnt NULL) {
-    List_Clear(self);
-    List_Free(l, l->head);
-    List_Free(l, l->tail);
-  }
+  List_Clear(self);
   
   l->type = subtype(obj);
   l->tsize = size(l->type);
-  l->head = List_Alloc(l);
-  l->tail = List_Alloc(l);
-  
-  *List_Next(l, l->head) = l->tail;
-  *List_Prev(l, l->head) = NULL;
-  *List_Next(l, l->tail) = NULL;
-  *List_Prev(l, l->tail) = l->head;
   
   size_t nargs = len(obj);
   for(size_t i = 0; i < nargs; i++) {
@@ -160,7 +204,7 @@ static int List_Cmp(var self, var obj) {
   int c = l->nitems - len(obj);
   if (c isnt 0) { return c; }
   
-  var item = *List_Next(l, l->head);
+  var item = l->head;
   foreach (oitem in obj) {
     c = cmp(item, oitem);
     if (c < 0) { return -1; }
@@ -175,7 +219,7 @@ static uint64_t List_Hash(var self) {
   struct List* l = self;
   uint64_t h = 0;
   
-  var item = *List_Next(l, l->head);
+  var item = l->head;
   for (size_t i = 0; i < l->nitems; i++) {
     h ^= hash(item);
     item = *List_Next(l, item);
@@ -191,12 +235,39 @@ static size_t List_Len(var self) {
 
 static bool List_Mem(var self, var obj) {
   struct List* l = self;
-  var item = *List_Next(l, l->head);
-  while (item isnt l->tail) {
+  var item = l->head;
+  while (item) {
     if (eq(item, obj)) { return true; }
     item = *List_Next(l, item);
   }
   return false;
+}
+
+static void List_Unlink(struct List* l, var item) {
+  
+  var next = *List_Next(l, item);
+  var prev = *List_Prev(l, item);
+
+  if (item is l->head and item is l->tail) {
+    l->head = NULL; l->tail = NULL;
+  } else if (item is l->head) {
+    l->head = next;
+    *List_Prev(l, next) = NULL;
+  } else if (item is l->tail) {
+    l->tail = prev;
+    *List_Next(l, prev) = NULL;
+  } else {
+    *List_Next(l, prev) = next;
+    *List_Prev(l, next) = prev;
+  }
+  
+}
+
+static void List_Link(struct List* l, var item, var prev, var next) {
+  if (prev is NULL) { l->head = item; } else { *List_Next(l, prev) = item; }
+  if (next is NULL) { l->tail = item; } else { *List_Prev(l, next) = item; }
+  *List_Next(l, item) = next;
+  *List_Prev(l, item) = prev;
 }
 
 static void List_Pop_At(var self, var key) {
@@ -205,10 +276,7 @@ static void List_Pop_At(var self, var key) {
   int64_t i = c_int(key);
   
   var item = List_At(l, i);
-  var prev = *List_Prev(l, item);
-  var next = *List_Next(l, item);
-  *List_Next(l, prev) = next;
-  *List_Prev(l, next) = prev;
+  List_Unlink(l, item);
   destruct(item);
   List_Free(l, item);
   l->nitems--;
@@ -216,13 +284,10 @@ static void List_Pop_At(var self, var key) {
 
 static void List_Rem(var self, var obj) {
   struct List* l = self;
-  var item = *List_Next(l, l->head);
-  while (item isnt l->tail) {
+  var item = l->head;
+  while (item) {
     if (eq(item, obj)) {
-      var prev = *List_Prev(l, item);
-      var next = *List_Next(l, item);
-      *List_Next(l, prev) = next;
-      *List_Prev(l, next) = prev;
+      List_Unlink(l, item);
       destruct(item);
       List_Free(l, item);
       l->nitems--;
@@ -238,14 +303,8 @@ static void List_Push(var self, var obj) {
   struct List* l = self;
   var item = List_Alloc(l);
   assign(item, obj);
-  
-  var last = *List_Prev(l, l->tail);
-  *List_Next(l, last) = item;
-  *List_Prev(l, item) = last;
-  *List_Next(l, item) = l->tail;
-  *List_Prev(l, l->tail) = item;
+  List_Link(l, item, l->tail, NULL);
   l->nitems++;
-  
 }
 
 static void List_Push_At(var self, var obj, var key) {
@@ -255,12 +314,12 @@ static void List_Push_At(var self, var obj, var key) {
   assign(item, obj);
   
   int64_t i = c_int(key);
-  var next = List_At(l, i);
-  var prev = *List_Prev(l, next);
-  *List_Prev(l, next) = item;
-  *List_Next(l, prev) = item;
-  *List_Next(l, item) = next;
-  *List_Prev(l, item) = prev;
+  if (i is 0) {
+    List_Link(l, item, NULL, l->head);
+  } else {
+    var curr = List_At(l, i);
+    List_Link(l, item, *List_Prev(l, curr), curr);
+  }
   l->nitems++;
 }
 
@@ -275,12 +334,10 @@ static void List_Pop(var self) {
   }
 #endif
   
-  var last = *List_Prev(l, l->tail);
-  var prev = *List_Prev(l, last);
-  destruct(last);
-  List_Free(l, last);
-  *List_Next(l, prev) = l->tail;
-  *List_Prev(l, l->tail) = prev;
+  var item = l->tail;
+  List_Unlink(l, item);
+  destruct(item);
+  List_Free(l, item);
   l->nitems--;
 }
 
@@ -297,54 +354,41 @@ static void List_Set(var self, var key, var val) {
 static var List_Iter_Init(var self) {
   struct List* l = self;
   if (l->nitems is 0) { return NULL; }
-  return *List_Next(l, l->head);
+  return l->head;
 }
 
 static var List_Iter_Next(var self, var curr) {
   struct List* l = self;
-  var next = *List_Next(l, curr);
-  return next is l->tail ? NULL : next;
-}
-
-static void List_Swap(struct List* l, var iitem, var jitem) {
-  var inext = *List_Next(l, iitem); var iprev = *List_Prev(l, iitem);
-  var jnext = *List_Next(l, jitem); var jprev = *List_Prev(l, jitem); 
-  *List_Next(l, iprev) = jitem; *List_Prev(l, inext) = jitem;
-  *List_Next(l, jitem) = inext; *List_Prev(l, jitem) = iprev;
-  *List_Next(l, jprev) = iitem; *List_Prev(l, jnext) = iitem;
-  *List_Next(l, iitem) = jnext; *List_Prev(l, iitem) = jprev;
+  return *List_Next(l, curr);
 }
 
 static void List_Reverse(var self) {
   struct List* l = self;
-  var item0 = *List_Next(l, l->head);
-  var item1 = *List_Prev(l, l->tail);
   
-  if (item0 is l->tail
-  or  item1 is l->head
-  or  item0 is item1) { return; }
+  var temp = NULL;
+  var curr = l->head;
   
-  while (true) {
-    var item0_next = *List_Next(l, item0);
-    var item1_prev = *List_Prev(l, item1);
-    List_Swap(l, item0, item1);
-    if (item0_next is item1
-    or  item0_next is item1_prev) { break; }
-    item0 = item0_next;
-    item1 = item1_prev;
+  while (curr) {
+    temp = *List_Prev(l, curr);
+    *List_Prev(l, curr) = *List_Next(l, curr);
+    *List_Next(l, curr) = temp;
+    curr = *List_Prev(l, curr); 
   }
+  
+  if (temp) {
+    l->head = *List_Prev(l, temp);
+  }
+  
 }
-
-/* TODO: Linked list sort */
 
 static int List_Show(var self, var output, int pos) {
   struct List* l = self;
   pos = print_to(output, pos, "<'List' At 0x%p [", self);
-  var item = *List_Next(l, l->head);
-  while (item isnt l->tail) {
+  var item = l->head;
+  while (item) {
     pos = print_to(output, pos, "%$", item);
     item = *List_Next(l, item);
-    if (item isnt l->tail) { pos = print_to(output, pos, ", "); }
+    if (item) { pos = print_to(output, pos, ", "); }
   }
   return print_to(output, pos, "]>");
 }
@@ -362,19 +406,16 @@ static void List_Reserve(var self, var amount) {
   
   while (nslots - l->nitems) {
     var item = List_Alloc(l);
-    var last = *List_Prev(l, l->tail);
-    *List_Next(l, last) = item;
-    *List_Prev(l, l->tail) = item;
-    nslots--;
+    List_Link(l, item, l->tail, NULL);
+    l->nitems++;
   }
   
 }
 
 static void List_Mark(var self, var gc, void(*f)(var,void*)) {
   struct List* l = self;
-  if (l->head is NULL) { return; }
-  var item = *List_Next(l, l->head);
-  while (item isnt l->tail) {
+  var item = l->head;
+  while (item) {
     f(gc, item);
     item = *List_Next(l, item);
   }
@@ -382,8 +423,8 @@ static void List_Mark(var self, var gc, void(*f)(var,void*)) {
 
 var List = Cello(List,
   Instance(Doc,
-    List_Name,        List_Brief,
-    List_Description, NULL, NULL, NULL),
+    List_Name, List_Brief,    List_Description, 
+    NULL,      List_Examples, NULL),
   Instance(New,     List_New, List_Del),
   Instance(Subtype, List_Subtype, NULL, NULL),
   Instance(Assign,  List_Assign),
@@ -394,11 +435,11 @@ var List = Cello(List,
   Instance(Push,
     List_Push,      List_Pop,
     List_Push_At,   List_Pop_At),
+  Instance(Concat,  List_Concat, List_Push),
   Instance(Len,     List_Len),
   Instance(Get,     List_Get, List_Set, List_Mem, List_Rem),
   Instance(Iter,    List_Iter_Init, List_Iter_Next),
   Instance(Reverse, List_Reverse),
-  //Member(Sort,    List_Sort_With),
   Instance(Show,    List_Show, NULL),
   Instance(Reserve, List_Reserve));
   

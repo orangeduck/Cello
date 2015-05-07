@@ -80,7 +80,10 @@ static const char* String_Description(void) {
 }
 
 static const char* String_Definition(void) {
-  return "struct String { char* val; };";
+  return
+    "struct String {\n"
+    "  char* val;\n"
+    "};\n";
 }
 
 static struct Example* String_Examples(void) {

@@ -1,26 +1,30 @@
 #include "Cello.h"
 
+/* Threaded Callback */
+var say_hello(var args) {
+  with (mutex in get(args, $I(0))) {
+    println("Hello from %$!", current(Thread));
+  }
+  return NULL;
+}
+
 int main(int argc, char** argv) {
 
+  /* Create a Mutex */
   var mutex = new(Mutex);
   
-  fun (f, args) {
-    with (m in mutex) {
-      println("Hello from %$!", current(Thread));
-    }
-    return NULL;
-  };
+  /* Create Several Threads */
+  var threads = new(Array, Thread,
+    new(Thread, $(Function, say_hello)),
+    new(Thread, $(Function, say_hello)),
+    new(Thread, $(Function, say_hello)),
+    new(Thread, $(Function, say_hello)));
   
-  var threads = new(Array, Box,
-    new(Thread, f), new(Thread, f),
-    new(Thread, f), new(Thread, f),
-    new(Thread, f));
+  /* Call each Thread */
+  foreach (t in threads) { call(t, mutex); }
   
-  foreach(t in threads) { call(t); }
-  foreach(t in threads) { join(t); }
-  
-  del(threads);
-  del(mutex);
+  /* Wait for each Thread to finish */
+  foreach (t in threads) { wait(t); }
   
   return 0;
 }

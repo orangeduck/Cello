@@ -181,6 +181,8 @@ extern var Array;
 extern var Table;
 extern var Range;
 extern var Slice;
+extern var Terminal;
+extern var _;
 
 extern var File;
 extern var Mutex;
@@ -206,6 +208,7 @@ extern var IllegalInstructionError;
 extern var ProgramInterruptedError;
 extern var ProgramTerminationError;
 
+
 /* Data */
 
 enum {
@@ -223,18 +226,59 @@ struct Header {
 #endif
 };
 
-struct Type { var cls; var name; var inst; };
-struct Ref { var val; };
-struct Box { var val; };
-struct Int { int64_t val; };
-struct Float { double val; };
-struct String { char* val; };
-struct Tuple { var* items; };
-struct Range { var iter; int64_t start; int64_t stop; int64_t step; };
-struct Slice { var iter; var range; };
-struct File { FILE* file; };
-struct Process { FILE* proc; };
-struct Function { var(*func)(var); };
+struct Type {
+  var cls;
+  var name;
+  var inst;
+};
+
+struct Ref {
+  var val;
+};
+
+struct Box {
+  var val;
+};
+
+struct Int {
+  int64_t val;
+};
+
+struct Float {
+  double val;
+};
+
+struct String {
+  char* val;
+};
+
+struct Tuple {
+  var* items;
+};
+
+struct Range {
+  var value;
+  int64_t start;
+  int64_t stop;
+  int64_t step;
+};
+
+struct Slice {
+  var iter;
+  var range;
+};
+
+struct File {
+  FILE* file;
+};
+
+struct Process {
+  FILE* proc;
+};
+
+struct Function {
+  var (*func)(var);
+};
 
 /* Classes */
 
@@ -268,7 +312,6 @@ extern var Format;
 extern var Show;
 extern var Current;
 extern var Start;
-extern var Join;
 extern var Lock;
 extern var Mark;
 
@@ -295,7 +338,7 @@ struct Doc {
 };
 
 struct Help {
-  void (*help)(var);
+  int (*help_to)(var, var, int);
 };
 
 struct Cast {
@@ -364,8 +407,8 @@ struct Get {
 struct Iter {
   var (*iter_init)(var);
   var (*iter_next)(var, var);
-  var (*iter_prev)(var, var);
   var (*iter_last)(var);
+  var (*iter_prev)(var, var);
 };
 
 struct Reverse {
@@ -433,11 +476,8 @@ struct Current {
 struct Start {
   void (*start)(var);
   void (*stop)(var);
+  void (*wait)(var);
   bool (*running)(var);
-};
-
-struct Join {
-  void (*join)(var);
 };
 
 struct Lock {
@@ -464,8 +504,8 @@ var type_of(var self);
 var cast(var self, var type);
 var instance(var self, var cls);
 bool implements(var self, var cls);
-var type_instance(var self, var cls);
-bool type_implements(var self, var cls);
+var type_instance(var type, var cls);
+bool type_implements(var type, var cls);
 
 #define method(X, C, M, ...) \
   ((struct C*)method_at_offset(X, C, \
@@ -548,7 +588,7 @@ bool ge(var self, var obj);
 bool le(var self, var obj);
 
 uint64_t hash(var self);
-uint64_t hash_data(void* data, size_t size);
+uint64_t hash_data(const void* data, size_t num);
 
 var iter_init(var self);
 var iter_next(var self, var curr);
@@ -591,10 +631,9 @@ char* c_str(var self);
 int64_t c_int(var self);
 double c_float(var self);
 
-var range_with(var self, var args);
-
-#define range(...) range_with($(Range, $I(0), 0, 0, 0), tuple(__VA_ARGS__))
-#define slice(I, ...) $(Slice, I, range(__VA_ARGS__))
+#define range(...) construct_with($(Range, $I(0), 0, 0, 0), tuple(__VA_ARGS__))
+#define slice(I, ...) construct_with( \
+  $(Slice, NULL, NULL), tuple(I, $(Range, $I(0), 0, 0, 0), ##__VA_ARGS__))
 
 var sopen(var self, var resource, var options);
 void sclose(var self);
@@ -645,6 +684,7 @@ var current(var type);
 
 void start(var self);
 void stop(var self);
+void wait(var self);
 bool running(var self);
 
 var start_in(var self);
@@ -653,8 +693,6 @@ var stop_in(var self);
 #define with(...) with_xp(with_in, (__VA_ARGS__))
 #define with_xp(X, A) X A
 #define with_in(X, S) for(var X = start_in(S); X isnt NULL; X = stop_in(X))
-
-void join(var self);
 
 void lock(var self);
 bool lock_try(var self);

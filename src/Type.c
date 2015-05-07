@@ -5,7 +5,7 @@ static const char* Cast_Name(void) {
 }
 
 static const char* Cast_Brief(void) {
-  return "Runtime type checking";
+  return "Runtime Type Checking";
 }
 
 static const char* Cast_Description(void) {
@@ -83,8 +83,8 @@ static const char* Type_Brief(void) {
 static const char* Type_Description(void) {
   return 
     "The `Type` type is one of the most important types in Cello. It is the "
-    "object which specifies the meta-data associated with a particular object "
-    "most importantly this says what classes an object implements and what "
+    "object which specifies the meta-data associated with a particular object. "
+    "Most importantly this says what classes an object implements and what "
     "their instances are."
     "\n\n"
     "One can get the type of an object using the `type_of` function."
@@ -104,15 +104,52 @@ static struct Example* Type_Examples(void) {
       "var t = type_of($I(5));\n"
       "show(t); /* Int */\n"
       "\n"
-      "show($I(type_implements(t, New))); /* 1 */\n"
+      "show($I(type_implements(t, New)));  /* 1 */\n"
       "show($I(type_implements(t, Cmp)));  /* 1 */\n"
       "show($I(type_implements(t, Hash))); /* 1 */\n"
       "\n"
-      "show($I(type_method(t, Cmp, cmp, $I(5), $I(6)))); /* -1 */\n"
+      "show($I(type_method(t, Cmp, cmp, $I(5), $I(6))));\n"
     }, {NULL, NULL}
   };
 
   return examples;
+  
+}
+
+static struct Method* Type_Methods(void) {
+
+  static struct Method methods[] = {
+    {
+      "type_of", 
+      "var type_of(var self);",
+      "Returns the `Type` of an object `self`."
+    }, {
+      "instance", 
+      "var instance(var self, var cls);\n"
+      "var type_instance(var type, var cls);",
+      "Returns the instance of class `cls` implemented by object `self` or "
+      "type `type`. If class is not implemented then returns `NULL`."
+    }, {
+      "implements", 
+      "bool implements(var self, var cls);\n"
+      "bool type_implements(var type, var cls);",
+      "Returns if the object `self` or type `type` implements the class `cls`."
+    }, {
+      "method", 
+      "#define method(X, C, M, ...)\n"
+      "#define type_method(T, C, M, ...)",
+      "Returns the result of the call to method `M` of class `C` for object `X`"
+      "or type `T`. If class is not implemented then an error is thrown."
+    }, {
+      "implements_method", 
+      "#define implements_method(X, C, M)\n"
+      "#define type_implements_method(T, C, M)",
+      "Returns if the type `T` or object `X` implements the method `M` of "
+      "class C."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
   
 }
 
@@ -183,32 +220,50 @@ static int Type_Show(var self, var output, int pos) {
 }
 
 static int Type_Cmp(var self, var obj) {
-  return (intptr_t)self - (intptr_t)obj;
+  struct Type* objt = cast(obj, Type);
+  return strcmp(Type_Builtin_Name(self), Type_Builtin_Name(objt));
 }
 
 static uint64_t Type_Hash(var self) {
-  return (uint64_t)(uintptr_t)self;
+  const char* name = Type_Builtin_Name(self);
+  return hash_data(name, strlen(name));
 }
 
 static char* Type_C_Str(var self) {
   return Type_Builtin_Name(self);
 }
 
+static void Type_Assign(var self, var obj) {
+  throw(ValueError, "Type objects cannot be assigned.");
+}
+
+static var Type_Copy(var self) {
+  return throw(ValueError, "Type objects cannot be copied.");
+}
+
+static size_t Type_Size(void) {
+  throw(ValueError, "Type objects have no size");
+  return 0;
+}
+
 /* TODO */
-static void Type_Help(var self) {
-  return;
+static int Type_Help_To(var self, var out, int pos) {
+  return pos;
 }
 
 var Type = CelloEmpty(Type,
   Instance(Doc,
-    Type_Name, Type_Brief, Type_Description, NULL, Type_Examples, NULL),
+    Type_Name, Type_Brief, Type_Description, NULL, Type_Examples, Type_Methods),
+  Instance(Assign,   Type_Assign),
+  Instance(Copy,     Type_Copy),
+  Instance(Size,     Type_Size),
   Instance(Alloc,    Type_Alloc, NULL),
   Instance(New,      Type_New, NULL),
   Instance(Cmp,      Type_Cmp),
   Instance(Hash,     Type_Hash),
   Instance(Show,     Type_Show, NULL),
   Instance(C_Str,    Type_C_Str),
-  Instance(Help,     Type_Help));
+  Instance(Help,     Type_Help_To));
 
 static var Type_Scan(var self, var cls) {
  
@@ -413,7 +468,7 @@ static const char* Size_Name(void) {
 }
 
 static const char* Size_Brief(void) {
-  return "Object has some Size";
+  return "Type Size";
 }
 
 static const char* Size_Description(void) {

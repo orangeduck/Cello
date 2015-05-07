@@ -1,45 +1,46 @@
 #include "Cello.h"
 
-static var Hello;
+/* Type Variable */
+static var ExampleType;
 
-struct Hello {
-  int hello_val;
+/* Type Struct */
+struct ExampleType {
+  int value;
 };
 
-static var Hello_New(var self, var args) {
-  struct Hello* h = self;
-  h->hello_val = c_int(get(args, $(Int, 0)));
-  return self;
+/* Constructor Function */
+static void ExampleType_New(var self, var args) {
+  struct ExampleType* h = self;
+  h->value = c_int(get(args, $(Int, 0)));
 }
 
-static size_t Hello_Size(void) {
-  return sizeof(struct Hello);
-}
-
-static bool Hello_Eq(var self, var obj) {
-  struct Hello* lhs = self;
-  struct Hello* rhs = cast(obj, Hello);
-  return lhs->hello_val is rhs->hello_val;
+/* Comparison Function */
+static int ExampleType_Cmp(var self, var obj) {
+  struct ExampleType* lhs = self;
+  struct ExampleType* rhs = cast(obj, ExampleType);
+  return lhs->value - rhs->value;
 }
 
 int main(int argc, char** argv) {
   
-  Hello = new(Type, $S("Hello"), $I(sizeof(struct Hello)),
-    $(Size, Hello_Size),
-    $(New, Hello_New, NULL),
-    $(Eq, Hello_Eq));
+  /* Construct `ExampleType` type dynamically */
+  ExampleType = new_root(Type,
+    $S("ExampleType"),              /* Type Name */ 
+    $I(sizeof(struct ExampleType)), /* Type Size */ 
+    $(New, ExampleType_New, NULL),  /* Type Interfaces */
+    $(Cmp, ExampleType_Cmp));       /* ... */
   
-  print("%$ is a %$!\n", Hello, type_of(Hello));
+  print("%$ is a %$!\n", ExampleType, type_of(ExampleType));
 
-  var hello_obj1 = new(Hello, $I(1));
-  var hello_obj2 = new(Hello, $I(2));
+  /* We can now make `ExampleType` objects */
+  var obj0 = new(ExampleType, $I(1));
+  var obj1 = new(ExampleType, $I(2));
 
-  print("Equal? %d\n", $I(eq(hello_obj1, hello_obj2)));
-  
-  del(hello_obj1);
-  del(hello_obj2);
-  del(Hello);
+  /* Test for comparison etc... */
+  print("Is %$ less Than %$? %s\n", 
+    obj0, obj1, lt(obj0, obj1) ? $S("Yes") : $S("No"));
   
   return 0;
+  
 }
 

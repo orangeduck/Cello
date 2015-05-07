@@ -5,13 +5,13 @@ static const char* Tuple_Name(void) {
 }
 
 static const char* Tuple_Brief(void) {
-  return "Basic Stack Based Collection";
+  return "Basic Collection";
 }
 
 static const char* Tuple_Description(void) {
   return
     "The `Tuple` type provides a basic way to create a simple collection of "
-    "objects. It's main use is the fact that it can be constructed on the "
+    "objects. Its main use is the fact that it can be constructed on the "
     "stack using the `tuple` macro. This makes it suitable for a number of "
     "purposes such as use in functions that take a variable number of "
     "arguments."
@@ -19,16 +19,17 @@ static const char* Tuple_Description(void) {
     "Tuples can also be constructed on the heap and stored in collections. "
     "This makes them also useful as a simple _untyped_ list of objects."
     "\n\n"
-    "Internally Tuples are just a NULL terminated array of pointers. This "
-    "makes positional access and iteration fast, but for Tuples with many "
-    "elements operations that require counting the number of elements can be "
-    "slow.";
+    "Internally Tuples are just a `NULL` terminated array of pointers. This "
+    "makes positional access fast, but many other operations slow including "
+    "iteration and counting the number of elements. Due to this it is only "
+    "recommended Tuples are used for small collections. ";
 }
 
-/* TODO: Add methods second for creation macros */
-
 static const char* Tuple_Definition(void) {
-  return "struct Tuple { var* items; };";
+  return
+    "struct Tuple {\n"
+    "  var* items;\n"
+    "};\n";
 }
 
 static struct Example* Tuple_Examples(void) {
@@ -52,6 +53,19 @@ static struct Example* Tuple_Examples(void) {
   
 }
 
+static struct Method* Tuple_Methods(void) {
+  
+  static struct Method methods[] = {
+    {
+      "tuple", 
+      "#define tuple(...)",
+      "Construct a `Tuple` object on the stack."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
+}
+
 static void Tuple_New(var self, var args) {
   struct Tuple* t = self;
   size_t nargs = len(args);
@@ -67,6 +81,7 @@ static void Tuple_New(var self, var args) {
   for (size_t i = 0; i < nargs; i++) {
     t->items[i] = get(args, $I(i));
   }
+  
   t->items[nargs] = NULL;
 }
 
@@ -105,12 +120,12 @@ static void Tuple_Assign(var self, var obj) {
   for (size_t i = 0; i < nargs; i++) {
     t->items[i] = get(obj, $I(i));
   }
+  
   t->items[nargs] = NULL;
 }
 
 static size_t Tuple_Len(var self) {
   struct Tuple* t = self;
-  size_t x = 0;
   size_t i = 0;
   while (t->items[i] isnt NULL) { i++; }
   return i;
@@ -131,16 +146,32 @@ static var Tuple_Iter_Next(var self, var curr) {
   return NULL;
 }
 
+static var Tuple_Iter_Last(var self) {
+  struct Tuple* t = self;
+  return t->items[Tuple_Len(t)-1];
+}
+
+static var Tuple_Iter_Prev(var self, var curr) {
+  struct Tuple* t = self;
+  if (curr is t->items[0]) { return NULL; }
+  size_t i = 0;
+  while (t->items[i] isnt NULL) {
+    if (t->items[i] is curr) { return t->items[i-1]; }
+    i++;
+  }
+  return NULL;
+}
+
 static var Tuple_Get(var self, var key) {
   struct Tuple* t = self;
 
   int64_t i = c_int(key);
 
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= (int64_t)len(self)) {
+  if (i < 0 or i >= (int64_t)Tuple_Len(t)) {
     return throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Tuple of size %i.", 
-      key, $(Int, Tuple_Len(t)));
+      key, $I(Tuple_Len(t)));
   }
 #endif
   
@@ -153,10 +184,10 @@ static void Tuple_Set(var self, var key, var val) {
   int64_t i = c_int(key);
 
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= (int64_t)len(self)) {
+  if (i < 0 or i >= (int64_t)Tuple_Len(t)) {
     throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Tuple of size %i.", 
-      key, $(Int, Tuple_Len(t)));
+      key, $I(Tuple_Len(t)));
     return;
   }
 #endif
@@ -174,17 +205,19 @@ static bool Tuple_Mem(var self, var item) {
 static void Tuple_Pop_At(var self, var key);
 
 static void Tuple_Rem(var self, var item) {
+  struct Tuple* t = self;
   size_t i = 0;
-  foreach (obj in self) {
-    if (eq(obj, item)) {
-      Tuple_Pop_At(self, $I(i)); break;
+  while (t->items[i] isnt NULL) {
+    if (eq(item, t->items[i])) {
+      Tuple_Pop_At(self, $I(i));
+      return;
     }
     i++;
   }
 }
 
 static int Tuple_Show(var self, var output, int pos) {
-  pos = print_to(output, pos, "<'Tuple' At 0x%p (", self);
+  pos = print_to(output, pos, "<'Tuple' At 0x%p tuple(", self);
   for(size_t i = 0; i < len(self); i++) {
     pos = print_to(output, pos, "%$", get(self, $I(i)));
     if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
@@ -222,6 +255,13 @@ static void Tuple_Pop(var self) {
   struct Tuple* t = self;
   size_t nitems = Tuple_Len(t);
   
+#if CELLO_BOUND_CHECK == 1
+  if (nitems is 0) {
+    throw(IndexOutOfBoundsError, "Cannot pop. Tuple is empty!");
+    return;
+  }
+#endif
+  
 #if CELLO_ALLOC_CHECK == 1
   if (header(self)->alloc is (var)AllocStack
   or  header(self)->alloc is (var)AllocStatic) {
@@ -234,11 +274,19 @@ static void Tuple_Pop(var self) {
   
 }
 
-static void Tuple_Push_At(var self, var key, var obj) {
+static void Tuple_Push_At(var self, var obj, var key) {
   
   struct Tuple* t = self;
-
   size_t nitems = Tuple_Len(t);
+
+  int64_t i = c_int(key);
+
+#if CELLO_BOUND_CHECK == 1
+  if (i < 0 or i >= (int64_t)nitems) {
+    throw(IndexOutOfBoundsError,
+      "Index '%i' out of bounds for Tuple of size %i.", key, $I(nitems));
+  }
+#endif  
   
 #if CELLO_ALLOC_CHECK == 1
   if (header(self)->alloc is (var)AllocStack
@@ -254,20 +302,8 @@ static void Tuple_Push_At(var self, var key, var obj) {
     throw(OutOfMemoryError, "Cannot grow Tuple, out of memory!");
   }
 #endif
-  
-  int64_t i = c_int(key);
 
-#if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= (int64_t)nitems) {
-    throw(IndexOutOfBoundsError,
-      "Index '%i' out of bounds for Tuple of size %i.", key, $(Int, nitems));
-  }
-#endif
-
-  memmove(t->items + sizeof(var) * (i+1), 
-          t->items + sizeof(var) * (i+0), 
-          sizeof(var) * (nitems - (size_t)i));
-  
+  memmove(&t->items[i+1], &t->items[i+0], sizeof(var) * (nitems - (size_t)i));
   t->items[i] = obj;
   
 }
@@ -282,13 +318,11 @@ static void Tuple_Pop_At(var self, var key) {
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)nitems) {
     throw(IndexOutOfBoundsError,
-      "Index '%i' out of bounds for Tuple of size %i.", key, $(Int, nitems));
+      "Index '%i' out of bounds for Tuple of size %i.", key, $I(nitems));
   }
 #endif
   
-  memmove(t->items + sizeof(var) * (i+0), 
-          t->items + sizeof(var) * (i+1), 
-          sizeof(var) * (nitems - (size_t)i));
+  memmove(&t->items[i+0], &t->items[i+1], sizeof(var) * (nitems - (size_t)i));
   
 #if CELLO_ALLOC_CHECK == 1
   if (header(self)->alloc is (var)AllocStack
@@ -428,10 +462,14 @@ static uint64_t Tuple_Hash(var self) {
   return h;
 }
 
+static var Tuple_Subtype(var self) {
+  return Ref;
+}
+
 var Tuple = Cello(Tuple,
   Instance(Doc,
     Tuple_Name,       Tuple_Brief,    Tuple_Description, 
-    Tuple_Definition, Tuple_Examples, NULL),
+    Tuple_Definition, Tuple_Examples, Tuple_Methods),
   Instance(New,      Tuple_New, Tuple_Del),
   Instance(Assign,   Tuple_Assign),
   Instance(Cmp,      Tuple_Cmp),
@@ -441,7 +479,10 @@ var Tuple = Cello(Tuple,
   Instance(Push,     Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),
   Instance(Concat,   Tuple_Concat, Tuple_Push),
   Instance(Clear,    Tuple_Clear),
-  Instance(Iter,     Tuple_Iter_Init, Tuple_Iter_Next),
+  Instance(Subtype,  Tuple_Subtype),
+  Instance(Iter, 
+    Tuple_Iter_Init, Tuple_Iter_Next, 
+    Tuple_Iter_Last, Tuple_Iter_Prev),
   Instance(Mark,     Tuple_Mark),
   Instance(Reverse,  Tuple_Reverse),
   Instance(Sort,     Tuple_Sort_By),

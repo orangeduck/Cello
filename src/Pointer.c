@@ -90,7 +90,10 @@ static const char* Ref_Description(void) {
 }
 
 static const char* Ref_Definition(void) {
-  return "struct Ref { var val; };";
+  return
+    "struct Ref {\n"
+    "  var val;\n"
+    "};\n";
 }
 
 static struct Example* Ref_Examples(void) {
@@ -124,6 +127,7 @@ static struct Example* Ref_Examples(void) {
 
 static void Ref_Ref(var self, var val);
 static var Ref_Deref(var self);
+static void Ref_Assign(var self, var obj);
 
 static void Ref_Assign(var self, var obj) {
   struct Pointer* p = instance(obj, Pointer);
@@ -132,10 +136,6 @@ static void Ref_Assign(var self, var obj) {
   } else {
     Ref_Ref(self, obj);
   }
-}
-
-static int Ref_Show(var self, var output, int pos) {
-  return print_to(output, pos, "<'Ref' at 0x%p (%$)>", self, Ref_Deref(self));
 }
 
 static void Ref_Ref(var self, var val) {
@@ -152,7 +152,6 @@ var Ref = Cello(Ref,
   Instance(Doc,
     Ref_Name, Ref_Brief, Ref_Description, Ref_Definition, Ref_Examples, NULL),
   Instance(Assign,   Ref_Assign),
-  Instance(Show,     Ref_Show, NULL),
   Instance(Pointer,  Ref_Ref, Ref_Deref));
 
   
@@ -170,7 +169,9 @@ static const char* Box_Description(void) {
     "behaviour as compared to `Ref`. When a `Box` object is deleted it will "
     "also call `del` on the object it points to. The means a `Box` is "
     "considered a pointer type that _owns_ the object it points to, and so is "
-    "responsible for it's destruction. "
+    "responsible for it's destruction. Due to this `Box`s must point to valid "
+    "Cello objects and so can't be initalised with `NULL` or anything else "
+    "invalid. "
     "\n\n"
     "While this might not seem that useful when there is Garbage Collection "
     "this can be very useful when Garbage Collection is turned off, and when "
@@ -178,7 +179,10 @@ static const char* Box_Description(void) {
 }
 
 static const char* Box_Definition(void) {
-  return "struct Box { var val; };";
+  return
+    "struct Box {\n"
+    "  var val;\n"
+    "};\n";
 }
 
 static struct Example* Box_Examples(void) {
@@ -198,7 +202,7 @@ static struct Example* Box_Examples(void) {
       "Lifetimes",
       "var quote = $S(\"Life is long\");\n"
       "\n"
-      "with(r in $B(new(String, quote))) {\n"
+      "with (r in $B(new(String, quote))) {\n"
       "  println(\"This reference is: %$\", r);\n"
       "  println(\"This string is alive: '%s'\", deref(r));\n"
       "}\n"
@@ -224,9 +228,15 @@ static struct Example* Box_Examples(void) {
 
 static void Box_Ref(var self, var val);
 static var Box_Deref(var self);
+static void Box_Assign(var self, var obj);
+
+static void Box_New(var self, var args) {
+  Box_Assign(self, get(args, $I(0)));
+}
 
 static void Box_Del(var self) {
-  del(Box_Deref(self));
+  var obj = Box_Deref(self);
+  if (obj) { del(obj); }
   Box_Ref(self, NULL);
 }
 
@@ -256,7 +266,7 @@ static var Box_Deref(var self) {
 var Box = Cello(Box,
   Instance(Doc,
     Box_Name, Box_Brief, Box_Description, Box_Definition, Box_Examples, NULL),
-  Instance(New,      NULL, Box_Del),
+  Instance(New,      Box_New, Box_Del),
   Instance(Assign,   Box_Assign),
   Instance(Show,     Box_Show, NULL),
   Instance(Pointer,  Box_Ref, Box_Deref));

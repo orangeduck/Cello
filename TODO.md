@@ -1,31 +1,30 @@
 Cello 2.0
 =========
 
-* Update tests
-  - Add test for array alignment
-* Update Documentation
-* Update README
-* Update INSTALL
-
-* Glitch example in Benchmarks
-* Put Exception Variables in TLS?
-* Send/Recv class
-
+* FAQ for "I don't want garbage collection"
+* Update Website
 * Update Syntax def for Notepad++
 * Update Syntax def for gedit
-
 * Passing empty string to `print_to` gives weird results
-* Swap class
 * TODO: Break/Continue in with
-* Remove leading spaces from methods documentation
-* Rename `DocMethods` and `DocExamples` to `Methods` and `Examples`.
-* Rename Format.c to Show.c
-* Binary read/write
-* Index array with iterable/slice
-* get/set for Types?
-* Definition field in documentation
 
-----------------
+
+Cello 2.1
+=========
+
+* Put Exception Variables in TLS?
+* Send/Recv class
+* Map, Filter, Zip, Sorted, Reversed, Join iterables (rename Map to Tree?)
+* Cute idea is to use `foreach (_ in x);` to apply a map.
+* Date object?
+* Binary Serialisation via MsgPack
+* `Move` class and `move` function. Like memmove (assignment when done).
+* `Swap` class (swap_using with preallocated space)
+
+
+
+Cello REPL
+==========
 
 * REPL
   - Python prototype

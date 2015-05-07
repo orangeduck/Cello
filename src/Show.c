@@ -13,10 +13,10 @@ static const char* Format_Description(void) {
     "Format abstracts the class of operations such as `scanf`, `sprintf` and "
     "`fprintf` with matching semantics. It provides general `printf` and "
     "`scanf` functionality for several different types objects in a "
-    "uniform way. This class is essentially an inbetween class, used by by the "
+    "uniform way. This class is essentially an inbetween class, used by the "
     "`Show` class to read and write output."
     "\n\n"
-    "It is important to note that the semantics of these options match "
+    "It is important to note that the semantics of these operations match "
     "`printf` and not the newly defined `Show` class. For example it is "
     "perfectly valid to pass a C `int` to these functions, while the `println` "
     "function from `Show` must be passed only `var` objects.";
@@ -35,9 +35,9 @@ static struct Example* Format_Examples(void) {
   static struct Example examples[] = {
     {
       "Usage",
-      "/* printf(\"Hello my name is %s, I am %i\n\", \"Dan\", 23); */\n"
+      "/* printf(\"Hello my name is %s, I'm %i\\n\", \"Dan\", 23); */\n"
       "format_to($(File, stdout), 0, \n"
-      "  \"Hello my name is %s, I am %i\\n\", \"Dan\", 23);\n"
+      "  \"Hello my name is %s, I'm %i\\n\", \"Dan\", 23);\n"
     }, {NULL, NULL}
   };
 
@@ -121,7 +121,8 @@ static const char* Show_Description(void) {
     "as `c_float` and `c_int` on their passed arguments to convert objects to "
     "C types before performing the standard C formatting behaviour."
     "\n\n"
-    "See `printf` for more information on format specifiers.";
+    "See [printf](http://www.cplusplus.com/reference/cstdio/printf/) for more "
+    "information on format specifiers.";
 }
 
 static const char* Show_Definition(void) {
@@ -140,7 +141,7 @@ static struct Example* Show_Examples(void) {
       "println(\"Hello %s!\", $S(\"World\"));\n"
     }, {
       "File Writing",
-      "with(f in sopen($(File, NULL), $S(\"prices.txt\"), $S(\"wb\"))) {\n"
+      "with (f in new(File, $S(\"prices.txt\"), $S(\"wb\"))) {\n"
       "  print_to(f, 0, \"%$ :: %$\\n\", $S(\"Banana\"), $I(57));\n"
       "  print_to(f, 0, \"%$ :: %$\\n\", $S(\"Apple\"),  $I(22));\n"
       "  print_to(f, 0, \"%$ :: %$\\n\", $S(\"Pear\"),   $I(16));\n"
@@ -179,7 +180,7 @@ static struct Method* Show_Methods(void) {
       "Show the object `self` either to `stdout` or to the object `output`."
     }, {
       "look", 
-      "int look(var self);\n    "
+      "int look(var self);\n"
       "int look_from(var self, var input, int pos);",
       "Read the object `self` either from `stdout` or from the object `input`."
     }, {
@@ -224,7 +225,7 @@ int show_to(var self, var out, int pos) {
     return s->show(self, out, pos);
   }
   
-  return print_to(out, 0, "<'%s' At 0x%p>", type_of(self), self);
+  return print_to(out, pos, "<'%s' At 0x%p>", type_of(self), self);
   
 }
 
@@ -367,7 +368,7 @@ int scan_from_with(var input, int pos, const char* fmt, var args) {
       memcpy(fmt_buf, start, fmt - start);
       fmt_buf[fmt - start] = '\0';
       format_from(input, pos, fmt_buf);
-      pos += fmt - start;
+      pos += (int)(fmt - start);
       continue;
     }
     
