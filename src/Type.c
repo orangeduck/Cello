@@ -246,9 +246,66 @@ static size_t Type_Size(void) {
   return 0;
 }
 
-/* TODO */
-static int Type_Help_To(var self, var out, int pos) {
+static int print_indent(var out, int pos, const char* str) {
+  pos = print_to(out, pos, "    ");
+  while (*str) {
+    if (*str is '\n') { pos = print_to(out, pos, "\n    "); }
+    else { pos = print_to(out, pos, "%c", $I(*str)); }
+    str++;
+  }
   return pos;
+}
+
+static int Type_Help_To(var self, var out, int pos) {
+  
+  struct Doc* doc = type_instance(self, Doc);
+  
+  if (doc is NULL) {
+    return print_to(out, pos, "\nNo Documentation Found for Type %s\n", self);
+  }
+  
+  pos = print_to(out, pos, "\n");
+  pos = print_to(out, pos, "# %s ", self);
+  
+  if (doc->brief) {
+    pos = print_to(out, pos, " - %s\n\n", $S((char*)doc->brief()));
+  }
+
+  if (doc->description) {
+    pos = print_to(out, pos, "%s\n\n", $S((char*)doc->description()));
+  }
+  
+  if (doc->definition) {
+    pos = print_to(out, pos, "\n### Definition\n\n");
+    pos = print_indent(out, pos, doc->definition());
+    pos = print_to(out, pos, "\n\n");
+  }
+
+  if (doc->methods) {
+    pos = print_to(out, pos, "\n### Methods\n\n");
+    struct Method* methods = doc->methods();
+    while (methods[0].name) {
+      pos = print_to(out, pos, "__%s__\n\n", $S((char*)methods[0].name));
+      pos = print_indent(out, pos, methods[0].definition);
+      pos = print_to(out, pos, "\n\n%s\n\n", $S((char*)methods[0].description));
+      methods++;
+    }
+  }
+    
+  if (doc->examples) {
+    pos = print_to(out, pos, "\n### Examples\n\n");
+    struct Example* examples = doc->examples();
+    while (examples[0].name) {
+      pos = print_to(out, pos, "__%s__\n\n", $S((char*)examples[0].name));
+      pos = print_indent(out, pos, examples[0].body);
+      pos = print_to(out, pos, "\n\n");
+      examples++;
+    }
+    pos = print_to(out, pos, "\n\n");
+  }
+  
+  return pos;
+  
 }
 
 var Type = CelloEmpty(Type,

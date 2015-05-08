@@ -34,8 +34,6 @@ static struct Method* Call_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
-
 var Call = Cello(Call,
   Instance(Doc,
     Call_Name,       Call_Brief, Call_Description, 
@@ -73,8 +71,6 @@ static var Function_Call(var self, var args) {
   struct Function* f = self;
   return f->func(args);
 }
-
-/* TODO: Examples */
 
 var Function = Cello(Function,
   Instance(Doc,

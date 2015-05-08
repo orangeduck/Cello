@@ -631,7 +631,7 @@ char* c_str(var self);
 int64_t c_int(var self);
 double c_float(var self);
 
-#define range(...) construct_with($(Range, $I(0), 0, 0, 0), tuple(__VA_ARGS__))
+#define range(...) construct_with($(Range, NULL, 0, 0, 0), tuple($I(0), ##__VA_ARGS__))
 #define slice(I, ...) construct_with( \
   $(Slice, NULL, NULL), tuple(I, $(Range, $I(0), 0, 0, 0), ##__VA_ARGS__))
 

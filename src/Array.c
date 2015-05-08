@@ -283,6 +283,7 @@ static void Array_Pop_At(var self, var key) {
 
   struct Array* a = self;
   int64_t i = c_int(key);
+  i = i < 0 ? a->nitems+i : i;
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {
@@ -327,6 +328,7 @@ static void Array_Push_At(var self, var obj, var key) {
   Array_Reserve_More(a);
   
   int64_t i = c_int(key);
+  i = i < 0 ? a->nitems+i : i;
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {
@@ -365,6 +367,7 @@ static var Array_Get(var self, var key) {
 
   struct Array* a = self;
   int64_t i = c_int(key);
+  i = i < 0 ? a->nitems+i : i;
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {
@@ -380,6 +383,7 @@ static void Array_Set(var self, var key, var val) {
 
   struct Array* a = self;
   int64_t i = c_int(key);
+  i = i < 0 ? a->nitems+i : i;
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)a->nitems) {

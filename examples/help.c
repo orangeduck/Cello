@@ -1,7 +1,9 @@
 #include "Cello.h"
 
 int main(int argc, char** argv) {
-  help(Array);
+  
+  help(Range);
+  
   return 0;
 }
 

@@ -454,12 +454,26 @@ static struct Method* Lock_Methods(void) {
   return methods;
 }
 
-/* TODO: Examples */
+static struct Example* Lock_Examples(void) {
+  
+  static struct Example examples[] = {
+    {
+      "Usage",
+      "var x = new(Mutex);\n"
+      "lock(x);   /* Lock Mutex */ \n"
+      "print(\"Inside Mutex!\\n\");\n"
+      "unlock(x); /* Unlock Mutex */"
+    }, {NULL, NULL}
+  };
+
+  return examples;
+  
+}
 
 var Lock = Cello(Lock,
   Instance(Doc,
-    Lock_Name,       Lock_Brief, Lock_Description,
-    Lock_Definition, NULL,       Lock_Methods));
+    Lock_Name,       Lock_Brief,    Lock_Description,
+    Lock_Definition, Lock_Examples, Lock_Methods));
 
 void lock(var self) {
   method(self, Lock, lock);

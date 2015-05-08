@@ -1,7 +1,7 @@
 CC ?= gcc
 AR ?= ar
 
-VERSION = 1.1.7
+VERSION = 2.0.0
 PACKAGE = libCello-$(VERSION)
 
 BINDIR = ${PREFIX}/bin

@@ -136,6 +136,10 @@ PT_FUNC(test_array_get) {
   PT_ASSERT( eq(get(a1, $I(1)), $S("There")) );
   PT_ASSERT( eq(get(a1, $I(2)), $S("People")) );
   
+  PT_ASSERT( eq(get(a1, $I(-1)), $S("People")) );
+  PT_ASSERT( eq(get(a1, $I(-2)), $S("There")) );
+  PT_ASSERT( eq(get(a1, $I(-3)), $S("Hello")) );
+  
   set(a1, $I(1), $S("Blah"));
   
   PT_ASSERT( eq(get(a1, $I(0)), $S("Hello")) );
@@ -820,6 +824,10 @@ PT_FUNC(test_list_get) {
   PT_ASSERT( eq(get(l1, $I(1)), $S("There")) );
   PT_ASSERT( eq(get(l1, $I(2)), $S("People")) );
   
+  PT_ASSERT( eq(get(l1, $I(-1)), $S("People")) );
+  PT_ASSERT( eq(get(l1, $I(-2)), $S("There")) );
+  PT_ASSERT( eq(get(l1, $I(-3)), $S("Hello")) );
+  
   set(l1, $I(1), $S("Blah"));
   
   PT_ASSERT( eq(get(l1, $I(0)), $S("Hello")) );
@@ -1385,6 +1393,10 @@ PT_FUNC(test_range_get) {
   PT_ASSERT(c_int(get(x, $I(10))) is 10);
   PT_ASSERT(c_int(get(x, $I(5))) is 5);
   
+  PT_ASSERT(c_int(get(x, $I(-1))) is 999);
+  PT_ASSERT(c_int(get(x, $I(-2))) is 998);
+  PT_ASSERT(c_int(get(x, $I(-3))) is 997);
+  
   PT_ASSERT(c_int(get(y, $I(15))) is 16);
   PT_ASSERT(c_int(get(y, $I(10))) is 11);
   PT_ASSERT(c_int(get(y, $I(5))) is 6);
@@ -1435,13 +1447,13 @@ PT_FUNC(test_range_len) {
 }
 
 PT_FUNC(test_range_new) {
-  var x = new(Range, $I(1), $I(5), $I(2));
+  var x = new(Range, $I(0), $I(1), $I(5), $I(2));
   del(x);
 }
 
 PT_FUNC(test_range_show) {
   
-  var r0 = new(Range, $I(1), $I(5), $I(2));
+  var r0 = new(Range, $I(0), $I(1), $I(5), $I(2));
   var s0 = new(String);
   
   show_to(r0, s0, 0);
@@ -1517,6 +1529,31 @@ PT_FUNC(test_slice_get) {
   
   PT_ASSERT(c_int(get(s3, $I(0))) is 100);
   PT_ASSERT(c_int(get(s3, $I(1))) is 30);
+  
+  var s4 = slice(x, $I(-2));
+  var s5 = slice(x, $I(-3), $I(-2));
+  var s6 = slice(x, _, _, $I(-1));
+  var s7 = slice(x, $I(-4), _, $I(1));
+  
+  PT_ASSERT(c_int(get(s4, $I(-1))) is 50);
+  PT_ASSERT(c_int(get(s4, $I(-2))) is 30);
+  
+  PT_ASSERT(c_int(get(s5, $I(0))) is 50);
+
+  PT_ASSERT(c_int(get(s6, $I(0))) is 1);
+  PT_ASSERT(c_int(get(s6, $I(1))) is 6);
+  PT_ASSERT(c_int(get(s6, $I(2))) is 50);
+  PT_ASSERT(c_int(get(s6, $I(3))) is 30);
+  PT_ASSERT(c_int(get(s6, $I(4))) is 10);
+  PT_ASSERT(c_int(get(s6, $I(5))) is 100);
+
+  PT_ASSERT(c_int(get(s7, $I(0))) is 30);
+  PT_ASSERT(c_int(get(s7, $I(1))) is 50);
+  PT_ASSERT(c_int(get(s7, $I(2))) is 6);
+  
+  PT_ASSERT(c_int(get(s0, $I(-1))) is 50);
+  PT_ASSERT(c_int(get(s1, $I(-1))) is 50);
+  PT_ASSERT(c_int(get(s6, $I(-1))) is 100);
   
 }
 
@@ -1663,9 +1700,14 @@ PT_FUNC(test_string_format) {
   var s0 = new(String);
   reserve(s0, $I(1000));
   
-  format_to(s0, 0, "%s", "Hello");
-  
+  format_to(s0, 0, "%s", "Hello");  
   PT_ASSERT_STR_EQ(c_str(s0), "Hello");
+
+  format_to(s0, 0, "");  
+  PT_ASSERT_STR_EQ(c_str(s0), "");
+  
+  print_to(s0, 0, "");
+  PT_ASSERT_STR_EQ(c_str(s0), "");
   
   del(s0);
   
@@ -2283,6 +2325,10 @@ PT_FUNC(test_tuple_get) {
   PT_ASSERT(c_int(get(x, $I(0))) is 100);
   PT_ASSERT(c_int(get(x, $I(1))) is 200);
   PT_ASSERT(c_int(get(x, $I(2))) is 300);
+  
+  PT_ASSERT(c_int(get(x, $I(-1))) is 300);
+  PT_ASSERT(c_int(get(x, $I(-2))) is 200);
+  PT_ASSERT(c_int(get(x, $I(-3))) is 100);
   
   set(x, $I(1), $I(10));
   

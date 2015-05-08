@@ -112,6 +112,8 @@ static var* List_Prev(struct List* l, var self) {
 
 static var List_At(struct List* l, int64_t i) {
 
+  i = i < 0 ? l->nitems+i : i;
+
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)l->nitems) {
     return throw(IndexOutOfBoundsError,

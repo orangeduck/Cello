@@ -180,27 +180,31 @@ void Range_New(var self, var args) {
   struct Range* r = self;
   size_t nargs = len(args);
   
-  if (nargs > 3) {
+  if (nargs > 4) {
     throw(FormatError, "Received too many arguments to Range constructor");
   }
   
-  if (nargs is 0) { return; }
+  if (nargs < 1) {
+    throw(FormatError, "Received too few arguments to Range constructor");
+  }
+  
+  r->value = get(args, $I(0));
   
   switch (nargs) {
-    case 1:
-      r->start = 0;
-      r->stop  = c_int(get(args, $I(0)));
-      r->step  = 1;
-    break;
     case 2:
-      r->start = get(args, $I(0)) is _ ? 0 : c_int(get(args, $I(0)));
+      r->start = 0;
       r->stop  = c_int(get(args, $I(1)));
       r->step  = 1;
     break;
     case 3:
-      r->start = get(args, $I(0)) is _ ? 0 : c_int(get(args, $I(0)));
-      r->stop  = c_int(get(args, $I(1)));
-      r->step  = get(args, $I(2)) is _ ? 1 : c_int(get(args, $I(2)));
+      r->start = get(args, $I(1)) is _ ? 0 : c_int(get(args, $I(1)));
+      r->stop  = c_int(get(args, $I(2)));
+      r->step  = 1;
+    break;
+    case 4:
+      r->start = get(args, $I(1)) is _ ? 0 : c_int(get(args, $I(1)));
+      r->stop  = c_int(get(args, $I(2)));
+      r->step  = get(args, $I(3)) is _ ? 1 : c_int(get(args, $I(3)));
     break;
   }
   
@@ -248,7 +252,6 @@ static var Range_Iter_Prev(var self, var curr) {
   return i;
 }
 
-/* TODO: Test */
 static size_t Range_Len(var self) {
   struct Range* r = self;
   if (r->step == 0) { return 0; }
@@ -257,26 +260,37 @@ static size_t Range_Len(var self) {
   return 0;
 }
 
-/* TODO: Test */
 static var Range_Get(var self, var key) {
   struct Range* r = self;
-  struct Int* i = r->value;
-  if (r->step == 0) { i->val = 0; return i; }
-  if (r->step  > 0) {
-    i->val = r->start  + r->step * c_int(key);
-    return i->val >= r->stop ? NULL : i;
+  struct Int* x = r->value;
+  
+  int64_t i = c_int(key);
+  i = i < 0 ? Range_Len(r)+i : i;
+  
+  if (r->step == 0) {
+    x->val = 0;
+    return x;
   }
-  if (r->step  < 0) {
-    i->val = r->stop-1 + r->step * c_int(key);
-    return i->val < r->start ? NULL : i;
+  
+  if (r->step  > 0 and (r->start + r->step * i) < r->stop) {
+    x->val = r->start  + r->step * i;
+    return x;
   }
-  return NULL;
+  
+  if (r->step  < 0 and (r->stop-1 + r->step * i) >= r->start) {
+    x->val = r->stop-1 + r->step * i;
+    return x;
+  }
+  
+  return throw(IndexOutOfBoundsError, 
+      "Index '%i' out of bounds for Range of start %i, stop %i and step %i.", 
+      key, $I(r->start), $I(r->stop), $I(r->step));
 }
 
-/* TODO: Test */
 static bool Range_Mem(var self, var key) {
   struct Range* r = self;
   int64_t i = c_int(key);
+  i = i < 0 ? Range_Len(r)+i : i;
   if (r->step == 0) { return false; }
   if (r->step  > 0) {
     return i >= r->start and i < r->stop and (i - r->start) % r->step is 0;
@@ -293,9 +307,14 @@ static var Range_Subtype(var self) {
 
 static int Range_Show(var self, var output, int pos) {
   struct Range* r = self;
-  return print_to(output, pos, 
-    "<'Range' at 0x%p range($I(%i), $I(%i), $I(%i))>", 
-    self, $I(r->start), $I(r->stop), $I(r->step));
+  pos = print_to(output, pos, "<'Range' At 0x%p [", self);
+  var curr = Range_Iter_Init(self);
+  while (curr) {
+    pos = print_to(output, pos, "%i", curr);
+    curr = Range_Iter_Next(self, curr);
+    if (curr) { pos = print_to(output, pos, ", "); }
+  }
+  return print_to(output, pos, "]>");
 }
 
 var Range = Cello(Range,
@@ -384,6 +403,25 @@ static struct Method* Slice_Methods(void) {
   return methods;
 }
 
+static int64_t Slice_Arg(int part, size_t n, var arg) {
+  
+  if (arg is _) {
+    if (part is 0) { return 0; }
+    if (part is 1) { return n; }
+    if (part is 2) { return 1; }
+  }
+  
+  int64_t a = c_int(arg);
+  
+  if (part isnt 2) {
+    a = a < 0 ? n+a : a;
+    a = a > n ? n   : a;
+    a = a < 0 ? 0   : a;
+  }
+  
+  return a;
+}
+
 void Slice_New(var self, var args) {
   struct Slice* s = self;
   size_t nargs = len(args);
@@ -402,28 +440,26 @@ void Slice_New(var self, var args) {
   struct Range* r = s->range;
   size_t n = len(s->iter);
   
-  /* TODO: Negative indices as offsets */
-  
   switch (nargs) {
     case 2:
       r->start = 0;
-      r->stop  = len(s->iter);
+      r->stop  = n;
       r->step  = 1;
     break;
     case 3:
       r->start = 0;
-      r->stop  = get(args, $I(2)) is _ ? n : c_int(get(args, $I(2)));
+      r->stop  = Slice_Arg(1, n, get(args, $I(2)));
       r->step  = 1;
     break;
     case 4:
-      r->start = get(args, $I(2)) is _ ? 0 : c_int(get(args, $I(2)));
-      r->stop  = get(args, $I(3)) is _ ? n : c_int(get(args, $I(3)));
+      r->start = Slice_Arg(0, n, get(args, $I(2)));
+      r->stop  = Slice_Arg(1, n, get(args, $I(3)));
       r->step  = 1;
     break;
     case 5:
-      r->start = get(args, $I(2)) is _ ? 0 : c_int(get(args, $I(2)));
-      r->stop  = get(args, $I(3)) is _ ? n : c_int(get(args, $I(3)));
-      r->step  = get(args, $I(4)) is _ ? 1 : c_int(get(args, $I(4)));
+      r->start = Slice_Arg(0, n, get(args, $I(2)));
+      r->stop  = Slice_Arg(1, n, get(args, $I(3)));
+      r->step  = Slice_Arg(2, n, get(args, $I(4)));
     break;
   }
   
@@ -520,20 +556,35 @@ static size_t Slice_Len(var self) {
   return Range_Len(s->range);
 }
 
-/* TODO: Test */
 static var Slice_Get(var self, var key) {
   struct Slice* s = self;
   return get(s->iter, Range_Get(s->range, key));
 }
 
-/* TODO: Implement */
 static bool Slice_Mem(var self, var key) {
+  var curr = Slice_Iter_Init(self);
+  while (curr) {
+    if (eq(curr, key)) { return true; }
+    curr = Slice_Iter_Next(self, curr);
+  }
   return false;
 }
 
 static var Slice_Subtype(var self) {
   struct Slice* s = self;
   return subtype(s->iter);
+}
+
+static int Slice_Show(var self, var output, int pos) {
+  struct Slice* s = self;
+  pos = print_to(output, pos, "<'Slice' At 0x%p [", self);
+  var curr = Slice_Iter_Init(self);
+  while (curr) {
+    pos = print_to(output, pos, "%$", curr);
+    curr = Slice_Iter_Next(self, curr);
+    if (curr) { pos = print_to(output, pos, ", "); }
+  }
+  return print_to(output, pos, "]>");
 }
 
 var Slice = Cello(Slice,
@@ -546,7 +597,8 @@ var Slice = Cello(Slice,
   Instance(Get,      Slice_Get, NULL, Slice_Mem, NULL),
   Instance(Iter, 
     Slice_Iter_Init, Slice_Iter_Next, 
-    Slice_Iter_Last, Slice_Iter_Prev));
+    Slice_Iter_Last, Slice_Iter_Prev),
+  Instance(Show,     Slice_Show, NULL));
 
 
 

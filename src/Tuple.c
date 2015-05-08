@@ -164,11 +164,13 @@ static var Tuple_Iter_Prev(var self, var curr) {
 
 static var Tuple_Get(var self, var key) {
   struct Tuple* t = self;
-
+  size_t nitems = Tuple_Len(t);
+  
   int64_t i = c_int(key);
+  i = i < 0 ? nitems+i : i;
 
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= (int64_t)Tuple_Len(t)) {
+  if (i < 0 or i >= (int64_t)nitems) {
     return throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Tuple of size %i.", 
       key, $I(Tuple_Len(t)));
@@ -180,11 +182,13 @@ static var Tuple_Get(var self, var key) {
 
 static void Tuple_Set(var self, var key, var val) {
   struct Tuple* t = self;
+  size_t nitems = Tuple_Len(t);
 
   int64_t i = c_int(key);
+  i = i < 0 ? nitems+i : i;
 
 #if CELLO_BOUND_CHECK == 1
-  if (i < 0 or i >= (int64_t)Tuple_Len(t)) {
+  if (i < 0 or i >= (int64_t)nitems) {
     throw(IndexOutOfBoundsError, 
       "Index '%i' out of bounds for Tuple of size %i.", 
       key, $I(Tuple_Len(t)));
@@ -280,6 +284,7 @@ static void Tuple_Push_At(var self, var obj, var key) {
   size_t nitems = Tuple_Len(t);
 
   int64_t i = c_int(key);
+  i = i < 0 ? nitems+i : i;
 
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)nitems) {
@@ -314,6 +319,7 @@ static void Tuple_Pop_At(var self, var key) {
   size_t nitems = Tuple_Len(t);
 
   int64_t i = c_int(key);
+  i = i < 0 ? nitems+i : i;
   
 #if CELLO_BOUND_CHECK == 1
   if (i < 0 or i >= (int64_t)nitems) {
