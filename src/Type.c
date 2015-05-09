@@ -440,14 +440,15 @@ bool type_implements_method_at_offset(var self, var cls, size_t offset) {
 static var Type_Instance(var self, var cls) {
 
 #if CELLO_CACHE == 1
-  Type_Cache_Entry( 0, Size);   Type_Cache_Entry( 1, Alloc);
-  Type_Cache_Entry( 2, New);    Type_Cache_Entry( 3, Assign);
-  Type_Cache_Entry( 4, Cmp);    Type_Cache_Entry( 5, Mark);
-  Type_Cache_Entry( 6, Hash);   Type_Cache_Entry( 7, Len);
-  Type_Cache_Entry( 8, Iter);   Type_Cache_Entry( 9, Push);
-  Type_Cache_Entry(10, Concat); Type_Cache_Entry(11, Get);
-  Type_Cache_Entry(12, C_Str);  Type_Cache_Entry(13, C_Int);
-  Type_Cache_Entry(14, C_Float);
+  Type_Cache_Entry( 0, Size);    Type_Cache_Entry( 1, Alloc);
+  Type_Cache_Entry( 2, New);     Type_Cache_Entry( 3, Assign);
+  Type_Cache_Entry( 4, Cmp);     Type_Cache_Entry( 5, Mark);
+  Type_Cache_Entry( 6, Hash);    Type_Cache_Entry( 7, Len);
+  Type_Cache_Entry( 8, Iter);    Type_Cache_Entry( 9, Push);
+  Type_Cache_Entry(10, Concat);  Type_Cache_Entry(11, Get);
+  Type_Cache_Entry(12, C_Str);   Type_Cache_Entry(13, C_Int);
+  Type_Cache_Entry(14, C_Float); Type_Cache_Entry(15, Current);
+  Type_Cache_Entry(16, Cast);    Type_Cache_Entry(17, Pointer);
 #endif
   
   return Type_Scan(self, cls);

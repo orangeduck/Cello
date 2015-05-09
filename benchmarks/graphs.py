@@ -6,7 +6,10 @@ languages = np.array([
     'Java', 'Javascript', 'Python', 
     'Ruby', 'Lua', 'Lua JIT'])
 
-experiments = ['Array', 'Map', 'N-Bodies', 'Dictionary', 'Sudoku', 'Matrix']
+experiments = [
+  'Array', 'Map', 'N-Bodies', 
+  'Dictionary', 'Sudoku', 'Matrix', 
+  'Garbage Collection']
     
 results_array = np.array([
     0.02, 0.02, 0.10,
@@ -38,9 +41,15 @@ results_matrix = np.array([
     0.11,  0.23,  2.33,
     7.62,  0.94,  0.03])
 
+results_gc = np.array([
+    0.00,  0.01,  0.26,
+    0.06,  0.25,  3.34,
+    5.37,  8.02,  0.31])
+
 results = [
     results_array, results_map,    results_nbodies,
-    results_dict,  results_sudoku, results_matrix]
+    results_dict,  results_sudoku, results_matrix,
+    results_gc]
     
 #cols = [
 #    '#006666', '#FF6600', '#991F00',
@@ -54,7 +63,7 @@ cols = [
     
 ylims = [
     3.25, 13.5, 2.2,
-    0.65, 13.5, 11,
+    0.65, 13.5, 11, 9
 ]
     
 for exp, result, ylim in zip(experiments, results, ylims):
@@ -68,7 +77,11 @@ for exp, result, ylim in zip(experiments, results, ylims):
         bar.set_color(col)
         bar.set_edgecolor('#555555')
         height = bar.get_height()
-        ax.text(bar.get_x()+bar.get_width()/1.5, height + (ylim/20), '%0.2f' % height, ha='center', va='bottom', rotation='vertical', color='#555555')
+        ax.text(
+          bar.get_x()+bar.get_width()/1.5, 
+          height + (ylim/20), '%0.2f' % height, 
+          ha='center', va='bottom', rotation='vertical', 
+          color='#555555')
             
     plt.xticks(np.arange(len(result)) + 0.75 / 2, languages, rotation='vertical')
     

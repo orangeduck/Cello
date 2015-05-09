@@ -30,6 +30,37 @@ g++ Matmul/matmul_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o Matmul/matmul
 gcc Matmul/matmul_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -Wno-unused-result -std=gnu99 -pg -O3 -lm -lpthread -o Matmul/matmul_cello
 javac Matmul/matmul_java.java
 
+gcc GC/gc_c.c -Wno-unused-result -I./ext -std=c99 -O3 -lm -o GC/gc_c
+g++ GC/gc_cpp.cpp -Wno-unused-result -std=c++11 -O3 -lm -o GC/gc_cpp
+gcc GC/gc_cello.c -DCELLO_NDEBUG ../libCello.a -I../include -std=gnu99 -O3 -lm -lpthread -o GC/gc_cello
+javac GC/gc_java.java
+
+echo 
+echo "## Garbage Collection"
+echo
+echo -n "* C: "
+time -f "%e" ./GC/gc_c
+echo -n "* C++: "
+time -f "%e" ./GC/gc_cpp
+echo -n "* Cello: "
+time -f "%e" ./GC/gc_cello
+echo -n "* Java: "
+time -f "%e" java -cp ./GC gc_java
+echo -n "* Javascript: "
+time -f "%e" nodejs GC/gc_javascript.js
+echo -n "* Python: "
+time -f "%e" python GC/gc_python.py
+echo -n "* Ruby: "
+time -f "%e" ruby GC/gc_ruby.rb
+echo -n "* Lua: "
+time -f "%e" lua GC/gc_lua.lua
+echo -n "* Lua JIT: "
+time -f "%e" luajit GC/gc_lua.lua
+
+gprof GC/gc_cello > GC/profile.txt
+rm gmon.out
+
+
 echo 
 echo "## List"
 echo

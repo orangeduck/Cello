@@ -144,13 +144,13 @@ static var alloc_by(var type, int method) {
 
   switch (method) {
     case ALLOC_STANDARD:
-#if CELLO_GC == 1
+#ifndef CELLO_NGC
   set(current(GC), self, $I(0));
 #endif
     break;
     case ALLOC_RAW: break;
     case ALLOC_ROOT:
-#if CELLO_GC == 1
+#ifndef CELLO_NGC
   set(current(GC), self, $I(1));
 #endif
     break;
@@ -168,7 +168,7 @@ static void dealloc_by(var self, int method) {
   switch (method) {
     case ALLOC_STANDARD:
     case ALLOC_ROOT:
-#if CELLO_GC == 1
+#ifndef CELLO_NGC
   rem(current(GC), self);
 #endif
     break;
