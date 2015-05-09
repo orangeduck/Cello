@@ -4,6 +4,7 @@ Cello 2.0
 Cello 2.1
 =========
 
+* Garbage Collection Benchmark
 * Fast lookup for keys in range of memory allocated by table.
 * Put Exception Variables in TLS?
 * Send/Recv class

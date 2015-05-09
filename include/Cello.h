@@ -181,6 +181,7 @@ extern var Array;
 extern var Table;
 extern var Range;
 extern var Slice;
+extern var Zip;
 extern var Terminal;
 extern var _;
 
@@ -266,6 +267,11 @@ struct Range {
 struct Slice {
   var iter;
   var range;
+};
+
+struct Zip {
+  var iters;
+  var values;
 };
 
 struct File {
@@ -631,9 +637,16 @@ char* c_str(var self);
 int64_t c_int(var self);
 double c_float(var self);
 
-#define range(...) construct_with($(Range, NULL, 0, 0, 0), tuple($I(0), ##__VA_ARGS__))
+#define range(...) construct_with( \
+  $(Range, NULL, 0, 0, 0), tuple($I(0), ##__VA_ARGS__))
+
 #define slice(I, ...) construct_with( \
   $(Slice, NULL, NULL), tuple(I, $(Range, $I(0), 0, 0, 0), ##__VA_ARGS__))
+
+#define zip(...) construct_with( \
+  $(Zip, tuple(__VA_ARGS__), tuple(__VA_ARGS__)), tuple(__VA_ARGS__))
+
+#define enumerate(I) zip(range(len(I)), I)
 
 var sopen(var self, var resource, var options);
 void sclose(var self);
