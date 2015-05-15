@@ -278,7 +278,7 @@ static void String_Reserve(var self, var amount) {
   int64_t x = c_int(amount);
   
 #if CELLO_BOUND_CHECK == 1
-  if (x <= strlen(s->val)) {
+  if (x <= (int64_t)strlen(s->val)) {
     throw(IndexOutOfBoundsError, 
       "String already has %li characters, cannot reserve %li", 
       $I(strlen(s->val)), amount);

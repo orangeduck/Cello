@@ -42,7 +42,7 @@ results_matrix = np.array([
     7.62,  0.94,  0.03])
 
 results_gc = np.array([
-    0.00,  0.01,  0.26,
+    0.01,  0.01,  0.26,
     0.06,  0.25,  3.34,
     5.37,  8.02,  0.31])
 
@@ -63,7 +63,7 @@ cols = [
     
 ylims = [
     3.25, 13.5, 2.2,
-    0.65, 13.5, 11, 9
+    0.65, 13.5, 11, 11
 ]
     
 for exp, result, ylim in zip(experiments, results, ylims):

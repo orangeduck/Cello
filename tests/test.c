@@ -2485,7 +2485,7 @@ static void TestType_New(var self, var args) {
 static int TestType_Cmp(var self, var obj) {
   struct TestType* lhs = cast(self, TestType);
   struct TestType* rhs = cast(obj, TestType);
-  return lhs->test_data - rhs->test_data;
+  return (int)(lhs->test_data - rhs->test_data);
 }
 
 PT_FUNC(test_type_new) {

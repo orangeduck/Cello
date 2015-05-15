@@ -603,7 +603,7 @@ var iter_last(var self);
 
 #define foreach(...) foreach_xp(foreach_in, (__VA_ARGS__))
 #define foreach_xp(X, A) X A
-#define foreach_in(X, S) for( var \
+#define foreach_in(X, S) for(var \
   __##X = (S), \
   __Iter##X = instance(__##X, Iter), \
   X = ((struct Iter*)(__Iter##X))->iter_init(__##X); \
@@ -637,16 +637,16 @@ char* c_str(var self);
 int64_t c_int(var self);
 double c_float(var self);
 
-#define range(...) construct_with( \
-  $(Range, NULL, 0, 0, 0), tuple($I(0), ##__VA_ARGS__))
-
-#define slice(I, ...) construct_with( \
-  $(Slice, NULL, NULL), tuple(I, $(Range, $I(0), 0, 0, 0), ##__VA_ARGS__))
-
-#define zip(...) construct_with( \
-  $(Zip, tuple(__VA_ARGS__), tuple(__VA_ARGS__)), tuple(__VA_ARGS__))
-
-#define enumerate(I) zip(range(len(I)), I)
+#define range(...) range_xp(range_in, ($I(0), ##__VA_ARGS__))
+#define range_xp(X, A) X A
+#define range_in(...) construct_with( \
+  $(Range, NULL, 0, 0, 0), tuple(__VA_ARGS__))
+  
+#define slice(I, ...) \
+  slice_xp(slice_in, (I, $(Range, $I(0), 0, 0, 0), ##__VA_ARGS__))
+#define slice_xp(X, A) X A
+#define slice_in(...) construct_with( \
+  $(Slice, NULL, NULL), tuple(__VA_ARGS__))
 
 var sopen(var self, var resource, var options);
 void sclose(var self);

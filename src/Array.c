@@ -234,7 +234,7 @@ static void Array_Concat(var self, var obj) {
 static int Array_Cmp(var self, var obj) {
   struct Array* a = self;
   
-  int c = a->nitems - len(obj);
+  int c = (int)a->nitems - (int)len(obj);
   if (c isnt 0) { return c; }
   
   for (size_t i = 0; i < a->nitems; i++) {

@@ -157,7 +157,7 @@ static int64_t Thread_C_Int(var self) {
 }
 
 static int Thread_Cmp(var self, var obj) {
-  return Thread_C_Int(self) - c_int(obj);
+  return (int)(Thread_C_Int(self) - c_int(obj));
 }
 
 static uint64_t Thread_Hash(var self) {

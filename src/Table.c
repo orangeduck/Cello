@@ -270,7 +270,7 @@ static var Table_Get(var self, var key);
 static int Table_Cmp(var self, var obj) {
   struct Table* t = self;
   
-  int c = t->nitems - len(obj);
+  int c = (int)t->nitems - (int)len(obj);
   if (c isnt 0) { return c; }
   
   var curr = Table_Iter_Init(self);

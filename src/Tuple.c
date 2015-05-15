@@ -389,6 +389,7 @@ static void Tuple_Clear(var self) {
 static void Tuple_Mark(var self, var gc, void(*f)(var,void*)) {
   struct Tuple* t = self;
   size_t i = 0;
+  if (t->items is NULL) { return; }
   while (t->items[i] isnt NULL) {
     f(gc, t->items[i]); i++;
   }
@@ -444,7 +445,7 @@ static int Tuple_Cmp(var self, var obj) {
   struct Tuple* t = self;
   
   size_t n = Tuple_Len(self);
-  int c = n - len(obj);
+  int c = (int)n - (int)len(obj);
   if (c isnt 0) { return c; }
   
   for (size_t i = 0; i < n; i++) {

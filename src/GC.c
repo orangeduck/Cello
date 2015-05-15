@@ -48,10 +48,11 @@ var Mark = Cello(Mark, Instance(Doc,
   Mark_Definition, NULL,       Mark_Methods));
   
 void mark(var self, var gc, void(*f)(var,void*)) {
+  if (self is NULL) { return; }
   struct Mark* m = instance(self, Mark);
   if (m and m->mark) { m->mark(self, gc, f); }
 }
-  
+
 #ifndef CELLO_NGC
   
 #define GC_TLS_KEY "__GC"

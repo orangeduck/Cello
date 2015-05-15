@@ -1,7 +1,7 @@
 CC ?= gcc
 AR ?= ar
 
-VERSION = 2.0.0
+VERSION = 2.0.1
 PACKAGE = libCello-$(VERSION)
 
 BINDIR = ${PREFIX}/bin
@@ -32,7 +32,9 @@ ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	LIBS = -lDbgHelp
 	
 	INSTALL_LIB = cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
-	INSTALL_INC = cp -r include/* $(INCDIR)
+	INSTALL_INC = cp -r include/Cello.h $(INCDIR)
+	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
+	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
 else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
 	PREFIX ?= /usr/local
 
@@ -44,7 +46,9 @@ else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
 	LFLAGS += -rdynamic
 
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
-	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/* ${INCDIR}
+	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h ${INCDIR}
+	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
+	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
 else
 	PREFIX ?= /usr/local
 
@@ -53,18 +57,12 @@ else
 	LIBS = -lpthread -ldl -lm
 
 	CFLAGS += -fPIC
-  LFLAGS += -rdynamic
+	LFLAGS += -rdynamic
 
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
-	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/* ${INCDIR}
-endif
-
-ifeq ($(findstring clang,$(COMPILER)),clang)
-	CFLAGS += -fblocks
-
-	ifneq ($(findstring Darwin,$(PLATFORM)),Darwin)
-		LIBS += -lBlocksRuntime
-	endif
+	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h ${INCDIR}
+	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
+	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
 endif
 
 # Libraries
@@ -95,7 +93,7 @@ obj/%.o: tests/%.c | obj
 
 # Benchmarks
 
-# Force bench to build with NDEBUG
+# TODO: Force bench to build with CELLO_NDEBUG
 bench:
 	cd benchmarks; ./benchmark; cd ../
 
@@ -127,3 +125,9 @@ install: all
 	$(INSTALL_LIB)
 	$(INSTALL_INC)
 	
+# Uninstall
+
+uninstall:
+	$(UNINSTALL_LIB)
+	$(UNINSTALL_INC)
+

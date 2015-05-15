@@ -240,7 +240,7 @@ static var Map_Get(var self, var key);
 static int Map_Cmp(var self, var obj) {
   struct Map* m = self;
   
-  int c = m->nitems - len(obj);
+  int c = (int)m->nitems - (int)len(obj);
   if (c isnt 0) { return c; }
   
   var curr = Map_Iter_Init(self);

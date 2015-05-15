@@ -173,7 +173,7 @@ static int64_t Int_C_Int(var self) {
 }
 
 static int Int_Cmp(var self, var obj) {
-  return Int_C_Int(self) - c_int(obj);
+  return (int)(Int_C_Int(self) - c_int(obj));
 }
 
 static uint64_t Int_Hash(var self) {

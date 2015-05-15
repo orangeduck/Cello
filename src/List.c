@@ -203,7 +203,7 @@ static void List_Concat(var self, var obj) {
 static int List_Cmp(var self, var obj) {
   struct List* l = self;
   
-  int c = l->nitems - len(obj);
+  int c = (int)l->nitems - (int)len(obj);
   if (c isnt 0) { return c; }
   
   var item = l->head;
