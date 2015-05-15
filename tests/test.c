@@ -2211,6 +2211,10 @@ PT_FUNC(test_thread_start) {
   
 }
 
+#if defined(CELLO_UNIX)
+#include <unistd.h>
+#endif
+
 void cello_sleep(int ms) {
 #if defined(CELLO_UNIX)
   usleep(ms * 1000);
