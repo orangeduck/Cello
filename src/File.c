@@ -167,7 +167,7 @@ static struct Example* File_Examples(void) {
     }, {
       "Automatic Closing",
       "with(f in new(File, $S(\"test.txt\"), $S(\"r\"))) {\n"
-      "  var k = new(String); reserve(k, $I(100));\n"
+      "  var k = new(String); resize(k, 100);\n"
       "  var v = new(Int, $I(0));\n"
       "  foreach (i in range($I(2))) {\n"
       "    scan_from(f, 0, \"%$ is %$ \", k, v);\n"
@@ -370,7 +370,7 @@ static struct Example* Process_Examples(void) {
       "while (not seof(x)) {\n"
       "  sread(x, &c, 1);\n"
       "  print(\"%c\", $I(c));\n"
-      "};\n"
+      "}\n"
       "sclose(x);\n"
     }, {NULL, NULL}
   };

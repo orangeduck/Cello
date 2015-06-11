@@ -175,13 +175,15 @@ extern var Int;
 extern var Float;
 extern var String;
 
-extern var Map;
+extern var Tree;
 extern var List;
 extern var Array;
 extern var Table;
 extern var Range;
 extern var Slice;
 extern var Zip;
+extern var Filter;
+extern var Map;
 extern var Terminal;
 extern var _;
 
@@ -274,6 +276,17 @@ struct Zip {
   var values;
 };
 
+struct Filter {
+  var iter;
+  var func;
+};
+
+struct Map {
+  var iter;
+  var curr;
+  var func;
+};
+
 struct File {
   FILE* file;
 };
@@ -296,7 +309,6 @@ extern var Alloc;
 extern var New;
 extern var Assign;
 extern var Copy;
-extern var Subtype;
 extern var Cmp;
 extern var Hash;
 extern var Len;
@@ -304,10 +316,8 @@ extern var Iter;
 extern var Push;
 extern var Concat;
 extern var Get;
-extern var Reverse;
 extern var Sort;
-extern var Clear;
-extern var Reserve;
+extern var Resize;
 extern var C_Str;
 extern var C_Int;
 extern var C_Float;
@@ -373,12 +383,6 @@ struct Copy {
   var (*copy)(var);
 };
 
-struct Subtype {
-  var (*subtype)(var);
-  var (*key_subtype)(var);
-  var (*val_subtype)(var);
-};
-
 struct Cmp {
   int (*cmp)(var, var);
 };
@@ -408,6 +412,8 @@ struct Get {
   void (*set)(var, var, var);
   bool (*mem)(var, var);
   void (*rem)(var, var);
+  var (*key_type)(var);
+  var (*val_type)(var);
 };
 
 struct Iter {
@@ -415,22 +421,15 @@ struct Iter {
   var (*iter_next)(var, var);
   var (*iter_last)(var);
   var (*iter_prev)(var, var);
-};
-
-struct Reverse {
-  void (*reverse)(var);
+  var (*iter_type)(var);  
 };
 
 struct Sort {
   void (*sort_by)(var,bool(*f)(var,var));
 };
 
-struct Clear {
-  void (*clear)(var);  
-};
-
-struct Reserve {
-  void (*reserve)(var, var);
+struct Resize {
+  void (*resize)(var, size_t);
 };
 
 struct C_Str {
@@ -549,8 +548,8 @@ void dealloc(var self);
 void dealloc_raw(var self);
 void dealloc_root(var self);
 
-#define $(T, ...) \
-  memcpy(alloc_stack(T), &((struct T){__VA_ARGS__}), sizeof(struct T))
+#define $(T, ...) ((struct T*)memcpy( \
+  alloc_stack(T), &((struct T){__VA_ARGS__}), sizeof(struct T)))
 
 #define $I(X) $(Int, X)
 #define $F(X) $(Float, X)
@@ -558,7 +557,7 @@ void dealloc_root(var self);
 #define $R(X) $(Ref, X)
 #define $B(X) $(Box, X)
 
-#define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, NULL))
+#define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, Terminal))
 #define tuple_xp(X, A) X A
 #define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
 
@@ -581,10 +580,6 @@ void del_root(var self);
 var assign(var self, var obj);
 var copy(var self);
 
-var subtype(var self);
-var key_subtype(var self);
-var val_subtype(var self);
-
 int cmp(var self, var obj);
 bool eq(var self, var obj);
 bool neq(var self, var obj);
@@ -600,6 +595,7 @@ var iter_init(var self);
 var iter_next(var self, var curr);
 var iter_prev(var self, var curr);
 var iter_last(var self);
+var iter_type(var self);
 
 #define foreach(...) foreach_xp(foreach_in, (__VA_ARGS__))
 #define foreach_xp(X, A) X A
@@ -607,7 +603,7 @@ var iter_last(var self);
   __##X = (S), \
   __Iter##X = instance(__##X, Iter), \
   X = ((struct Iter*)(__Iter##X))->iter_init(__##X); \
-  X isnt NULL; \
+  X isnt Terminal; \
   X = ((struct Iter*)(__Iter##X))->iter_next(__##X, X))
 
 void push(var self, var obj);
@@ -615,7 +611,6 @@ void pop(var self);
 void push_at(var self, var obj, var key);
 void pop_at(var self, var key);
 
-void reverse(var self);
 void sort(var self);
 void sort_by(var self, bool(*f)(var,var));
 
@@ -626,10 +621,10 @@ var  get(var self, var key);
 void set(var self, var key, var val);
 bool mem(var self, var key);
 void rem(var self, var key);
+var key_type(var self);
+var val_type(var self);
 
-void reserve(var self, var amount);
-void clear(var self);
-
+void resize(var self, size_t n);
 size_t len(var self);
 bool empty(var self);
 
@@ -637,16 +632,27 @@ char* c_str(var self);
 int64_t c_int(var self);
 double c_float(var self);
 
-#define range(...) range_xp(range_in, ($I(0), ##__VA_ARGS__))
-#define range_xp(X, A) X A
-#define range_in(...) construct_with( \
-  $(Range, NULL, 0, 0, 0), tuple(__VA_ARGS__))
-  
-#define slice(I, ...) \
-  slice_xp(slice_in, (I, $(Range, $I(0), 0, 0, 0), ##__VA_ARGS__))
+#define range(...) range_stack($(Range, $I(0), 0, 0, 0), tuple(__VA_ARGS__))
+
+#define slice(I, ...) slice_xp(slice_in, (I, ##__VA_ARGS__))
 #define slice_xp(X, A) X A
-#define slice_in(...) construct_with( \
-  $(Slice, NULL, NULL), tuple(__VA_ARGS__))
+#define slice_in(...) slice_stack( \
+  $(Slice, NULL, $(Range, $I(0), 0, 0, 0)), tuple(__VA_ARGS__))
+
+#define reverse(I) slice(I, _, _, $I(-1))
+#define filter(I, F) $(Filter, I, F)
+#define map(I, F) $(Map, I, NULL, F)
+
+#define zip(...) zip_stack( \
+  $(Zip, tuple(__VA_ARGS__), \
+  $(Tuple, (var[(sizeof((var[]){__VA_ARGS__})/sizeof(var))+1]){0})))
+
+#define enumerate(I) enumerate_stack(zip(range(), I))
+
+var range_stack(var self, var args);
+var slice_stack(var self, var args);
+var zip_stack(var self);
+var enumerate_stack(var self);
 
 var sopen(var self, var resource, var options);
 void sclose(var self);

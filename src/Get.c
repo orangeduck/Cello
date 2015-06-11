@@ -24,6 +24,8 @@ static const char* Get_Definition(void) {
     "  void (*set)(var, var, var);\n"
     "  bool (*mem)(var, var);\n"
     "  void (*rem)(var, var);\n"
+    "  var (*key_type)(var);\n"
+    "  var (*val_type)(var);\n"
     "};\n";
 }
 
@@ -79,6 +81,14 @@ static struct Method* Get_Methods(void) {
       "rem", 
       "void rem(var self, var key);",
       "Removes the `key` from object `self`."
+    }, {
+      "key_type", 
+      "var key_type(var self);",
+      "Returns the key type for the object `self`."
+    }, {
+      "val_type", 
+      "var val_type(var self);",
+      "Returns the value type for the object `self`."
     }, {NULL, NULL, NULL}
   };
   
@@ -106,3 +116,10 @@ void rem(var self, var key) {
   method(self, Get, rem, key);
 }
 
+var key_type(var self) {
+  return method(self, Get, key_type);
+}
+
+var val_type(var self) {
+  return method(self, Get, val_type);  
+}

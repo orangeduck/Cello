@@ -145,13 +145,13 @@ static var alloc_by(var type, int method) {
   switch (method) {
     case ALLOC_STANDARD:
 #ifndef CELLO_NGC
-  set(current(GC), self, $I(0));
+    set(current(GC), self, $I(0));
 #endif
     break;
     case ALLOC_RAW: break;
     case ALLOC_ROOT:
 #ifndef CELLO_NGC
-  set(current(GC), self, $I(1));
+    set(current(GC), self, $I(1));
 #endif
     break;
   }
@@ -163,17 +163,7 @@ var alloc(var type)      { return alloc_by(type, ALLOC_STANDARD); }
 var alloc_raw(var type)  { return alloc_by(type, ALLOC_RAW); }
 var alloc_root(var type) { return alloc_by(type, ALLOC_ROOT); }
 
-static void dealloc_by(var self, int method) {
-
-  switch (method) {
-    case ALLOC_STANDARD:
-    case ALLOC_ROOT:
-#ifndef CELLO_NGC
-  rem(current(GC), self);
-#endif
-    break;
-    case ALLOC_RAW: break;
-  }
+void dealloc(var self) {
 
   struct Alloc* a = instance(self, Alloc);
   if (a and a->dealloc) {
@@ -206,25 +196,18 @@ static void dealloc_by(var self, int method) {
 #endif
   
 #if CELLO_ALLOC_CHECK == 1
-  /*
-  ** Some objects throw exceptions when you try to get their size.
-  ** For this reason this section must be wrapped in a try block
-  */
-  try {
-    size_t s = size(type_of(self));
-    for (size_t i = 0; i < (sizeof(struct Header) + s) / sizeof(var); i++) {
-      ((var*)header(self))[i] = (var)0xDeadCe110;
-    }
-  } catch (e) {}
+  size_t s = size(type_of(self));
+  for (size_t i = 0; i < (sizeof(struct Header) + s) / sizeof(var); i++) {
+    ((var*)header(self))[i] = (var)0xDeadCe110;
+  }
 #endif
   
   free(((char*)self) - sizeof(struct Header));
   
 }
 
-void dealloc(var self)      { dealloc_by(self, ALLOC_STANDARD); }
-void dealloc_raw(var self)  { dealloc_by(self, ALLOC_RAW); }
-void dealloc_root(var self) { dealloc_by(self, ALLOC_ROOT); }
+void dealloc_raw(var self)  { dealloc(self); }
+void dealloc_root(var self) { dealloc(self); }
 
 static const char* New_Name(void) {
   return "New";
@@ -349,7 +332,7 @@ var destruct(var self) {
   return self;
 }
 
-var new_with(var type, var args) { 
+var new_with(var type, var args) {
   return construct_with(alloc(type), args);
 }
 
@@ -361,17 +344,26 @@ var new_root_with(var type, var args) {
   return construct_with(alloc_root(type), args);
 }
 
-void del(var self) {
+static void del_by(var self, int method) {
+  
+  switch (method) {
+    case ALLOC_STANDARD:
+    case ALLOC_ROOT:
+#ifndef CELLO_NGC
+    rem(current(GC), self);
+    return;
+#endif
+    break;
+    case ALLOC_RAW: break;
+  }
+  
   dealloc(destruct(self));
+  
 }
 
-void del_raw(var self) {
-  dealloc_raw(destruct(self));
-}
-
-void del_root(var self) {
-  dealloc_root(destruct(self));
-}
+void del(var self) { return del_by(self, ALLOC_STANDARD); }
+void del_raw(var self) { return del_by(self, ALLOC_RAW); }
+void del_root(var self) { return del_by(self, ALLOC_ROOT); }
 
 static const char* Copy_Name(void) {
   return "Copy";

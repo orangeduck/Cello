@@ -241,11 +241,6 @@ static var Type_Copy(var self) {
   return throw(ValueError, "Type objects cannot be copied.");
 }
 
-static size_t Type_Size(void) {
-  throw(ValueError, "Type objects have no size");
-  return 0;
-}
-
 static int print_indent(var out, int pos, const char* str) {
   pos = print_to(out, pos, "    ");
   while (*str) {
@@ -313,7 +308,6 @@ var Type = CelloEmpty(Type,
     Type_Name, Type_Brief, Type_Description, NULL, Type_Examples, Type_Methods),
   Instance(Assign,   Type_Assign),
   Instance(Copy,     Type_Copy),
-  Instance(Size,     Type_Size),
   Instance(Alloc,    Type_Alloc, NULL),
   Instance(New,      Type_New, NULL),
   Instance(Cmp,      Type_Cmp),

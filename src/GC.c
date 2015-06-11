@@ -121,6 +121,8 @@ struct GC {
   uintptr_t minptr;
   var bottom;
   bool running;
+  uintptr_t freenum;
+  var* freelist;
 };
 
 static uint64_t GC_Probe(struct GC* gc, uint64_t i, uint64_t h) {
@@ -234,6 +236,10 @@ static void GC_Rem_Ptr(struct GC* gc, var ptr) {
   
   if (gc->nslots is 0) { return; }
   
+  for (size_t i = 0; i < gc->freenum; i++) {
+    if (gc->freelist[i] is ptr) { gc->freelist[i] = NULL; }
+  }
+  
   uint64_t i = GC_Hash(ptr) % gc->nslots;
   uint64_t j = 0;
   
@@ -241,25 +247,27 @@ static void GC_Rem_Ptr(struct GC* gc, var ptr) {
     
     uint64_t h = gc->entries[i].hash;
     if (h is 0 or j > GC_Probe(gc, i, h)) { return; }
-    if (gc->entries[i].ptr == ptr) {
+    if (gc->entries[i].ptr is ptr) {
       
+      var freeitem = gc->entries[i].ptr;
       memset(&gc->entries[i], 0, sizeof(struct GCEntry));
       
-      while (true) {
-        
-        uint64_t ni = (i+1) % gc->nslots;
-        uint64_t nh = gc->entries[ni].hash;
-        if (nh isnt 0 and GC_Probe(gc, ni, nh) > 0) {
-          memcpy(&gc->entries[i], &gc->entries[ni], sizeof(struct GCEntry));
-          memset(&gc->entries[ni], 0, sizeof(struct GCEntry));
-          i = ni;
+      j = i;
+      while (true) { 
+        uint64_t nj = (j+1) % gc->nslots;
+        uint64_t nh = gc->entries[nj].hash;
+        if (nh isnt 0 and GC_Probe(gc, nj, nh) > 0) {
+          memcpy(&gc->entries[j], &gc->entries[nj], sizeof(struct GCEntry));
+          memset(&gc->entries[nj], 0, sizeof(struct GCEntry));
+          j = nj;
         } else {
           break;
-        }
-        
+        }  
       }
       
       gc->nitems--;
+      
+      dealloc(destruct(freeitem));
       return;
     }
     
@@ -278,20 +286,16 @@ static void GC_Recurse(struct GC* gc, var ptr) {
   or  type is String or  type is Type
   or  type is File   or  type is Process
   or  type is Function) { return; }
-  
+    
   struct Mark* m = type_instance(type, Mark);
   if (m and m->mark) {
     m->mark(ptr, gc, (void(*)(var,void*))GC_Mark_Item);
     return;
   }
-  
-  struct Size* s = type_instance(type, Size);
-  if (s and s->size) {
-    for (size_t i = 0; i < s->size(); i += sizeof(var)) {
-      var p = ((char*)ptr) + i;
-      GC_Mark_Item(gc, *((var*)p));
-    }
-    return;
+    
+  for (size_t i = 0; i < size(type); i += sizeof(var)) {
+    var p = ((char*)ptr) + i;
+    GC_Mark_Item(gc, *((var*)p));
   }
   
 }
@@ -398,7 +402,7 @@ static int GC_Show(var self, var out, int pos) {
       continue;
     }
     pos += print_to(out, pos, "| %i : %p %i %i\n", 
-      $I(i), $R(gc->entries[i].ptr), 
+      $I(i), gc->entries[i].ptr, 
       $I(gc->entries[i].root),
       $I(gc->entries[i].marked));
   }
@@ -410,8 +414,8 @@ static int GC_Show(var self, var out, int pos) {
 
 void GC_Sweep(struct GC* gc) {
    
-  var* freelist = malloc(sizeof(var) * gc->nitems);
-  size_t freenum = 0;
+  gc->freelist = realloc(gc->freelist, sizeof(var) * gc->nitems);
+  gc->freenum = 0;
   
   size_t i = 0;
   while (i < gc->nslots) {
@@ -421,8 +425,8 @@ void GC_Sweep(struct GC* gc) {
     
     if (not gc->entries[i].root and not gc->entries[i].marked) {
       
-      freelist[freenum] = gc->entries[i].ptr;
-      freenum++;
+      gc->freelist[gc->freenum] = gc->entries[i].ptr;
+      gc->freenum++;
       memset(&gc->entries[i], 0, sizeof(struct GCEntry));
       
       uint64_t j = i;
@@ -456,11 +460,15 @@ void GC_Sweep(struct GC* gc) {
   GC_Resize_Less(gc);
   gc->mitems = gc->nitems + gc->nitems / 2 + 1;
   
-  for (size_t i = 0; i < freenum; i++) {
-    dealloc(destruct(freelist[i]));
+  for (size_t i = 0; i < gc->freenum; i++) {
+    if (gc->freelist[i]) {
+      dealloc(destruct(gc->freelist[i]));
+    }
   }
   
-  free(freelist);
+  free(gc->freelist);
+  gc->freelist = NULL;
+  gc->freenum = 0;
   
 }
 
@@ -475,6 +483,8 @@ static void GC_New(var self, var args) {
   gc->maxptr = 0;
   gc->minptr = UINTPTR_MAX;
   gc->running = true;
+  gc->freelist = NULL;
+  gc->freenum = 0;
   set(current(Thread), $S(GC_TLS_KEY), gc);
 }
 
@@ -482,6 +492,7 @@ static void GC_Del(var self) {
   struct GC* gc = self;
   GC_Sweep(gc);
   free(gc->entries);
+  free(gc->freelist);
 }
 
 static void GC_Set(var self, var key, var val) {

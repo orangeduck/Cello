@@ -59,7 +59,7 @@ static struct Example* List_Examples(void) {
       "show($I(len(x)));        /* 3 */\n"
       "show($I(empty(x)));      /* 0 */\n"
       "\n"
-      "clear(x);\n"
+      "resize(x, 0);\n"
       "\n"
       "show($I(empty(x)));      /* 1 */\n",
     }, {
@@ -155,11 +155,6 @@ static void List_New(var self, var args) {
   
 }
 
-static var List_Subtype(var self) {
-  struct List* l = self;
-  return l->type;
-}
-
 static void List_Clear(var self) {
   struct List* l = self;
   var item = l->head;
@@ -184,11 +179,11 @@ static void List_Assign(var self, var obj) {
   
   List_Clear(self);
   
-  l->type = subtype(obj);
+  l->type = implements_method(obj, Iter, iter_type) ? iter_type(obj) : Ref;
   l->tsize = size(l->type);
   
   size_t nargs = len(obj);
-  for(size_t i = 0; i < nargs; i++) {
+  for (size_t i = 0; i < nargs; i++) {
     List_Push(self, get(obj, $I(i)));
   }
   
@@ -355,32 +350,31 @@ static void List_Set(var self, var key, var val) {
 
 static var List_Iter_Init(var self) {
   struct List* l = self;
-  if (l->nitems is 0) { return NULL; }
+  if (l->nitems is 0) { return Terminal; }
   return l->head;
 }
 
 static var List_Iter_Next(var self, var curr) {
   struct List* l = self;
-  return *List_Next(l, curr);
+  curr = *List_Next(l, curr);
+  return curr ? curr : Terminal;
 }
 
-static void List_Reverse(var self) {
+static var List_Iter_Last(var self) {
   struct List* l = self;
-  
-  var temp = NULL;
-  var curr = l->head;
-  
-  while (curr) {
-    temp = *List_Prev(l, curr);
-    *List_Prev(l, curr) = *List_Next(l, curr);
-    *List_Next(l, curr) = temp;
-    curr = *List_Prev(l, curr); 
-  }
-  
-  if (temp) {
-    l->head = *List_Prev(l, temp);
-  }
-  
+  if (l->nitems is 0) { return Terminal; }
+  return l->tail;
+}
+
+static var List_Iter_Prev(var self, var curr) {
+  struct List* l = self;
+  curr = *List_Prev(l, curr);
+  return curr ? curr : Terminal;
+}
+
+static var List_Iter_Type(var self) {
+  struct List* l = self;
+  return l->type;
 }
 
 static int List_Show(var self, var output, int pos) {
@@ -395,18 +389,23 @@ static int List_Show(var self, var output, int pos) {
   return print_to(output, pos, "]>");
 }
 
-static void List_Reserve(var self, var amount) {
+static void List_Resize(var self, size_t n) {
   struct List* l = self;
-  int64_t nslots = c_int(amount);
-  
-#if CELLO_BOUND_CHECK == 1
-  if (nslots < (int64_t)l->nitems) {
-    throw(IndexOutOfBoundsError, 
-      "List already has %li items, cannot reserve %li", $I(l->nitems), amount);
+
+  if (n is 0) {
+    List_Clear(self);
+    return;
   }
-#endif
   
-  while (nslots - l->nitems) {
+  while (n < l->nitems) {
+    var item = l->tail;
+    List_Unlink(l, item);
+    destruct(item);
+    List_Free(l, item);
+    l->nitems--;
+  }
+  
+  while (n > l->nitems) {
     var item = List_Alloc(l);
     List_Link(l, item, l->tail, NULL);
     l->nitems++;
@@ -428,20 +427,19 @@ var List = Cello(List,
     List_Name, List_Brief,    List_Description, 
     NULL,      List_Examples, NULL),
   Instance(New,     List_New, List_Del),
-  Instance(Subtype, List_Subtype, NULL, NULL),
   Instance(Assign,  List_Assign),
   Instance(Mark,    List_Mark),
   Instance(Cmp,     List_Cmp),
   Instance(Hash,    List_Hash),
-  Instance(Clear,   List_Clear),
   Instance(Push,
     List_Push,      List_Pop,
     List_Push_At,   List_Pop_At),
   Instance(Concat,  List_Concat, List_Push),
   Instance(Len,     List_Len),
   Instance(Get,     List_Get, List_Set, List_Mem, List_Rem),
-  Instance(Iter,    List_Iter_Init, List_Iter_Next),
-  Instance(Reverse, List_Reverse),
+  Instance(Iter,
+    List_Iter_Init, List_Iter_Next,
+    List_Iter_Last, List_Iter_Prev, List_Iter_Type),
   Instance(Show,    List_Show, NULL),
-  Instance(Reserve, List_Reserve));
+  Instance(Resize,  List_Resize));
   

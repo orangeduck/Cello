@@ -109,6 +109,59 @@ static const char* Thread_Description(void) {
     "using WinThreads on Windows and pthreads otherwise.";
 }
 
+static struct Example* Thread_Examples(void) {
+  
+  static struct Example examples[] = {
+    {
+      "Usage",
+      "var set_value(var args) {\n"
+      "  assign(get(args, $I(0)), $I(1));\n"
+      "  return NULL;\n"
+      "}\n"
+      "\n"
+      "var i = $I(0);\n"
+      "\n"
+      "var x = new(Thread, $(Function, set_value));\n"
+      "call(x, i);\n"
+      "wait(x);\n"
+      "\n"
+      "show(i); /* 1 */\n"
+    }, {
+      "Exclusive Resource",
+      "var increment(var args) {\n"
+      "  var mut = get(args, $I(0));\n"
+      "  var tot = get(args, $I(1));\n"
+      "  lock(mut);\n"
+      "  assign(tot, $I(c_int(tot)+1));\n"
+      "  unlock(mut);\n"
+      "  return NULL;\n"
+      "}\n"
+      "\n"
+      "var mutex = new(Mutex);\n"
+      "var total = $I(0);\n"
+      "\n"
+      "var threads = new(Array, Box,\n"
+      "  new(Thread, $(Function, increment)),\n"
+      "  new(Thread, $(Function, increment)),\n"
+      "  new(Thread, $(Function, increment)));\n"
+      "\n"
+      "show(total); /* 0 */\n"
+      "\n"
+      "foreach (t in threads) {\n"
+      "  call(deref(t), mutex, total);\n"
+      "}\n"
+      "\n"
+      "foreach (t in threads) {\n"
+      "  wait(deref(t));\n"
+      "}\n"
+      "\n"
+      "show(total); /* 3 */\n"
+    }, {NULL, NULL}
+  };
+  
+  return examples;
+}
+
 static void Thread_New(var self, var args) {
   
   struct Thread* t = self;
@@ -183,7 +236,7 @@ static var Thread_Init_Run(var self) {
   pthread_setspecific(Thread_Key_Wrapper, t);
   t->is_running = true;
   
-#if CELLO_GC == 1
+#ifndef CELLO_NGC
   var bottom = NULL;
   var gc = new_raw(GC, $R(&bottom));
 #endif
@@ -192,7 +245,7 @@ static var Thread_Init_Run(var self) {
   del_raw(t->args);
   t->args = NULL;
   
-#if CELLO_GC == 1
+#ifndef CELLO_NGC
   del_raw(gc);
 #endif
   
@@ -216,7 +269,7 @@ static DWORD Thread_Init_Run(var self) {
   TlsSetValue(Thread_Key_Wrapper, t);
   t->is_running = true;
   
-#if CELLO_GC == 1
+#ifndef CELLO_NGC
   var bottom = NULL;
   var gc = new_raw(GC, $R(&bottom));
 #endif
@@ -225,7 +278,7 @@ static DWORD Thread_Init_Run(var self) {
   del_raw(t->args);
   t->args = NULL;
   
-#if CELLO_GC == 1
+#ifndef CELLO_NGC
   del_raw(gc);
 #endif
   
@@ -389,6 +442,16 @@ static void Thread_Rem(var self, var key) {
   rem(t->tls, key);
 }
 
+static var Thread_Key_Type(var self) {
+  struct Thread* t = self;
+  return key_type(t->tls);
+}
+
+static var Thread_Val_Type(var self) {
+  struct Thread* t = self;
+  return val_type(t->tls);
+}
+
 static void Thread_Mark(var self, var gc, void(*f)(var,void*)) {
   struct Thread* t = self;
   mark(t->tls, gc, f);
@@ -397,7 +460,7 @@ static void Thread_Mark(var self, var gc, void(*f)(var,void*)) {
 var Thread = Cello(Thread,
   Instance(Doc,
     Thread_Name, Thread_Brief, Thread_Description, 
-    NULL, NULL, NULL),
+    NULL, Thread_Examples, NULL),
   Instance(New,     Thread_New, Thread_Del),
   Instance(Cmp,     Thread_Cmp),
   Instance(Hash,    Thread_Hash),

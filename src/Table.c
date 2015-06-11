@@ -52,7 +52,7 @@ static struct Example* Table_Examples(void) {
       "show($I(mem(t, $S(\"Hello\")))); /* 0 */\n"
       "show($I(mem(t, $S(\"There\")))); /* 1 */\n"
       "\n"
-      "clear(t);\n"
+      "resize(t, 0);\n"
       "\n"
       "show($I(len(t))); /* 0 */\n"
       "show($I(mem(t, $S(\"Hello\")))); /* 0 */\n"
@@ -198,12 +198,12 @@ static void Table_Del(var self) {
   
 }
 
-static var Table_Key_Subtype(var self) {
+static var Table_Key_Type(var self) {
   struct Table* t = self;  
   return t->ktype;
 }
 
-static var Table_Val_Subtype(var self) {
+static var Table_Val_Type(var self) {
   struct Table* t = self;  
   return t->vtype;
 }
@@ -230,8 +230,8 @@ static void Table_Assign(var self, var obj) {
   struct Table* t = self;  
   Table_Clear(t);
   
-  t->ktype = key_subtype(obj);
-  t->vtype = val_subtype(obj);
+  t->ktype = implements_method(obj, Get, key_type) ? key_type(obj) : Ref;
+  t->vtype = implements_method(obj, Get, val_type) ? val_type(obj) : Ref;
   t->ksize = Table_Size_Round(size(t->ktype));
   t->vsize = Table_Size_Round(size(t->vtype));
   t->nitems = 0;
@@ -295,7 +295,7 @@ static uint64_t Table_Hash(var self) {
   uint64_t h = 0;
   
   var curr = Table_Iter_Init(self);
-  while (curr isnt NULL) {
+  while (curr isnt Terminal) {
     var vurr = (char*)curr + t->ksize + sizeof(struct Header);
     h = h ^ hash(curr) ^ hash(vurr);
     curr = Table_Iter_Next(self, curr);
@@ -518,6 +518,11 @@ static void Table_Rem(var self, var key) {
 
 static var Table_Get(var self, var key) {
   struct Table* t = self;
+  
+  if (key >= t->data and key < t->data + t->nslots * Table_Step(self)) {
+    return Table_Val(self, (key - t->data) / Table_Step(self));
+  }
+  
   key = cast(key, t->ktype);
   
   if (t->nslots is 0) {
@@ -551,7 +556,7 @@ static void Table_Set(var self, var key, var val) {
 
 static var Table_Iter_Init(var self) {
   struct Table* t = self;
-  if (t->nitems is 0) { return NULL; }
+  if (t->nitems is 0) { return Terminal; }
   
   for (size_t i = 0; i < t->nslots; i++) {
     if (Table_Key_Hash(t, i) isnt 0) {
@@ -559,7 +564,7 @@ static var Table_Iter_Init(var self) {
     }
   }
   
-  return NULL;
+  return Terminal;
 }
 
 static var Table_Iter_Next(var self, var curr) {
@@ -569,14 +574,51 @@ static var Table_Iter_Next(var self, var curr) {
   
   while (true) {
 
-    if (curr > Table_Key(t, t->nslots-1)) { return NULL;}
+    if (curr > Table_Key(t, t->nslots-1)) { return Terminal;}
     uint64_t h = *(uint64_t*)((char*)curr - 
       sizeof(struct Header) - sizeof(uint64_t));
     if (h isnt 0) { return curr; }
     curr = (char*)curr + Table_Step(t);
   }
   
-  return NULL;
+  return Terminal;
+}
+
+static var Table_Iter_Last(var self) {
+  
+  struct Table* t = self;
+  if (t->nitems is 0) { return Terminal; }
+  
+  for (size_t i = t->nslots-1; i >= 0; i--) {
+    if (Table_Key_Hash(t, i) isnt 0) {
+      return Table_Key(t, i);
+    }
+  }
+  
+  return Terminal;
+  
+}
+
+static var Table_Iter_Prev(var self, var curr) {
+  struct Table* t = self;
+  
+  curr = (char*)curr - Table_Step(t);
+  
+  while (true) {
+
+    if (curr < Table_Key(t, 0)) { return Terminal; }
+    uint64_t h = *(uint64_t*)((char*)curr - 
+      sizeof(struct Header) - sizeof(uint64_t));
+    if (h isnt 0) { return curr; }
+    curr = (char*)curr - Table_Step(t);
+  }
+  
+  return Terminal;
+}
+
+static var Table_Iter_Type(var self) {
+  struct Table* t = self;  
+  return t->ktype;
 }
 
 static int Table_Show(var self, var output, int pos) {
@@ -597,18 +639,23 @@ static int Table_Show(var self, var output, int pos) {
   return print_to(output, pos, "}>");
 }
 
-static void Table_Reserve(var self, var amount) {
+static void Table_Resize(var self, size_t n) {
   struct Table* t = self;
-  int64_t nnslots = c_int(amount);
+  
+  if (n is 0) {
+    Table_Clear(t);
+    return;
+  }
   
 #if CELLO_BOUND_CHECK == 1
-  if (nnslots < (int64_t)t->nitems) {
-    throw(IndexOutOfBoundsError, 
-      "Table already has %li items, cannot reserve %li", $I(t->nitems), amount);
+  if (n < (int64_t)t->nitems) {
+    throw(FormatError, 
+      "Cannot resize Table to make it smaller than %li items", 
+      $I(t->nitems));
   }
 #endif
   
-  Table_Rehash(t, Table_Ideal_Size((size_t)nnslots));
+  Table_Rehash(t, Table_Ideal_Size(n));
 }
 
 static void Table_Mark(var self, var gc, void(*f)(var,void*)) {
@@ -626,15 +673,17 @@ var Table = Cello(Table,
     Table_Name, Table_Brief,    Table_Description,
     NULL,       Table_Examples, NULL),
   Instance(New,      Table_New, Table_Del),
-  Instance(Subtype,  Table_Key_Subtype, Table_Key_Subtype, Table_Val_Subtype),
   Instance(Assign,   Table_Assign),
   Instance(Mark,     Table_Mark),
   Instance(Cmp,      Table_Cmp),
   Instance(Hash,     Table_Hash),
   Instance(Len,      Table_Len),
-  Instance(Get,      Table_Get, Table_Set, Table_Mem, Table_Rem),
-  Instance(Clear,    Table_Clear),
-  Instance(Iter,     Table_Iter_Init, Table_Iter_Next),
+  Instance(Get,
+    Table_Get, Table_Set, Table_Mem, Table_Rem, 
+    Table_Key_Type, Table_Val_Type),
+  Instance(Iter, 
+    Table_Iter_Init, Table_Iter_Next, 
+    Table_Iter_Last, Table_Iter_Prev, Table_Iter_Type),
   Instance(Show,     Table_Show, NULL),
-  Instance(Reserve,  Table_Reserve));
+  Instance(Resize,   Table_Resize));
 

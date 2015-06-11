@@ -60,7 +60,7 @@ static struct Example* Array_Examples(void) {
       "show($I(len(x)));        /* 3 */\n"
       "show($I(empty(x)));      /* 0 */\n"
       "\n"
-      "clear(x);\n"
+      "resize(x, 0);\n"
       "\n"
       "show($I(empty(x)));      /* 1 */\n",
     }, {
@@ -135,11 +135,6 @@ static void Array_New(var self, var args) {
   
 }
 
-static var Array_Subtype(var self) {
-  struct Array* a = self;
-  return a->type;
-}
-
 static void Array_Del(var self) {
   
   struct Array* a = self;
@@ -172,7 +167,7 @@ static void Array_Assign(var self, var obj) {
 
   Array_Clear(self);
   
-  a->type = subtype(obj);
+  a->type = implements_method(obj, Iter, iter_type) ? iter_type(obj) : Ref;
   a->tsize = Array_Size_Round(size(a->type));
   a->nitems = len(obj);
   a->nslots = a->nitems;
@@ -398,17 +393,37 @@ static void Array_Set(var self, var key, var val) {
 
 static var Array_Iter_Init(var self) {
   struct Array* a = self;
-  if (a->nitems is 0) { return NULL; }
+  if (a->nitems is 0) { return Terminal; }
   return Array_Item(a, 0);
 }
 
 static var Array_Iter_Next(var self, var curr) {
   struct Array* a = self;
   if (curr >= Array_Item(a, a->nitems-1)) {
-    return NULL;
+    return Terminal;
   } else {
     return (char*)curr + Array_Step(a);
   }
+}
+
+static var Array_Iter_Last(var self) {
+  struct Array* a = self;
+  if (a->nitems is 0) { return Terminal; }
+  return Array_Item(a, a->nitems-1);
+}
+
+static var Array_Iter_Prev(var self, var curr) {
+  struct Array* a = self;
+  if (curr < Array_Item(a, 0)) {
+    return Terminal;
+  } else {
+    return (char*)curr - Array_Step(a);
+  }
+}
+
+static var Array_Iter_Type(var self) {
+  struct Array* a = self;
+  return a->type;
 }
 
 static void Array_Swap(struct Array* a, size_t i, size_t j) {
@@ -417,13 +432,6 @@ static void Array_Swap(struct Array* a, size_t i, size_t j) {
   memcpy((char*)a->data + i * Array_Step(a),
          (char*)a->data + j * Array_Step(a), Array_Step(a));
   memcpy((char*)a->data + j * Array_Step(a), (char*)a->sspace0, Array_Step(a));
-}
-
-static void Array_Reverse(var self) {
-  struct Array* a = self;
-  for(size_t i = 0; i < a->nitems / 2; i++) {
-    Array_Swap(a, i, a->nitems-1-i);
-  }
 }
 
 static size_t Array_Sort_Partition(
@@ -462,25 +470,27 @@ static void Array_Sort_By(var self, bool(*f)(var,var)) {
 static int Array_Show(var self, var output, int pos) {
   struct Array* a = self;
   pos = print_to(output, pos, "<'Array' At 0x%p [", self);
-  for(size_t i = 0; i < a->nitems; i++) {
+  for (size_t i = 0; i < a->nitems; i++) {
     pos = print_to(output, pos, "%$", Array_Item(a, i));
     if (i < a->nitems-1) { pos = print_to(output, pos, ", "); }
   }
   return print_to(output, pos, "]>");
 }
 
-static void Array_Reserve(var self, var amount) {
+static void Array_Resize(var self, size_t n) {
   struct Array* a = self;
-  int64_t nnslots = c_int(amount);
   
-#if CELLO_BOUND_CHECK == 1
-  if (nnslots < (int64_t)a->nitems) {
-    throw(IndexOutOfBoundsError, 
-      "Array already has %li items, cannot reserve %li", $I(a->nitems), amount);
+  if (n is 0) {
+    Array_Clear(self);
+    return;
   }
-#endif
   
-  a->nslots = nnslots;
+  while (n < a->nitems) {
+    destruct(Array_Item(a, a->nitems-1));
+    a->nitems--;
+  }
+  
+  a->nslots = n;
   a->data = realloc(a->data, Array_Step(a) * a->nslots);
 
 #if CELLO_MEMORY_CHECK == 1
@@ -503,22 +513,21 @@ var Array = Cello(Array,
     Array_Name, Array_Brief,    Array_Description, 
     NULL,       Array_Examples, NULL),
   Instance(New,     Array_New, Array_Del),
-  Instance(Subtype, Array_Subtype, NULL, NULL),
   Instance(Assign,  Array_Assign),
   Instance(Mark,    Array_Mark),
   Instance(Cmp,     Array_Cmp),
   Instance(Hash,    Array_Hash),
-  Instance(Clear,   Array_Clear),
   Instance(Push,
     Array_Push,     Array_Pop,
     Array_Push_At,  Array_Pop_At),
   Instance(Concat,  Array_Concat, Array_Push),
   Instance(Len,     Array_Len),
   Instance(Get,     Array_Get, Array_Set, Array_Mem, Array_Rem),
-  Instance(Iter,    Array_Iter_Init, Array_Iter_Next),
-  Instance(Reverse, Array_Reverse),
+  Instance(Iter,   
+    Array_Iter_Init, Array_Iter_Next, 
+    Array_Iter_Last, Array_Iter_Prev, Array_Iter_Type),
   Instance(Sort,    Array_Sort_By),
   Instance(Show,    Array_Show, NULL),
-  Instance(Reserve, Array_Reserve));
+  Instance(Resize,  Array_Resize));
 
   

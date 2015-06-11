@@ -18,7 +18,7 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -g -ggdb -O3
+CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g -ggdb
 LFLAGS = -g -ggdb
 
 PLATFORM := $(shell uname)
@@ -107,7 +107,7 @@ examples/%: examples/%.c $(STATIC) | obj
 # Dist
 
 dist: all | $(PACKAGE)
-	cp -R examples include src tests INSTALL.md LICENSE.md Makefile README.md $(PACKAGE)
+	cp -R examples include src tests LICENSE.md Makefile README.md $(PACKAGE)
 	tar -czf $(PACKAGE).tar.gz $(PACKAGE)
 
 $(PACKAGE):

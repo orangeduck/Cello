@@ -19,10 +19,15 @@ static const char* Tuple_Description(void) {
     "Tuples can also be constructed on the heap and stored in collections. "
     "This makes them also useful as a simple _untyped_ list of objects."
     "\n\n"
-    "Internally Tuples are just a `NULL` terminated array of pointers. This "
-    "makes positional access fast, but many other operations slow including "
-    "iteration and counting the number of elements. Due to this it is only "
-    "recommended Tuples are used for small collections. ";
+    "Internally Tuples are just an array of pointers terminated with a pointer "
+    "to the Cello `Terminal` object. This makes positional access fast, but "
+    "many other operations slow including iteration and counting the number of "
+    "elements. Due to this it is only recommended Tuples are used for small "
+    "collections. "
+    "\n\n"
+    "Because Tuples are terminated with the Cello `Terminal` object this can't "
+    "naturally be included within them. This object should therefore only be "
+    "returned from iteration functions.";
 }
 
 static const char* Tuple_Definition(void) {
@@ -82,7 +87,7 @@ static void Tuple_New(var self, var args) {
     t->items[i] = get(args, $I(i));
   }
   
-  t->items[nargs] = NULL;
+  t->items[nargs] = Terminal;
 }
 
 static void Tuple_Del(var self) {
@@ -121,13 +126,13 @@ static void Tuple_Assign(var self, var obj) {
     t->items[i] = get(obj, $I(i));
   }
   
-  t->items[nargs] = NULL;
+  t->items[nargs] = Terminal;
 }
 
 static size_t Tuple_Len(var self) {
   struct Tuple* t = self;
   size_t i = 0;
-  while (t->items[i] isnt NULL) { i++; }
+  while (t->items[i] isnt Terminal) { i++; }
   return i;
 }
 
@@ -139,11 +144,11 @@ static var Tuple_Iter_Init(var self) {
 static var Tuple_Iter_Next(var self, var curr) {
   struct Tuple* t = self;
   size_t i = 0;
-  while (t->items[i] isnt NULL) {
+  while (t->items[i] isnt Terminal) {
     if (t->items[i] is curr) { return t->items[i+1]; }
     i++;
   }
-  return NULL;
+  return Terminal;
 }
 
 static var Tuple_Iter_Last(var self) {
@@ -153,13 +158,13 @@ static var Tuple_Iter_Last(var self) {
 
 static var Tuple_Iter_Prev(var self, var curr) {
   struct Tuple* t = self;
-  if (curr is t->items[0]) { return NULL; }
+  if (curr is t->items[0]) { return Terminal; }
   size_t i = 0;
-  while (t->items[i] isnt NULL) {
+  while (t->items[i] isnt Terminal) {
     if (t->items[i] is curr) { return t->items[i-1]; }
     i++;
   }
-  return NULL;
+  return Terminal;
 }
 
 static var Tuple_Get(var self, var key) {
@@ -211,7 +216,7 @@ static void Tuple_Pop_At(var self, var key);
 static void Tuple_Rem(var self, var item) {
   struct Tuple* t = self;
   size_t i = 0;
-  while (t->items[i] isnt NULL) {
+  while (t->items[i] isnt Terminal) {
     if (eq(item, t->items[i])) {
       Tuple_Pop_At(self, $I(i));
       return;
@@ -221,12 +226,15 @@ static void Tuple_Rem(var self, var item) {
 }
 
 static int Tuple_Show(var self, var output, int pos) {
-  pos = print_to(output, pos, "<'Tuple' At 0x%p tuple(", self);
-  for(size_t i = 0; i < len(self); i++) {
-    pos = print_to(output, pos, "%$", get(self, $I(i)));
-    if (i < len(self)-1) { pos = print_to(output, pos, ", "); }
+  struct Tuple* t = self;
+  pos = print_to(output, pos, "tuple(", self);
+  size_t i = 0;
+  while (t->items[i] isnt Terminal) {
+    pos = print_to(output, pos, "%$", t->items[i]);
+    if (t->items[i+1] isnt Terminal) { pos = print_to(output, pos, ", "); }
+    i++;
   }
-  return print_to(output, pos, ")>");
+  return print_to(output, pos, ")");
 }
 
 static void Tuple_Push(var self, var obj) {
@@ -250,7 +258,7 @@ static void Tuple_Push(var self, var obj) {
 #endif
   
   t->items[nitems+0] = obj;
-  t->items[nitems+1] = NULL;
+  t->items[nitems+1] = Terminal;
   
 }
 
@@ -274,7 +282,7 @@ static void Tuple_Pop(var self) {
 #endif
   
   t->items = realloc(t->items, sizeof(var) * nitems);
-  t->items[nitems-1] = NULL;
+  t->items[nitems-1] = Terminal;
   
 }
 
@@ -368,11 +376,11 @@ static void Tuple_Concat(var self, var obj) {
     i++;
   }
   
-  t->items[nitems+objlen] = NULL;
+  t->items[nitems+objlen] = Terminal;
   
 }
 
-static void Tuple_Clear(var self) {
+static void Tuple_Resize(var self, size_t n) {
   struct Tuple* t = self;
   
 #if CELLO_ALLOC_CHECK == 1
@@ -382,15 +390,24 @@ static void Tuple_Clear(var self) {
   }
 #endif
   
-  t->items = realloc(t->items, sizeof(var));
-  t->items[0] = NULL;
+  size_t m = Tuple_Len(self);
+  
+  if (n < m) {
+    t->items = realloc(t->items, sizeof(var) * (n+1));
+    t->items[n] = Terminal;
+  } else {
+    throw(FormatError, 
+      "Cannot resize Tuple to %li as it only contains %li items", 
+      $I(n), $I(m));
+  }
+  
 }
 
 static void Tuple_Mark(var self, var gc, void(*f)(var,void*)) {
   struct Tuple* t = self;
   size_t i = 0;
   if (t->items is NULL) { return; }
-  while (t->items[i] isnt NULL) {
+  while (t->items[i] isnt Terminal) {
     f(gc, t->items[i]); i++;
   }
 }
@@ -399,14 +416,6 @@ static void Tuple_Swap(struct Tuple* t, size_t i, size_t j) {
   var tmp = t->items[i];
   t->items[i] = t->items[j];
   t->items[j] = tmp;
-}
-
-static void Tuple_Reverse(var self) {
-  struct Tuple* t = self;
-  size_t nitems = Tuple_Len(self);
-  for (size_t i = 0; i < nitems / 2; i++) {
-    Tuple_Swap(t, i, nitems-1-i);
-  }
 }
 
 static size_t Tuple_Sort_Partition(
@@ -469,10 +478,6 @@ static uint64_t Tuple_Hash(var self) {
   return h;
 }
 
-static var Tuple_Subtype(var self) {
-  return Ref;
-}
-
 var Tuple = Cello(Tuple,
   Instance(Doc,
     Tuple_Name,       Tuple_Brief,    Tuple_Description, 
@@ -485,13 +490,11 @@ var Tuple = Cello(Tuple,
   Instance(Get,      Tuple_Get, Tuple_Set, Tuple_Mem, Tuple_Rem),
   Instance(Push,     Tuple_Push, Tuple_Pop, Tuple_Push_At, Tuple_Pop_At),
   Instance(Concat,   Tuple_Concat, Tuple_Push),
-  Instance(Clear,    Tuple_Clear),
-  Instance(Subtype,  Tuple_Subtype),
+  Instance(Resize,   Tuple_Resize),
   Instance(Iter, 
     Tuple_Iter_Init, Tuple_Iter_Next, 
-    Tuple_Iter_Last, Tuple_Iter_Prev),
+    Tuple_Iter_Last, Tuple_Iter_Prev, NULL),
   Instance(Mark,     Tuple_Mark),
-  Instance(Reverse,  Tuple_Reverse),
   Instance(Sort,     Tuple_Sort_By),
   Instance(Show,     Tuple_Show, NULL));
 

@@ -110,7 +110,7 @@ static struct Example* String_Examples(void) {
       "\n"
       "show($I(eq(s0, $S(\"Ball\")))); /* 1 */\n"
       "\n"
-      "clear(s0);\n"
+      "resize(s0, 0);\n"
       "\n"
       "show($I(len(s0))); /* 0 */\n"
       "show($I(eq(s0, $S(\"\")))); /* 1 */\n"
@@ -235,15 +235,6 @@ static uint64_t String_Hash(var self) {
   return hash_data(s->val, strlen(s->val));
 }
 
-static void String_Reverse(var self) {
-  struct String* s = self;
-  for(size_t i = 0; i < strlen(s->val) / 2; i++) {
-    char temp = s->val[i];
-    s->val[i] = s->val[strlen(s->val)-1-i];
-    s->val[strlen(s->val)-1-i] = temp;
-  }
-}
-
 static void String_Concat(var self, var obj) {
   struct String* s = self;
   
@@ -265,7 +256,7 @@ static void String_Concat(var self, var obj) {
   strcat(s->val, c_str(obj));
 }
 
-static void String_Reserve(var self, var amount) {
+static void String_Resize(var self, size_t n) {
   struct String* s = self;
   
 #if CELLO_ALLOC_CHECK == 1
@@ -275,17 +266,14 @@ static void String_Reserve(var self, var amount) {
   }
 #endif
   
-  int64_t x = c_int(amount);
+  size_t m = String_Len(self);
+  s->val = realloc(s->val, n+1);
   
-#if CELLO_BOUND_CHECK == 1
-  if (x <= (int64_t)strlen(s->val)) {
-    throw(IndexOutOfBoundsError, 
-      "String already has %li characters, cannot reserve %li", 
-      $I(strlen(s->val)), amount);
+  if (n > m) {
+    memset(&s->val[m], 0, n - m);
+  } else {
+    s->val[n] = '\0';
   }
-#endif
-
-  s->val = realloc(s->val, x);
   
 #if CELLO_MEMORY_CHECK == 1
   if (s->val is NULL) {
@@ -465,9 +453,7 @@ var String = Cello(String,
   Instance(Hash,    String_Hash),
   Instance(Len,     String_Len),
   Instance(Get,     NULL, NULL, String_Mem, String_Rem),
-  Instance(Clear,   String_Clear),
-  Instance(Reverse, String_Reverse),
-  Instance(Reserve, String_Reserve),
+  Instance(Resize,  String_Resize),
   Instance(Concat,  String_Concat, String_Concat),
   Instance(C_Str,   String_C_Str),
   Instance(Format,  String_Format_To, String_Format_From),
