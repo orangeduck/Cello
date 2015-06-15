@@ -102,7 +102,7 @@ bench: clean $(STATIC)
 examples: $(EXAMPLES_EXE)
 
 examples/%: examples/%.c $(STATIC) | obj
-	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) -o $@
+	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) $(LFLAGS) -o $@
 
 # Dist
 
