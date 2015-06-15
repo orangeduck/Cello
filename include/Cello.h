@@ -193,6 +193,7 @@ extern var Thread;
 extern var Process;
 extern var Function;
 
+extern var Exception;
 extern var IOError;
 extern var KeyError;
 extern var BusyError;
@@ -203,7 +204,6 @@ extern var FormatError;
 extern var ResourceError;
 extern var OutOfMemoryError;
 extern var IndexOutOfBoundsError;
-
 extern var SegmentationError;
 extern var ProgramAbortedError;
 extern var DivisionByZeroError;
@@ -307,8 +307,9 @@ extern var Cast;
 extern var Size;
 extern var Alloc;
 extern var New;
-extern var Assign;
 extern var Copy;
+extern var Assign;
+extern var Swap;
 extern var Cmp;
 extern var Hash;
 extern var Len;
@@ -375,12 +376,16 @@ struct New {
   void (*destruct)(var);
 };
 
+struct Copy {
+  var (*copy)(var);
+};
+
 struct Assign {
   void (*assign)(var, var);
 };
 
-struct Copy {
-  var (*copy)(var);
+struct Swap {
+  void (*swap)(var, var);
 };
 
 struct Cmp {
@@ -579,6 +584,7 @@ void del_root(var self);
 
 var assign(var self, var obj);
 var copy(var self);
+void swap(var self, var obj);
 
 int cmp(var self, var obj);
 bool eq(var self, var obj);
@@ -721,27 +727,22 @@ void unlock(var self);
 
 #define catch(...) catch_xp(catch_in, (__VA_ARGS__))
 #define catch_xp(X, A) X A
-#define catch_in(X, ...) else { exception_activate(); } exception_dec(); } \
+#define catch_in(X, ...) else { exception_try_fail(); } exception_try_end(); } \
   for (var X = exception_catch(tuple(__VA_ARGS__)); \
     X isnt NULL; X = NULL)
 
 #define throw(E, F, ...) exception_throw(E, F, tuple(__VA_ARGS__))
 
-void exception_register_signals(void);
-void exception_inc(void);
-void exception_dec(void);
-bool exception_active(void);
-void exception_activate(void);
-void exception_deactivate(void);
+void exception_try(jmp_buf* env);
+void exception_try_end(void);
+void exception_try_fail(void);
+var exception_throw(var obj, const char* fmt, var args);
+var exception_catch(var args);
+
+void exception_signals(void);
 
 var exception_object(void);
 var exception_message(void);
-size_t exception_depth(void);
-void exception_try(jmp_buf* env);
-jmp_buf* exception_buffer(void);
-
-var exception_throw(var obj, const char* fmt, var args);
-var exception_catch(var args);
 
 void mark(var self, var gc, void(*f)(var,void*));
 

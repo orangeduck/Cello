@@ -103,36 +103,50 @@ static void Tuple_Del(var self) {
   free(t->items);
 }
 
+static void Tuple_Push(var self, var obj);
+
 static void Tuple_Assign(var self, var obj) {
   struct Tuple* t = self;
-  size_t nargs = len(obj);
   
+  if (implements_method(obj, Len, len)
+  and implements_method(obj, Get, get)) {
+  
+    size_t nargs = len(obj);
+    
 #if CELLO_ALLOC_CHECK == 1
-  if (header(self)->alloc is (var)AllocStack
-  or  header(self)->alloc is (var)AllocStatic) {
-    throw(ValueError, "Cannot reallocate Tuple, not on heap!");
-  }
+    if (header(self)->alloc is (var)AllocStack
+    or  header(self)->alloc is (var)AllocStatic) {
+      throw(ValueError, "Cannot reallocate Tuple, not on heap!");
+    }
 #endif
-  
-  t->items = realloc(t->items, sizeof(var) * (nargs+1));
-  
+    
+    t->items = realloc(t->items, sizeof(var) * (nargs+1));
+    
 #if CELLO_MEMORY_CHECK == 1
-  if (t->items is NULL) {
-    throw(OutOfMemoryError, "Cannot allocate Tuple, out of memory!");
-  }
+    if (t->items is NULL) {
+      throw(OutOfMemoryError, "Cannot allocate Tuple, out of memory!");
+    }
 #endif
+    
+    for (size_t i = 0; i < nargs; i++) {
+      t->items[i] = get(obj, $I(i));
+    }
+    
+    t->items[nargs] = Terminal;
   
-  for (size_t i = 0; i < nargs; i++) {
-    t->items[i] = get(obj, $I(i));
+  } else {
+    
+    foreach (item in obj) {
+      Tuple_Push(self, item);
+    }
+    
   }
-  
-  t->items[nargs] = Terminal;
 }
 
 static size_t Tuple_Len(var self) {
   struct Tuple* t = self;
   size_t i = 0;
-  while (t->items[i] isnt Terminal) { i++; }
+  while (t->items and t->items[i] isnt Terminal) { i++; }
   return i;
 }
 
@@ -316,7 +330,9 @@ static void Tuple_Push_At(var self, var obj, var key) {
   }
 #endif
 
-  memmove(&t->items[i+1], &t->items[i+0], sizeof(var) * (nitems - (size_t)i));
+  memmove(&t->items[i+1], &t->items[i+0], 
+    sizeof(var) * (nitems - (size_t)i + 1));
+    
   t->items[i] = obj;
   
 }
@@ -337,7 +353,7 @@ static void Tuple_Pop_At(var self, var key) {
 #endif
   
   memmove(&t->items[i+0], &t->items[i+1], sizeof(var) * (nitems - (size_t)i));
-  
+
 #if CELLO_ALLOC_CHECK == 1
   if (header(self)->alloc is (var)AllocStack
   or  header(self)->alloc is (var)AllocStatic) {
@@ -422,12 +438,11 @@ static size_t Tuple_Sort_Partition(
   struct Tuple* t, int64_t l, int64_t r, bool(*f)(var,var)) {
   
   int64_t p = l + (r - l) / 2;
-  var tmp = t->items[p];
   Tuple_Swap(t, p, r);
   
   int64_t s = l;
   for (int64_t i = l; i < r; i++) {
-    if (f(t->items[i], tmp)) {
+    if (f(t->items[i], t->items[r])) {
       Tuple_Swap(t, i, s);
       s++;
     }
@@ -453,14 +468,20 @@ static void Tuple_Sort_By(var self, bool(*f)(var,var)) {
 static int Tuple_Cmp(var self, var obj) {
   struct Tuple* t = self;
   
-  size_t n = Tuple_Len(self);
-  int c = (int)n - (int)len(obj);
-  if (c isnt 0) { return c; }
+  size_t i = 0;
+  var item0 = t->items[i];
+  var item1 = iter_init(obj);
   
-  for (size_t i = 0; i < n; i++) {
-    c = cmp(t->items[i], get(obj, $I(i)));
+  while (true) {
+    if (item0 is Terminal and item1 is Terminal) { return 0; }
+    if (item0 is Terminal) { return -1; }
+    if (item1 is Terminal) { return  1; }
+    int c = cmp(item0, item1);
     if (c < 0) { return -1; }
     if (c > 0) { return  1; }
+    i++;
+    item0 = t->items[i];
+    item1 = iter_next(obj, item1);
   }
   
   return 0;

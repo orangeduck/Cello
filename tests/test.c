@@ -313,6 +313,15 @@ PT_FUNC(test_array_sort) {
   
   del(a0); del(a1); del(a2); del(a3); del(a4);
   
+  var a5 = new(Array, String, $S("a"), $S("b"), $S("c"), $S("d"), $S("e"));
+  var a6 = new(Array, String, $S("c"), $S("b"), $S("e"), $S("a"), $S("d"));
+  
+  PT_ASSERT(neq(a5, a6));
+  sort(a6);
+  PT_ASSERT(eq(a5, a6));
+  
+  del(a5); del(a6);
+  
 }
 
 PT_SUITE(suite_array) {
@@ -1204,6 +1213,38 @@ PT_SUITE(suite_mutex) {
 
 /* Range */
 
+PT_FUNC(test_range_assign) {
+  var x = new(Range, $I(1), $I(5), $I(2));
+  var y = assign(new(Range), x);
+  
+  PT_ASSERT(eq(x, y));
+  PT_ASSERT(c_int(get(y, $I(0))) is 1);
+  PT_ASSERT(c_int(get(y, $I(1))) is 3);
+  PT_ASSERT(len(y) is 2);
+  
+  del(x); del(y);
+}
+
+PT_FUNC(test_range_cmp) {
+  
+  var x = range($I(100));
+  var y = range($I(0), $I(100));
+  var z = range($I(0), $I(100), $I(1));
+  
+  PT_ASSERT(eq(x, y));
+  PT_ASSERT(eq(y, z));
+  PT_ASSERT(eq(x, z));
+  
+  var a = new(Range, $I(100));
+  
+  PT_ASSERT(eq(x, a));
+  PT_ASSERT(eq(y, a));
+  PT_ASSERT(eq(z, a));
+  
+  del(a);
+  
+}
+
 PT_FUNC(test_range_get) {
   
   var x = range($I(1000));
@@ -1286,6 +1327,8 @@ PT_FUNC(test_range_show) {
 
 
 PT_SUITE(suite_range) {
+  PT_REG(test_range_assign);
+  PT_REG(test_range_cmp);
   PT_REG(test_range_get);
   PT_REG(test_range_iter);
   PT_REG(test_range_len);
@@ -1328,6 +1371,36 @@ PT_SUITE(suite_ref) {
 }
 
 /* Slice */
+
+PT_FUNC(test_slice_assign) {
+  
+  var x = tuple($I(100), $I(10), $I(30), $I(50), $I(6), $I(1));
+  var s0 = new(Slice, x, _, _, _);
+  var s1 = assign(new(Slice, x), s0);
+  
+  PT_ASSERT(eq(s0, s1));
+  PT_ASSERT(c_int(get(s1, $I(0))) is 100);
+  PT_ASSERT(c_int(get(s1, $I(1))) is 10);
+  PT_ASSERT(c_int(get(s1, $I(2))) is 30);
+  
+  del(s0); del(s1);
+  
+}
+
+PT_FUNC(test_slice_cmp) {
+  
+  
+  var x = tuple($I(100), $I(10), $I(30), $I(50), $I(6), $I(1));
+  var s0 = slice(x, $I(4));
+  var s1 = slice(x, $I(0), $I(4));
+  var s2 = slice(x, $I(0), $I(4), $I(1));
+  var s3 = slice(x, _, $I(4));
+  
+  PT_ASSERT(eq(s0, s1));
+  PT_ASSERT(eq(s0, s2));
+  PT_ASSERT(eq(s0, s3));
+  
+}
 
 PT_FUNC(test_slice_get) {
   
@@ -1426,6 +1499,8 @@ PT_FUNC(test_slice_new) {
 }
 
 PT_SUITE(suite_slice) {
+  PT_REG(test_slice_assign);
+  PT_REG(test_slice_cmp);
   PT_REG(test_slice_get);
   PT_REG(test_slice_iter);
   PT_REG(test_slice_len);
@@ -1675,12 +1750,19 @@ PT_FUNC(test_table_cmp) {
     $S("Bello"), $I(2),
     $S("There"), $I(5));
   
+  var t3 = new(Table, String, Int,
+    $S("Hello"), $I(2),
+    $S("There"), $I(5),
+    $S("World"), $I(6));
+  
   PT_ASSERT(eq(t0, t1));
   PT_ASSERT(neq(t0, t2));
-  PT_ASSERT(gt(t2, t0));
-  PT_ASSERT(lt(t0, t2));
+  PT_ASSERT(lt(t2, t0));
+  PT_ASSERT(gt(t0, t2));
+  PT_ASSERT(gt(t3, t1));
+  PT_ASSERT(gt(t3, t0));
   
-  del(t0); del(t1); del(t2);
+  del(t0); del(t1); del(t2); del(t3);
   
 }
 
@@ -2008,7 +2090,7 @@ void cello_sleep(int ms) {
 static var exception_sleep(var args) {
   try {
     cello_sleep(20);
-    PT_ASSERT(exception_depth() is 1);
+    PT_ASSERT(len(current(Exception)) is 1);
   } catch(e) { }
   return NULL;
 }
@@ -2019,7 +2101,7 @@ PT_FUNC(test_thread_exception) {
   
   call(t);
   cello_sleep(10);
-  PT_ASSERT(exception_depth() is 0);
+  PT_ASSERT(len(current(Exception)) is 0);
   wait(t);
   
   del(t);
@@ -2096,12 +2178,19 @@ PT_FUNC(test_tree_cmp) {
     $S("Bello"), $I(2),
     $S("There"), $I(5));
   
+  var m3 = new(Table, String, Int,
+    $S("Hello"), $I(2),
+    $S("There"), $I(5),
+    $S("World"), $I(6));
+  
   PT_ASSERT(eq(m0, m1));
   PT_ASSERT(neq(m0, m2));
-  PT_ASSERT(gt(m2, m0));
-  PT_ASSERT(lt(m0, m2));
+  PT_ASSERT(lt(m2, m0));
+  PT_ASSERT(gt(m0, m2));
+  PT_ASSERT(gt(m3, m1));
+  PT_ASSERT(gt(m3, m0));
   
-  del(m0); del(m1); del(m2);
+  del(m0); del(m1); del(m2); del(m3);
   
 }
 
@@ -2687,7 +2776,7 @@ PT_FUNC(test_exception_throw) {
   PT_ASSERT(r1 == 2);
   PT_ASSERT(r2 == 3);
   
-  PT_ASSERT(exception_depth() is 0);
+  PT_ASSERT(len(current(Exception)) is 0);
   
 }
 
@@ -2719,7 +2808,7 @@ PT_FUNC(test_exception_catch) {
   PT_ASSERT(not reached1);
   PT_ASSERT(not reached2);
   
-  PT_ASSERT(exception_depth() is 0);
+  PT_ASSERT(len(current(Exception)) is 0);
   
 }
 
@@ -2742,7 +2831,7 @@ PT_FUNC(test_exception_catch_all) {
   
   PT_ASSERT(reached0);
   PT_ASSERT(reached1);
-  PT_ASSERT(exception_depth() is 0);
+  PT_ASSERT(len(current(Exception)) is 0);
   
 }
 
@@ -2753,16 +2842,16 @@ PT_FUNC(test_exception_catch_outer) {
   
   try {
 
-  PT_ASSERT(exception_depth() is 1);
+  PT_ASSERT(len(current(Exception)) is 1);
 
     try {
-      PT_ASSERT(exception_depth() is 2);
+      PT_ASSERT(len(current(Exception)) is 2);
       exception_divide(2, 0);
     } catch (e in TypeError) {
       reached0 = true;
     }    
 
-    PT_ASSERT(exception_depth() is 1);
+    PT_ASSERT(len(current(Exception)) is 1);
   
   } catch (e) {
     reached1  = true;
@@ -2771,7 +2860,7 @@ PT_FUNC(test_exception_catch_outer) {
   PT_ASSERT(not reached0);
   PT_ASSERT(reached1);
   
-  PT_ASSERT(exception_depth() is 0);
+  PT_ASSERT(len(current(Exception)) is 0);
   
 }
 

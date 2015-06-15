@@ -83,8 +83,6 @@ struct Array {
   size_t tsize;
   size_t nitems;
   size_t nslots;
-  var sspace0;
-  var sspace1;
 };
 
 static size_t Array_Step(struct Array* a) {
@@ -119,11 +117,9 @@ static void Array_New(var self, var args) {
   }
   
   a->data = malloc(a->nslots * Array_Step(a));
-  a->sspace0 = malloc(Array_Step(a));
-  a->sspace1 = malloc(Array_Step(a));
   
 #if CELLO_MEMORY_CHECK == 1
-  if (a->data is NULL or a->sspace0 is NULL or a->sspace1 is NULL) {
+  if (a->data is NULL) {
     throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
   }
 #endif
@@ -144,8 +140,6 @@ static void Array_Del(var self) {
   }
   
   free(a->data);
-  free(a->sspace0);
-  free(a->sspace1);
   
 }
 
@@ -162,6 +156,8 @@ static void Array_Clear(var self) {
   a->nslots = 0;
 }
 
+static void Array_Push(var self, var obj);
+
 static void Array_Assign(var self, var obj) {
   struct Array* a = self;
 
@@ -169,27 +165,39 @@ static void Array_Assign(var self, var obj) {
   
   a->type = implements_method(obj, Iter, iter_type) ? iter_type(obj) : Ref;
   a->tsize = Array_Size_Round(size(a->type));
-  a->nitems = len(obj);
-  a->nslots = a->nitems;
+  a->nitems = 0;
+  a->nslots = 0;
   
-  if (a->nslots is 0) {
-    a->data = NULL;
-    return;
-  }
+  if (implements_method(obj, Len, len)
+  and implements_method(obj, Get, get)) {
   
-  a->data = malloc(a->nslots * Array_Step(a));
-  a->sspace0 = realloc(a->sspace0, Array_Step(a));
-  a->sspace1 = realloc(a->sspace1, Array_Step(a));
+    a->nitems = len(obj);
+    a->nslots = a->nitems;
+    
+    if (a->nslots is 0) {
+      a->data = NULL;
+      return;
+    }
+    
+    a->data = malloc(a->nslots * Array_Step(a));
+    
+  #if CELLO_MEMORY_CHECK == 1
+    if (a->data is NULL) {
+      throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
+    }
+  #endif
+    
+    for(size_t i = 0; i < a->nitems; i++) {
+      Array_Alloc(a, i);
+      assign(Array_Item(a, i), get(obj, $I(i)));  
+    }
   
-#if CELLO_MEMORY_CHECK == 1
-  if (a->data is NULL or a->sspace0 is NULL or a->sspace1 is NULL) {
-    throw(OutOfMemoryError, "Cannot allocate Array, out of memory!");
-  }
-#endif
-  
-  for(size_t i = 0; i < a->nitems; i++) {
-    Array_Alloc(a, i);
-    assign(Array_Item(a, i), get(obj, $I(i)));  
+  } else {
+    
+    foreach (item in obj) {
+      Array_Push(self, item);
+    }
+    
   }
   
 }
@@ -226,16 +234,23 @@ static void Array_Concat(var self, var obj) {
   
 }
 
+static var Array_Iter_Init(var self);
+static var Array_Iter_Next(var self, var curr);
+
 static int Array_Cmp(var self, var obj) {
-  struct Array* a = self;
   
-  int c = (int)a->nitems - (int)len(obj);
-  if (c isnt 0) { return c; }
+  var item0 = Array_Iter_Init(self);
+  var item1 = iter_init(obj);
   
-  for (size_t i = 0; i < a->nitems; i++) {
-    c = cmp(Array_Item(a, i), get(obj, $I(i)));
+  while (true) {
+    if (item0 is Terminal and item1 is Terminal) { return 0; }
+    if (item0 is Terminal) { return -1; }
+    if (item1 is Terminal) { return  1; }
+    int c = cmp(item0, item1);
     if (c < 0) { return -1; }
     if (c > 0) { return  1; }
+    item0 = Array_Iter_Next(self, item0);
+    item1 = iter_next(obj, item1);
   }
   
   return 0;
@@ -426,31 +441,21 @@ static var Array_Iter_Type(var self) {
   return a->type;
 }
 
-static void Array_Swap(struct Array* a, size_t i, size_t j) {
-  if (i == j) { return; }
-  memcpy((char*)a->sspace0, (char*)a->data + i * Array_Step(a), Array_Step(a));
-  memcpy((char*)a->data + i * Array_Step(a),
-         (char*)a->data + j * Array_Step(a), Array_Step(a));
-  memcpy((char*)a->data + j * Array_Step(a), (char*)a->sspace0, Array_Step(a));
-}
-
 static size_t Array_Sort_Partition(
   struct Array* a, int64_t l, int64_t r, bool(*f)(var,var)) {
   
   int64_t p = l + (r - l) / 2;
-  memcpy((char*)a->sspace1, (char*)a->data + p * Array_Step(a), Array_Step(a));
-  
-  Array_Swap(a, p, r);
+  swap(Array_Item(a, p), Array_Item(a, r));
   
   int64_t s = l;
   for (int64_t i = l; i < r; i++) {
-    if (f(Array_Get(a, $I(i)), (char*)a->sspace1 + sizeof(struct Header))) {
-      Array_Swap(a, i, s);
+    if (f(Array_Get(a, $I(i)), Array_Item(a, r))) {
+      swap(Array_Item(a, i), Array_Item(a, s));
       s++;
     }
   }
   
-  Array_Swap(a, s, r);
+  swap(Array_Item(a, s), Array_Item(a, r));
   
   return s;
 }

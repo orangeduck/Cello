@@ -1,7 +1,7 @@
 CC ?= gcc
 AR ?= ar
 
-VERSION = 2.0.1
+VERSION = 2.0.2
 PACKAGE = libCello-$(VERSION)
 
 BINDIR = ${PREFIX}/bin
@@ -18,7 +18,7 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -Wall -Werror -Wno-unused -O3 -g -ggdb
+CFLAGS = -I ./include -std=gnu99 -Wall -Wno-unused -O3 -g -ggdb
 LFLAGS = -g -ggdb
 
 PLATFORM := $(shell uname)

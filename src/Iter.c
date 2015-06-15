@@ -236,6 +236,21 @@ static void Range_Del(var self) {
   del(r->value);
 }
 
+static void Range_Assign(var self, var obj) {
+  struct Range* r = self;
+  struct Range* o = cast(obj, Range);
+  assign(r->value, o->value);
+  r->start = o->start;
+  r->stop = o->stop;
+  r->step = o->step;
+}
+
+static int Range_Cmp(var self, var obj) {
+  struct Range* r = self;
+  struct Range* o = cast(obj, Range);
+  return memcmp(&r->start, &o->start, sizeof(int64_t) * 3);
+}
+
 static var Range_Iter_Init(var self) {
   struct Range* r = self;
   struct Int* i = r->value;
@@ -348,6 +363,8 @@ var Range = Cello(Range,
     Range_Name,       Range_Brief,    Range_Description, 
     Range_Definition, Range_Examples, Range_Methods),
   Instance(New,       Range_New, Range_Del),
+  Instance(Assign,    Range_Assign),
+  Instance(Cmp,       Range_Cmp),
   Instance(Len,       Range_Len),
   Instance(Get,       Range_Get, NULL, Range_Mem, NULL),
   Instance(Show,      Range_Show, NULL),
@@ -508,6 +525,21 @@ static void Slice_Del(var self) {
   del(s->range);
 }
 
+static void Slice_Assign(var self, var obj) {
+  struct Slice* s = self;
+  struct Slice* o = cast(obj, Slice);
+  s->iter = o->iter;
+  assign(s->range, o->range);
+}
+
+static int Slice_Cmp(var self, var obj) {
+  struct Slice* s = self;
+  struct Slice* o = cast(obj, Slice);
+  if (s->iter > o->iter) { return  1; }
+  if (s->iter < o->iter) { return -1; }
+  return cmp(s->range, o->range);
+}
+
 static var Slice_Iter_Init(var self) {
   struct Slice* s = self;
   struct Range* r = s->range;
@@ -633,6 +665,8 @@ var Slice = Cello(Slice,
     Slice_Name,       Slice_Brief,    Slice_Description, 
     Slice_Definition, Slice_Examples, Slice_Methods),
   Instance(New,      Slice_New, Slice_Del),
+  Instance(Assign,   Slice_Assign),
+  Instance(Cmp,      Slice_Cmp),
   Instance(Len,      Slice_Len),
   Instance(Get,      Slice_Get, NULL, Slice_Mem, NULL),
   Instance(Iter, 
@@ -734,6 +768,13 @@ static void Zip_Del(var self) {
   del(z->values);
 }
 
+static void Zip_Assign(var self, var obj) {
+  struct Zip* z = self;
+  struct Zip* o = cast(obj, Zip);
+  assign(z->iters, o->iters);
+  assign(z->values, o->values);
+}
+
 static var Zip_Iter_Init(var self) {
   struct Zip* z = self;
   struct Tuple* values = z->values;
@@ -833,6 +874,7 @@ var Zip = Cello(Zip,
     Zip_Name,         Zip_Brief,    Zip_Description, 
     Zip_Definition,   Zip_Examples, Zip_Methods),
   Instance(New,       Zip_New, Zip_Del),
+  Instance(Assign,    Zip_Assign),
   Instance(Len,       Zip_Len),
   Instance(Get,       Zip_Get, NULL, Zip_Mem, NULL),
   Instance(Iter, 
@@ -895,9 +937,7 @@ static struct Example* Filter_Examples(void) {
       "  $S(\"Bonjour\"));\n"
       "\n"
       "var y = new(Tuple);\n"
-      "foreach (item in filter(x, $(Function, mem_hello))) {\n"
-      "  push(y, item);\n"
-      "}\n"
+      "assign(y, filter(x, $(Function, mem_hello)));\n"
       "show(y); /* tuple(\"Hello World\", \"Hello Dan\") */\n"
     }, {NULL, NULL}
   };

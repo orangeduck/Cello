@@ -90,3 +90,93 @@ var assign(var self, var obj) {
     "Cannot assign type %s to type %s", type_of(obj), type_of(self));
   
 }
+
+static const char* Swap_Name(void) {
+  return "Swap";
+}
+
+static const char* Swap_Brief(void) {
+  return "Swapable";
+}
+
+static const char* Swap_Description(void) {
+  return
+    "The `Swap` class can be used to override the behaviour of swapping two "
+    "objects. By default the `Swap` class simply swaps the memory of the "
+    "two objects passed in as parameters making use of the `Size` class. "
+    "In almost all cases this default behaviour should be fine, even if the "
+    "objects have custom assignment functions."
+    "\n\n"
+    "Swapping can be used internally by various collections and algorithms.";
+}
+
+static const char* Swap_Definition(void) {
+  return
+    "struct Swap {\n"
+    "  void (*swap)(var, var);\n"
+    "};\n";
+}
+
+static struct Example* Swap_Examples(void) {
+  
+  static struct Example examples[] = {
+    {
+      "Usage",
+      "var x = $S(\"Hello\");\n"
+      "var y = $S(\"World\");\n"
+      "show(x); /* Hello */\n"
+      "show(y); /* World */\n"
+      "swap(x, y);\n"
+      "show(x); /* World */\n"
+      "show(y); /* Hello */\n"
+    }, {NULL, NULL}
+  };
+  
+  return examples;
+}
+
+static struct Method* Swap_Methods(void) {
+  
+  static struct Method methods[] = {
+    {
+      "swap", 
+      "void swap(var self, var obj);",
+      "Swap the object `self` for the object `obj`."
+    }, {NULL, NULL, NULL}
+  };
+  
+  return methods;
+}
+
+var Swap = Cello(Swap,
+  Instance(Doc,
+    Swap_Name,       Swap_Brief,    Swap_Description, 
+    Swap_Definition, Swap_Examples, Swap_Methods));
+
+static void memswap(void* p0, void* p1, size_t s) {
+  if (p0 == p1) { return; }
+  for (size_t i = 0; i < s; i++) {
+    char t = ((char*)p0)[i];
+    ((char*)p0)[i] = ((char*)p1)[i];
+    ((char*)p1)[i] = t;
+  }
+}
+    
+void swap(var self, var obj) {
+  
+  struct Swap* s = instance(self, Swap);
+  if (s and s->swap) {
+    s->swap(self, obj);
+    return;
+  }
+  
+  size_t n = size(type_of(self));
+  if (type_of(self) is type_of(obj) and n) {
+    memswap(self, obj, n);
+    return;
+  }
+  
+  throw(TypeError,
+    "Cannot swap type %s and type %s", type_of(obj), type_of(self));
+  
+}

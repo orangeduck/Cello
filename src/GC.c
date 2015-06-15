@@ -81,7 +81,7 @@ static const char* GC_Brief(void) {
 static const char* GC_Description(void) {
   return
     "The `GC` type provides an interface to the Cello Garbage Collector. One "
-    "instance of this class is created for each thread and can be retrieved "
+    "instance of this type is created for each thread and can be retrieved "
     "using the `current` function. The Garbage Collector can be stopped and "
     "started using `start` and `stop` and objects can be added or removed from "
     "the Garbage Collector using `set` and `rem`.";
@@ -390,26 +390,21 @@ void GC_Mark(struct GC* gc) {
 }
 
 static int GC_Show(var self, var out, int pos) {
- 
   struct GC* gc = self;
-  int ipos = pos;
  
-  pos += print_to(out, pos, "\n");
-  pos += print_to(out, pos, "| GC TABLE\n");
+  pos = print_to(out, pos, "<'GC' At 0x%p\n", self);
   for (size_t i = 0; i < gc->nslots; i++) {
     if (gc->entries[i].hash is 0) {
-      pos += print_to(out, pos, "| %i : ---\n", $I(i));
+      pos = print_to(out, pos, "| %i : ---\n", $I(i));
       continue;
     }
-    pos += print_to(out, pos, "| %i : %p %i %i\n", 
+    pos = print_to(out, pos, "| %i : %p %i %i\n", 
       $I(i), gc->entries[i].ptr, 
       $I(gc->entries[i].root),
       $I(gc->entries[i].marked));
   }
   
-  pos += print_to(out, pos, "|======\n");
-  
-  return pos - ipos;
+  return print_to(out, pos, "|========= >\n");
 }
 
 void GC_Sweep(struct GC* gc) {
@@ -493,6 +488,7 @@ static void GC_Del(var self) {
   GC_Sweep(gc);
   free(gc->entries);
   free(gc->freelist);
+  rem(current(Thread), $S(GC_TLS_KEY));
 }
 
 static void GC_Set(var self, var key, var val) {

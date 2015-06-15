@@ -268,22 +268,23 @@ static bool Table_Mem(var self, var key);
 static var Table_Get(var self, var key);
 
 static int Table_Cmp(var self, var obj) {
-  struct Table* t = self;
   
-  int c = (int)t->nitems - (int)len(obj);
-  if (c isnt 0) { return c; }
+  int c;
+  var item0 = Table_Iter_Init(self);
+  var item1 = iter_init(obj);
   
-  var curr = Table_Iter_Init(self);
-  foreach (key in obj) {
-    var val = get(obj, key);
-    var vurr = (char*)curr + t->ksize + sizeof(struct Header);
-    c = cmp(key, curr);
+  while (true) {
+    if (item0 is Terminal and item1 is Terminal) { return 0; }
+    if (item0 is Terminal) { return -1; }
+    if (item1 is Terminal) { return  1; }
+    c = cmp(item0, item1);
     if (c < 0) { return -1; }
     if (c > 0) { return  1; }
-    c = cmp(val, vurr);
+    c = cmp(Table_Get(self, item0), get(obj, item1));
     if (c < 0) { return -1; }
     if (c > 0) { return  1; }
-    curr = Table_Iter_Next(self, curr);
+    item0 = Table_Iter_Next(self, item0);
+    item1 = iter_next(obj, item1);
   }
   
   return 0;
@@ -519,8 +520,8 @@ static void Table_Rem(var self, var key) {
 static var Table_Get(var self, var key) {
   struct Table* t = self;
   
-  if (key >= t->data and key < t->data + t->nslots * Table_Step(self)) {
-    return Table_Val(self, (key - t->data) / Table_Step(self));
+  if (key >= t->data and ((char*)key) < ((char*)t->data) + t->nslots * Table_Step(self)) {
+    return Table_Val(self, (((char*)key) - ((char*)t->data)) / Table_Step(self));
   }
   
   key = cast(key, t->ktype);
@@ -648,7 +649,7 @@ static void Table_Resize(var self, size_t n) {
   }
   
 #if CELLO_BOUND_CHECK == 1
-  if (n < (int64_t)t->nitems) {
+  if (n < t->nitems) {
     throw(FormatError, 
       "Cannot resize Table to make it smaller than %li items", 
       $I(t->nitems));

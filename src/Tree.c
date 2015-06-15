@@ -228,22 +228,23 @@ static bool Tree_Mem(var self, var key);
 static var Tree_Get(var self, var key);
 
 static int Tree_Cmp(var self, var obj) {
-  struct Tree* m = self;
   
-  int c = (int)m->nitems - (int)len(obj);
-  if (c isnt 0) { return c; }
+  int c;
+  var item0 = Tree_Iter_Init(self);
+  var item1 = iter_init(obj);
   
-  var curr = Tree_Iter_Init(self);
-  foreach (key in obj) {
-    var val = get(obj, key);
-    var node = (char*)curr - sizeof(struct Header) - 3 * sizeof(var);
-    c = cmp(key, Tree_Key(m, node));
+  while (true) {
+    if (item0 is Terminal and item1 is Terminal) { return 0; }
+    if (item0 is Terminal) { return -1; }
+    if (item1 is Terminal) { return  1; }
+    c = cmp(item0, item1);
     if (c < 0) { return -1; }
     if (c > 0) { return  1; }
-    c = cmp(val, Tree_Val(m, node));
+    c = cmp(Tree_Get(self, item0), get(obj, item1));
     if (c < 0) { return -1; }
     if (c > 0) { return  1; }
-    curr = Tree_Iter_Next(self, curr);
+    item0 = Tree_Iter_Next(self, item0);
+    item1 = iter_next(obj, item1);
   }
   
   return 0;

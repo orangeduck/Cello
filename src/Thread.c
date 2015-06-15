@@ -64,33 +64,21 @@ var current(var type) {
   return type_method(type, Current, current);
 }
 
-enum {
-  CELLO_EXC_MAX_DEPTH  = 2048,
-  CELLO_EXC_MAX_STRACE = 25
-};
-
 struct Thread {
   
   var func;
   var args;
+  var tls;
+  
+  bool is_main;
+  bool is_running;
   
 #if defined(__unix__) || defined(__APPLE__)
   pthread_t thread;
 #elif defined(_WIN32)
   DWORD id;
   HANDLE thread;
-#endif
-
-  bool is_main;
-  bool is_running;
-  
-  var      exc_obj;
-  var      exc_msg;
-  bool     exc_active;
-  size_t   exc_depth;
-  jmp_buf* exc_buffers[CELLO_EXC_MAX_DEPTH];
-  
-  var tls;
+#endif  
   
 };
 
@@ -163,22 +151,12 @@ static struct Example* Thread_Examples(void) {
 }
 
 static void Thread_New(var self, var args) {
-  
   struct Thread* t = self;
-  
   t->func = empty(args) ? NULL : get(args, $I(0));
   t->args = NULL;
   t->is_main = false;
   t->is_running = false;
-  
-  t->exc_active = false;
-  t->exc_depth = 0;
-  memset(t->exc_buffers, 0, sizeof(jmp_buf*) * CELLO_EXC_MAX_DEPTH);
-  t->exc_obj = NULL;
-  t->exc_msg = NULL;
-  
   t->tls = new_raw(Table, String, Ref);
-  
 }
 
 static void Thread_Del(var self) {
@@ -188,9 +166,7 @@ static void Thread_Del(var self) {
   CloseHandle(t->thread);
 #endif
   
-  if (t->args    isnt NULL) { del_raw(t->args); }
-  if (t->exc_msg isnt NULL) { del_raw(t->exc_msg); }
-  
+  if (t->args isnt NULL) { del_raw(t->args); }
   del_raw(t->tls);
 }
 
@@ -240,10 +216,14 @@ static var Thread_Init_Run(var self) {
   var bottom = NULL;
   var gc = new_raw(GC, $R(&bottom));
 #endif
+
+  var exc = new_raw(Exception);
   
   var x = call_with(t->func, t->args);
   del_raw(t->args);
   t->args = NULL;
+  
+  del_raw(exc);
   
 #ifndef CELLO_NGC
   del_raw(gc);
@@ -269,7 +249,9 @@ static DWORD Thread_Init_Run(var self) {
   TlsSetValue(Thread_Key_Wrapper, t);
   t->is_running = true;
   
-#ifndef CELLO_NGC
+  var ex = new_raw(Exception);
+
+  #ifndef CELLO_NGC
   var bottom = NULL;
   var gc = new_raw(GC, $R(&bottom));
 #endif
@@ -281,6 +263,8 @@ static DWORD Thread_Init_Run(var self) {
 #ifndef CELLO_NGC
   del_raw(gc);
 #endif
+  
+  del_raw(ex);
   
   return 0;
 }
@@ -335,8 +319,10 @@ static var Thread_Call(var self, var args) {
 }
 
 static var Thread_Main = NULL;
+static var Exception_Main = NULL;
 
 static void Thread_Main_Del(void) {
+  del_raw(Exception_Main);
   del_raw(Thread_Main);
 }
 
@@ -365,6 +351,7 @@ static var Thread_Current(void) {
   
     if (Thread_Main is NULL) {
       Thread_Main = new_raw(Thread);
+      Exception_Main = new_raw(Exception);
       atexit(Thread_Main_Del);
     }
     
@@ -658,310 +645,3 @@ var Mutex = Cello(Mutex,
   Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
   Instance(Start,  Mutex_Lock, Mutex_Unlock, NULL));
 
-var TypeError = CelloEmpty(TypeError);
-var ValueError = CelloEmpty(ValueError);
-var ClassError = CelloEmpty(ClassError);
-var IndexOutOfBoundsError = CelloEmpty(IndexOutOfBoundsError);
-var KeyError = CelloEmpty(KeyError);
-var OutOfMemoryError = CelloEmpty(OutOfMemoryError);
-var IOError = CelloEmpty(IOError);
-var FormatError = CelloEmpty(FormatError);
-var BusyError = CelloEmpty(BusyError);
-var ResourceError = CelloEmpty(ResourceError);
-
-var ProgramAbortedError = CelloEmpty(ProgramAbortedError);
-var DivisionByZeroError = CelloEmpty(DivisionByZeroError);
-var IllegalInstructionError = CelloEmpty(IllegalInstructionError);
-var ProgramInterruptedError = CelloEmpty(ProgramInterruptedError);
-var SegmentationError = CelloEmpty(SegmentationError);
-var ProgramTerminationError = CelloEmpty(ProgramTerminationError);
-
-static void Exception_Signal(int sig) {
-  switch(sig) {
-    case SIGABRT: throw(ProgramAbortedError, "Program Aborted");
-    case SIGFPE:  throw(DivisionByZeroError, "Division by Zero");
-    case SIGILL:  throw(IllegalInstructionError, "Illegal Instruction");
-    case SIGINT:  throw(ProgramInterruptedError, "Program Interrupted");
-    case SIGSEGV: throw(SegmentationError, "Segmentation fault");
-    case SIGTERM: throw(ProgramTerminationError, "Program Terminated");
-  }
-}
-
-void exception_register_signals(void) {
-  signal(SIGABRT, Exception_Signal);
-  signal(SIGFPE,  Exception_Signal);
-  signal(SIGILL,  Exception_Signal);
-  signal(SIGINT,  Exception_Signal);
-  signal(SIGSEGV, Exception_Signal);
-  signal(SIGTERM, Exception_Signal);
-}
-
-void exception_inc(void) {
-  struct Thread* t = Thread_Current();
-  if (t->exc_depth is CELLO_EXC_MAX_DEPTH) {
-    fprintf(stderr, "Cello Fatal Error: Exception Buffer Overflow!\n");
-    abort();
-  }
-  t->exc_depth++;
-}
-
-void exception_dec(void) {
-  struct Thread* t = Thread_Current();
-  if (t->exc_depth == 0) {
-    fprintf(stderr, "Cello Fatal Error: Exception Buffer Underflow!\n");
-    abort();
-  }
-  t->exc_depth--;
-}
-
-bool exception_active(void) {
-  struct Thread* t = Thread_Current();
-  return t->exc_active;
-}
-
-void exception_activate(void) {
-  struct Thread* t = Thread_Current();
-  t->exc_active = true;
-}
-
-void exception_deactivate(void) {
-  struct Thread* t = Thread_Current();
-  t->exc_active = false;  
-}
-
-var exception_object(void) {
-  struct Thread* t = Thread_Current();
-  return t->exc_obj;  
-}
-
-var exception_message(void) {
-  struct Thread* t = Thread_Current();
-  return t->exc_msg;
-}
-
-void exception_try(jmp_buf* env) {
-  struct Thread* t = Thread_Current();
-  exception_inc();
-  exception_deactivate();
-  t->exc_buffers[t->exc_depth-1] = env;
-}
-
-jmp_buf* exception_buffer(void) {
-  struct Thread* t = Thread_Current();
-  if (t->exc_depth == 0) {
-    fprintf(stderr, "Cello Fatal Error: Exception Buffer Out of Bounds!\n");
-    abort();
-  }
-  return t->exc_buffers[t->exc_depth-1];
-}
-
-size_t exception_depth(void) {
-  struct Thread* t = Thread_Current();
-  return t->exc_depth;
-}
-
-#ifndef CELLO_NSTRACE
-#if defined(__unix__) || defined(__APPLE__)
-
-static void Exception_Backtrace(void) {
-  
-  struct Thread* t = Thread_Current();
-  
-  var exc_backtrace[CELLO_EXC_MAX_STRACE];
-  size_t exc_backtrace_count = backtrace(exc_backtrace, CELLO_EXC_MAX_STRACE);
-  char** symbols = backtrace_symbols(exc_backtrace, exc_backtrace_count);  
-  
-  print_to($(File, stderr), 0, "!!\tStack Trace: \n");
-  print_to($(File, stderr), 0, "!!\t\n");
-
-  for (size_t i = 0; i < exc_backtrace_count; i++) {
-    print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", 
-      $(Int, i), $(String, symbols[i]));
-  }
-  print_to($(File, stderr), 0, "!!\t\n");
-  
-  free(symbols);
-  
-}
-
-#elif defined(_WIN32)
-
-static void Exception_Backtrace(void) {
-  
-  HANDLE process = GetCurrentProcess();
-  HANDLE thread = GetCurrentThread();
-  
-  CONTEXT context;
-  memset(&context, 0, sizeof(CONTEXT));
-  context.ContextFlags = CONTEXT_FULL;
-  RtlCaptureContext(&context);
-  
-  SymSetOptions(SYMOPT_UNDNAME|SYMOPT_LOAD_LINES);
-  SymInitialize(process, NULL, TRUE);
-  
-  DWORD image;
-  STACKFRAME64 stackframe;
-  ZeroMemory(&stackframe, sizeof(STACKFRAME64));
-  
-#ifdef _M_IX86
-  image = IMAGE_FILE_MACHINE_I386;
-  stackframe.AddrPC.Offset = context.Eip;
-  stackframe.AddrPC.Mode = AddrModeFlat;
-  stackframe.AddrFrame.Offset = context.Ebp;
-  stackframe.AddrFrame.Mode = AddrModeFlat;
-  stackframe.AddrStack.Offset = context.Esp;
-  stackframe.AddrStack.Mode = AddrModeFlat;
-#elif _M_X64
-  image = IMAGE_FILE_MACHINE_AMD64;
-  stackframe.AddrPC.Offset = context.Rip;
-  stackframe.AddrPC.Mode = AddrModeFlat;
-  stackframe.AddrFrame.Offset = context.Rsp;
-  stackframe.AddrFrame.Mode = AddrModeFlat;
-  stackframe.AddrStack.Offset = context.Rsp;
-  stackframe.AddrStack.Mode = AddrModeFlat;
-#elif _M_IA64
-  image = IMAGE_FILE_MACHINE_IA64;
-  stackframe.AddrPC.Offset = context.StIIP;
-  stackframe.AddrPC.Mode = AddrModeFlat;
-  stackframe.AddrFrame.Offset = context.IntSp;
-  stackframe.AddrFrame.Mode = AddrModeFlat;
-  stackframe.AddrBStore.Offset = context.RsBSP;
-  stackframe.AddrBStore.Mode = AddrModeFlat;
-  stackframe.AddrStack.Offset = context.IntSp;
-  stackframe.AddrStack.Mode = AddrModeFlat;
-#endif
-
-  print_to($(File, stderr), 0, "!!\tStack Trace: \n");
-  print_to($(File, stderr), 0, "!!\t\n");
-
-  for (size_t i = 0; i < CELLO_EXC_MAX_STRACE; i++) {
-    
-    BOOL result = StackWalk64(
-      image, process, thread,
-      &stackframe, &context, NULL, 
-      SymFunctionTableAccess64, SymGetModuleBase64, NULL);
-    
-    if (!result) { break; }
-    
-    char* filename = "";
-    char* symbolname = "???";
-    int lineno = 0;
-    
-    char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-    PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
-    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-    symbol->MaxNameLen = MAX_SYM_NAME;
-    
-    DWORD64 displacement = 0;
-    if (SymFromAddr(process, stackframe.AddrPC.Offset, &displacement, symbol)) {
-      symbolname = symbol->Name;
-    } else {
-      symbolname = "???";
-    }
-      
-    IMAGEHLP_LINE64 line;
-    line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-    
-    DWORD displacementline = 0;
-    if (SymGetLineFromAddr64(process, 
-      stackframe.AddrPC.Offset, &displacementline, &line)) {
-      lineno = line.LineNumber;
-      filename = line.FileName;
-    } else {
-      lineno = 0;
-      filename = "";
-    }
-    
-    if (strcmp(filename, "") == 0) {
-      print_to($(File, stderr), 0, "!!\t\t[%i] %s\n",
-        $I(i), $S(symbolname));      
-    } else {
-      print_to($(File, stderr), 0, "!!\t\t[%i] %s:%i %s\n",
-        $I(i), $S(filename), $I(lineno), $S(symbolname));
-    }
-    
-  }
-  
-  print_to($(File, stderr), 0, "!!\t\n");
-  
-  SymCleanup(process);
-  
-}
-
-#else
-
-static void Exception_Backtrace(void) {}
-
-#endif
-
-#else
-
-static void Exception_Backtrace(void) {}
-  
-#endif
-
-static void Exception_Error(void)  {
-  
-  struct Thread* t = Thread_Current();
-  
-  print_to($(File, stderr), 0, "\n");
-  print_to($(File, stderr), 0, "!!\t\n");
-  print_to($(File, stderr), 0, "!!\tUncaught %$\n", exception_object());
-  print_to($(File, stderr), 0, "!!\t\n");
-  print_to($(File, stderr), 0, "!!\t\t %s\n", exception_message());
-  print_to($(File, stderr), 0, "!!\t\n");
-  
-  Exception_Backtrace();
-  
-  exit(EXIT_FAILURE);
-  
-}
-
-var exception_throw(var obj, const char* fmt, var args) {
-
-  struct Thread* t = Thread_Current();
-  
-  t->exc_obj = obj;
-  
-  if (t->exc_msg is NULL) {
-    t->exc_msg = new_raw(String);
-  }
-  
-  print_to_with(t->exc_msg, 0, fmt, args);
-  
-  if (exception_depth() >= 1) {
-    longjmp(*exception_buffer(), 1);
-  } else {
-    Exception_Error();
-  }
-  
-  return NULL;
-  
-}
-
-var exception_catch(var args) {
-  
-  if (not exception_active()) { return NULL; }
-  
-  /* If no Arguments catch all */
-  if (len(args) is 0) {
-    return exception_object();
-  }
-  
-  /* Check Exception against Arguments */
-  foreach(arg in args) {
-    if (eq(arg, exception_object())) {
-      return exception_object();
-    }
-  }
-  
-  /* No matches found. Propagate to outward block */
-  if (exception_depth() >= 1) {
-    longjmp(*exception_buffer(), 1);
-  } else {
-    Exception_Error();
-  }
-  
-  return NULL;
-  
-}

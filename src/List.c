@@ -195,18 +195,23 @@ static void List_Concat(var self, var obj) {
   }
 }
 
+static var List_Iter_Init(var self);
+static var List_Iter_Next(var self, var curr);
+
 static int List_Cmp(var self, var obj) {
-  struct List* l = self;
   
-  int c = (int)l->nitems - (int)len(obj);
-  if (c isnt 0) { return c; }
+  var item0 = List_Iter_Init(self);
+  var item1 = iter_init(obj);
   
-  var item = l->head;
-  foreach (oitem in obj) {
-    c = cmp(item, oitem);
+  while (true) {
+    if (item0 is Terminal and item1 is Terminal) { return 0; }
+    if (item0 is Terminal) { return -1; }
+    if (item1 is Terminal) { return  1; }
+    int c = cmp(item0, item1);
     if (c < 0) { return -1; }
     if (c > 0) { return  1; }
-    item = *List_Next(l, item);
+    item0 = List_Iter_Next(self, item0);
+    item1 = iter_next(obj, item1);
   }
   
   return 0;

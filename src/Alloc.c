@@ -361,9 +361,9 @@ static void del_by(var self, int method) {
   
 }
 
-void del(var self) { return del_by(self, ALLOC_STANDARD); }
-void del_raw(var self) { return del_by(self, ALLOC_RAW); }
-void del_root(var self) { return del_by(self, ALLOC_ROOT); }
+void del(var self) { del_by(self, ALLOC_STANDARD); }
+void del_raw(var self) { del_by(self, ALLOC_RAW); }
+void del_root(var self) { del_by(self, ALLOC_ROOT); }
 
 static const char* Copy_Name(void) {
   return "Copy";
@@ -444,4 +444,3 @@ var copy(var self) {
   return assign(alloc(type_of(self)), self);
   
 }
-
