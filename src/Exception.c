@@ -182,14 +182,14 @@ static bool Exception_Running(var self) {
 
 static void Exception_Backtrace(void) {
   
-  var exc->backtrace[EXCEPTION_MAX_STRACE];
-  size_t exc->backtrace_count = backtrace(exc->backtrace, EXCEPTION_MAX_STRACE);
-  char** symbols = backtrace_symbols(exc->backtrace, exc->backtrace_count);  
+  var trace[EXCEPTION_MAX_STRACE];
+  size_t trace_count = backtrace(trace, EXCEPTION_MAX_STRACE);
+  char** symbols = backtrace_symbols(trace, trace_count);  
   
   print_to($(File, stderr), 0, "!!\tStack Trace: \n");
   print_to($(File, stderr), 0, "!!\t\n");
 
-  for (size_t i = 0; i < exc->backtrace_count; i++) {
+  for (size_t i = 0; i < trace_count; i++) {
     print_to($(File, stderr), 0, "!!\t\t[%i] %s\n", 
       $(Int, i), $(String, symbols[i]));
   }

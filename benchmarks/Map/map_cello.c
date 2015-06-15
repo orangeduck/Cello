@@ -8,7 +8,7 @@ enum {
 };
 
 int main(int argc, char *argv[]) {
-	var m = new(Map, String, Int);
+	var m = new(Tree, String, Int);
 	int max = 1;
 	char *buf = malloc(BUF_SIZE);
 	while (!feof(stdin)) {

@@ -18,8 +18,7 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -Wall -Wno-unused -O3 -g -ggdb
-LFLAGS = -g -ggdb
+CFLAGS = -I ./include -std=gnu99 -Wall -Wno-unused -O3 
 
 PLATFORM := $(shell uname)
 COMPILER := $(shell $(CC) -v 2>&1 )
@@ -43,7 +42,7 @@ else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
 	LIBS = -lpthread -lexecinfo -lm
 
 	CFLAGS += -fPIC
-	LFLAGS += -rdynamic
+	LFLAGS = -rdynamic
 
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
 	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h ${INCDIR}
@@ -57,7 +56,7 @@ else
 	LIBS = -lpthread -ldl -lm
 
 	CFLAGS += -fPIC
-	LFLAGS += -rdynamic
+	LFLAGS = -rdynamic
 
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
 	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h ${INCDIR}
@@ -83,6 +82,7 @@ obj:
 
 # Tests
 
+check: CFLAGS += -Werror -g -ggdb
 check: $(TESTS_OBJ) $(STATIC)
 	$(CC) $(TESTS_OBJ) $(STATIC) $(LIBS) $(LFLAGS) -o ./tests/test
 	./tests/test
@@ -93,8 +93,8 @@ obj/%.o: tests/%.c | obj
 
 # Benchmarks
 
-# TODO: Force bench to build with CELLO_NDEBUG
-bench:
+bench: CFLAGS += -DCELLO_NDEBUG -pg
+bench: clean $(STATIC)
 	cd benchmarks; ./benchmark; cd ../
 
 # Examples

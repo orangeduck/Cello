@@ -126,7 +126,7 @@ struct GC {
 };
 
 static uint64_t GC_Probe(struct GC* gc, uint64_t i, uint64_t h) {
-  uint64_t v = i - (h-1);
+  int64_t v = i - (h-1);
   if (v < 0) {
     v = gc->nslots + v;
   }

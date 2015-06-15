@@ -207,6 +207,7 @@ PT_FUNC(test_array_len) {
   
   PT_ASSERT(len(a0) is 0);
   
+  del(a0);
   
 }
 
@@ -433,7 +434,9 @@ PT_FUNC(test_file_start) {
   }; 
      
   PT_ASSERT(file->file is NULL);
-    
+  
+  del(file);
+  
 }
 
 PT_FUNC(test_file_stream) {
@@ -934,6 +937,8 @@ PT_FUNC(test_list_len) {
   resize(l0, 0);
   
   PT_ASSERT(len(l0) is 0);
+  
+  del(l0);
   
 }
 
@@ -2664,6 +2669,7 @@ PT_FUNC(test_type_show) {
   PT_ASSERT_STR_EQ(c_str(s), "Type");
   show_to(Array, s, 0);
   PT_ASSERT_STR_EQ(c_str(s), "Array");
+  del(s);
 }
 
 PT_SUITE(suite_type) {

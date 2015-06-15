@@ -128,7 +128,7 @@ static var Table_Val(struct Table* t, uint64_t i) {
 }
 
 static uint64_t Table_Probe(struct Table* t, uint64_t i, uint64_t h) {
-  uint64_t v = i - (h-1);
+  int64_t v = i - (h-1);
   if (v < 0) {
     v = t->nslots + v;
   }
@@ -590,10 +590,13 @@ static var Table_Iter_Last(var self) {
   struct Table* t = self;
   if (t->nitems is 0) { return Terminal; }
   
-  for (size_t i = t->nslots-1; i >= 0; i--) {
+  size_t i = t->nslots-1;
+  while (true) {
     if (Table_Key_Hash(t, i) isnt 0) {
       return Table_Key(t, i);
     }
+    if (i == 0) { break; }
+    i--;
   }
   
   return Terminal;

@@ -9,7 +9,7 @@ enum {
 
 int main(int argc, char *argv[]) {
 	var h = new(Table, String, Int);
-	reserve(h, $I(1500000));
+	resize(h, 1500000);
 	int max = 1;
 	char *buf = malloc(BUF_SIZE);
 	while (!feof(stdin)) {
