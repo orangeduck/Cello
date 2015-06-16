@@ -293,7 +293,7 @@ static void GC_Recurse(struct GC* gc, var ptr) {
     return;
   }
     
-  for (size_t i = 0; i < size(type); i += sizeof(var)) {
+  for (size_t i = 0; i+sizeof(var) <= size(type); i += sizeof(var)) {
     var p = ((char*)ptr) + i;
     GC_Mark_Item(gc, *((var*)p));
   }
@@ -395,16 +395,17 @@ static int GC_Show(var self, var out, int pos) {
   pos = print_to(out, pos, "<'GC' At 0x%p\n", self);
   for (size_t i = 0; i < gc->nslots; i++) {
     if (gc->entries[i].hash is 0) {
-      pos = print_to(out, pos, "| %i : ---\n", $I(i));
+      pos = print_to(out, pos, "| %i : \n", $I(i));
       continue;
     }
-    pos = print_to(out, pos, "| %i : %p %i %i\n", 
-      $I(i), gc->entries[i].ptr, 
-      $I(gc->entries[i].root),
-      $I(gc->entries[i].marked));
+    pos = print_to(out, pos, "| %i : %15s %p %s %s\n", 
+      $I(i), type_of(gc->entries[i].ptr), 
+      gc->entries[i].ptr, 
+      gc->entries[i].root ? $S("root") : $S("auto"),
+      gc->entries[i].marked ? $S("*") : $S(" "));
   }
   
-  return print_to(out, pos, "|========= >\n");
+  return print_to(out, pos, "+------------------->\n");
 }
 
 void GC_Sweep(struct GC* gc) {

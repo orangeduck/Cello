@@ -11,7 +11,7 @@ struct ExampleType {
 /* Constructor Function */
 static void ExampleType_New(var self, var args) {
   struct ExampleType* h = self;
-  h->value = c_int(get(args, $(Int, 0)));
+  h->value = c_int(get(args, $I(0)));
 }
 
 /* Comparison Function */
@@ -35,10 +35,15 @@ int main(int argc, char** argv) {
   /* We can now make `ExampleType` objects */
   var obj0 = new(ExampleType, $I(1));
   var obj1 = new(ExampleType, $I(2));
-
+  
   /* Test for comparison etc... */
   print("Is %$ less Than %$? %s\n", 
     obj0, obj1, lt(obj0, obj1) ? $S("Yes") : $S("No"));
+  
+  /* Type objects must remain around longer than their instances */
+  del(obj0); del(obj1);
+  
+  del_root(ExampleType);
   
   return 0;
   
