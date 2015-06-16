@@ -546,8 +546,8 @@ var alloc(var type);
 var alloc_raw(var type);
 var alloc_root(var type);
 
-#define alloc_stack(T) header_init( \
-  (char[sizeof(struct Header) + sizeof(struct T)]){0}, T, AllocStack)
+#define alloc_stack(T) ((struct T*)header_init( \
+  (char[sizeof(struct Header) + sizeof(struct T)]){0}, T, AllocStack))
 
 void dealloc(var self);
 void dealloc_raw(var self);
@@ -570,9 +570,9 @@ void dealloc_root(var self);
 var construct_with(var self, var args);
 var destruct(var self);
 
-#define new(T, ...) new_with(T, tuple(__VA_ARGS__))
-#define new_raw(T, ...) new_raw_with(T, tuple(__VA_ARGS__))
-#define new_root(T, ...) new_root_with(T, tuple(__VA_ARGS__))
+#define new(T, ...) ((struct T*)new_with(T, tuple(__VA_ARGS__)))
+#define new_raw(T, ...) ((struct T*)new_raw_with(T, tuple(__VA_ARGS__)))
+#define new_root(T, ...) ((struct T*)new_root_with(T, tuple(__VA_ARGS__)))
 
 var new_with(var type, var args);
 var new_raw_with(var type, var args);
