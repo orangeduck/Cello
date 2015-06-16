@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   foreach (t in threads) { call(t, mutex); }
   
   /* Wait for each Thread to finish */
-  foreach (t in threads) { wait(t); }
+  foreach (t in threads) { join(t); }
   
   return 0;
 }
