@@ -178,7 +178,7 @@ static bool Exception_Running(var self) {
 }
 
 #ifndef CELLO_NSTRACE
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
 
 static void Exception_Backtrace(void) {
   
@@ -199,7 +199,7 @@ static void Exception_Backtrace(void) {
   
 }
 
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
 
 static void Exception_Backtrace(void) {
   

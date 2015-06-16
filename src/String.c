@@ -287,7 +287,7 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
 
   struct String* s = self;
   
-#if defined(_WIN32)
+#ifdef CELLO_WINDOWS
   
   va_list va_tmp;
   va_copy(va_tmp, va);
@@ -311,7 +311,7 @@ static int String_Format_To(var self, int pos, const char* fmt, va_list va) {
   
   return vsprintf(s->val + pos, fmt, va); 
   
-#elif defined(__APPLE__)
+#elif defined(CELLO_MAC)
   
   va_list va_tmp;
   va_copy(va_tmp, va);

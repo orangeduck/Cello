@@ -73,9 +73,9 @@ struct Thread {
   bool is_main;
   bool is_running;
   
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   pthread_t thread;
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   DWORD id;
   HANDLE thread;
 #endif  
@@ -162,7 +162,7 @@ static void Thread_New(var self, var args) {
 static void Thread_Del(var self) {
   struct Thread* t = self;
 
-#ifdef _WIN32
+#ifdef CELLO_WINDOWS
   CloseHandle(t->thread);
 #endif
   
@@ -177,9 +177,9 @@ static int64_t Thread_C_Int(var self) {
     throw(ValueError, "Cannot get thread ID, thread not running!");
   }
   
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   return (int64_t)t->thread;
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   return (int64_t)t->id;
 #endif
   
@@ -203,7 +203,7 @@ static uint64_t Thread_Hash(var self) {
 
 static bool Thread_TLS_Key_Created = false;
 
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
 
 static pthread_key_t Thread_Key_Wrapper;
 
@@ -240,7 +240,7 @@ static var Thread_Init_Run(var self) {
   return x;
 }
 
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
 
 static DWORD Thread_Key_Wrapper;
 
@@ -259,7 +259,7 @@ static DWORD Thread_Init_Run(var self) {
   
   var ex = new_raw(Exception);
 
-  #ifndef CELLO_NGC
+#ifndef CELLO_NGC
   var bottom = NULL;
   var gc = new_raw(GC, $R(&bottom));
 #endif
@@ -295,7 +295,7 @@ static var Thread_Call(var self, var args) {
   
   /* Call Init Thread & Run */
   
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   
   int err = pthread_create(&t->thread, NULL, Thread_Init_Run, t);
   
@@ -311,7 +311,7 @@ static var Thread_Call(var self, var args) {
     throw(BusyError, "System is too busy to create thread");
   }
   
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   
   t->thread = CreateThread(NULL, 0,
     (LPTHREAD_START_ROUTINE)Thread_Init_Run, t, 0, &t->id);
@@ -336,9 +336,9 @@ static void Thread_Main_Del(void) {
 
 static var Thread_Current(void) {
   
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   var wrapper = pthread_getspecific(Thread_Key_Wrapper);
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   var wrapper = TlsGetValue(Thread_Key_Wrapper);
 #endif
   
@@ -351,7 +351,7 @@ static var Thread_Current(void) {
   ** Luckily we can test directly for the main
   ** thread on OSX using this non-portable method
   */
-#if defined(__APPLE__)
+#ifdef CELLO_MAC
   if (pthread_main_np()) { wrapper = NULL; }
 #endif
   
@@ -367,9 +367,9 @@ static var Thread_Current(void) {
     t->is_main = true;
     t->is_running = true;
     
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
     t->thread = pthread_self();
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
     t->thread = GetCurrentThread();
 #endif
 
@@ -388,11 +388,11 @@ static void Thread_Stop(var self) {
   struct Thread* t = self;
   if (not t->thread) { return; }
   
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   int err = pthread_kill(t->thread, SIGINT);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Stop"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   TerminateThread(t->thread, FALSE);
 #endif  
   
@@ -402,11 +402,11 @@ static void Thread_Wait(var self) {
   struct Thread* t = self;
   if (not t->thread) { return; }
   
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   int err = pthread_join(t->thread, NULL);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Join"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   WaitForSingleObject(t->thread, INFINITE);
 #endif
   
@@ -547,9 +547,9 @@ bool lock_try(var self) {
 }
 
 struct Mutex {
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   pthread_mutex_t mutex;
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   HANDLE mutex;
 #endif
 };
@@ -586,25 +586,25 @@ static struct Example* Mutex_Examples(void) {
 
 static void Mutex_New(var self, var args) {
   struct Mutex* m = self;
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   pthread_mutex_init(&m->mutex, NULL);
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   m->mutex = CreateMutex(NULL, false, NULL);
 #endif
 }
 
 static void Mutex_Del(var self) {
   struct Mutex* m = self;
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   pthread_mutex_destroy(&m->mutex);
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   CloseHandle(m->mutex);
 #endif
 }
 
 static void Mutex_Lock(var self) {
   struct Mutex* m = self;
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   int err = pthread_mutex_lock(&m->mutex);
   
   if (err is EINVAL)  {
@@ -614,7 +614,7 @@ static void Mutex_Lock(var self) {
   if (err is EDEADLK) {
     throw(ResourceError, "Attempt to relock already held mutex");
   }
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   WaitForSingleObject(m->mutex, INFINITE);
 #endif
   
@@ -622,14 +622,14 @@ static void Mutex_Lock(var self) {
 
 static bool Mutex_Lock_Try(var self) {
   struct Mutex* m = self;
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   int err = pthread_mutex_trylock(&m->mutex);
   if (err == EBUSY) { return false; }
   if (err is EINVAL) {
     throw(ValueError, "Invalid Argument to Mutex Lock Try");
   }
   return true;
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   return not (WaitForSingleObject(m->mutex, 0) is WAIT_TIMEOUT);
 #endif
   
@@ -637,11 +637,11 @@ static bool Mutex_Lock_Try(var self) {
 
 static void Mutex_Unlock(var self) {
   struct Mutex* m = cast(self, Mutex);
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(CELLO_UNIX)
   int err = pthread_mutex_unlock(&m->mutex);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Mutex Unlock"); }
   if (err is EPERM)  { throw(ResourceError, "Mutex cannot be held by caller"); }
-#elif defined(_WIN32)
+#elif defined(CELLO_WINDOWS)
   ReleaseMutex(m->mutex);
 #endif
   

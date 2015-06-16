@@ -2080,7 +2080,7 @@ PT_FUNC(test_thread_start) {
   
 }
 
-#if defined(CELLO_UNIX)
+#ifdef CELLO_UNIX
 #include <unistd.h>
 #endif
 

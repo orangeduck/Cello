@@ -75,29 +75,21 @@
 #define CELLO_CACHE_NUM 0
 #endif
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #define CELLO_WINDOWS
 #endif
 
-#if defined(__unix__)
+#ifdef __unix__
 #define CELLO_UNIX
 #define CELLO_LINUX
 #endif
 
-#if defined(__APPLE__)
+#ifdef __APPLE__
 #define CELLO_UNIX
 #define CELLO_MAC
 #endif
 
-#if defined(__clang__)
-#define CELLO_CLANG
-#endif
-
-#if defined(__GNUC__)
-#define CELLO_GCC
-#endif
-
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #define CELLO_MSC
 #define popen _popen
 #define pclose _pclose
