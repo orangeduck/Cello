@@ -10,7 +10,7 @@ that were previously impractical or awkward in C such as:
 * __Polymorphic Functions__
 * __Interfaces / Type Classes__
 * __Constructors / Destructors__
-* __Garbage Collection__
+* __Optional Garbage Collection__
 * __Exceptions__
 * __Reflection__
 
@@ -78,6 +78,7 @@ Learning Resources.
 
 Articles about its creation and internal workings.
 
+* [Best Improvements of Cello 2.0](http://libcello.org/learn/best-improvements-of-cello-2.0)
 * [A Fat Pointer Library](http://libcello.org/learn/a-fat-pointer-library)
 * [Cello vs C++ vs ObjC](http://libcello.org/learn/cello-vs-cpp-vs-objc)
 * [Benchmarks](http://libcello.org/learn/benchmarks)
@@ -154,9 +155,9 @@ those who want to explore what is possible in C.
 * __How does it work?__
 
 I recommend reading 
-[A Fat Pointer Library](http://libcello.org/learn/fatpointer) to get an overview of how Cello 
-works.You can also peek at the source code, which I'm told is fairly readable, 
-or ask me any questions you like via e-mail.
+[A Fat Pointer Library](http://libcello.org/learn/fatpointer) to get an 
+overview of how Cello works.You can also peek at the source code, which I'm 
+told is fairly readable, or ask me any questions you like via e-mail.
 
 * __Can it be used in Production?__
 

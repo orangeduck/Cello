@@ -101,6 +101,7 @@ bench: clean $(STATIC)
 
 examples: $(EXAMPLES_EXE)
 
+examples/%: CFLAGS += -Werror -g -ggdb
 examples/%: examples/%.c $(STATIC) | obj
 	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) $(LFLAGS) -o $@
 
@@ -108,7 +109,7 @@ examples/%: examples/%.c $(STATIC) | obj
 
 dist: all | $(PACKAGE)
 	cp -R examples include src tests LICENSE.md Makefile README.md $(PACKAGE)
-	tar -czf $(PACKAGE).tar.gz $(PACKAGE)
+	tar -czf $(PACKAGE).tar.gz $(PACKAGE) --exclude='*.exe' --exclude='*.pdb'
 
 $(PACKAGE):
 	mkdir -p $(PACKAGE)

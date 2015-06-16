@@ -1163,7 +1163,7 @@ PT_FUNC(test_mutex_lock) {
   }
   
   foreach (t in threads) {
-    wait(deref(t));
+    join(deref(t));
   }
   
   PT_ASSERT(eq(total, $I(5)));
@@ -1200,7 +1200,7 @@ PT_FUNC(test_mutex_start) {
   }
   
   foreach (t in threads) {
-    wait(deref(t));
+    join(deref(t));
   }
   
   PT_ASSERT(eq(total, $I(5)));
@@ -2028,7 +2028,7 @@ PT_FUNC(test_thread_call) {
   
   var x = new(Thread, $(Function, set_value));
   call(x, i);
-  wait(x);
+  join(x);
   
   PT_ASSERT(c_int(i) is 1);
   
@@ -2075,7 +2075,7 @@ PT_FUNC(test_thread_start) {
   
   /*
   ** TODO: Separate out Enter/Exit to Start/Stop.
-  ** For Threads With should do `wait` on stop
+  ** For Threads With should do `join` on stop
   */
   
 }
@@ -2107,7 +2107,7 @@ PT_FUNC(test_thread_exception) {
   call(t);
   cello_sleep(10);
   PT_ASSERT(len(current(Exception)) is 0);
-  wait(t);
+  join(t);
   
   del(t);
   

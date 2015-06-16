@@ -486,7 +486,7 @@ struct Current {
 struct Start {
   void (*start)(var);
   void (*stop)(var);
-  void (*wait)(var);
+  void (*join)(var);
   bool (*running)(var);
 };
 
@@ -709,7 +709,7 @@ var current(var type);
 
 void start(var self);
 void stop(var self);
-void wait(var self);
+void join(var self);
 bool running(var self);
 
 var start_in(var self);
@@ -750,17 +750,17 @@ void mark(var self, var gc, void(*f)(var,void*));
 
 extern var GC;
 
-int main_gc(int argc, char** argv);
-void main_exit_gc(void);
+int Cello_Main(int argc, char** argv);
+void Cello_Exit(void);
 
 #define main(...) \
   main(int argc, char** argv) { \
     var bottom = NULL; \
     new_raw(GC, $R(&bottom)); \
-    atexit(main_exit_gc); \
-    return main_gc(argc, argv); \
+    atexit(Cello_Exit); \
+    return Cello_Main(argc, argv); \
   }; \
-  int main_gc(__VA_ARGS__)
+  int Cello_Main(__VA_ARGS__)
 
 #endif
   

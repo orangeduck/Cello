@@ -178,11 +178,19 @@ static int64_t Thread_C_Int(var self) {
   }
   
 #if defined(__unix__) || defined(__APPLE__)
-  return t->thread;
+  return (int64_t)t->thread;
 #elif defined(_WIN32)
-  return t->id;
+  return (int64_t)t->id;
 #endif
   
+}
+
+static void Thread_Assign(var self, var obj) {
+  struct Thread* t = self;
+  struct Thread* o = cast(obj, Thread);
+  t->func = o->func;
+  t->tls = t->tls ? t->tls : alloc_raw(Table);
+  assign(t->tls, o->tls);
 }
 
 static int Thread_Cmp(var self, var obj) {
@@ -449,6 +457,7 @@ var Thread = Cello(Thread,
     Thread_Name, Thread_Brief, Thread_Description, 
     NULL, Thread_Examples, NULL),
   Instance(New,     Thread_New, Thread_Del),
+  Instance(Assign,  Thread_Assign),
   Instance(Cmp,     Thread_Cmp),
   Instance(Hash,    Thread_Hash),
   Instance(Call,    Thread_Call),

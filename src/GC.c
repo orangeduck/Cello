@@ -542,7 +542,7 @@ var GC = Cello(GC,
   Instance(Show,    GC_Show, NULL),
   Instance(Current, GC_Current));
 
-void main_exit_gc(void) {
+void Cello_Exit(void) {
   del_raw(current(GC));
 }
 

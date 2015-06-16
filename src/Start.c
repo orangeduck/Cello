@@ -25,7 +25,7 @@ static const char* Start_Definition(void) {
     "struct Start {\n"
     "  void (*start)(var);\n"
     "  void (*stop)(var);\n"
-    "  void (*wait)(var);\n"
+    "  void (*join)(var);\n"
     "  bool (*running)(var);\n"
     "};\n";
 }
@@ -68,8 +68,8 @@ static struct Method* Start_Methods(void) {
       "void stop(var self);",
       "Stop the object `self`."
     }, {
-      "wait", 
-      "void wait(var self);",
+      "join", 
+      "void join(var self);",
       "Block and wait for the object `self` to stop."
     }, {
       "running", 
@@ -93,8 +93,8 @@ void stop(var self) {
   method(self, Start, stop);
 }
 
-void wait(var self) {
-  method(self, Start, wait);
+void join(var self) {
+  method(self, Start, join);
 }
 
 bool running(var self) {
