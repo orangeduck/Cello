@@ -13,7 +13,7 @@ static const char* Format_Description(void) {
     "Format abstracts the class of operations such as `scanf`, `sprintf` and "
     "`fprintf` with matching semantics. It provides general `printf` and "
     "`scanf` functionality for several different types objects in a "
-    "uniform way. This class is essentially an inbetween class, used by the "
+    "uniform way. This class is essentially an in-between class, used by the "
     "`Show` class to read and write output."
     "\n\n"
     "It is important to note that the semantics of these operations match "
@@ -192,7 +192,7 @@ static struct Method* Show_Methods(void) {
       "int println_with(const char* fmt, var args);\n"
       "int print_to_with(var out, int pos, const char* fmt, var args);",
       "Print the format string `fmt` either to `stdout` or to the object `out` "
-      "at positions `pos`."
+      "at positions `pos`. Returns new position in output."
     }, {
       "scan", 
       "#define scan(fmt, ...)\n"
@@ -202,7 +202,7 @@ static struct Method* Show_Methods(void) {
       "int scanln_with(const char* fmt, var args);\n"
       "int scan_from_with(var input, int pos, const char* fmt, var args);",
       "Scan the format string `fmt` either from `stdout` or from the object "
-      "`input` at position `pos`."
+      "`input` at position `pos`. Returns new position in output."
     }, {NULL, NULL, NULL}
   };
   
@@ -234,10 +234,10 @@ int print_with(const char* fmt, var args) {
 }
 
 int println_with(const char* fmt, var args) {
-  int ret = 0;
-  ret = print_to_with($(File, stdout), ret, fmt, args);
-  ret = print_to($(File, stdout), ret, "\n");
-  return ret;
+  int pos = 0;
+  pos = print_to_with($(File, stdout), pos, fmt, args);
+  pos = print_to($(File, stdout), pos, "\n");
+  return pos;
 }
 
 int print_to_with(var out, int pos, const char* fmt, var args) {
@@ -344,10 +344,10 @@ int scan_with(const char* fmt, var args) {
 }
 
 int scanln_with(const char* fmt, var args) {
-  int ret = 0;
-  ret = scan_from_with($(File, stdin), ret, fmt, args);
-  ret = scan_from($(File, stdin), ret, "\n");
-  return ret;
+  int pos = 0;
+  pos = scan_from_with($(File, stdin), pos, fmt, args);
+  pos = scan_from($(File, stdin), pos, "\n");
+  return pos;
 }
 
 int scan_from_with(var input, int pos, const char* fmt, var args) {
