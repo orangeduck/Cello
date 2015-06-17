@@ -111,7 +111,7 @@ static struct Example* Thread_Examples(void) {
       "\n"
       "var x = new(Thread, $(Function, set_value));\n"
       "call(x, i);\n"
-      "wait(x);\n"
+      "join(x);\n"
       "\n"
       "show(i); /* 1 */\n"
     }, {
@@ -140,7 +140,7 @@ static struct Example* Thread_Examples(void) {
       "}\n"
       "\n"
       "foreach (t in threads) {\n"
-      "  wait(deref(t));\n"
+      "  join(deref(t));\n"
       "}\n"
       "\n"
       "show(total); /* 3 */\n"
@@ -398,7 +398,7 @@ static void Thread_Stop(var self) {
   
 }
 
-static void Thread_Wait(var self) {
+static void Thread_Join(var self) {
   struct Thread* t = self;
   if (not t->thread) { return; }
   
@@ -463,7 +463,7 @@ var Thread = Cello(Thread,
   Instance(Call,    Thread_Call),
   Instance(Current, Thread_Current),
   Instance(Mark,    Thread_Mark),
-  Instance(Start,   Thread_Start, Thread_Stop, Thread_Wait, Thread_Running),
+  Instance(Start,   Thread_Start, Thread_Stop, Thread_Join, Thread_Running),
   Instance(C_Int,   Thread_C_Int),
   Instance(Get,     Thread_Get, Thread_Set, Thread_Mem, Thread_Rem));
 
