@@ -441,7 +441,7 @@ static struct Method* Slice_Methods(void) {
       "Construct a `Slice` object on the stack over iterable `I`."
     }, {
       "reverse",
-      "#define reversed(I)"
+      "#define reverse(I)",
       "Construct a `Slice` object that iterates over iterable `I` in reverse "
       "order."
     }, {NULL, NULL, NULL}
