@@ -18,17 +18,39 @@ EXAMPLES := $(wildcard examples/*.c)
 EXAMPLES_OBJ := $(addprefix obj/,$(notdir $(EXAMPLES:.c=.o)))
 EXAMPLES_EXE := $(EXAMPLES:.c=)
 
-CFLAGS = -I ./include -std=gnu99 -Wall -Wno-unused
+CFLAGS = -I ./include -std=gnu99 -Wall -Wno-unused -g -ggdb
 
 PLATFORM := $(shell uname)
 COMPILER := $(shell $(CC) -v 2>&1 )
 
-ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
+ifeq ($(findstring CYGWIN,$(PLATFORM)),CYGWIN)
+	PREFIX ?= /usr/local
+	
+	DYNAMIC = libCello.so
+	STATIC = libCello.a
+	LIBS = -lpthread -lm
+	
+	ifneq (,$(wildcard ${LIBDIR}/libdbghelp.a))
+		LIBS += -lDbgHelp
+	else
+		CFLAGS += -DCELLO_NSTRACE
+	endif
+  
+	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
+	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h ${INCDIR}
+	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
+	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
+else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	PREFIX ?= C:/MinGW64/x86_64-w64-mingw32
 
 	DYNAMIC = libCello.dll
 	STATIC = libCello.a
-	LIBS = -lDbgHelp
+  
+	ifneq (,$(wildcard ${LIBDIR}/libdbghelp.a))
+		LIBS += -lDbgHelp
+	else
+		CFLAGS += -DCELLO_NSTRACE
+	endif
 	
 	INSTALL_LIB = cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
 	INSTALL_INC = cp -r include/Cello.h $(INCDIR)
@@ -39,11 +61,17 @@ else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
 
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
-	LIBS = -lpthread -lexecinfo -lm
+	LIBS = -lpthread -lm
 
 	CFLAGS += -fPIC
-	LFLAGS = -rdynamic
 
+	ifneq (,$(wildcard ${LIBDIR}/libexecinfo.a))
+		LIBS += -lexecinfo
+		LFLAGS += -rdynamic
+	else
+		CFLAGS += -DCELLO_NSTRACE
+	endif
+  
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
 	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h ${INCDIR}
 	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
@@ -53,11 +81,17 @@ else
 
 	DYNAMIC = libCello.so
 	STATIC = libCello.a
-	LIBS = -lpthread -ldl -lm
+	LIBS = -lpthread -lm
 
 	CFLAGS += -fPIC
-	LFLAGS = -rdynamic
-
+  
+	ifneq (,$(wildcard ${LIBDIR}/libexecinfo.a))
+		LIBS += -lexecinfo
+		LFLAGS += -rdynamic
+	else
+		CFLAGS += -DCELLO_NSTRACE
+	endif
+  
 	INSTALL_LIB = mkdir -p ${LIBDIR} && cp -f ${STATIC} ${LIBDIR}/$(STATIC)
 	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h ${INCDIR}
 	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
@@ -101,7 +135,7 @@ bench: clean $(STATIC)
 
 examples: $(EXAMPLES_EXE)
 
-examples/%: CFLAGS += -Werror -g -ggdb
+examples/%: CFLAGS += -Werror
 examples/%: examples/%.c $(STATIC) | obj
 	$(CC) $< $(STATIC) $(CFLAGS) $(LIBS) $(LFLAGS) -o $@
 
@@ -117,8 +151,7 @@ $(PACKAGE):
 # Clean
 
 clean:
-	rm -f $(OBJ) $(TESTS_OBJ) $(EXAMPLES_OBJ) $(STATIC) $(DYNAMIC)
-	rm -f test
+	rm -f $(OBJ) $(TESTS_OBJ) $(EXAMPLES_OBJ) $(STATIC) $(DYNAMIC) tests/test
 
 # Install
 
