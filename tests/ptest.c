@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <time.h>
-#include <unistd.h>
+#if defined(CELLO_UNIX)
+# include <unistd.h>
+#endif
 
 /* Globals */
 
