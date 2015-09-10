@@ -181,6 +181,8 @@ static int64_t Thread_C_Int(var self) {
   return (int64_t)t->thread;
 #elif defined(CELLO_WINDOWS)
   return (int64_t)t->id;
+#else
+  return 0;
 #endif
   
 }
@@ -283,6 +285,12 @@ static var Thread_Call(var self, var args) {
   
   struct Thread* t = self;
   
+  t->args = assign(alloc_raw(type_of(args)), args);  
+  
+  /* Call Init Thread & Run */
+  
+#if defined(CELLO_UNIX)
+  
   /* Setup Thread Local Storage */
   
   if (not Thread_TLS_Key_Created) {
@@ -290,12 +298,6 @@ static var Thread_Call(var self, var args) {
     Thread_TLS_Key_Created = true;
     atexit(Thread_TLS_Key_Delete);
   }
-  
-  t->args = assign(alloc_raw(type_of(args)), args);  
-  
-  /* Call Init Thread & Run */
-  
-#if defined(CELLO_UNIX)
   
   int err = pthread_create(&t->thread, NULL, Thread_Init_Run, t);
   
@@ -313,12 +315,24 @@ static var Thread_Call(var self, var args) {
   
 #elif defined(CELLO_WINDOWS)
   
+  /* Setup Thread Local Storage */
+  
+  if (not Thread_TLS_Key_Created) {
+    Thread_TLS_Key_Create();
+    Thread_TLS_Key_Created = true;
+    atexit(Thread_TLS_Key_Delete);
+  }
+  
   t->thread = CreateThread(NULL, 0,
     (LPTHREAD_START_ROUTINE)Thread_Init_Run, t, 0, &t->id);
   
   if (t->thread is NULL) {
     throw(ValueError, "Unable to Create WinThread");
   }
+  
+#else
+  
+  throw(ResourceError, "Unsupported Threading Environment");
   
 #endif
   
@@ -340,6 +354,8 @@ static var Thread_Current(void) {
   var wrapper = pthread_getspecific(Thread_Key_Wrapper);
 #elif defined(CELLO_WINDOWS)
   var wrapper = TlsGetValue(Thread_Key_Wrapper);
+#else
+  var wrapper = NULL;
 #endif
   
   /*
@@ -386,13 +402,14 @@ static void Thread_Start(var self) {
 
 static void Thread_Stop(var self) {
   struct Thread* t = self;
-  if (not t->thread) { return; }
   
 #if defined(CELLO_UNIX)
+  if (not t->thread) { return; }
   int err = pthread_kill(t->thread, SIGINT);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Stop"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
 #elif defined(CELLO_WINDOWS)
+  if (not t->thread) { return; }
   TerminateThread(t->thread, FALSE);
 #endif  
   
@@ -400,13 +417,14 @@ static void Thread_Stop(var self) {
 
 static void Thread_Join(var self) {
   struct Thread* t = self;
-  if (not t->thread) { return; }
   
 #if defined(CELLO_UNIX)
+  if (not t->thread) { return; }
   int err = pthread_join(t->thread, NULL);
   if (err is EINVAL) { throw(ValueError, "Invalid Argument to Thread Join"); }
   if (err is ESRCH)  { throw(ValueError, "Invalid Thread"); }
 #elif defined(CELLO_WINDOWS)
+  if (not t->thread) { return; }
   WaitForSingleObject(t->thread, INFINITE);
 #endif
   
@@ -631,6 +649,8 @@ static bool Mutex_Lock_Try(var self) {
   return true;
 #elif defined(CELLO_WINDOWS)
   return not (WaitForSingleObject(m->mutex, 0) is WAIT_TIMEOUT);
+#else
+  return true;
 #endif
   
 }

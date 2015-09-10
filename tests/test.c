@@ -2890,13 +2890,17 @@ int main(int argc, char** argv) {
   pt_add_suite(suite_int);
   pt_add_suite(suite_list);
   pt_add_suite(suite_map);
+#if defined(CELLO_WINDOWS) || defined(CELLO_UNIX)
   pt_add_suite(suite_mutex);
+#endif
   pt_add_suite(suite_range);
   pt_add_suite(suite_ref);
   pt_add_suite(suite_slice);
   pt_add_suite(suite_string);
   pt_add_suite(suite_table);
+#if defined(CELLO_WINDOWS) || defined(CELLO_UNIX)
   pt_add_suite(suite_thread);
+#endif
   pt_add_suite(suite_tree);
   pt_add_suite(suite_tuple);
   pt_add_suite(suite_type);
