@@ -17,12 +17,12 @@ function create_objects(depth)
         return;
     end
   
-    for i=0,10 do
+    for i = 1, 10 do
       create_objects(depth+1)
     end
 end
 
-for i=0, 10000 do
+for i = 1, 10000 do
     create_objects(0)
 end
 
