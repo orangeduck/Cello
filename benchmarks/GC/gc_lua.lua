@@ -1,6 +1,6 @@
 
 function Int () 
-  return {val=0}
+  return {}
 end
 
 function create_objects(depth)
