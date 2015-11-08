@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 
   /* Stack objects are created using "$" */
   var i0 = $(Int, 5);
-  var i2 = $(Int, 3);
+  var i1 = $(Int, 3);
   var i2 = $(Int, 4);
 
   /* Heap objects are created using "new" */
