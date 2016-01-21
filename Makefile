@@ -64,7 +64,7 @@ else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	
 	INSTALL_LIB = cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
 	INSTALL_INC = cp -r include/Cello.h $(INCDIR)
-	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
+	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC); rm -f ${BINDIR}/$(DYNAMIC)
 	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
 else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
 	PREFIX ?= /usr/local
