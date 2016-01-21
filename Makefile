@@ -43,10 +43,13 @@ ifeq ($(findstring CYGWIN,$(PLATFORM)),CYGWIN)
 else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	# MSYS2
 	ifeq ($(findstring MINGW32,$(MSYSTEM)),MINGW32)
+		CC = i686-w64-mingw32-gcc
 		PREFIX ?= /mingw32
 	else ifeq ($(findstring MINGW64,$(MSYSTEM)),MINGW64)
+		CC = x86_64-w64-mingw32-gcc
 		PREFIX ?= /mingw64
 	else ifeq ($(findstring MSYS,$(MSYSTEM)),MSYS)
+		CC = gcc
 		PREFIX ?= /usr
 	else
 		# MinGW64 mingw-builds
