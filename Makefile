@@ -80,8 +80,8 @@ else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 		PCFCFLAGS += -DCELLO_NSTRACE
 	endif
 	
-	INSTALL_LIB = cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
-	INSTALL_INC = cp -r include/Cello.h $(INCDIR)
+	INSTALL_LIB = mkdir -p ${LIBDIR} && cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
+	INSTALL_INC = mkdir -p ${INCDIR} && cp -r include/Cello.h $(INCDIR)
 	INSTALL_PCF = mkdir -p ${PCFDIR} && cp -f $(PCF) ${PCFDIR}/$(PCF)
 	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC); rm -f ${BINDIR}/$(DYNAMIC)
 	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
