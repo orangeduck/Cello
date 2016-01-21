@@ -41,7 +41,17 @@ ifeq ($(findstring CYGWIN,$(PLATFORM)),CYGWIN)
 	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
 	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
 else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
-	PREFIX ?= C:/MinGW64/x86_64-w64-mingw32
+	# MSYS2
+	ifeq ($(findstring MINGW32,$(MSYSTEM)),MINGW32)
+		PREFIX ?= /mingw32
+	else ifeq ($(findstring MINGW64,$(MSYSTEM)),MINGW64)
+		PREFIX ?= /mingw64
+	else ifeq ($(findstring MSYS,$(MSYSTEM)),MSYS)
+		PREFIX ?= /usr
+	else
+		# MinGW64 mingw-builds
+		prefix ?= c:/mingw64/x86_64-w64-mingw32
+	endif
 
 	DYNAMIC = libCello.dll
 	STATIC = libCello.a
