@@ -41,7 +41,20 @@ ifeq ($(findstring CYGWIN,$(PLATFORM)),CYGWIN)
 	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
 	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
 else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
-	PREFIX ?= C:/MinGW64/x86_64-w64-mingw32
+	# MSYS2
+	ifeq ($(findstring MINGW32,$(MSYSTEM)),MINGW32)
+		CC = i686-w64-mingw32-gcc
+		PREFIX ?= /mingw32
+	else ifeq ($(findstring MINGW64,$(MSYSTEM)),MINGW64)
+		CC = x86_64-w64-mingw32-gcc
+		PREFIX ?= /mingw64
+	else ifeq ($(findstring MSYS,$(MSYSTEM)),MSYS)
+		CC = gcc
+		PREFIX ?= /usr
+	else
+		# MinGW64 mingw-builds
+		prefix ?= c:/mingw64/x86_64-w64-mingw32
+	endif
 
 	DYNAMIC = libCello.dll
 	STATIC = libCello.a
@@ -54,7 +67,7 @@ else ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
 	
 	INSTALL_LIB = cp $(STATIC) $(LIBDIR)/$(STATIC); cp $(DYNAMIC) $(BINDIR)/$(DYNAMIC)
 	INSTALL_INC = cp -r include/Cello.h $(INCDIR)
-	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC)
+	UNINSTALL_LIB = rm -f ${LIBDIR}/$(STATIC); rm -f ${BINDIR}/$(DYNAMIC)
 	UNINSTALL_INC = rm -f ${INCDIR}/Cello.h
 else ifeq ($(findstring FreeBSD,$(PLATFORM)),FreeBSD)
 	PREFIX ?= /usr/local
