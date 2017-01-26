@@ -350,6 +350,12 @@ static void Thread_Main_Del(void) {
 
 static var Thread_Current(void) {
   
+  if (not Thread_TLS_Key_Created) {
+    Thread_TLS_Key_Create();
+    Thread_TLS_Key_Created = true;
+    atexit(Thread_TLS_Key_Delete);
+  }
+  
 #if defined(CELLO_UNIX)
   var wrapper = pthread_getspecific(Thread_Key_Wrapper);
 #elif defined(CELLO_WINDOWS)
