@@ -511,7 +511,7 @@ static const char* Lock_Definition(void) {
     "struct Lock {\n"
     "  void (*lock)(var);\n"
     "  void (*unlock)(var);\n"
-    "  bool (*lock_try)(var);\n"
+    "  bool (*trylock)(var);\n"
     "};\n";
 }
 
@@ -523,8 +523,8 @@ static struct Method* Lock_Methods(void) {
       "void lock(var self);",
       "Wait until a lock can be aquired on object `self`."
     }, {
-      "lock_try", 
-      "bool lock_try(var self);",
+      "trylock", 
+      "bool trylock(var self);",
       "Try to acquire a lock on object `self`. Returns `true` on success and "
       "`false` if the resource is busy."
     }, {
@@ -566,8 +566,8 @@ void unlock(var self) {
   method(self, Lock, unlock);
 }
 
-bool lock_try(var self) {
-  return method(self, Lock, lock_try);
+bool trylock(var self) {
+  return method(self, Lock, trylock);
 }
 
 struct Mutex {
@@ -644,7 +644,7 @@ static void Mutex_Lock(var self) {
   
 }
 
-static bool Mutex_Lock_Try(var self) {
+static bool Mutex_Trylock(var self) {
   struct Mutex* m = self;
 #if defined(CELLO_UNIX)
   int err = pthread_mutex_trylock(&m->mutex);
@@ -677,6 +677,6 @@ var Mutex = Cello(Mutex,
   Instance(Doc, 
     Mutex_Name, Mutex_Brief, Mutex_Description, NULL, Mutex_Examples, NULL),
   Instance(New,    Mutex_New, Mutex_Del),
-  Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Lock_Try),
+  Instance(Lock,   Mutex_Lock, Mutex_Unlock, Mutex_Trylock),
   Instance(Start,  Mutex_Lock, Mutex_Unlock, NULL));
 

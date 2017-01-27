@@ -485,7 +485,7 @@ struct Start {
 struct Lock {
   void (*lock)(var);
   void (*unlock)(var);
-  bool (*lock_try)(var);
+  bool (*trylock)(var);
 };
 
 struct Mark {
@@ -712,7 +712,7 @@ var stop_in(var self);
 #define with_in(X, S) for(var X = start_in(S); X isnt NULL; X = stop_in(X))
 
 void lock(var self);
-bool lock_try(var self);
+bool trylock(var self);
 void unlock(var self);
 
 #define try { jmp_buf __env; exception_try(&__env); if (!setjmp(__env))
