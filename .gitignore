@@ -11,6 +11,7 @@
 *.exe
 *.gz
 *.class
+Cello.pc
 
 # Tests
 test.bin
