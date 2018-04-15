@@ -277,6 +277,12 @@ static void GC_Rem_Ptr(struct GC* gc, var ptr) {
 }
 
 static void GC_Mark_Item(struct GC* gc, void* ptr);
+static void GC_Recurse(struct GC* gc, var ptr);
+
+static void GC_Mark_And_Recurse(struct GC* gc, void* ptr) {
+  GC_Mark_Item(gc, ptr);
+  GC_Recurse(gc, ptr);
+}
 
 static void GC_Recurse(struct GC* gc, var ptr) {
   
@@ -289,7 +295,7 @@ static void GC_Recurse(struct GC* gc, var ptr) {
     
   struct Mark* m = type_instance(type, Mark);
   if (m and m->mark) {
-    m->mark(ptr, gc, (void(*)(var,void*))GC_Mark_Item);
+    m->mark(ptr, gc, (void(*)(var,void*))GC_Mark_And_Recurse);
     return;
   }
     
