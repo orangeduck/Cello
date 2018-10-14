@@ -196,7 +196,7 @@ static void Type_New(var self, var args) {
   }
   
   t[cache_entries+0] = (struct Type){ NULL, "__Name", (var)c_str(name) };
-  t[cache_entries+1] = (struct Type){ NULL, "__Size", (var)c_int(size) };
+  t[cache_entries+1] = (struct Type){ NULL, "__Size", (var)(uintptr_t)c_int(size) };
   
   for(size_t i = 2; i < len(args); i++) {
     var ins = get(args, $I(i));
