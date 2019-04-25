@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.8.0)
+
+cello_add_example(cello_world src/cello_world.c)
+cello_add_example(cello_help src/help.c)
+cello_add_example(cello_iteration src/iteration.c)
+cello_add_example(cello_newtype src/newtype.c)
+cello_add_example(cello_object src/object.c)
+cello_add_example(cello_ranges src/ranges.c)
+cello_add_example(cello_table src/table.c)
+cello_add_example(cello_threads src/threads.c)
