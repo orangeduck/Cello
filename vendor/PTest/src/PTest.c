@@ -1,4 +1,4 @@
-#include "ptest.h"
+#include <PTest/PTest.h>
 
 #include <stdio.h>
 #include <stdlib.h>
