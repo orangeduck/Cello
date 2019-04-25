@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include <Cello/Cello.h>
 
 var _ = CelloEmpty(_);
 var Terminal = CelloEmpty(Terminal);

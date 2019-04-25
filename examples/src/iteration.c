@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include <Cello/Cello.h>
 
 int main(int argc, char** argv) {
 

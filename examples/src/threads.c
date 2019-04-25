@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include <Cello/Cello.h>
 
 /* Threaded Callback */
 var say_hello(var args) {

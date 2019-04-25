@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include <Cello/Cello.h>
 
 /* Type Variable */
 static var ExampleType;

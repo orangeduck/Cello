@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include <Cello/Cello.h>
 
 static const char* C_Int_Name(void) {
   return "C_Int";

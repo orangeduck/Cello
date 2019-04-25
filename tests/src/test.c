@@ -1,5 +1,5 @@
-#include "../include/Cello.h"
-#include "ptest.h"
+#include <Cello/Cello.h>
+#include <PTest/PTest.h>
 
 /* Array */
 
@@ -406,7 +406,7 @@ PT_FUNC(test_file_format) {
   
   var f0 = $(File, NULL);
   
-  sopen(f0, $S("./tests/test.txt"), $S("w"));
+  sopen(f0, $S("test.txt"), $S("w"));
   format_to(f0, 0, "%s", "Hello World!");
   sclose(f0);  
   
@@ -414,7 +414,7 @@ PT_FUNC(test_file_format) {
 
 PT_FUNC(test_file_new) {
   
-  var f0 = new(File, $S("./tests/test.bin"), $S("w")); 
+  var f0 = new(File, $S("test.bin"), $S("w")); 
   var f1 = $(File, NULL);
   
   PT_ASSERT(f0);
@@ -428,7 +428,7 @@ PT_FUNC(test_file_new) {
 
 PT_FUNC(test_file_start) {
   
-  struct File* file = new(File, $S("./tests/test.bin"), $S("w"));
+  struct File* file = new(File, $S("test.bin"), $S("w"));
   with (f0 in file) {
     PT_ASSERT(f0);
   }; 
@@ -447,11 +447,11 @@ PT_FUNC(test_file_stream) {
   
   var f0 = $(File, NULL);
   
-  sopen(f0, $S("./tests/test.txt"), $S("w"));
+  sopen(f0, $S("test.txt"), $S("w"));
   swrite(f0, testoutput1, sizeof(testoutput1));
   sclose(f0);  
   
-  sopen(f0, $S("./tests/test.txt"), $S("r"));
+  sopen(f0, $S("test.txt"), $S("r"));
   sread(f0, testinput, sizeof(testoutput1));
   sclose(f0);
   

@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include <Cello/Cello.h>
 
 static const char* Tree_Name(void) {
   return "Tree";

@@ -1,4 +1,4 @@
-#include "Cello.h"
+#include <Cello/Cello.h>
 
 struct Header* header(var self) {
   return (struct Header*)((char*)self - sizeof(struct Header));
