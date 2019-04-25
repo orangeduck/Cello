@@ -26,3 +26,5 @@ libCello*
 
 # VIM related
 .clang_complete
+
+\.vscode/
