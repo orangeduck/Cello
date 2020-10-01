@@ -69,14 +69,14 @@ int main(int argc, char** argv) {
 Articles
 --------
 
-Learning Resources.
+Learning Resources:
 
 * [Installation](http://libcello.org/learn/installation)
 * [Cello World](http://libcello.org/learn/cello-world)
 * [Quickstart](http://libcello.org/learn/quickstart)
 * [Common Queries / Pitfalls](http://libcello.org/learn/queries-and-pitfalls)
 
-Articles about its creation and internal workings.
+Articles about its creation and internal workings:
 
 * [Best Improvements of Cello 2.0](http://libcello.org/learn/best-improvements-of-cello-2.0)
 * [A Fat Pointer Library](http://libcello.org/learn/a-fat-pointer-library)
@@ -156,7 +156,7 @@ those who want to explore what is possible in C.
 
 I recommend reading 
 [A Fat Pointer Library](http://libcello.org/learn/a-fat-pointer-library) to get an 
-overview of how Cello works.You can also peek at the source code, which I'm 
+overview of how Cello works. You can also peek at the source code, which I'm 
 told is fairly readable, or ask me any questions you like via e-mail.
 
 * __Can it be used in Production?__
