@@ -1,6 +1,7 @@
-#include "Cello.h"
+#include <stdio.h>
 
-int main(int argc, char** argv) {
-  println("Cello World!");
+int main() 
+{
+  println("Hello World!");
   return 0;
 }
