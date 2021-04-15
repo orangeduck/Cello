@@ -1,6 +1,7 @@
 #include <vector>
 #include <cmath>
 
+#undef M_PI
 #define M_PI 3.14159265358979323846
 
 static const double solar_mass = 4 * M_PI * M_PI;

@@ -26,3 +26,27 @@ libCello*
 
 # VIM related
 .clang_complete
+
+# benchmark programs
+benchmarks/Dict/dict_c
+benchmarks/Dict/dict_cello
+benchmarks/Dict/dict_cpp
+benchmarks/ext/genint
+benchmarks/GC/gc_c
+benchmarks/GC/gc_cello
+benchmarks/GC/gc_cpp
+benchmarks/List/list_c
+benchmarks/List/list_cello
+benchmarks/List/list_cpp
+benchmarks/Map/map_c
+benchmarks/Map/map_cello
+benchmarks/Map/map_cpp
+benchmarks/Matmul/matmul_c
+benchmarks/Matmul/matmul_cello
+benchmarks/Matmul/matmul_cpp
+benchmarks/Nbodies/nbodies_c
+benchmarks/Nbodies/nbodies_cello
+benchmarks/Nbodies/nbodies_cpp
+benchmarks/Sudoku/sudoku_c
+benchmarks/Sudoku/sudoku_cello
+benchmarks/Sudoku/sudoku_cpp

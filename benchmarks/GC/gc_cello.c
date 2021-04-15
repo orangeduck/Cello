@@ -36,5 +36,5 @@ int main(int argc, char** argv) {
   for (size_t i = 0; i < 100; i++) {
     create_objects(0);
   }
-  
+  return 0;  
 }

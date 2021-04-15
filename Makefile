@@ -139,10 +139,15 @@ obj/%.o: tests/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
 
 # Benchmarks
-
-bench: CFLAGS += -DCELLO_NDEBUG -pg
+ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
+bench: CFLAGS += -DCELLO_NDEBUG -O3
+bench: clean $(STATIC)
+	cd benchmarks; ./benchmark.sh; cd ../
+else
+bench: CFLAGS += -DCELLO_NDEBUG -pg -O3
 bench: clean $(STATIC)
 	cd benchmarks; ./benchmark; cd ../
+endif
 
 # Examples
 
