@@ -201,7 +201,7 @@ static struct Method* Show_Methods(void) {
       "int scan_with(const char* fmt, var args);\n"
       "int scanln_with(const char* fmt, var args);\n"
       "int scan_from_with(var input, int pos, const char* fmt, var args);",
-      "Scan the format string `fmt` either from `stdout` or from the object "
+      "Scan the format string `fmt` either from `stdin` or from the object "
       "`input` at position `pos`. Returns new position in output."
     }, {NULL, NULL, NULL}
   };
