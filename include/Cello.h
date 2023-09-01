@@ -742,17 +742,48 @@ void mark(var self, var gc, void(*f)(var,void*));
 
 extern var GC;
 
-int Cello_Main(int argc, char** argv);
 void Cello_Exit(void);
 
-#define main(...) \
-  main(int argc, char** argv) { \
+#define MACRO_CONCAT0(x, y) x##y
+#define MACRO_CONCAT(x, y) MACRO_CONCAT0(x, y)
+
+#define GET_5TH_ARG(_1, _2, _3, _4, _5, ...) _5
+#define VA_NUMS(...) GET_5TH_ARG(_, ##__VA_ARGS__, 3, 2, 1, 0)
+
+#define main0(...) \
+  Cello_Main(); \
+  int main() { \
+    var bottom = NULL; \
+    new_raw(GC, $R(&bottom)); \
+    atexit(Cello_Exit); \
+    return Cello_Main(); \
+  }; \
+  int Cello_Main()
+
+#define main1(...) main0(__VA_ARGS__)
+
+#define main2(...) \
+  Cello_Main(int, char**); \
+  int main(int argc, char** argv) { \
     var bottom = NULL; \
     new_raw(GC, $R(&bottom)); \
     atexit(Cello_Exit); \
     return Cello_Main(argc, argv); \
   }; \
   int Cello_Main(__VA_ARGS__)
+
+#define main3(...) \
+  Cello_Main(int, char**, char**); \
+  int main(int argc, char** argv, char** envp) { \
+    var bottom = NULL; \
+    new_raw(GC, $R(&bottom)); \
+    atexit(Cello_Exit); \
+    return Cello_Main(argc, argv, envp); \
+  }; \
+  int Cello_Main(__VA_ARGS__)
+
+#define main(...) \
+  MACRO_CONCAT(main, VA_NUMS(__VA_ARGS__))(__VA_ARGS__)
 
 #endif
   
