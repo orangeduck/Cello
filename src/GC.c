@@ -335,7 +335,7 @@ static void GC_Mark_Item(struct GC* gc, void* ptr) {
   
 }
 
-static void GC_Mark_Stack(struct GC* gc) {
+static void CELLO_NASAN GC_Mark_Stack(struct GC* gc) {
   
   var stk = NULL;
   var bot = gc->bottom;
