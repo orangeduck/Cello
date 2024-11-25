@@ -276,10 +276,11 @@ static void GC_Rem_Ptr(struct GC* gc, var ptr) {
   
 }
 
-static void GC_Mark_Item(struct GC* gc, void* ptr);
+static void GC_Mark_Item(void* _gc, void* ptr);
 static void GC_Recurse(struct GC* gc, var ptr);
 
-static void GC_Mark_And_Recurse(struct GC* gc, void* ptr) {
+static void GC_Mark_And_Recurse(void* _gc, void* ptr) {
+  struct GC* gc = _gc;
   GC_Mark_Item(gc, ptr);
   GC_Recurse(gc, ptr);
 }
@@ -308,8 +309,8 @@ static void GC_Recurse(struct GC* gc, var ptr) {
 
 static void GC_Print(struct GC* gc);
 
-static void GC_Mark_Item(struct GC* gc, void* ptr) {
-  
+static void GC_Mark_Item(void* _gc, void* ptr) {
+  struct GC* gc = _gc;
   uintptr_t pval = (uintptr_t)ptr;
   if (pval % sizeof(var) isnt 0
   or  pval < gc->minptr
