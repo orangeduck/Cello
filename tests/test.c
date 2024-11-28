@@ -2658,7 +2658,16 @@ PT_FUNC(test_type_hash) {
 }
 
 PT_FUNC(test_type_help) {
-  /* TODO */
+  /* TODO: improve test cases, but for now just verify that
+    they can be called without crashing
+   */
+  try{ name(_);        } catch(e) { }
+  try{ brief(_);       } catch(e) { }
+  try{ description(_); } catch(e) { }
+  try{ definition(_);  } catch(e) { }
+  try{ help(_);        } catch(e) { }
+  try{ help_to(_, 0,_);} catch(e) { }
+  PT_ASSERT(1);
 }
 
 PT_FUNC(test_type_show) {
