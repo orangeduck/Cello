@@ -88,7 +88,7 @@ var Doc = Cello(Doc,
     
 const char* name(var type) {
   struct Doc* doc = type_instance(type, Doc);
-  if (doc->name) { return doc->name(); }
+  if (doc and doc->name) { return doc->name(); }
   return c_str(type);
 }
   
