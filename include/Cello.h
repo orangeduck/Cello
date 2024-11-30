@@ -255,6 +255,7 @@ struct String {
 
 struct Tuple {
   var* items;
+  size_t len;
 };
 
 struct Range {
@@ -562,7 +563,7 @@ void dealloc_root(var self);
 
 #define tuple(...) tuple_xp(tuple_in, (_, ##__VA_ARGS__, Terminal))
 #define tuple_xp(X, A) X A
-#define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ })
+#define tuple_in(_, ...) $(Tuple, (var[]){ __VA_ARGS__ }, (sizeof((var[]){ __VA_ARGS__ }) / sizeof(var))-1)
 
 #define construct(self, ...) construct_with(self, tuple(__VA_ARGS__))
 var construct_with(var self, var args);
@@ -649,7 +650,7 @@ double c_float(var self);
 
 #define zip(...) zip_stack( \
   $(Zip, tuple(__VA_ARGS__), \
-  $(Tuple, (var[(sizeof((var[]){__VA_ARGS__})/sizeof(var))+1]){0})))
+  $(Tuple, (var[(sizeof((var[]){__VA_ARGS__})/sizeof(var))+1]){0},sizeof((var[]){__VA_ARGS__})/sizeof(var))))
 
 #define enumerate(I) enumerate_stack(zip(range(), I))
 

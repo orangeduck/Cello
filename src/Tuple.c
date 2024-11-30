@@ -21,9 +21,8 @@ static const char* Tuple_Description(void) {
     "\n\n"
     "Internally Tuples are just an array of pointers terminated with a pointer "
     "to the Cello `Terminal` object. This makes positional access fast, but "
-    "many other operations slow including iteration and counting the number of "
-    "elements. Due to this it is only recommended Tuples are used for small "
-    "collections. "
+    "many other operations slow including iteration. Due to this it is only "
+    "recommended Tuples are used for small collections. "
     "\n\n"
     "Because Tuples are terminated with the Cello `Terminal` object this can't "
     "naturally be included within them. This object should therefore only be "
@@ -34,6 +33,7 @@ static const char* Tuple_Definition(void) {
   return
     "struct Tuple {\n"
     "  var* items;\n"
+    "  size_t len;\n"
     "};\n";
 }
 
@@ -76,6 +76,7 @@ static void Tuple_New(var self, var args) {
   size_t nargs = len(args);
   
   t->items = malloc(sizeof(var) * (nargs+1));
+  t->len = nargs; 
   
 #if CELLO_MEMORY_CHECK == 1
   if (t->items is NULL) {
@@ -121,6 +122,7 @@ static void Tuple_Assign(var self, var obj) {
 #endif
     
     t->items = realloc(t->items, sizeof(var) * (nargs+1));
+    t->len = nargs;
     
 #if CELLO_MEMORY_CHECK == 1
     if (t->items is NULL) {
@@ -145,9 +147,7 @@ static void Tuple_Assign(var self, var obj) {
 
 static size_t Tuple_Len(var self) {
   struct Tuple* t = self;
-  size_t i = 0;
-  while (t->items and t->items[i] isnt Terminal) { i++; }
-  return i;
+  return t->len;
 }
 
 static var Tuple_Iter_Init(var self) {
@@ -264,6 +264,7 @@ static void Tuple_Push(var self, var obj) {
 #endif
   
   t->items = realloc(t->items, sizeof(var) * (nitems+2));
+  t->len++;
   
 #if CELLO_MEMORY_CHECK == 1
   if (t->items is NULL) {
@@ -297,6 +298,7 @@ static void Tuple_Pop(var self) {
   
   t->items = realloc(t->items, sizeof(var) * nitems);
   t->items[nitems-1] = Terminal;
+  t->len--;
   
 }
 
@@ -393,6 +395,7 @@ static void Tuple_Concat(var self, var obj) {
   }
   
   t->items[nitems+objlen] = Terminal;
+  t->len += objlen;
   
 }
 
@@ -411,6 +414,7 @@ static void Tuple_Resize(var self, size_t n) {
   if (n < m) {
     t->items = realloc(t->items, sizeof(var) * (n+1));
     t->items[n] = Terminal;
+    t->len = n;
   } else {
     throw(FormatError, 
       "Cannot resize Tuple to %li as it only contains %li items", 
