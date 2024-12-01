@@ -99,10 +99,16 @@
 #endif
 #endif
 
-#if defined( __clang__ ) && __has_feature(address_sanitizer)
-#define CELLO_NASAN __attribute__((no_sanitize("address")))
+#if defined __has_feature
+# if __has_feature(address_sanitizer)
+#   if defined __clang__ 
+#     define CELLO_NASAN __attribute__((no_sanitize("address")))
+#   else
+#     define CELLO_NASAN
+#   endif
+# endif
 #else
-#define CELLO_NASAN
+# define CELLO_NASAN
 #endif
 
 /* Includes */
