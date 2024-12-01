@@ -219,7 +219,10 @@ int show(var self) {
 }
 
 int show_to(var self, var out, int pos) {
-  
+
+  if (self is NULL) {
+    return print_to(out, pos, "<NULL>");
+  }
   struct Show* s = instance(self, Show);
   if (s and s->show) {
     return s->show(self, out, pos);
