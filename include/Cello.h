@@ -255,6 +255,7 @@ struct String {
 
 struct Tuple {
   var* items;
+  size_t iter;
 };
 
 struct Range {

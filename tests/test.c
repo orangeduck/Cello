@@ -2495,10 +2495,13 @@ PT_FUNC(test_tuple_hash) {
 PT_FUNC(test_tuple_iter) {
   
   size_t i = 0;
-  foreach (x in tuple($I(10), $I(20), $I(30))) {
+  var y = $I(0);
+  foreach (x in tuple($I(10), $I(20), $I(30), y, y)) {
     if (i is 0) { PT_ASSERT(eq(x, $I(10))); }
     if (i is 1) { PT_ASSERT(eq(x, $I(20))); }
     if (i is 2) { PT_ASSERT(eq(x, $I(30))); }
+    if (i is 3) { PT_ASSERT(eq(x, y)); }
+    if (i is 4) { PT_ASSERT(eq(x, y)); }
     i++;
   }
   

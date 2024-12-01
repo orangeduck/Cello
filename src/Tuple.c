@@ -152,33 +152,29 @@ static size_t Tuple_Len(var self) {
 
 static var Tuple_Iter_Init(var self) {
   struct Tuple* t = self;
+  t->iter = 0;
   return t->items[0];
 }
 
 static var Tuple_Iter_Next(var self, var curr) {
   struct Tuple* t = self;
-  size_t i = 0;
-  while (t->items[i] isnt Terminal) {
-    if (t->items[i] is curr) { return t->items[i+1]; }
-    i++;
-  }
-  return Terminal;
+  if (t->items[t->iter] is Terminal) { return Terminal; }
+  t->iter++;
+  return t->items[t->iter];
 }
 
 static var Tuple_Iter_Last(var self) {
   struct Tuple* t = self;
-  return t->items[Tuple_Len(t)-1];
+  size_t len = Tuple_Len(t);
+  if (len is 0) { return Terminal; }
+  return t->items[len-1];
 }
 
 static var Tuple_Iter_Prev(var self, var curr) {
   struct Tuple* t = self;
-  if (curr is t->items[0]) { return Terminal; }
-  size_t i = 0;
-  while (t->items[i] isnt Terminal) {
-    if (t->items[i] is curr) { return t->items[i-1]; }
-    i++;
-  }
-  return Terminal;
+  if (t->iter is 0) { return Terminal; }
+  t->iter--;
+  return t->items[t->iter];
 }
 
 static var Tuple_Get(var self, var key) {
